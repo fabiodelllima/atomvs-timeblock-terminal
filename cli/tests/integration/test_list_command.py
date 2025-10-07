@@ -1,38 +1,38 @@
-"""Testes de caracterização do comando list.
+"""Characterization tests for list command.
 
-Capturam comportamento MÍNIMO necessário antes da refatoração.
+Capture MINIMAL necessary behavior before refactoring.
 """
+
+import sys
+import tempfile
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
-from datetime import datetime, timezone, timedelta
-from pathlib import Path
-import tempfile
-import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 
 @pytest.fixture(scope="function")
 def isolated_db(tmp_path, monkeypatch):
-    """Banco temporário isolado."""
+    """Isolated temporary database."""
     db_file = tmp_path / "test.db"
     monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_file))
-    
-    # Criar tabelas
+    # Create tables
     from timeblock.database import create_db_and_tables
+
     create_db_and_tables()
-    
     return db_file
 
 
 @pytest.fixture
 def add_sample_events(isolated_db):
-    """Adiciona 3 eventos de teste."""
+    """Add 3 test events."""
+    from sqlmodel import Session
     from timeblock.database import get_engine
     from timeblock.models import Event, EventStatus
-    from sqlmodel import Session
-    
+
     now = datetime.now(timezone.utc)
     events = [
         Event(
@@ -54,7 +54,6 @@ def add_sample_events(isolated_db):
             status=EventStatus.PLANNED,
         ),
     ]
-    
     engine = get_engine()
     with Session(engine) as session:
         for event in events:
@@ -64,24 +63,24 @@ def add_sample_events(isolated_db):
 
 def test_list_command_works(add_sample_events):
     """
-    COMPORTAMENTO MÍNIMO: comando list não crasha.
+    MINIMAL BEHAVIOR: list command doesn't crash.
     """
     from timeblock.main import app
+
     runner = CliRunner()
     result = runner.invoke(app, ["list"])
-    
-    # Não deve crashar
+    # Should not crash
     assert result.exit_code == 0
 
 
 def test_list_shows_created_events(add_sample_events):
     """
-    COMPORTAMENTO MÍNIMO: mostra eventos criados.
+    MINIMAL BEHAVIOR: shows created events.
     """
     from timeblock.main import app
+
     runner = CliRunner()
     result = runner.invoke(app, ["list"])
-    
     assert result.exit_code == 0
     assert "Morning Standup" in result.output
     assert "Code Review" in result.output
@@ -90,10 +89,10 @@ def test_list_shows_created_events(add_sample_events):
 
 def test_list_empty_db_works(isolated_db):
     """
-    COMPORTAMENTO MÍNIMO: banco vazio não crasha.
+    MINIMAL BEHAVIOR: empty database doesn't crash.
     """
     from timeblock.main import app
+
     runner = CliRunner()
     result = runner.invoke(app, ["list"])
-    
     assert result.exit_code == 0

@@ -1,18 +1,17 @@
-"""Configuração global do pytest."""
+"""Global pytest configuration."""
 
 import pytest
 
 
 @pytest.fixture(autouse=True)
 def isolate_tests(tmp_path, monkeypatch):
-    """Isola cada teste usando banco de dados temporário.
+    """Isolate each test using temporary database.
 
-    Esta fixture roda automaticamente antes de cada teste,
-    garantindo que os testes não interferem uns nos outros.
+    This fixture runs automatically before each test,
+    ensuring tests don't interfere with each other.
     """
-    # Criar caminho para banco temporário
+    # Create path for temporary database
     db_path = tmp_path / "test_timeblock.db"
 
-    # Sobrescrever variável de ambiente
-    monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_path))
+    # Override environment variable
     monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_path))
