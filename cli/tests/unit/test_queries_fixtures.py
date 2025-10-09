@@ -1,0 +1,71 @@
+"""Shared fixtures for query tests."""
+
+import pytest
+from datetime import datetime, timedelta, timezone
+from sqlmodel import Session, SQLModel, create_engine
+
+from src.timeblock.models import Event, EventStatus
+
+
+@pytest.fixture(scope="function")
+def in_memory_db():
+    """Create in-memory SQLite database for testing."""
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        echo=False,
+    )
+    SQLModel.metadata.create_all(engine)
+    yield engine
+    SQLModel.metadata.drop_all(engine)
+    engine.dispose()
+
+
+@pytest.fixture
+def now_time():
+    """Fixed datetime for consistent testing."""
+    return datetime.now(timezone.utc)
+
+
+@pytest.fixture
+def sample_events(in_memory_db, now_time):
+    """Populate database with 5 sample events."""
+    events = [
+        Event(
+            title="Event 1",
+            scheduled_start=now_time - timedelta(days=2),
+            scheduled_end=now_time - timedelta(days=2, hours=-1),
+            status=EventStatus.COMPLETED,
+        ),
+        Event(
+            title="Event 2",
+            scheduled_start=now_time - timedelta(days=1),
+            scheduled_end=now_time - timedelta(days=1, hours=-1),
+            status=EventStatus.COMPLETED,
+        ),
+        Event(
+            title="Event 3",
+            scheduled_start=now_time,
+            scheduled_end=now_time + timedelta(hours=1),
+            status=EventStatus.PLANNED,
+        ),
+        Event(
+            title="Event 4",
+            scheduled_start=now_time + timedelta(days=1),
+            scheduled_end=now_time + timedelta(days=1, hours=1),
+            status=EventStatus.PLANNED,
+        ),
+        Event(
+            title="Event 5",
+            scheduled_start=now_time + timedelta(days=2),
+            scheduled_end=now_time + timedelta(days=2, hours=1),
+            status=EventStatus.PLANNED,
+        ),
+    ]
+
+    with Session(in_memory_db) as session:
+        for event in events:
+            session.add(event)
+        session.commit()
+
+    return events
