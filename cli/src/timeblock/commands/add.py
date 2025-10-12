@@ -1,13 +1,12 @@
 """Add event command."""
 
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 import typer
 from rich.console import Console
 from sqlmodel import Session
 
-from ..database import get_engine
+from ..database import get_engine_context
 from ..models import Event, EventStatus
 from ..utils.validators import is_valid_hex_color, parse_time, validate_time_range
 
@@ -16,53 +15,35 @@ console = Console()
 
 def add(
     title: str = typer.Argument(..., help="Event title"),
-    start: Optional[str] = typer.Option(
-        None, "--start", "-s", help="Start time (HH:MM)"
-    ),
-    end: Optional[str] = typer.Option(None, "--end", "-e", help="End time (HH:MM)"),
-    color: Optional[str] = typer.Option(
+    start: str | None = typer.Option(None, "--start", "-s", help="Start time (HH:MM)"),
+    end: str | None = typer.Option(None, "--end", "-e", help="End time (HH:MM)"),
+    color: str | None = typer.Option(
         None, "--color", "-c", help="Event color (#RRGGBB)"
     ),
-    description: Optional[str] = typer.Option(
+    description: str | None = typer.Option(
         None, "--desc", "-d", help="Event description"
     ),
 ) -> None:
-    """Add a new event to the schedule.
-
-    Examples:
-        timeblock add "Study Python"
-        timeblock add "Meeting" --start "14:00" --end "15:30"
-        timeblock add "Workout" -s "07:00" -e "08:00" -c "#FF5733"
-    """
+    """Add a new event to the schedule."""
     try:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
+        scheduled_start = parse_time(start, now) if start else now
+        scheduled_end = parse_time(end, now) if end else now + timedelta(hours=1)
 
-        # Parse start time (default: now)
-        if start:
-            scheduled_start = parse_time(start, now)
-        else:
-            scheduled_start = now
-
-        # Parse end time (default: start + 1 hour)
-        if end:
-            scheduled_end = parse_time(end, now)
-        else:
-            scheduled_end = scheduled_start + timedelta(hours=1)
-
-        # Validate time range
+        # Handle midnight crossing
+        if scheduled_end <= scheduled_start:
+            console.print("[yellow]⚠[/yellow] Event crosses midnight (ends next day)")
+            scheduled_end = scheduled_end + timedelta(days=1)
+        
         validate_time_range(scheduled_start, scheduled_end)
-
-        # Validate color format
         if color and not is_valid_hex_color(color):
             console.print(
                 f"[red]✗[/red] Invalid color format: {color}", style="bold red"
             )
             console.print("[dim]Use hex format: #RRGGBB (e.g., #3498db)[/dim]")
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from None
 
-        # Create event
-        engine = get_engine()
-        with Session(engine) as session:
+        with get_engine_context() as engine, Session(engine) as session:
             event = Event(
                 title=title,
                 description=description,
@@ -71,16 +52,15 @@ def add(
                 scheduled_start=scheduled_start,
                 scheduled_end=scheduled_end,
             )
-
             session.add(event)
             session.commit()
             session.refresh(event)
             created = event
-
-            # Success message
+            
             duration = (scheduled_end - scheduled_start).total_seconds() / 3600
             console.print(
-                f"\n[green]✓[/green] Event created successfully!", style="bold green"
+                "\n[green]✓[/green] Event created successfully!",
+                style="bold green",
             )
             console.print(f"[dim]ID: {created.id}[/dim]")
             console.print(f"[bold]{created.title}[/bold]")
@@ -101,7 +81,7 @@ def add(
 
     except ValueError as e:
         console.print(f"[red]✗[/red] {e}", style="bold red")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
     except Exception as e:
         console.print(f"[red]✗[/red] Error creating event: {e}", style="bold red")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
