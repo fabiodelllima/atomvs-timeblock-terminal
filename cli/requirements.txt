@@ -1,12 +1,10 @@
 annotated-types==0.7.0
 astroid==3.3.11
-black==25.9.0
 click==8.3.0
 coverage==7.10.7
 dill==0.4.0
 greenlet==3.2.4
 iniconfig==2.1.0
-isort==6.1.0
 linkify-it-py==2.0.3
 markdown-it-py==4.0.0
 mccabe==0.7.0
@@ -21,12 +19,12 @@ pluggy==1.6.0
 pydantic==2.11.9
 pydantic_core==2.33.2
 Pygments==2.19.2
-pylint==3.3.8
 pytest==8.4.2
 pytest-cov==7.0.0
 python-dateutil==2.9.0.post0
 pytokens==0.1.10
 rich==14.1.0
+ruff==0.14.0
 shellingham==1.5.4
 six==1.17.0
 SQLAlchemy==2.0.43
