@@ -64,3 +64,69 @@ def test_list_all_events(sample_events):
     from src.timeblock.main import app
     result = sample_events.invoke(app, ["list", "--all"])
     assert result.exit_code == 0
+
+
+def test_list_handles_database_error(isolated_db, monkeypatch):
+    """Should handle database errors gracefully."""
+    from src.timeblock.main import app
+    
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    
+    # Mock fetch to raise error
+    def mock_fetch_error(*args, **kwargs):
+        raise Exception("Database connection failed")
+    
+    monkeypatch.setattr(
+        "src.timeblock.commands.list.fetch_events_in_range",
+        mock_fetch_error
+    )
+    
+    result = runner.invoke(app, ["list"])
+    
+    assert result.exit_code == 1
+    assert "error" in result.output.lower()
+
+
+def test_list_handles_database_error(isolated_db, monkeypatch):
+    """Should handle database errors gracefully."""
+    from src.timeblock.main import app
+    
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    
+    # Mock fetch to raise error
+    def mock_fetch_error(*args, **kwargs):
+        raise Exception("Database connection failed")
+    
+    monkeypatch.setattr(
+        "src.timeblock.commands.list.fetch_events_in_range",
+        mock_fetch_error
+    )
+    
+    result = runner.invoke(app, ["list"])
+    
+    assert result.exit_code == 1
+    assert "error" in result.output.lower()
+
+
+def test_list_handles_database_error(isolated_db, monkeypatch):
+    """Should handle database errors gracefully."""
+    from src.timeblock.main import app
+    
+    runner = CliRunner()
+    runner.invoke(app, ["init"])
+    
+    # Mock fetch to raise error
+    def mock_fetch_error(*args, **kwargs):
+        raise Exception("Database connection failed")
+    
+    monkeypatch.setattr(
+        "src.timeblock.commands.list.fetch_events_in_range",
+        mock_fetch_error
+    )
+    
+    result = runner.invoke(app, ["list"])
+    
+    assert result.exit_code == 1
+    assert "error" in result.output.lower()
