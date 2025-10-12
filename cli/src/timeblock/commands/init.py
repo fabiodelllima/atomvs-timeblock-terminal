@@ -34,4 +34,4 @@ def init():
             f"[red]✗[/red] Error initializing database: {e}",
             style="bold red",
         )
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None

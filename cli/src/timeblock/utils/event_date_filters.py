@@ -1,31 +1,30 @@
 """Date range filter construction for event list command."""
 
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Tuple
+from datetime import UTC, datetime, timedelta
 
-from .date_helpers import get_month_range, get_week_range, get_day_range
+from .date_helpers import get_day_range, get_month_range, get_week_range
 
 
 class DateFilterBuilder:
     """Builds date range filters from CLI arguments."""
 
-    def __init__(self, now: Optional[datetime] = None):
+    def __init__(self, now: datetime | None = None):
         """Initialize with current time (allows mocking in tests).
 
         Args:
             now: Reference datetime. If None, uses current UTC time.
         """
-        self.now = now or datetime.now(timezone.utc)
+        self.now = now or datetime.now(UTC)
 
     def build_from_args(
         self,
-        weeks: Optional[int] = None,
+        weeks: int | None = None,
         all_events: bool = False,
-        limit: Optional[int] = None,
-        month: Optional[str] = None,
-        week: Optional[str] = None,
-        day: Optional[str] = None,
-    ) -> Tuple[Optional[datetime], Optional[datetime], Optional[int]]:
+        limit: int | None = None,
+        month: str | None = None,
+        week: str | None = None,
+        day: str | None = None,
+    ) -> tuple[datetime | None, datetime | None, int | None]:
         """Build date filter from CLI arguments.
 
         Returns:
@@ -62,7 +61,7 @@ class DateFilterBuilder:
         # Priority 6: Default to weeks
         return self._build_weeks_filter(weeks or 2)
 
-    def _build_month_filter(self, month: str) -> Tuple[datetime, datetime, None]:
+    def _build_month_filter(self, month: str) -> tuple[datetime, datetime, None]:
         """Build filter for specific month.
 
         Args:
@@ -81,19 +80,19 @@ class DateFilterBuilder:
 
         return (start, end, None)
 
-    def _build_week_filter(self, week: str) -> Tuple[datetime, datetime, None]:
+    def _build_week_filter(self, week: str) -> tuple[datetime, datetime, None]:
         """Build filter for specific week."""
         offset = int(week)
         start, end = get_week_range(offset)
         return (start, end, None)
 
-    def _build_day_filter(self, day: str) -> Tuple[datetime, datetime, None]:
+    def _build_day_filter(self, day: str) -> tuple[datetime, datetime, None]:
         """Build filter for specific day."""
         offset = int(day)
         start, end = get_day_range(offset)
         return (start, end, None)
 
-    def _build_weeks_filter(self, weeks: int) -> Tuple[datetime, datetime, None]:
+    def _build_weeks_filter(self, weeks: int) -> tuple[datetime, datetime, None]:
         """Build filter for next N weeks."""
         start = self.now
         end = start + timedelta(weeks=weeks)

@@ -1,7 +1,7 @@
 """Presentation layer for displaying event lists in terminal."""
 
-from typing import List
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+
 from rich.console import Console
 
 from ..models import Event
@@ -31,7 +31,7 @@ class ListPresenter:
             "--start 09:00 --end 10:00[/dim]"
         )
 
-    def show_single_table(self, events: List[Event], title: str):
+    def show_single_table(self, events: list[Event], title: str):
         """Display a single formatted table of events.
 
         Args:
@@ -45,9 +45,9 @@ class ListPresenter:
 
     def show_split_view(
         self,
-        past_events: List[Event],
-        present_events: List[Event],
-        future_events: List[Event],
+        past_events: list[Event],
+        present_events: list[Event],
+        future_events: list[Event],
     ):
         """Display events split into three time-based tables.
 
@@ -70,8 +70,8 @@ class ListPresenter:
         self.console.print(f"[dim]Total: {total} events[/dim]")
 
     def split_by_time(
-        self, events: List[Event]
-    ) -> tuple[List[Event], List[Event], List[Event]]:
+        self, events: list[Event]
+    ) -> tuple[list[Event], list[Event], list[Event]]:
         """Split events into past, present, and future.
 
         Time periods:
@@ -85,24 +85,16 @@ class ListPresenter:
         Returns:
             Tuple of (past_events, present_events, future_events)
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         week_ago = now - timedelta(days=7)
 
         # SQLite returns naive datetimes, convert to aware for comparison
-        past = [
-            e
-            for e in events
-            if e.scheduled_start.replace(tzinfo=timezone.utc) < week_ago
-        ]
+        past = [e for e in events if e.scheduled_start.replace(tzinfo=UTC) < week_ago]
 
         present = [
-            e
-            for e in events
-            if week_ago <= e.scheduled_start.replace(tzinfo=timezone.utc) < now
+            e for e in events if week_ago <= e.scheduled_start.replace(tzinfo=UTC) < now
         ]
 
-        future = [
-            e for e in events if e.scheduled_start.replace(tzinfo=timezone.utc) >= now
-        ]
+        future = [e for e in events if e.scheduled_start.replace(tzinfo=UTC) >= now]
 
         return (past, present, future)

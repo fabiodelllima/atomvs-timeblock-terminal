@@ -1,7 +1,6 @@
 """Database query utilities."""
 
 from datetime import datetime
-from typing import Optional
 
 from sqlmodel import Session, select
 
@@ -9,8 +8,8 @@ from ..models import Event
 
 
 def build_events_query(
-    start: Optional[datetime] = None,
-    end: Optional[datetime] = None,
+    start: datetime | None = None,
+    end: datetime | None = None,
     ascending: bool = True,
 ):
     """Build a query for events with optional date range filter.
@@ -78,8 +77,8 @@ def fetch_events(session: Session, statement) -> list[Event]:
 
 def fetch_events_in_range(
     session: Session,
-    start: Optional[datetime] = None,
-    end: Optional[datetime] = None,
+    start: datetime | None = None,
+    end: datetime | None = None,
     ascending: bool = True,
 ) -> list[Event]:
     """Fetch events in a date range (convenience function).

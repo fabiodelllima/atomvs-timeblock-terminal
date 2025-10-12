@@ -1,6 +1,7 @@
 """Date manipulation utilities for time range calculations."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+
 from dateutil.relativedelta import relativedelta
 
 
@@ -39,7 +40,7 @@ def get_month_range(months_offset: int = 0) -> tuple[datetime, datetime]:
         >>> # Next month
         >>> start, end = get_month_range(+1)
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     target_month = add_months(now, months_offset)
 
     # Start: first day of month at 00:00:00
@@ -71,7 +72,7 @@ def get_week_range(weeks_offset: int = 0) -> tuple[datetime, datetime]:
         >>> # Last week
         >>> start, end = get_week_range(-1)
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # Calculate start of current week (Monday)
     days_since_monday = now.weekday()
@@ -105,7 +106,7 @@ def get_day_range(days_offset: int = 0) -> tuple[datetime, datetime]:
         >>> # Tomorrow
         >>> start, end = get_day_range(+1)
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     target_day = now + timedelta(days=days_offset)
 
     # Start: 00:00:00 of target day

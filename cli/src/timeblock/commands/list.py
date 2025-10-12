@@ -79,7 +79,7 @@ def list_events(
 
     except Exception as error:
         console.print(f"[red]✗[/red] Error: {error}", style="bold red")
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
 
 
 def _describe_filter(weeks, all_events, limit, month, week, day) -> str:
