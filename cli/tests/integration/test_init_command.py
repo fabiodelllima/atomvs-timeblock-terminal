@@ -38,8 +38,24 @@ def test_init_creates_database(isolated_db):
     assert isolated_db.exists()
 
 
+def test_init_on_existing_database_accept(isolated_db):
+    """Should recreate database when user accepts."""
+    from src.timeblock.main import app
+
+    runner = CliRunner()
+
+    # First init
+    runner.invoke(app, ["init"])
+
+    # Second init - accept with 'y'
+    result = runner.invoke(app, ["init"], input="y\n")
+
+    assert result.exit_code == 0
+    assert "initialized" in result.output.lower()
+
+
 def test_init_on_existing_database_decline(isolated_db):
-    """Should ask for confirmation when database exists."""
+    """Should cancel when user declines."""
     from src.timeblock.main import app
 
     runner = CliRunner()
@@ -51,3 +67,25 @@ def test_init_on_existing_database_decline(isolated_db):
     result = runner.invoke(app, ["init"], input="n\n")
 
     assert result.exit_code == 0
+    assert "cancelled" in result.output.lower() or "aborted" in result.output.lower()
+
+
+def test_init_handles_database_error(isolated_db, monkeypatch):
+    """Should handle database creation errors gracefully."""
+    from src.timeblock.main import app
+    
+    runner = CliRunner()
+    
+    # Mock create_db_and_tables to raise exception
+    def mock_create_error():
+        raise Exception("Simulated database error")
+    
+    monkeypatch.setattr(
+        "src.timeblock.commands.init.create_db_and_tables",
+        mock_create_error
+    )
+    
+    result = runner.invoke(app, ["init"])
+    
+    assert result.exit_code == 1
+    assert "error" in result.output.lower()
