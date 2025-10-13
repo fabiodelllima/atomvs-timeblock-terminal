@@ -1,5 +1,5 @@
 """Integration tests for list command."""
-
+from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -18,9 +18,17 @@ def isolated_db(monkeypatch):
         "sqlite:///:memory:", connect_args={"check_same_thread": False}
     )
 
-    # Mock get_engine to return our test engine
-    monkeypatch.setattr("src.timeblock.database.get_engine", lambda: engine)
-    monkeypatch.setattr("src.timeblock.commands.list.get_engine", lambda: engine)
+    # Create context manager that yields our test engine
+    @contextmanager
+    def mock_engine_context():
+        try:
+            yield engine
+        finally:
+            pass  # Don't dispose during test
+
+    # Mock get_engine_context to return our test engine
+    monkeypatch.setattr("src.timeblock.database.get_engine_context", mock_engine_context)
+    monkeypatch.setattr("src.timeblock.commands.list.get_engine_context", mock_engine_context)
 
     # Create tables
     SQLModel.metadata.create_all(engine)
