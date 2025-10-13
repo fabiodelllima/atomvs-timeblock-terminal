@@ -4,7 +4,7 @@ import typer
 from rich.console import Console
 from sqlmodel import Session
 
-from ..database import get_engine
+from ..database import get_engine_context
 from ..utils.event_date_filters import DateFilterBuilder
 from ..utils.event_list_presenter import ListPresenter
 from ..utils.queries import fetch_events_in_range
@@ -46,18 +46,18 @@ def list_events(
         )
 
         # Fetch events from database
-        engine = get_engine()
-        with Session(engine) as session:
-            if limit_val:
-                # Use limit without date filter, newest first
-                events = fetch_events_in_range(
-                    session, start=None, end=None, ascending=False
-                )[:limit_val]
-            else:
-                # Use date range filter, newest first
-                events = fetch_events_in_range(
-                    session, start=start, end=end, ascending=False
-                )
+        with get_engine_context() as engine:
+            with Session(engine) as session:
+                if limit_val:
+                    # Use limit without date filter, newest first
+                    events = fetch_events_in_range(
+                        session, start=None, end=None, ascending=False
+                    )[:limit_val]
+                else:
+                    # Use date range filter, newest first
+                    events = fetch_events_in_range(
+                        session, start=start, end=end, ascending=False
+                    )
 
         # Present results
         presenter = ListPresenter(console)
