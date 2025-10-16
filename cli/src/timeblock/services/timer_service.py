@@ -19,7 +19,6 @@ class TimerService:
         habit_instance_id: Optional[int] = None,
     ) -> TimeLog:
         """Inicia timer."""
-        # Validar que apenas um ID foi fornecido
         ids_provided = sum([
             event_id is not None,
             task_id is not None,
@@ -28,7 +27,6 @@ class TimerService:
         if ids_provided != 1:
             raise ValueError("Exactly one ID must be provided")
         
-        # Verificar se já existe timer ativo
         active = TimerService.get_active_timer()
         if active:
             raise ValueError("Another timer is already active")
@@ -49,7 +47,7 @@ class TimerService:
 
     @staticmethod
     def stop_timer(timelog_id: int) -> Optional[TimeLog]:
-        """Para timer e calcula duração."""
+        """Para timer e salva duração."""
         with get_engine_context() as engine:
             with Session(engine) as session:
                 timelog = session.get(TimeLog, timelog_id)
@@ -67,6 +65,28 @@ class TimerService:
                 session.commit()
                 session.refresh(timelog)
                 return timelog
+
+    @staticmethod
+    def cancel_timer(timelog_id: int) -> bool:
+        """Cancela timer sem salvar."""
+        with get_engine_context() as engine:
+            with Session(engine) as session:
+                timelog = session.get(TimeLog, timelog_id)
+                if not timelog:
+                    return False
+                if timelog.end_time is not None:
+                    raise ValueError("Timer already stopped")
+                
+                # Deletar pausas associadas
+                pauses = session.exec(
+                    select(PauseLog).where(PauseLog.timelog_id == timelog_id)
+                ).all()
+                for pause in pauses:
+                    session.delete(pause)
+                
+                session.delete(timelog)
+                session.commit()
+                return True
 
     @staticmethod
     def pause_timer(timelog_id: int) -> PauseLog:
@@ -97,7 +117,6 @@ class TimerService:
                 if not timelog:
                     raise ValueError("TimeLog not found")
                 
-                # Buscar última pausa ativa
                 pauses = session.exec(
                     select(PauseLog)
                     .where(PauseLog.timelog_id == timelog_id)
