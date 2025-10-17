@@ -256,3 +256,154 @@ class TestAdjustInstanceTime:
                 time(10, 0),
                 time(9, 0),
             )
+
+    def test_generate_instances_tuesday(self, test_engine):
+        """Gera instâncias apenas para terça-feira."""
+        with Session(test_engine) as session:
+            routine = Routine(name="Test Routine")
+            session.add(routine)
+            session.commit()
+            
+            habit = Habit(
+                routine_id=routine.id,
+                title="Tuesday Habit",
+                scheduled_start=time(9, 0),
+                scheduled_end=time(10, 0),
+                recurrence=Recurrence.TUESDAY,
+            )
+            session.add(habit)
+            session.commit()
+            session.refresh(habit)
+
+        instances = HabitInstanceService.generate_instances(
+            habit.id, date(2025, 10, 13), date(2025, 10, 19)  # Segunda a domingo
+        )
+        
+        # Apenas terça (14/10) deve ser gerada
+        assert len(instances) == 1
+        assert instances[0].date == date(2025, 10, 14)
+
+    def test_generate_instances_wednesday(self, test_engine):
+        """Gera instâncias apenas para quarta-feira."""
+        with Session(test_engine) as session:
+            routine = Routine(name="Test Routine")
+            session.add(routine)
+            session.commit()
+            
+            habit = Habit(
+                routine_id=routine.id,
+                title="Wednesday Habit",
+                scheduled_start=time(9, 0),
+                scheduled_end=time(10, 0),
+                recurrence=Recurrence.WEDNESDAY,
+            )
+            session.add(habit)
+            session.commit()
+            session.refresh(habit)
+
+        instances = HabitInstanceService.generate_instances(
+            habit.id, date(2025, 10, 13), date(2025, 10, 19)
+        )
+        
+        assert len(instances) == 1
+        assert instances[0].date == date(2025, 10, 15)
+
+    def test_generate_instances_thursday(self, test_engine):
+        """Gera instâncias apenas para quinta-feira."""
+        with Session(test_engine) as session:
+            routine = Routine(name="Test Routine")
+            session.add(routine)
+            session.commit()
+            
+            habit = Habit(
+                routine_id=routine.id,
+                title="Thursday Habit",
+                scheduled_start=time(9, 0),
+                scheduled_end=time(10, 0),
+                recurrence=Recurrence.THURSDAY,
+            )
+            session.add(habit)
+            session.commit()
+            session.refresh(habit)
+
+        instances = HabitInstanceService.generate_instances(
+            habit.id, date(2025, 10, 13), date(2025, 10, 19)
+        )
+        
+        assert len(instances) == 1
+        assert instances[0].date == date(2025, 10, 16)
+
+    def test_generate_instances_friday(self, test_engine):
+        """Gera instâncias apenas para sexta-feira."""
+        with Session(test_engine) as session:
+            routine = Routine(name="Test Routine")
+            session.add(routine)
+            session.commit()
+            
+            habit = Habit(
+                routine_id=routine.id,
+                title="Friday Habit",
+                scheduled_start=time(9, 0),
+                scheduled_end=time(10, 0),
+                recurrence=Recurrence.FRIDAY,
+            )
+            session.add(habit)
+            session.commit()
+            session.refresh(habit)
+
+        instances = HabitInstanceService.generate_instances(
+            habit.id, date(2025, 10, 13), date(2025, 10, 19)
+        )
+        
+        assert len(instances) == 1
+        assert instances[0].date == date(2025, 10, 17)
+
+    def test_generate_instances_saturday(self, test_engine):
+        """Gera instâncias apenas para sábado."""
+        with Session(test_engine) as session:
+            routine = Routine(name="Test Routine")
+            session.add(routine)
+            session.commit()
+            
+            habit = Habit(
+                routine_id=routine.id,
+                title="Saturday Habit",
+                scheduled_start=time(9, 0),
+                scheduled_end=time(10, 0),
+                recurrence=Recurrence.SATURDAY,
+            )
+            session.add(habit)
+            session.commit()
+            session.refresh(habit)
+
+        instances = HabitInstanceService.generate_instances(
+            habit.id, date(2025, 10, 13), date(2025, 10, 19)
+        )
+        
+        assert len(instances) == 1
+        assert instances[0].date == date(2025, 10, 18)
+
+    def test_generate_instances_sunday(self, test_engine):
+        """Gera instâncias apenas para domingo."""
+        with Session(test_engine) as session:
+            routine = Routine(name="Test Routine")
+            session.add(routine)
+            session.commit()
+            
+            habit = Habit(
+                routine_id=routine.id,
+                title="Sunday Habit",
+                scheduled_start=time(9, 0),
+                scheduled_end=time(10, 0),
+                recurrence=Recurrence.SUNDAY,
+            )
+            session.add(habit)
+            session.commit()
+            session.refresh(habit)
+
+        instances = HabitInstanceService.generate_instances(
+            habit.id, date(2025, 10, 13), date(2025, 10, 19)
+        )
+        
+        assert len(instances) == 1
+        assert instances[0].date == date(2025, 10, 19)

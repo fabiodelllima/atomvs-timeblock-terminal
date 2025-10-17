@@ -1,4 +1,4 @@
-"""Shared fixtures for query tests."""
+"""Fixtures específicas para unit tests."""
 
 from datetime import UTC, datetime, timedelta
 
@@ -63,10 +63,8 @@ def sample_events(test_db, now_time):
             status=EventStatus.PLANNED,
         ),
     ]
-
     with Session(test_db) as session:
         for event in events:
             session.add(event)
         session.commit()
-
     return events
