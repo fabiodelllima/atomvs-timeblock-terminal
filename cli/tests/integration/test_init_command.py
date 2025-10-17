@@ -73,19 +73,18 @@ def test_init_on_existing_database_decline(isolated_db):
 def test_init_handles_database_error(isolated_db, monkeypatch):
     """Should handle database creation errors gracefully."""
     from src.timeblock.main import app
-    
+
     runner = CliRunner()
-    
+
     # Mock create_db_and_tables to raise exception
     def mock_create_error():
         raise Exception("Simulated database error")
-    
+
     monkeypatch.setattr(
-        "src.timeblock.commands.init.create_db_and_tables",
-        mock_create_error
+        "src.timeblock.commands.init.create_db_and_tables", mock_create_error
     )
-    
+
     result = runner.invoke(app, ["init"])
-    
+
     assert result.exit_code == 1
     assert "error" in result.output.lower()

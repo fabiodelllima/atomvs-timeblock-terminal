@@ -1,4 +1,5 @@
 """Tests for Routine model."""
+
 from datetime import datetime
 
 import pytest

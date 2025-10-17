@@ -3,9 +3,8 @@
 from datetime import datetime
 
 import pytest
-from sqlmodel import Session, create_engine, SQLModel
+from sqlmodel import SQLModel, create_engine
 
-from src.timeblock.models import Task
 from src.timeblock.services.task_service import TaskService
 
 
@@ -21,14 +20,13 @@ def test_engine():
 def mock_engine(monkeypatch, test_engine):
     """Mock do get_engine_context."""
     from contextlib import contextmanager
-    
+
     @contextmanager
     def mock_get_engine():
         yield test_engine
-    
+
     monkeypatch.setattr(
-        "src.timeblock.services.task_service.get_engine_context",
-        mock_get_engine
+        "src.timeblock.services.task_service.get_engine_context", mock_get_engine
     )
 
 
@@ -114,7 +112,7 @@ class TestListTasks:
         TaskService.create_task("Task 1", datetime(2025, 10, 20, 10, 0))
         TaskService.create_task("Task 2", datetime(2025, 10, 21, 11, 0))
         TaskService.create_task("Task 3", datetime(2025, 10, 22, 12, 0))
-        
+
         tasks = TaskService.list_tasks()
         assert len(tasks) == 3
 
@@ -123,7 +121,7 @@ class TestListTasks:
         TaskService.create_task("Task 1", datetime(2025, 10, 20, 10, 0))
         TaskService.create_task("Task 2", datetime(2025, 10, 21, 11, 0))
         TaskService.create_task("Task 3", datetime(2025, 10, 22, 12, 0))
-        
+
         tasks = TaskService.list_tasks(start=datetime(2025, 10, 21, 0, 0))
         assert len(tasks) == 2
 
@@ -132,7 +130,7 @@ class TestListTasks:
         TaskService.create_task("Task 1", datetime(2025, 10, 20, 10, 0))
         TaskService.create_task("Task 2", datetime(2025, 10, 21, 11, 0))
         TaskService.create_task("Task 3", datetime(2025, 10, 22, 12, 0))
-        
+
         tasks = TaskService.list_tasks(end=datetime(2025, 10, 21, 23, 59))
         assert len(tasks) == 2
 
@@ -141,7 +139,7 @@ class TestListTasks:
         TaskService.create_task("Task 1", datetime(2025, 10, 20, 10, 0))
         TaskService.create_task("Task 2", datetime(2025, 10, 21, 11, 0))
         TaskService.create_task("Task 3", datetime(2025, 10, 22, 12, 0))
-        
+
         tasks = TaskService.list_tasks(
             start=datetime(2025, 10, 21, 0, 0),
             end=datetime(2025, 10, 21, 23, 59),
@@ -159,7 +157,7 @@ class TestCompleteTask:
             title="Task",
             scheduled_datetime=datetime(2025, 10, 20, 10, 0),
         )
-        
+
         completed = TaskService.complete_task(task.id)
         assert completed is not None
         assert completed.completed_datetime is not None
@@ -178,7 +176,7 @@ class TestDeleteTask:
             title="Task",
             scheduled_datetime=datetime(2025, 10, 20, 10, 0),
         )
-        
+
         assert TaskService.delete_task(task.id) is True
         assert TaskService.get_task(task.id) is None
 

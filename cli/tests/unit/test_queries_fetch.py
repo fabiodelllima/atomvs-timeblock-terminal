@@ -3,8 +3,8 @@
 from datetime import UTC, timedelta
 
 from sqlmodel import Session
-from src.timeblock.database import get_engine, create_db_and_tables
 
+from src.timeblock.database import create_db_and_tables, get_engine
 from src.timeblock.utils.queries import (
     build_events_query,
     fetch_events,
@@ -24,10 +24,8 @@ class TestFetchEvents:
 
     def test_fetch_empty_database(self, test_db):
         """Should return empty list when database is empty."""
-        from src.timeblock.database import create_db_and_tables
         create_db_and_tables()
         # test_db já cria engine e tabelas
-        from src.timeblock.database import get_engine, create_db_and_tables
         engine = get_engine()
         with Session(engine) as session:
             query = build_events_query()

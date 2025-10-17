@@ -3,10 +3,9 @@
 from datetime import time
 
 import pytest
-from sqlmodel import Session, create_engine, SQLModel
+from sqlmodel import Session, SQLModel, create_engine
 
-from src.timeblock.database import get_engine_context
-from src.timeblock.models import Routine, Habit, Recurrence
+from src.timeblock.models import Recurrence, Routine
 from src.timeblock.services.habit_service import HabitService
 
 
@@ -45,12 +44,14 @@ def test_habit(test_routine):
 def mock_engine(monkeypatch, test_engine):
     """Mock do get_engine_context."""
     from contextlib import contextmanager
-    
+
     @contextmanager
     def mock_get_engine():
         yield test_engine
-    
-    monkeypatch.setattr("src.timeblock.services.habit_service.get_engine_context", mock_get_engine)
+
+    monkeypatch.setattr(
+        "src.timeblock.services.habit_service.get_engine_context", mock_get_engine
+    )
 
 
 class TestUpdateHabit:

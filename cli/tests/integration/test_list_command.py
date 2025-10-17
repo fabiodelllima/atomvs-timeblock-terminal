@@ -1,4 +1,5 @@
 """Integration tests for list command."""
+
 from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 
@@ -27,8 +28,12 @@ def isolated_db(monkeypatch):
             pass  # Don't dispose during test
 
     # Mock get_engine_context to return our test engine
-    monkeypatch.setattr("src.timeblock.database.get_engine_context", mock_engine_context)
-    monkeypatch.setattr("src.timeblock.commands.list.get_engine_context", mock_engine_context)
+    monkeypatch.setattr(
+        "src.timeblock.database.get_engine_context", mock_engine_context
+    )
+    monkeypatch.setattr(
+        "src.timeblock.commands.list.get_engine_context", mock_engine_context
+    )
 
     # Create tables
     SQLModel.metadata.create_all(engine)

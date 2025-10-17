@@ -3,10 +3,9 @@
 from datetime import time
 
 import pytest
-from sqlmodel import Session, create_engine, SQLModel
+from sqlmodel import Session, SQLModel, create_engine
 
-from src.timeblock.database import get_engine_context
-from src.timeblock.models import Routine, Habit, Recurrence
+from src.timeblock.models import Recurrence, Routine
 from src.timeblock.services.habit_service import HabitService
 
 
@@ -33,12 +32,14 @@ def test_routine(test_engine):
 def mock_engine(monkeypatch, test_engine):
     """Mock do get_engine_context."""
     from contextlib import contextmanager
-    
+
     @contextmanager
     def mock_get_engine():
         yield test_engine
-    
-    monkeypatch.setattr("src.timeblock.services.habit_service.get_engine_context", mock_get_engine)
+
+    monkeypatch.setattr(
+        "src.timeblock.services.habit_service.get_engine_context", mock_get_engine
+    )
 
 
 class TestCreateHabit:
@@ -146,7 +147,7 @@ class TestListHabits:
             session.add(routine2)
             session.commit()
             session.refresh(routine2)
-            
+
             HabitService.create_habit(
                 routine_id=test_routine.id,
                 title="Habit 1",
@@ -161,7 +162,7 @@ class TestListHabits:
                 scheduled_end=time(10, 0),
                 recurrence=Recurrence.WEEKDAYS,
             )
-            
+
         habits = HabitService.list_habits()
         assert len(habits) == 2
 
@@ -172,7 +173,7 @@ class TestListHabits:
             session.add(routine2)
             session.commit()
             session.refresh(routine2)
-            
+
             HabitService.create_habit(
                 routine_id=test_routine.id,
                 title="Habit 1",
@@ -187,7 +188,7 @@ class TestListHabits:
                 scheduled_end=time(10, 0),
                 recurrence=Recurrence.WEEKDAYS,
             )
-            
+
         habits = HabitService.list_habits(routine_id=test_routine.id)
         assert len(habits) == 1
         assert habits[0].routine_id == test_routine.id

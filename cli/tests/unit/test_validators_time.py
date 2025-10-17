@@ -1,8 +1,7 @@
 """Tests for parse_time function."""
 
 import pytest
-from datetime import datetime
-from datetime import timezone as tz
+
 from src.timeblock.utils.validators import parse_time
 
 

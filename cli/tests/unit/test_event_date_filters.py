@@ -1,6 +1,6 @@
 """Unit tests for event_date_filters module."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 import pytest
 
@@ -35,12 +35,7 @@ class TestBuildFromArgsPriority:
     def test_limit_overrides_all(self, builder):
         """Limit should override all other filters."""
         start, end, limit = builder.build_from_args(
-            limit=10,
-            all_events=True,
-            month="1",
-            week="0",
-            day="0",
-            weeks=2
+            limit=10, all_events=True, month="1", week="0", day="0", weeks=2
         )
         assert start is None
         assert end is None
@@ -49,11 +44,7 @@ class TestBuildFromArgsPriority:
     def test_all_events_overrides_filters(self, builder):
         """all_events should override date filters."""
         start, end, limit = builder.build_from_args(
-            all_events=True,
-            month="1",
-            week="0",
-            day="0",
-            weeks=2
+            all_events=True, month="1", week="0", day="0", weeks=2
         )
         assert start is None
         assert end is None
@@ -62,10 +53,7 @@ class TestBuildFromArgsPriority:
     def test_month_overrides_week_day_weeks(self, builder):
         """month should take precedence over week/day/weeks."""
         start, end, limit = builder.build_from_args(
-            month="1",
-            week="0",
-            day="0",
-            weeks=2
+            month="1", week="0", day="0", weeks=2
         )
         assert start is not None
         assert end is not None
@@ -73,21 +61,14 @@ class TestBuildFromArgsPriority:
 
     def test_week_overrides_day_weeks(self, builder):
         """week should take precedence over day/weeks."""
-        start, end, limit = builder.build_from_args(
-            week="0",
-            day="0",
-            weeks=2
-        )
+        start, end, limit = builder.build_from_args(week="0", day="0", weeks=2)
         assert start is not None
         assert start.weekday() == 0
         assert limit is None
 
     def test_day_overrides_weeks(self, builder):
         """day should take precedence over weeks."""
-        start, end, limit = builder.build_from_args(
-            day="0",
-            weeks=2
-        )
+        start, end, limit = builder.build_from_args(day="0", weeks=2)
         assert start is not None
         assert start.hour == 0
         assert (end - start).days == 1

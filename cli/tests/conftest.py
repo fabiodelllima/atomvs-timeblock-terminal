@@ -30,6 +30,8 @@ def test_db(tmp_path, monkeypatch):
     monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_path))
     create_db_and_tables()
     yield db_path
+
+
 """Shared fixtures for query tests."""
 
 from datetime import UTC, datetime, timedelta

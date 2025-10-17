@@ -1,4 +1,5 @@
 """Tests for Habit model."""
+
 from datetime import time
 
 import pytest
