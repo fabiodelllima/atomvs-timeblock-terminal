@@ -1,70 +1,32 @@
 """Fixtures específicas para unit tests."""
-
-from datetime import UTC, datetime, timedelta
-
 import pytest
-from sqlmodel import Session, SQLModel, create_engine
-
-from src.timeblock.models import Event, EventStatus
-
-
-@pytest.fixture(scope="function")
-def test_db():
-    """Create in-memory SQLite database for testing."""
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        echo=False,
-    )
-    SQLModel.metadata.create_all(engine)
-    yield engine
-    SQLModel.metadata.drop_all(engine)
-    engine.dispose()
+from unittest.mock import Mock, MagicMock
+from datetime import date, time, datetime
 
 
 @pytest.fixture
-def now_time():
-    """Fixed datetime for consistent testing."""
-    return datetime.now(UTC)
+def mock_session():
+    """Mock de sessão de database."""
+    session = MagicMock()
+    session.add = Mock()
+    session.commit = Mock()
+    session.refresh = Mock()
+    return session
 
 
 @pytest.fixture
-def sample_events(test_db, now_time):
-    """Populate database with 5 sample events."""
-    events = [
-        Event(
-            title="Event 1",
-            scheduled_start=now_time - timedelta(days=2),
-            scheduled_end=now_time - timedelta(days=2, hours=-1),
-            status=EventStatus.COMPLETED,
-        ),
-        Event(
-            title="Event 2",
-            scheduled_start=now_time - timedelta(days=1),
-            scheduled_end=now_time - timedelta(days=1, hours=-1),
-            status=EventStatus.COMPLETED,
-        ),
-        Event(
-            title="Event 3",
-            scheduled_start=now_time,
-            scheduled_end=now_time + timedelta(hours=1),
-            status=EventStatus.PLANNED,
-        ),
-        Event(
-            title="Event 4",
-            scheduled_start=now_time + timedelta(days=1),
-            scheduled_end=now_time + timedelta(days=1, hours=1),
-            status=EventStatus.PLANNED,
-        ),
-        Event(
-            title="Event 5",
-            scheduled_start=now_time + timedelta(days=2),
-            scheduled_end=now_time + timedelta(days=2, hours=1),
-            status=EventStatus.PLANNED,
-        ),
-    ]
-    with Session(test_db) as session:
-        for event in events:
-            session.add(event)
-        session.commit()
-    return events
+def sample_date():
+    """Data de exemplo para testes."""
+    return date(2025, 10, 17)
+
+
+@pytest.fixture
+def sample_time_start():
+    """Hora de início exemplo."""
+    return time(9, 0)
+
+
+@pytest.fixture
+def sample_time_end():
+    """Hora de fim exemplo."""
+    return time(10, 0)
