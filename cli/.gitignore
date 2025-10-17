@@ -33,3 +33,5 @@ ENV/
 # IDE
 .vscode/
 .idea/
+backup_tests_*/
+improve_test_structure.sh
