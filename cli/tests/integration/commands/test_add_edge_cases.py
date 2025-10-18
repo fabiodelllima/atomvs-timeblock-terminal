@@ -1,7 +1,7 @@
 """Integration tests for add command - edge cases."""
 
 import pytest
-from sqlmodel import Session, select
+from sqlmodel import Session, select, create_engine
 from typer.testing import CliRunner
 
 from src.timeblock.database import get_engine
@@ -18,9 +18,9 @@ def runner():
 class TestAddEdgeCases:
     """Test edge cases and boundary conditions."""
 
-    def test_add_one_minute_event(self, isolated_db, runner):
+    def test_add_one_minute_event(self, isolated_db, cli_runner):
         """Should handle very short events."""
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             ["add", "Quick Check", "-s", "10:00", "-e", "10:01"],
         )
@@ -30,18 +30,18 @@ class TestAddEdgeCases:
             duration = (event.scheduled_end - event.scheduled_start).total_seconds()
             assert duration == 60
 
-    def test_add_event_crossing_midnight_success(self, isolated_db, runner):
+    def test_add_event_crossing_midnight_success(self, isolated_db, cli_runner):
         """Should handle events that cross midnight."""
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             ["add", "Night Shift", "-s", "23:00", "-e", "01:00"],
         )
         assert result.exit_code == 0
 
-    def test_add_long_title(self, isolated_db, runner):
+    def test_add_long_title(self, isolated_db, cli_runner):
         """Should handle long event titles."""
         long_title = "A" * 200
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             ["add", long_title, "-s", "10:00", "-e", "11:00"],
         )
@@ -50,9 +50,9 @@ class TestAddEdgeCases:
             event = session.exec(select(Event)).all()[-1]
             assert event.title == long_title
 
-    def test_add_special_characters_in_title(self, isolated_db, runner):
+    def test_add_special_characters_in_title(self, isolated_db, cli_runner):
         """Should handle special characters in title."""
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             [
                 "add",
@@ -68,9 +68,9 @@ class TestAddEdgeCases:
             event = session.exec(select(Event)).all()[-1]
             assert event.title == "Meeting: Q&A (Part 1) - Review #2"
 
-    def test_add_empty_description(self, isolated_db, runner):
+    def test_add_empty_description(self, isolated_db, cli_runner):
         """Should handle empty description gracefully."""
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             [
                 "add",
@@ -88,9 +88,9 @@ class TestAddEdgeCases:
             event = session.exec(select(Event)).all()[-1]
             assert event.description == ""
 
-    def test_add_midnight_event(self, isolated_db, runner):
+    def test_add_midnight_event(self, isolated_db, cli_runner):
         """Should handle events at midnight."""
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             ["add", "Midnight Task", "-s", "00:00", "-e", "01:00"],
         )
