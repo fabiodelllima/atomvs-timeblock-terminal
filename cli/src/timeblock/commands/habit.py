@@ -82,17 +82,16 @@ def create_habit(
             console.print(f"Cor: {habit.color}")
         console.print("═" * 40)
         
-        # Geração de instâncias
+        # Geração de hábitos
         instances_generated = False
         if generate is not None:
             months = generate
         else:
-            if typer.confirm("\nGerar este hábito automaticamente?", default=True):
-                months = typer.prompt("Por quantos meses?", type=int, default=3, 
-                                     show_choices=False, 
-                                     show_default=True)
-            else:
-                months = None
+            months = typer.prompt(
+                "Por quantos meses quer gerar esse hábito? [1/3/6/12]",
+                type=int,
+                default=3
+            )
         
         if months:
             start_date = date.today()
@@ -102,7 +101,7 @@ def create_habit(
             instances_generated = True
         
         if not instances_generated:
-            console.print("\nℹ️  Use 'timeblock schedule generate' para gerar esse hábito depois", style="cyan")
+            console.print("\n→ Use 'timeblock schedule generate' para gerar esse hábito depois", style="cyan")
 
     except (ValueError, KeyError) as e:
         console.print(f"✗ Erro: {e}", style="red")
