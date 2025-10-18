@@ -87,7 +87,7 @@ def create_habit(
         if generate is not None:
             months = generate
         else:
-            if typer.confirm("\nGerar instâncias automaticamente?", default=True):
+            if typer.confirm("\nGerar este hábito automaticamente?", default=True):
                 months = typer.prompt("Por quantos meses?", type=int, default=3, 
                                      show_choices=False, 
                                      show_default=True)
@@ -98,11 +98,11 @@ def create_habit(
             start_date = date.today()
             end_date = start_date + relativedelta(months=months)
             instances = HabitInstanceService.generate_instances(habit.id, start_date, end_date)
-            console.print(f"\n✓ {len(instances)} instâncias geradas ({start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')})", style="green")
+            console.print(f"\n✓ {len(instances)} hábitos gerados ({start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')})", style="green")
             instances_generated = True
         
         if not instances_generated:
-            console.print("\nℹ️  Use 'timeblock schedule generate' para gerar instâncias depois", style="cyan")
+            console.print("\nℹ️  Use 'timeblock schedule generate' para gerar esse hábito depois", style="cyan")
 
     except (ValueError, KeyError) as e:
         console.print(f"✗ Erro: {e}", style="red")

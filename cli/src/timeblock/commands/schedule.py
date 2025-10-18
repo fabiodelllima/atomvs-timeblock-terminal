@@ -30,7 +30,7 @@ def generate_instances(
 
         instances = HabitInstanceService.generate_instances(habit_id, start_date, end_date)
 
-        console.print(f"\n✓ {len(instances)} instâncias geradas para [bold]{habit.title}[/bold]", style="green")
+        console.print(f"\n✓ {len(instances)} hábitos gerados para [bold]{habit.title}[/bold]", style="green")
         console.print(f"  Período: {start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')}\n")
         
     except ValueError as e:
@@ -49,7 +49,7 @@ def list_instances(
         instances = HabitInstanceService.list_instances(date=date_obj, habit_id=habit_id)
 
         if not instances:
-            console.print("Nenhuma instância encontrada.", style="yellow")
+            console.print("Nenhum hábito agendado encontrado.", style="yellow")
             return
 
         # Título da tabela
