@@ -61,7 +61,7 @@ def _display_timer(timelog_id: int):
                 
                 # Criar display
                 text = Text()
-                text.append("⏱️  ", style="bold cyan")
+                text.append("[●] ", style="bold cyan")
                 text.append(f"{hours:02d}:{minutes:02d}:{seconds:02d}", style="bold cyan")
                 text.append(" | ", style="dim")
                 text.append(activity, style="bold white")
@@ -69,9 +69,9 @@ def _display_timer(timelog_id: int):
                 
                 # Status
                 if hasattr(timelog, 'paused') and timelog.paused:
-                    text.append("⏸️  Pausado", style="yellow")
+                    text.append("[‖] Pausado", style="yellow")
                 else:
-                    text.append("▶️  Em andamento", style="green")
+                    text.append("[▶] Em andamento", style="green")
                 
                 info = f"\n\nIniciado: {timelog.start_time.strftime('%H:%M')}\n"
                 
@@ -173,7 +173,7 @@ def pause_timer():
             raise typer.Exit(1)
         
         TimerService.pause_timer(active.id)
-        console.print("⏸️  Timer pausado", style="yellow")
+        console.print("[‖] Timer pausado", style="yellow")
         
     except ValueError as e:
         console.print(f"✗ Erro: {e}", style="red")
@@ -190,7 +190,7 @@ def resume_timer():
             raise typer.Exit(1)
         
         TimerService.resume_timer(active.id)
-        console.print("▶️  Timer retomado", style="green")
+        console.print("[▶] Timer retomado", style="green")
         
         # Mostrar display novamente
         _display_timer(active.id)
