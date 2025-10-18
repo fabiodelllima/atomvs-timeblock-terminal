@@ -19,3 +19,4 @@ __all__ = [
     "HabitInstance",
     "Task",
 ]
+from .tag import Tag
