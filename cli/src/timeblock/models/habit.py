@@ -1,4 +1,5 @@
 """Habit model for recurring events."""
+
 from datetime import time
 from enum import Enum
 
@@ -30,3 +31,4 @@ class Habit(SQLModel, table=True):
     scheduled_end: time
     recurrence: Recurrence
     color: str | None = Field(default=None, max_length=7)
+    tag_id: int | None = Field(default=None, foreign_key="tag.id")
