@@ -1,6 +1,6 @@
 """Integration tests for add command - success cases."""
 
-from sqlmodel import Session, select
+from sqlmodel import Session, select, create_engine
 
 from src.timeblock.main import app
 from src.timeblock.models import Event
@@ -9,21 +9,22 @@ from src.timeblock.models import Event
 class TestAddSuccess:
     """Test successful event creation scenarios."""
 
-    def test_add_basic_event(self, isolated_db, runner):
+    def test_add_basic_event(self, isolated_db, cli_runner):
         """Should add a basic event successfully."""
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             ["add", "Morning Meeting", "-s", "09:00", "-e", "10:00"],
         )
         assert result.exit_code == 0
-        with Session(isolated_db) as session:
+        engine = create_engine(f"sqlite:///{isolated_db}")
+        with Session(engine) as session:
             events = session.exec(select(Event)).all()
             assert len(events) == 1
             assert events[0].title == "Morning Meeting"
 
-    def test_add_with_description(self, isolated_db, runner):
+    def test_add_with_description(self, isolated_db, cli_runner):
         """Should add event with description."""
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             [
                 "add",
@@ -37,16 +38,17 @@ class TestAddSuccess:
             ],
         )
         assert result.exit_code == 0
-        with Session(isolated_db) as session:
+        engine = create_engine(f"sqlite:///{isolated_db}")
+        with Session(engine) as session:
             event = session.exec(select(Event)).first()
             description = (
                 event.description if event is not None else "Default description"
             )
             assert description == "Daily sync meeting"
 
-    def test_add_with_color(self, isolated_db, runner):
+    def test_add_with_color(self, isolated_db, cli_runner):
         """Should add event with color."""
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             [
                 "add",
@@ -61,16 +63,17 @@ class TestAddSuccess:
         )
         assert result is not None
         assert result.exit_code == 0
-        with Session(isolated_db) as session:
+        engine = create_engine(f"sqlite:///{isolated_db}")
+        with Session(engine) as session:
             event = session.exec(select(Event)).first()
             if event is not None:
                 assert event.color == "#FF5733"
             else:
                 print("No event found")
 
-    def test_add_with_all_fields(self, isolated_db, runner):
+    def test_add_with_all_fields(self, isolated_db, cli_runner):
         """Should add event with all optional fields."""
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             [
                 "add",
@@ -86,7 +89,8 @@ class TestAddSuccess:
             ],
         )
         assert result.exit_code == 0
-        with Session(isolated_db) as session:
+        engine = create_engine(f"sqlite:///{isolated_db}")
+        with Session(engine) as session:
             event = session.exec(select(Event)).first()
             if event is not None:
                 assert event.title == "Client Call"
@@ -95,23 +99,25 @@ class TestAddSuccess:
             else:
                 print("No event found")
 
-    def test_add_multiple_events(self, isolated_db, runner):
+    def test_add_multiple_events(self, isolated_db, cli_runner):
         """Should add multiple events sequentially."""
-        runner.invoke(app, ["add", "Event 1", "-s", "09:00", "-e", "10:00"])
-        runner.invoke(app, ["add", "Event 2", "-s", "11:00", "-e", "12:00"])
-        runner.invoke(app, ["add", "Event 3", "-s", "14:00", "-e", "15:00"])
-        with Session(isolated_db) as session:
+        cli_runner.invoke(app, ["add", "Event 1", "-s", "09:00", "-e", "10:00"])
+        cli_runner.invoke(app, ["add", "Event 2", "-s", "11:00", "-e", "12:00"])
+        cli_runner.invoke(app, ["add", "Event 3", "-s", "14:00", "-e", "15:00"])
+        engine = create_engine(f"sqlite:///{isolated_db}")
+        with Session(engine) as session:
             events = session.exec(select(Event)).all()
             assert len(events) == 3
 
-    def test_add_with_minutes(self, isolated_db, runner):
+    def test_add_with_minutes(self, isolated_db, cli_runner):
         """Should handle times with minutes correctly."""
-        result = runner.invoke(
+        result = cli_runner.invoke(
             app,
             ["add", "Quick Sync", "-s", "10:15", "-e", "10:45"],
         )
         assert result.exit_code == 0
-        with Session(isolated_db) as session:
+        engine = create_engine(f"sqlite:///{isolated_db}")
+        with Session(engine) as session:
             event = session.exec(select(Event)).first()
             if event is not None:
                 assert event.scheduled_start.hour == 10
