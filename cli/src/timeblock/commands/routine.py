@@ -2,7 +2,9 @@
 
 import typer
 from rich.console import Console
+from sqlmodel import Session
 
+from src.timeblock.database import get_engine_context
 from src.timeblock.services.habit_service import HabitService
 from src.timeblock.services.routine_service import RoutineService
 
@@ -14,70 +16,68 @@ console = Console()
 def create_routine(name: str = typer.Argument(..., help="Nome da rotina")):
     """Cria uma nova rotina."""
     try:
-        routine = RoutineService.create_routine(name)
+        with get_engine_context() as engine, Session(engine) as session:
+            service = RoutineService(session)
+            routine = service.create_routine(name)
 
-        # Output detalhado
-        console.print("\n✓ Rotina criada com sucesso!\n", style="bold green")
-        console.print(f"ID: {routine.id}")
-        console.print(f"Nome: [bold]{routine.name}[/bold]")
-        console.print(f"Status: {'Ativa' if routine.is_active else 'Inativa'}")
+            console.print("\n[green]✓ Rotina criada com sucesso![/green]\n")
+            console.print(f"ID: {routine.id}")
+            console.print(f"Nome: [bold]{routine.name}[/bold]")
+            console.print(f"Status: {'Ativa' if routine.is_active else 'Inativa'}")
 
-        # Perguntar se quer ativar
-        if not routine.is_active:
-            if typer.confirm("\nAtivar esta rotina agora?", default=True):
-                RoutineService.activate_routine(routine.id)
-                console.print("✓ Rotina ativada", style="green")
+            if not routine.is_active:
+                if typer.confirm("\nAtivar esta rotina agora?", default=True):
+                    service.activate_routine(routine.id)
+                    console.print("[green]✓ Rotina ativada[/green]")
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
 
 
 @app.command("list")
 def list_routines(all: bool = typer.Option(False, "--all", help="Incluir inativas")):
     """Lista rotinas."""
-    routines = RoutineService.list_routines(active_only=not all)
+    with get_engine_context() as engine, Session(engine) as session:
+        service = RoutineService(session)
+        routines = service.list_routines(active_only=not all)
 
-    if not routines:
-        console.print("Nenhuma rotina encontrada.", style="yellow")
-        return
+        if not routines:
+            console.print("[yellow]Nenhuma rotina encontrada.[/yellow]")
+            return
 
-    console.print(f"\n[bold]{'Todas as Rotinas' if all else 'Rotinas Ativas'}[/bold]\n")
-    for r in routines:
-        status = "✓" if r.is_active else "✗"
-        active_tag = " [ATIVA]" if r.is_active else ""
-        console.print(f"{status} [bold]{r.name}[/bold] (ID: {r.id}){active_tag}")
-    console.print()
+        console.print(f"\n[bold]{'Todas as Rotinas' if all else 'Rotinas Ativas'}[/bold]\n")
+        for r in routines:
+            status = "[green]✓[/green]" if r.is_active else "[dim]✗[/dim]"
+            active_tag = " [ATIVA]" if r.is_active else ""
+            console.print(f"{status} [bold]{r.name}[/bold] (ID: {r.id}){active_tag}")
+        console.print()
 
 
 @app.command("activate")
 def activate_routine(routine_id: int = typer.Argument(..., help="ID da rotina")):
     """Ativa uma rotina (desativa outras automaticamente)."""
     try:
-        # Buscar rotina antes de ativar para mostrar nome
-        routine = RoutineService.get_routine(routine_id)
+        with get_engine_context() as engine, Session(engine) as session:
+            service = RoutineService(session)
+            routine = service.get_routine(routine_id)
 
-        # Verificar se já está ativa
-        if routine.is_active:
-            console.print(f"ℹ️  [bold]{routine.name}[/bold] já está ativa", style="cyan")
-            return
+            if routine.is_active:
+                console.print(f"[cyan]i[/cyan] [bold]{routine.name}[/bold] já está ativa")
+                return
 
-        # Buscar rotina ativa atual
-        current_active = RoutineService.get_active_routine()
+            current_active = service.get_active_routine()
+            service.activate_routine(routine_id)
 
-        # Ativar nova rotina
-        RoutineService.activate_routine(routine_id)
+            console.print(
+                f"\n[green]✓ Rotina ativada: [bold]{routine.name}[/bold] (ID: {routine.id})[/green]"
+            )
 
-        # Output detalhado
-        console.print(
-            f"\n✓ Rotina ativada: [bold]{routine.name}[/bold] (ID: {routine.id})", style="green"
-        )
-
-        if current_active:
-            console.print(f"  [bold]{current_active.name}[/bold] foi desativada", style="dim")
+            if current_active:
+                console.print(f"  [dim][bold]{current_active.name}[/bold] foi desativada[/dim]")
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
 
 
@@ -85,19 +85,21 @@ def activate_routine(routine_id: int = typer.Argument(..., help="ID da rotina"))
 def deactivate_routine(routine_id: int = typer.Argument(..., help="ID da rotina")):
     """Desativa uma rotina."""
     try:
-        routine = RoutineService.get_routine(routine_id)
+        with get_engine_context() as engine, Session(engine) as session:
+            service = RoutineService(session)
+            routine = service.get_routine(routine_id)
 
-        if not routine.is_active:
-            console.print(f"ℹ️  [bold]{routine.name}[/bold] já está inativa", style="cyan")
-            return
+            if not routine.is_active:
+                console.print(f"[cyan]i[/cyan] [bold]{routine.name}[/bold] já está inativa")
+                return
 
-        RoutineService.deactivate_routine(routine_id)
-        console.print(
-            f"✓ Rotina desativada: [bold]{routine.name}[/bold] (ID: {routine.id})", style="green"
-        )
+            service.deactivate_routine(routine_id)
+            console.print(
+                f"[green]✓ Rotina desativada: [bold]{routine.name}[/bold] (ID: {routine.id})[/green]"
+            )
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
 
 
@@ -108,39 +110,40 @@ def delete_routine(
 ):
     """Deleta uma rotina e todos os seus hábitos."""
     try:
-        routine = RoutineService.get_routine(routine_id)
-        habits = HabitService.list_habits(routine_id)
+        with get_engine_context() as engine, Session(engine) as session:
+            routine_service = RoutineService(session)
+            habit_service = HabitService(session)
+            
+            routine = routine_service.get_routine(routine_id)
+            habits = habit_service.list_habits(routine_id)
 
-        # Warning detalhado se houver hábitos
-        if habits and not force:
-            console.print(
-                f"\n⚠️  [bold red]ATENÇÃO[/bold red]: Esta rotina contém {len(habits)} hábito(s):\n"
-            )
-
-            for i, h in enumerate(habits, 1):
-                rec_display = h.recurrence.value.replace("_", " ").title()
+            if habits and not force:
                 console.print(
-                    f"{i}. [bold]{h.title}[/bold] ({rec_display} {h.scheduled_start.strftime('%H:%M')} → {h.scheduled_end.strftime('%H:%M')})"
+                    f"\n[red]! ATENÇÃO:[/red] Esta rotina contém {len(habits)} hábito(s):\n"
                 )
 
+                for i, h in enumerate(habits, 1):
+                    rec_display = h.recurrence.value.replace("_", " ").title()
+                    console.print(
+                        f"{i}. [bold]{h.title}[/bold] ({rec_display} {h.scheduled_start.strftime('%H:%M')} -> {h.scheduled_end.strftime('%H:%M')})"
+                    )
+
+                console.print(
+                    "\n[red]Todos os hábitos e suas instâncias agendadas serão deletados.[/red]\n"
+                )
+
+                if not typer.confirm("Confirma a exclusão?", default=False):
+                    console.print("[yellow]Cancelado.[/yellow]")
+                    return
+
+            routine_service.delete_routine(routine_id)
+
             console.print(
-                "\n[red]Todos os hábitos e suas instâncias agendadas serão deletados.[/red]\n"
+                f"\n[green]✓ Rotina deletada: [bold]{routine.name}[/bold] (ID: {routine.id})[/green]"
             )
-
-            if not typer.confirm("Confirma a exclusão?", default=False):
-                console.print("Cancelado.", style="yellow")
-                return
-
-        # Deletar
-        RoutineService.delete_routine(routine_id)
-
-        # Output detalhado
-        console.print(
-            f"\n✓ Rotina deletada: [bold]{routine.name}[/bold] (ID: {routine.id})", style="green"
-        )
-        if habits:
-            console.print(f"✓ {len(habits)} hábito(s) deletado(s)", style="green")
+            if habits:
+                console.print(f"[green]✓ {len(habits)} hábito(s) deletado(s)[/green]")
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
