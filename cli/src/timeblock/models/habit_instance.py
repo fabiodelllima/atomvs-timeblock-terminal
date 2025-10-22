@@ -2,8 +2,19 @@
 
 from datetime import date as date_type
 from datetime import datetime, time
+from enum import Enum
 
 from sqlmodel import Field, SQLModel
+
+
+class HabitInstanceStatus(str, Enum):
+    """Status de instância de hábito."""
+    PLANNED = "planned"
+    IN_PROGRESS = "in_progress"
+    PAUSED = "paused"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    RESCHEDULED = "rescheduled"
 
 
 class HabitInstance(SQLModel, table=True):
@@ -16,5 +27,5 @@ class HabitInstance(SQLModel, table=True):
     scheduled_end: time
     actual_start: datetime | None = None
     actual_end: datetime | None = None
-    status: str = Field(default="planned")
+    status: HabitInstanceStatus = Field(default=HabitInstanceStatus.PLANNED)
     manually_adjusted: bool = Field(default=False)
