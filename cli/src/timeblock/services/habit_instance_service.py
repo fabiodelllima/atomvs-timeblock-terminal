@@ -124,6 +124,7 @@ class HabitInstanceService:
             instance.scheduled_start = new_start
             instance.scheduled_end = new_end
             instance.manually_adjusted = True
+            instance.user_override = True
 
             session.add(instance)
             session.commit()

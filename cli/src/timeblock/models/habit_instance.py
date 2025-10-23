@@ -29,3 +29,4 @@ class HabitInstance(SQLModel, table=True):
     actual_end: datetime | None = None
     status: HabitInstanceStatus = Field(default=HabitInstanceStatus.PLANNED)
     manually_adjusted: bool = Field(default=False)
+    user_override: bool = Field(default=False)
