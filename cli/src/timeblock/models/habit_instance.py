@@ -30,3 +30,18 @@ class HabitInstance(SQLModel, table=True):
     status: HabitInstanceStatus = Field(default=HabitInstanceStatus.PLANNED)
     manually_adjusted: bool = Field(default=False)
     user_override: bool = Field(default=False)
+
+    @property
+    def is_overdue(self) -> bool:
+        """Verifica se instância está atrasada.
+        
+        Retorna True apenas se:
+        - Status é PLANNED (ainda não iniciou)
+        - Horário agendado já passou
+        """
+        if self.status != HabitInstanceStatus.PLANNED:
+            return False
+        
+        now = datetime.now()
+        scheduled = datetime.combine(self.date, self.scheduled_start)
+        return now > scheduled
