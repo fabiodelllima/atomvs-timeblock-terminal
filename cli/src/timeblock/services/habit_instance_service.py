@@ -109,9 +109,9 @@ class HabitInstanceService:
                         instance = HabitInstance(
                             habit_id=habit_id,
                             date=current_date,
-                            scheduled_start=habit.start_time,
-                            scheduled_end=habit.end_time,
-                            status="pending"
+                            scheduled_start=habit.scheduled_start,
+                            scheduled_end=habit.scheduled_end,
+                            status="PLANNED"
                         )
                         session.add(instance)
                         instances.append(instance)
@@ -128,7 +128,7 @@ class HabitInstanceService:
     @staticmethod
     def _should_create_for_date(recurrence: Recurrence, date: date) -> bool:
         """Verifica se deve criar instância para data."""
-        if recurrence == Recurrence.DAILY:
+        if recurrence == Recurrence.EVERYDAY:
             return True
         elif recurrence == Recurrence.WEEKDAYS:
             return date.weekday() < 5
