@@ -224,3 +224,107 @@ class EventReorderingService:
     ) -> bool:
         """Check if two time ranges overlap."""
         return start1 < end2 and start2 < end1
+
+    @staticmethod
+    def propose_reordering(conflicts: list[Conflict]) -> ReorderingProposal:
+        """
+        Propose reordering solution for conflicts.
+        
+        Args:
+            conflicts: List of detected conflicts
+            
+        Returns:
+            ReorderingProposal with suggested changes
+        """
+        if not conflicts:
+            return ReorderingProposal(
+                conflicts=[],
+                proposed_changes=[],
+                estimated_duration_shift=0,
+            )
+        
+        with get_engine_context() as engine, Session(engine) as session:
+            # Calculate priorities
+            priorities = EventReorderingService.calculate_priorities(conflicts)
+            
+            # Collect all events to reorder
+            events_data = []
+            for (event_id, event_type), priority in priorities.items():
+                event = EventReorderingService._get_event_by_type(session, event_id, event_type)
+                if not event:
+                    continue
+                start, end = EventReorderingService._get_event_times(event, event_type)
+                if not start or not end:
+                    continue
+                
+                # Get event title
+                if event_type == "habit_instance":
+                    event_title = event.habit.name if event.habit else f"Habit Instance {event_id}"
+                else:  # task or event
+                    event_title = event.title if hasattr(event, 'title') else f"Event {event_id}"
+                
+                events_data.append({
+                    'event_id': event_id,
+                    'event_type': event_type,
+                    'event': event,
+                    'event_title': event_title,
+                    'priority': priority,
+                    'current_start': start,
+                    'current_end': end,
+                    'duration': (end - start).total_seconds() / 60,  # minutes
+                })
+            
+            # Sort by priority (CRITICAL first), then by start time
+            events_data.sort(key=lambda x: (x['priority'].value, x['current_start']))
+            
+            # Calculate new times sequentially
+            proposed_changes = []
+            current_time = None
+            
+            for event_data in events_data:
+                # HIGH and CRITICAL priorities don't move
+                if event_data['priority'] in (EventPriority.CRITICAL, EventPriority.HIGH):
+                    current_time = event_data['current_end']
+                    continue
+                
+                # NORMAL and LOW priorities get reordered after CRITICAL/HIGH
+                if current_time is None:
+                    # First event after critical/high - use its original time
+                    current_time = event_data['current_start']
+                
+                new_start = current_time
+                new_end = current_time + timedelta(minutes=event_data['duration'])
+                
+                # Only add change if times actually changed
+                if new_start != event_data['current_start'] or new_end != event_data['current_end']:
+                    # Calculate time shift for reason
+                    shift_minutes = int((new_start - event_data['current_start']).total_seconds() / 60)
+                    reason = f"Reordered due to {event_data['priority'].name} priority (shifted {shift_minutes:+d} min)"
+                    
+                    proposed_changes.append(
+                        ProposedChange(
+                            event_id=event_data['event_id'],
+                            event_type=event_data['event_type'],
+                            event_title=event_data['event_title'],
+                            current_start=event_data['current_start'],
+                            current_end=event_data['current_end'],
+                            proposed_start=new_start,
+                            proposed_end=new_end,
+                            priority=event_data['priority'],
+                            reason=reason,
+                        )
+                    )
+                
+                current_time = new_end
+            
+            # Calculate total duration shift
+            total_shift = sum(
+                (change.proposed_end - change.current_end).total_seconds() / 60
+                for change in proposed_changes
+            )
+            
+            return ReorderingProposal(
+                conflicts=conflicts,
+                proposed_changes=proposed_changes,
+                estimated_duration_shift=int(total_shift),
+            )
