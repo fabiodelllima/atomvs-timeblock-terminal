@@ -7,6 +7,8 @@ from rich.console import Console
 from rich.table import Table
 
 from src.timeblock.services.task_service import TaskService
+from src.timeblock.services.event_reordering_service import EventReorderingService
+from src.timeblock.utils.proposal_display import display_proposal, confirm_apply_proposal
 
 app = typer.Typer(help="Gerenciar tarefas")
 console = Console()
@@ -136,6 +138,52 @@ def check_task(task_id: int = typer.Argument(..., help="ID da tarefa")):
             console.print(f"Status: [green]{abs(diff_minutes)}min de antecipação[/green]")
         else:
             console.print("Status: [green]No horário![/green]")
+        console.print()
+
+    except ValueError as e:
+        console.print(f"✗ Erro: {e}", style="red")
+        raise typer.Exit(1)
+
+
+@app.command("update")
+def update_task(
+    task_id: int = typer.Argument(..., help="ID da tarefa"),
+    title: str = typer.Option(None, "--title", "-t", help="Novo título"),
+    scheduled: str = typer.Option(None, "--datetime", "-D", help="Nova data/hora (YYYY-MM-DD HH:MM)"),
+    description: str = typer.Option(None, "--desc", help="Nova descrição"),
+):
+    """Atualiza uma tarefa."""
+    try:
+        # Parse scheduled datetime if provided
+        scheduled_dt = datetime.fromisoformat(scheduled) if scheduled else None
+        
+        # Update task and get reordering proposal
+        task, proposal = TaskService.update_task(
+            task_id,
+            title=title,
+            scheduled_datetime=scheduled_dt,
+            description=description,
+        )
+        
+        # Display reordering proposal if conflicts detected
+        if proposal:
+            display_proposal(proposal)
+            
+            if confirm_apply_proposal():
+                EventReorderingService.apply_reordering(proposal)
+                console.print("\n✓ Reordenamento aplicado com sucesso!\n", style="bold green")
+            else:
+                console.print("\n[yellow]Reordenamento cancelado. Tarefa atualizada mas agenda não foi reorganizada.[/yellow]\n")
+        
+        # Display updated task info
+        console.print("✓ Tarefa atualizada com sucesso!\n", style="bold green")
+        console.print("═" * 40)
+        console.print(f"ID: {task.id}")
+        console.print(f"Título: [bold]{task.title}[/bold]")
+        console.print(f"Programado: {task.scheduled_datetime.strftime('%d/%m/%Y às %H:%M')}")
+        if task.description:
+            console.print(f"Descrição: {task.description}")
+        console.print("═" * 40)
         console.print()
 
     except ValueError as e:
