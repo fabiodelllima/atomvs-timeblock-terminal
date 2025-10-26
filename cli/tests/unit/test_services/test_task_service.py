@@ -181,3 +181,24 @@ class TestDeleteTask:
     def test_delete_task_not_found(self):
         """Retorna False se não existe."""
         assert TaskService.delete_task(9999) is False
+
+
+@pytest.mark.skip(reason="Integration test - requires full DB setup for EventReorderingService")
+class TestUpdateTaskWithReordering:
+    """Testes para update_task com detecção de conflitos."""
+
+    def test_update_task_no_datetime_change_no_proposal(self):
+        """Sem mudança de datetime, não detecta conflitos."""
+        task = TaskService.create_task(
+            title="Task",
+            scheduled_datetime=datetime(2025, 10, 27, 10, 0),
+        )
+
+        updated, proposal = TaskService.update_task(
+            task.id,
+            title="Updated Title",
+        )
+
+        assert updated is not None
+        assert updated.title == "Updated Title"
+        assert proposal is None
