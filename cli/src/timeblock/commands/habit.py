@@ -223,3 +223,39 @@ def delete_habit(
     except ValueError as e:
         console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
+
+
+@app.command("adjust")
+def adjust_instance(
+    instance_id: int = typer.Argument(..., help="ID da instância"),
+    start: str = typer.Option(..., "--start", "-s", help="Nova hora início (HH:MM)"),
+    end: str = typer.Option(..., "--end", "-e", help="Nova hora fim (HH:MM)"),
+):
+    """Ajusta horário de instância específica de hábito."""
+    try:
+        from datetime import time as dt_time
+        from src.timeblock.services.habit_instance_service import HabitInstanceService
+        from src.timeblock.services.event_reordering_service import EventReorderingService
+        from src.timeblock.utils.proposal_display import display_proposal, confirm_apply_proposal
+        
+        new_start = dt_time.fromisoformat(start)
+        new_end = dt_time.fromisoformat(end)
+        
+        instance, proposal = HabitInstanceService.adjust_instance_time(
+            instance_id, new_start, new_end
+        )
+        
+        if proposal:
+            display_proposal(proposal)
+            
+            if confirm_apply_proposal():
+                EventReorderingService.apply_reordering(proposal)
+                console.print("\n✓ Reordenamento aplicado!\n", style="bold green")
+            else:
+                console.print("\n[yellow]Reordenamento cancelado. Instância ajustada mas agenda não reorganizada.[/yellow]\n")
+        
+        console.print(f"✓ Instância {instance_id} ajustada: {new_start} - {new_end}", style="green")
+        
+    except ValueError as e:
+        console.print(f"[red]✗ Erro: {e}[/red]")
+        raise typer.Exit(1)
