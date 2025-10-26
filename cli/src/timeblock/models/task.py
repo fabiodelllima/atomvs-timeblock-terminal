@@ -19,6 +19,7 @@ class Task(SQLModel, table=True):
     scheduled_datetime: datetime = Field(index=True)
     completed_datetime: datetime | None = Field(default=None)
     description: str | None = Field(default=None)
+    color: str | None = Field(default=None)
     tag_id: int | None = Field(default=None, foreign_key="tags.id")
 
     # Relationships
