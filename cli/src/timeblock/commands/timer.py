@@ -15,6 +15,8 @@ from src.timeblock.services.habit_instance_service import HabitInstanceService
 from src.timeblock.services.habit_service import HabitService
 from src.timeblock.services.task_service import TaskService
 from src.timeblock.services.timer_service import TimerService
+from src.timeblock.services.event_reordering_service import EventReorderingService
+from src.timeblock.utils.proposal_display import display_proposal, confirm_apply_proposal
 
 app = typer.Typer(help="Gerenciar timer de tracking")
 console = Console()
@@ -61,7 +63,7 @@ def _display_timer(timelog_id: int):
 
                 # Criar display
                 text = Text()
-                text.append("[●] ", style="bold cyan")
+                text.append("[>] ", style="bold cyan")
                 text.append(f"{hours:02d}:{minutes:02d}:{seconds:02d}", style="bold cyan")
                 text.append(" | ", style="dim")
                 text.append(activity, style="bold white")
@@ -69,9 +71,9 @@ def _display_timer(timelog_id: int):
 
                 # Status
                 if hasattr(timelog, "paused") and timelog.paused:
-                    text.append("[‖] Pausado", style="yellow")
+                    text.append("[||] Pausado", style="yellow")
                 else:
-                    text.append("[▶] Em andamento", style="green")
+                    text.append("[>] Em andamento", style="green")
 
                 info = f"\n\nIniciado: {timelog.start_time.strftime('%H:%M')}\n"
 
@@ -94,7 +96,7 @@ def _display_timer(timelog_id: int):
                 )
                 return
             except Exception as e:
-                console.print(f"\n✗ Erro: {e}", style="red")
+                console.print(f"\n[X] Erro: {e}", style="red")
                 return
 
 
@@ -109,10 +111,13 @@ def start_timer(
         active = TimerService.get_active_timelog()
         if active:
             console.print(
-                "✗ Já existe um timer ativo. Use 'timer stop' ou 'timer cancel' primeiro.",
+                "[X] Já existe um timer ativo. Use 'timer stop' ou 'timer cancel' primeiro.",
                 style="red",
             )
             raise typer.Exit(1)
+
+        timelog = None
+        proposal = None
 
         # Workflow A: direto com flags
         if schedule or task:
@@ -132,16 +137,16 @@ def start_timer(
 
             # Iniciar
             if schedule:
-                timelog = TimerService.start_timer(habit_instance_id=schedule)
+                timelog, proposal = TimerService.start_timer(habit_instance_id=schedule)
             else:
-                timelog = TimerService.start_timer(task_id=task)
+                timelog, proposal = TimerService.start_timer(task_id=task)
 
         # Workflow B: via select
         else:
             selected = _get_selected_schedule()
             if not selected:
                 console.print(
-                    "✗ Nenhuma instância selecionada. Use 'timeblock schedule select <id>' ou '--schedule <id>'",
+                    "[X] Nenhuma instância selecionada. Use 'timeblock schedule select <id>' ou '--schedule <id>'",
                     style="red",
                 )
                 raise typer.Exit(1)
@@ -153,17 +158,27 @@ def start_timer(
                 console.print("Cancelado.", style="yellow")
                 return
 
-            timelog = TimerService.start_timer(habit_instance_id=selected)
+            timelog, proposal = TimerService.start_timer(habit_instance_id=selected)
+
+        # Display reordering proposal if conflicts detected
+        if proposal:
+            display_proposal(proposal)
+            
+            if confirm_apply_proposal():
+                EventReorderingService.apply_reordering(proposal)
+                console.print("\n[OK] Reordenamento aplicado com sucesso!\n", style="bold green")
+            else:
+                console.print("\n[!] Reordenamento cancelado. Timer iniciado mas agenda não foi reorganizada.\n", style="yellow")
 
         console.print(
-            f"\n✓ Timer iniciado às {timelog.start_time.strftime('%H:%M')}!\n", style="green"
+            f"\n[OK] Timer iniciado às {timelog.start_time.strftime('%H:%M')}!\n", style="green"
         )
 
         # Display interativo
         _display_timer(timelog.id)
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)
 
 
@@ -173,14 +188,14 @@ def pause_timer():
     try:
         active = TimerService.get_active_timelog()
         if not active:
-            console.print("✗ Nenhum timer ativo", style="red")
+            console.print("[X] Nenhum timer ativo", style="red")
             raise typer.Exit(1)
 
         TimerService.pause_timer(active.id)
-        console.print("[‖] Timer pausado", style="yellow")
+        console.print("[||] Timer pausado", style="yellow")
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)
 
 
@@ -190,17 +205,17 @@ def resume_timer():
     try:
         active = TimerService.get_active_timelog()
         if not active:
-            console.print("✗ Nenhum timer ativo", style="red")
+            console.print("[X] Nenhum timer ativo", style="red")
             raise typer.Exit(1)
 
         TimerService.resume_timer(active.id)
-        console.print("[▶] Timer retomado", style="green")
+        console.print("[>] Timer retomado", style="green")
 
         # Mostrar display novamente
         _display_timer(active.id)
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)
 
 
@@ -210,7 +225,7 @@ def stop_timer():
     try:
         active = TimerService.get_active_timelog()
         if not active:
-            console.print("✗ Nenhum timer ativo", style="red")
+            console.print("[X] Nenhum timer ativo", style="red")
             raise typer.Exit(1)
 
         # Parar timer
@@ -223,18 +238,15 @@ def stop_timer():
         minutes, seconds = divmod(remainder, 60)
 
         # Output
-        console.print("\n✓ Timer finalizado!\n", style="bold green")
+        console.print("\n[OK] Timer finalizado!\n", style="bold green")
         console.print(f"Duração total: {hours}h {minutes}min {seconds}s")
         console.print(f"Início: {timelog.start_time.strftime('%H:%M')}")
         console.print(f"Fim: {timelog.end_time.strftime('%H:%M')}")
 
-        # Perguntar sobre notas de pausas (se implementado)
-        # TODO: implementar sistema de pausas no TimerService
-
         console.print()
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)
 
 
@@ -244,7 +256,7 @@ def cancel_timer():
     try:
         active = TimerService.get_active_timelog()
         if not active:
-            console.print("✗ Nenhum timer ativo", style="red")
+            console.print("[X] Nenhum timer ativo", style="red")
             raise typer.Exit(1)
 
         if not typer.confirm("Cancelar timer? (não será salvo)", default=False):
@@ -252,10 +264,10 @@ def cancel_timer():
             return
 
         TimerService.cancel_timer(active.id)
-        console.print("✓ Timer cancelado (não salvo)", style="yellow")
+        console.print("[OK] Timer cancelado (não salvo)", style="yellow")
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)
 
 
@@ -263,12 +275,11 @@ def cancel_timer():
 def recover_timer():
     """Recupera timer cancelado recentemente."""
     try:
-        # TODO: Implementar no TimerService lista de timers cancelados
-        console.print("⚠️  Funcionalidade em desenvolvimento", style="yellow")
+        console.print("[!] Funcionalidade em desenvolvimento", style="yellow")
         console.print("Por enquanto, timers cancelados não podem ser recuperados", style="dim")
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)
 
 
@@ -304,5 +315,5 @@ def timer_status():
         console.print(f"Iniciado: {active.start_time.strftime('%H:%M')}\n")
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)

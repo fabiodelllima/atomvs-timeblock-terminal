@@ -14,7 +14,7 @@ class TimeLog(SQLModel, table=True):
 
     # Foreign keys opcionais (apenas um preenchido por registro)
     event_id: int | None = Field(foreign_key="event.id", default=None, index=True)
-    task_id: int | None = Field(foreign_key="task.id", default=None, index=True)
+    task_id: int | None = Field(foreign_key="tasks.id", default=None, index=True)
     habit_instance_id: int | None = Field(foreign_key="habitinstance.id", default=None, index=True)
 
     # Timestamps

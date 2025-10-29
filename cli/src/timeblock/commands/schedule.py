@@ -11,6 +11,8 @@ from rich.table import Table
 
 from src.timeblock.services.habit_instance_service import HabitInstanceService
 from src.timeblock.services.habit_service import HabitService
+from src.timeblock.services.event_reordering_service import EventReorderingService
+from src.timeblock.utils.proposal_display import display_proposal, confirm_apply_proposal
 
 app = typer.Typer(help="Gerenciar agenda de hábitos")
 console = Console()
@@ -31,14 +33,14 @@ def generate_instances(
         instances = HabitInstanceService.generate_instances(habit_id, start_date, end_date)
 
         console.print(
-            f"\n✓ {len(instances)} hábitos gerados para [bold]{habit.title}[/bold]", style="green"
+            f"\n[OK] {len(instances)} hábitos gerados para [bold]{habit.title}[/bold]", style="green"
         )
         console.print(
             f"  Período: {start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')}\n"
         )
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)
 
 
@@ -77,7 +79,7 @@ def list_instances(
 
         for inst in instances:
             habit = HabitService.get_habit(inst.habit_id)
-            adjusted = "✓" if inst.manually_adjusted else "—"
+            adjusted = "[OK]" if inst.manually_adjusted else "—"
             table.add_row(
                 str(inst.id),
                 habit.title,
@@ -91,7 +93,7 @@ def list_instances(
         console.print()
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)
 
 
@@ -110,10 +112,23 @@ def edit_instance(
         start_time = dt_time.fromisoformat(start)
         end_time = dt_time.fromisoformat(end)
 
-        instance = HabitInstanceService.adjust_instance_time(instance_id, start_time, end_time)
+        # Adjust instance time and get reordering proposal
+        instance, proposal = HabitInstanceService.adjust_instance_time(
+            instance_id, start_time, end_time
+        )
+
+        # Display reordering proposal if conflicts detected
+        if proposal:
+            display_proposal(proposal)
+            
+            if confirm_apply_proposal():
+                EventReorderingService.apply_reordering(proposal)
+                console.print("\n[OK] Reordenamento aplicado com sucesso!\n", style="bold green")
+            else:
+                console.print("\n[!] Reordenamento cancelado. Horário ajustado mas agenda não foi reorganizada.\n", style="yellow")
 
         # Output detalhado
-        console.print("\n✓ Agenda editada com sucesso!\n", style="bold green")
+        console.print("\n[OK] Agenda editada com sucesso!\n", style="bold green")
         console.print(f"[bold]{habit.title}[/bold] em {instance.date.strftime('%d/%m/%Y')}")
         console.print(
             f"Horário: {instance.scheduled_start.strftime('%H:%M')} → {instance.scheduled_end.strftime('%H:%M')}"
@@ -123,7 +138,7 @@ def edit_instance(
         )
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)
 
 
@@ -140,7 +155,7 @@ def select_instance(instance_id: int = typer.Argument(..., help="ID da instânci
         config_path.write_text(json.dumps(config))
 
         # Output
-        console.print(f"\n✓ Selecionado: [bold]{habit.title}[/bold]", style="green")
+        console.print(f"\n[OK] Selecionado: [bold]{habit.title}[/bold]", style="green")
         console.print(f"  Data: {instance.date.strftime('%d/%m/%Y')}")
         console.print(
             f"  Horário: {instance.scheduled_start.strftime('%H:%M')} → {instance.scheduled_end.strftime('%H:%M')}\n"
@@ -148,5 +163,5 @@ def select_instance(instance_id: int = typer.Argument(..., help="ID da instânci
         console.print("Use 'timeblock timer start' para iniciar timer", style="dim")
 
     except ValueError as e:
-        console.print(f"✗ Erro: {e}", style="red")
+        console.print(f"[X] Erro: {e}", style="red")
         raise typer.Exit(1)
