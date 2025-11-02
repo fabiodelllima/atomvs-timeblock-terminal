@@ -1,7 +1,7 @@
 # TimeBlock Organizer - Status do Projeto
 
 - **Última Atualização:** 01 de Novembro de 2025
-- **Versão Atual:** v1.0.0 (baseline estável) + v1.1.0 (pronto para release)
+- **Versão Atual:** v1.1.0 (Event Reordering - LANÇADO)
 
 ## Visão Rápida
 
@@ -10,8 +10,9 @@ TimeBlock Organizer é um sistema inteligente de gerenciamento de tempo via CLI 
 ### Estado Atual
 
 ```terminal
-v1.0.0 (ESTÁVEL)    [OK] 141 testes, 99% cobertura, 3 comandos funcionais
-v1.1.0 (COMPLETO)   [OK] Event Reordering 100%, 78 testes novos, comando reschedule
+v1.0.0 (ESTÁVEL)    [OK] 141 testes, 99% cobertura, baseline funcional
+v1.1.0 (LANÇADO)    [OK] Event Reordering completo, 78 testes novos, 01 Nov 2025
+v1.2.0 (PRÓXIMO)    Refatoração HabitAtom (ETA: 2 semanas)
 ```
 
 ## O Que Está Pronto
@@ -36,38 +37,38 @@ v1.1.0 (COMPLETO)   [OK] Event Reordering 100%, 78 testes novos, comando resched
 4. TaskService - CRUD de tarefas únicas
 5. TimerService - Start/pause/resume/stop timer
 6. TagService - Gerenciamento de tags
-7. **EventReorderingService** - [OK] 100% completo (90% cobertura)
+7. **EventReorderingService** - [OK] LANÇADO v1.1.0 (90% cobertura)
 8. ReportService - FUNCIONAL (daily, weekly, habit reports)
 9. RoutineExecutionService - TODO (escopo a definir)
 
-### Event Reordering System - COMPLETO
+### Sistema de Reordenamento de Eventos - LANÇADO v1.1.0
 
-**Status Geral:** [OK] 100% implementado e testado
+**Status Geral:** [OK] LANÇADO em 01/Nov/2025
 
 **Fase 1 - Core (100%):**
 
-- [x] Sprint 1.1: Modelos Auxiliares (8 testes passando)
-- [x] Sprint 1.2: Detectar Conflitos (9 testes passando)
-- [x] Sprint 1.3: Calcular Prioridades (5 testes passando)
-- [x] Sprint 1.4: Propor Reordenação (3 testes passando)
+- [x] Sprint 1.1: Modelos Auxiliares (8 testes)
+- [x] Sprint 1.2: Detectar Conflitos (9 testes)
+- [x] Sprint 1.3: Calcular Prioridades (5 testes)
+- [x] Sprint 1.4: Propor Reordenação (3 testes)
 
 **Fase 2 - Integração (100%):**
 
-- [x] Sprint 2.1: TaskService Integration (16 testes passando)
-- [x] Sprint 2.2: HabitInstanceService (6 testes passando)
-- [x] Sprint 2.3: TimerService (24 testes passando)
-- [x] Sprint 2.4: CLI Preview (3 testes passando)
+- [x] Sprint 2.1: Integração TaskService (16 testes)
+- [x] Sprint 2.2: HabitInstanceService (6 testes)
+- [x] Sprint 2.3: TimerService (24 testes)
+- [x] Sprint 2.4: CLI Preview (3 testes)
 
-**Fase 3 - Apply (100%):**
+**Fase 3 - Aplicação (100%):**
 
-- [x] Sprint 3.1: Apply Reordering (4 testes passando)
-- [x] Sprint 3.2: CLI Confirmation (integrado)
+- [x] Sprint 3.1: Apply Reordering (4 testes)
+- [x] Sprint 3.2: Confirmação CLI (integrado)
 
 **Cobertura de Código:**
 
 ```terminal
-event_reordering_models.py      100% (45 linhas, 0 missing)
-event_reordering_service.py      90% (168 linhas, 17 missing)
+event_reordering_models.py      100% (45 linhas)
+event_reordering_service.py      90% (168 linhas)
 Total Event Reordering:          78 testes passando
 ```
 
@@ -111,15 +112,25 @@ Status: [OK] 219 passando, 1 skip intencional
 
 ## O Que Está em Progresso
 
-### Nada - Pronto para Release v1.1.0
+### v1.2.0 - Refatoração HabitAtom
 
-Event Reordering completamente implementado e testado. Todas as fases concluídas.
+**Início Previsto:** 02 de Novembro de 2025
+**Status:** Planejamento
+
+**Escopo:**
+
+- Renomear HabitInstance -> HabitAtom
+- Reposicionar filosoficamente (Atomic Habits)
+- Melhorar testes como documentação viva
+- Atualizar toda documentação técnica
+
+**Estimativa:** 44h (~1-2 semanas)
 
 ## Débito Técnico
 
 Ver [Débito Técnico](technical-debt.md) para detalhes completos.
 
-**Resolvidos:**
+**Resolvidos em v1.1.0:**
 
 - [x] Event Reordering Fase 1 (era CRÍTICO)
 - [x] Event Reordering Fase 2 (era 8h)
@@ -129,52 +140,68 @@ Ver [Débito Técnico](technical-debt.md) para detalhes completos.
 
 - [ ] Cobertura 50% -> 80% (estimativa: 10h) - MÉDIA prioridade
 - [ ] Testes E2E Faltando (estimativa: 12h) - ALTA prioridade
-- [ ] HabitAtom Refactor (estimativa: 44h) - PRÓXIMO ciclo
+- [ ] Refatoração HabitAtom (estimativa: 44h) - PRÓXIMO ciclo
 
 ## Próximos Releases
 
 ```terminal
-v1.0.0 (ATUAL)      [OK] Baseline (16 Out 2025)
-v1.1.0 (PRÓXIMO)    [OK] Event Reordering completo (pronto)
-v1.2.0 (MÉDIO)      HabitAtom refactor (ETA: +2 semanas)
-v1.3.0 (LONGO)      Living Documentation (ETA: +6 semanas)
+v1.0.0 (LANÇADO)    [OK] Baseline (16 Out 2025)
+v1.1.0 (LANÇADO)    [OK] Event Reordering (01 Nov 2025)
+v1.2.0 (PRÓXIMO)    Refatoração HabitAtom (ETA: 15 Nov 2025)
+v1.3.0 (MÉDIO)      Living Documentation (ETA: +6 semanas)
 v2.0.0 (FUTURO)     Sistema Completo (ETA: 6+ meses)
 ```
 
 ## Ações Imediatas
 
-**AGORA:**
+**CONCLUÍDO:**
 
 - [x] Event Reordering completo
-- [ ] Release v1.1.0 (merge develop -> main + tag)
-- [ ] Documentar release notes
+- [x] Release v1.1.0 publicado
+- [x] Documentação atualizada
+- [x] CHANGELOG criado
 
 **PRÓXIMA SEMANA:**
 
-- [ ] Iniciar HabitAtom Refactor (Fase 3 original)
-- [ ] Testes E2E mínimos (12h)
+- [ ] Branch feat/habitatom-refactor
+- [ ] Planejamento detalhado HabitAtom
+- [ ] Início implementação
 
 **2 SEMANAS:**
 
 - [ ] Release v1.2.0 (HabitAtom)
+- [ ] Testes E2E mínimos
 
 ## Métricas de Progresso
 
-**Antes Event Reordering:**
+**v1.0.0 (Baseline):**
 
 - Testes: 141
 - Cobertura: 28%
 - Comandos: 8 grupos
 
-**Depois Event Reordering:**
+**v1.1.0 (Event Reordering):**
 
 - Testes: 219 (+78, +55%)
 - Cobertura: ~50% (+22pp)
 - Comandos: 9 grupos (+reschedule)
-- Event Reordering: 90% cobertura própria
+- Features: Event Reordering completo
+
+**Progresso Geral:**
+
+- 2 releases públicos
+- 219 testes (100% passando)
+- 9 services implementados
+- 7 entidades no modelo de dados
 
 ---
 
-- **Próxima Atualização:** Após Release v1.1.0
-- **Responsável:** Mantenedor do projeto
-- **Documentos Relacionados:** [Débito Técnico](technical-debt.md) | [Roadmap](detailed-roadmap.md) | [Event Reordering Conclusão](event-reordering-completed.md)
+**Próxima Atualização:** Início do ciclo v1.2.0 (Refatoração HabitAtom)
+**Responsável:** Mantenedor do projeto
+**Documentos Relacionados:**
+
+- [CHANGELOG](../../CHANGELOG.md)
+- [Notas de Lançamento v1.1.0](release-notes-v1.1.0.md)
+- [Débito Técnico](technical-debt.md)
+- [Roadmap](detailed-roadmap.md)
+- [Conclusão Event Reordering](event-reordering-completed.md)
