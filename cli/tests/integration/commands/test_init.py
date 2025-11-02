@@ -1,0 +1,88 @@
+"""Integration tests for init command."""
+
+import pytest
+from typer.testing import CliRunner
+
+
+@pytest.fixture(autouse=True)
+def isolated_db(tmp_path, monkeypatch):
+    """Create isolated database in temp directory."""
+    db_file = tmp_path / "test.db"
+
+    # Set environment variable BEFORE importing
+    monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_file))
+
+    # Force reimport to pick up new env var
+    import sys
+
+    for module in [
+        "src.timeblock.database",
+        "src.timeblock.commands.init",
+        "src.timeblock.main",
+    ]:
+        if module in sys.modules:
+            del sys.modules[module]
+
+    yield db_file
+
+
+def test_init_creates_database(isolated_db):
+    """Should create database file when it doesn't exist."""
+    from src.timeblock.main import app
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["init"])
+
+    assert result.exit_code == 0
+    assert "initialized" in result.output.lower()
+    assert isolated_db.exists()
+
+
+def test_init_on_existing_database_accept(isolated_db):
+    """Should recreate database when user accepts."""
+    from src.timeblock.main import app
+
+    runner = CliRunner()
+
+    # First init
+    runner.invoke(app, ["init"])
+
+    # Second init - accept with 'y'
+    result = runner.invoke(app, ["init"], input="y\n")
+
+    assert result.exit_code == 0
+    assert "initialized" in result.output.lower()
+
+
+def test_init_on_existing_database_decline(isolated_db):
+    """Should cancel when user declines."""
+    from src.timeblock.main import app
+
+    runner = CliRunner()
+
+    # First init
+    runner.invoke(app, ["init"])
+
+    # Second init - decline with 'n'
+    result = runner.invoke(app, ["init"], input="n\n")
+
+    assert result.exit_code == 0
+    assert "cancelled" in result.output.lower() or "aborted" in result.output.lower()
+
+
+def test_init_handles_database_error(isolated_db, monkeypatch):
+    """Should handle database creation errors gracefully."""
+    from src.timeblock.main import app
+
+    runner = CliRunner()
+
+    # Mock create_db_and_tables to raise exception
+    def mock_create_error():
+        raise Exception("Simulated database error")
+
+    monkeypatch.setattr("src.timeblock.commands.init.create_db_and_tables", mock_create_error)
+
+    result = runner.invoke(app, ["init"])
+
+    assert result.exit_code == 1
+    assert "error" in result.output.lower()

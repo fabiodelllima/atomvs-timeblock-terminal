@@ -30,6 +30,8 @@ def test_db(tmp_path, monkeypatch):
     monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_path))
     create_db_and_tables()
     yield db_path
+
+
 """Shared fixtures for query tests."""
 
 from datetime import UTC, datetime, timedelta
@@ -37,11 +39,11 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from sqlmodel import Session, SQLModel, create_engine
 
-from src.timeblock.models import Event, EventStatus
+from src.timeblock.models import Event, EventStatus, Routine, Habit, HabitInstance, Task, Tag
 
 
 @pytest.fixture(scope="function")
-def test_db():
+def test_engine():
     """Create in-memory SQLite database for testing."""
     engine = create_engine(
         "sqlite:///:memory:",

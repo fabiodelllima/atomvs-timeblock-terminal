@@ -10,12 +10,10 @@ dist/
 build/
 
 # Database
-cli/data/*.db
-cli/data/*.sqlite3
+cli/data/
 
 # IDE
 .vscode/*
-!.vscode/settings.json
 .idea/
 
 # OS
@@ -24,8 +22,15 @@ Thumbs.db
 
 # Tests
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
 .coverage
 htmlcov/
 
 # Logs
 *.log
+cli/src/data/
+
+#
+site/
+*.tar.gz
