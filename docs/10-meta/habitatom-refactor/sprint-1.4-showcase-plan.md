@@ -1,65 +1,76 @@
 # Sprint 1.4 - Documentação Showcase
 
-**Duração:** 6h  
+**Duração:** 6h
+
 **Objetivo:** Documentação portfolio-ready
 
 ---
 
-## Fase 1: PHILOSOPHY.md (2h)
+## Fase 1: PHILOSOPHY.md
 
 ### Objetivo
+
 Documento explicando filosofia "Atomic Habits" e como TimeBlock implementa.
 
 ### Estrutura
 
-**1. Introdução (15min)**
+#### **1. Introdução**
+
 - O que são Atomic Habits
 - Por que importam
 - Como TimeBlock usa
 
-**2. Conceitos Core (45min)**
+#### **2. Conceitos Core**
+
 - Lei 1: Torne óbvio (Cue)
 - Lei 2: Torne atraente (Craving)
 - Lei 3: Torne fácil (Response)
 - Lei 4: Torne satisfatório (Reward)
 
-**3. Implementação TimeBlock (45min)**
+#### **3. Implementação TimeBlock**
+
 - HabitInstance como átomo
 - Recorrência = consistência
 - EventReordering = facilitação
 - Tracking = feedback
 
-**4. Exemplos Práticos (15min)**
+#### **4. Exemplos Práticos**
+
 - Cenários reais
 - Como usar efetivamente
 
 ---
 
-## Fase 2: ARCHITECTURE.md (1.5h)
+## Fase 2: ARCHITECTURE.md
 
 ### Objetivo
+
 Documento técnico sobre arquitetura do sistema.
 
 ### Estrutura
 
-**1. Visão Geral (15min)**
+#### **1. Visão Geral**
+
 - Stack tecnológico
 - Padrões arquiteturais
 - Decisões principais
 
-**2. Camadas (30min)**
+#### **2. Camadas**
+
 - Models (SQLModel)
 - Services (Business Logic)
 - Commands (CLI)
 - Utils (Helpers)
 
-**3. Fluxos Principais (30min)**
+#### **3. Fluxos Principais**
+
 - Criação de hábito
 - Geração de instâncias
 - Detecção de conflitos
 - Event reordering
 
-**4. Decisões Arquiteturais (15min)**
+#### **4. Decisões Arquiteturais**
+
 - Por que SQLModel
 - Por que não ORM complexo
 - Service pattern
@@ -67,14 +78,16 @@ Documento técnico sobre arquitetura do sistema.
 
 ---
 
-## Fase 3: README.md Bilíngue (2h)
+## Fase 3: README.md Bilíngue
 
 ### Objetivo
+
 README profissional em PT e EN.
 
 ### Estrutura
 
-**Seção PT-BR (45min)**
+#### **Seção PT-BR (45min)**
+
 - Descrição
 - Features
 - Instalação
@@ -82,12 +95,14 @@ README profissional em PT e EN.
 - Filosofia (link)
 - Arquitetura (link)
 
-**Seção EN (45min)**
+#### **Seção EN**
+
 - Tradução completa
 - Adaptações culturais
 - Exemplos em inglês
 
-**Badges e Metadados (30min)**
+#### **Badges e Metadados**
+
 - Build status
 - Coverage
 - Version
@@ -96,15 +111,17 @@ README profissional em PT e EN.
 
 ---
 
-## Fase 4: Diagramas (30min)
+## Fase 4: Diagramas
 
 ### Objetivo
+
 Atualizar/criar diagramas visuais.
 
 ### Diagramas Necessários
 
-**1. Arquitetura de Camadas**
-```
+#### **1. Arquitetura de Camadas**
+
+```terminal
 ┌─────────────────┐
 │   CLI Commands  │
 ├─────────────────┤
@@ -116,8 +133,9 @@ Atualizar/criar diagramas visuais.
 └─────────────────┘
 ```
 
-**2. Fluxo HabitInstance**
-```
+#### **2. Fluxo HabitInstance**
+
+```terminal
 Habit → generate_instances() → HabitInstance[]
   ↓
 adjust_time() → detect_conflicts() → ReorderingProposal
@@ -125,8 +143,9 @@ adjust_time() → detect_conflicts() → ReorderingProposal
 mark_completed() → TimeLog
 ```
 
-**3. Event Reordering**
-```
+#### **3. Event Reordering**
+
+```terminal
 Trigger Event → detect_conflicts() → propose_reordering()
      ↓                                        ↓
   Conflicts[]                          Proposal
@@ -150,10 +169,12 @@ Trigger Event → detect_conflicts() → propose_reordering()
 ## Riscos
 
 **Médio Risco:**
+
 - Cansaço após 13.5h (pode afetar qualidade)
 - Tradução EN requer atenção
 
 **Mitigação:**
+
 - Focar em qualidade > velocidade
 - Revisar PT antes de traduzir
 - Pausas de 10min a cada hora
