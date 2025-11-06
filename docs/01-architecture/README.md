@@ -1,6 +1,6 @@
 # Arquitetura (arc42)
 
-## Seções
+## Seções Principais
 
 1. [Introdução e Objetivos](01-introduction-goals.md)
 2. [Restrições](02-constraints.md)
@@ -20,3 +20,13 @@
 - [13. Análise Arquitetural](13-architectural-analysis.md)
 - [14. Problemas Arquiteturais](14-architectural-problems.md)
 - [15. Recomendações](15-recommendations.md)
+
+## Planejamento v2.0
+
+- [16. Sync Architecture](16-sync-architecture-v2.md) - **NOVO**
+
+## Sobre arc42
+
+Este projeto segue o template arc42 para documentação de arquitetura de software. Arc42 é um padrão aberto e pragmático para documentar e comunicar arquiteturas.
+
+**Mais informações:** <https://arc42.org/>
