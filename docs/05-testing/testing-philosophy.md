@@ -5,7 +5,8 @@
 **Todo teste deve validar uma Regra de Negócio documentada.**
 
 ## Pirâmide de Testes
-```
+
+```terminal
         ╱╲
        ╱E2E╲         ← Poucos, lentos, alto nível
       ╱──────╲
@@ -22,6 +23,7 @@
 **Localização:** `cli/tests/unit/`
 
 **Características:**
+
 - Testam uma função/método específico
 - Usam mocks para dependências externas
 - Rápidos (< 100ms por teste)
@@ -29,6 +31,7 @@
 - Validam lógica de negócio pura
 
 **Exemplo:**
+
 ```python
 def test_rn_event_001_detecta_sobreposicao_total(self):
     """RN-EVENT-001: Sistema detecta sobreposição total."""
@@ -43,6 +46,7 @@ def test_rn_event_001_detecta_sobreposicao_total(self):
 **Localização:** `cli/tests/integration/`
 
 **Características:**
+
 - Testam múltiplos componentes juntos
 - Usam banco de dados real (SQLite in-memory)
 - Moderados (< 1s por teste)
@@ -50,6 +54,7 @@ def test_rn_event_001_detecta_sobreposicao_total(self):
 - Verificam integrações (Service ↔ Model ↔ DB)
 
 **Exemplo:**
+
 ```python
 def test_rn_event_001_fluxo_completo_deteccao_conflitos(self):
     """RN-EVENT-001: Fluxo completo de detecção de conflitos."""
@@ -64,6 +69,7 @@ def test_rn_event_001_fluxo_completo_deteccao_conflitos(self):
 **Localização:** `cli/tests/e2e/`
 
 **Características:**
+
 - Testam CLI completa
 - Banco de dados persistente (temporário)
 - Lentos (1-5s por teste)
@@ -71,6 +77,7 @@ def test_rn_event_001_fluxo_completo_deteccao_conflitos(self):
 - Validam comandos CLI completos
 
 **Exemplo:**
+
 ```python
 def test_rn_event_002_usuario_visualiza_conflitos_via_cli(self):
     """RN-EVENT-002: Usuário executa comando e vê conflitos."""
@@ -81,31 +88,32 @@ def test_rn_event_002_usuario_visualiza_conflitos_via_cli(self):
 ## Metodologia: Documentation-Driven Development (DDD)
 
 ### Ciclo de Desenvolvimento
-```
+
+```terminal
 ┌─────────────────────────────────────────────────────────┐
-│                   1. DOCUMENTAÇÃO                        │
-│  docs/04-specifications/business-rules/                  │
-│  Define TODAS as regras de negócio (RN-XXX-YYY)        │
+│                   1. DOCUMENTAÇÃO                       │
+│  docs/04-specifications/business-rules/                 │
+│  Define TODAS as regras de negócio (RN-XXX-YYY)         │
 └──────────────────┬──────────────────────────────────────┘
                    │
                    ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   2. TESTES                              │
-│  tests/{unit,integration,e2e}/                           │
+│                   2. TESTES                             │
+│  tests/{unit,integration,e2e}/                          │
 │  Valida cada regra em diferentes níveis                 │
 └──────────────────┬──────────────────────────────────────┘
                    │
                    ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   3. IMPLEMENTAÇÃO                       │
-│  src/timeblock/*                                         │
+│                   3. IMPLEMENTAÇÃO                      │
+│  src/timeblock/*                                        │
 │  Implementa código para passar nos testes               │
 └──────────────────┬──────────────────────────────────────┘
                    │
                    ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   4. VALIDAÇÃO                           │
-│  pytest + ruff + mypy                                    │
+│                   4. VALIDAÇÃO                          │
+│  pytest + ruff + mypy                                   │
 │  Garante qualidade e aderência às regras                │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -115,19 +123,21 @@ def test_rn_event_002_usuario_visualiza_conflitos_via_cli(self):
 ### Nomenclatura Obrigatória
 
 Testes DEVEM seguir o padrão:
+
 ```python
 class TestRN<DOMINIO><NUMERO><NomeRegra>:
     """RN-<DOMINIO>-<NUMERO>: Descrição da Regra."""
-    
+
     def test_rn_<dominio>_<numero>_<cenario_especifico>(self):
         """RN-<DOMINIO>-<NUMERO>: Validação de cenário específico."""
 ```
 
 **Exemplo:**
+
 ```python
 class TestRNEvent001DeteccaoConflitosTemporais:
     """RN-EVENT-001: Detecção de Conflitos Temporais."""
-    
+
     def test_rn_event_001_detecta_sobreposicao_total(self):
         """RN-EVENT-001: Sistema detecta sobreposição total."""
 ```
@@ -142,13 +152,14 @@ Para cada Regra de Negócio:
 
 ### Mapeamento Regra → Teste
 
-| Documento | Testes Unit | Testes Integration | Testes E2E |
-|-----------|-------------|-------------------|------------|
+| Documento                   | Testes Unit                        | Testes Integration                     | Testes E2E                   |
+| --------------------------- | ---------------------------------- | -------------------------------------- | ---------------------------- |
 | `event-reordering-rules.md` | `test_event_reordering_service.py` | `test_event_reordering_integration.py` | `test_reschedule_command.py` |
 
 ## Validação de Qualidade
 
 Antes de QUALQUER commit, executar:
+
 ```bash
 # 1. Formatação
 ruff check --fix cli/
