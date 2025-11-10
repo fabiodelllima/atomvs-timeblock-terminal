@@ -7,9 +7,9 @@ Exporta todas as factories para facilitar imports.
 from .factories import (
     HabitFactory,
     HabitInstanceFactory,
-    TaskFactory,
     RoutineFactory,
     TagFactory,
+    TaskFactory,
     reset_all_sequences,
 )
 
