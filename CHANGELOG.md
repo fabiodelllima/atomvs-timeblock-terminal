@@ -7,6 +7,49 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ## [Não Lançado]
 
+### Adicionado em 2025-11-11
+
+#### **Reorganização e Consolidação da Documentação**
+
+**Estrutura de Documentação:**
+- 9 ADRs agora navegáveis no mkdocs (ADR-012 a ADR-020)
+  - ADR-012: Sync Strategy
+  - ADR-013: Offline-First Schema
+  - ADR-014: Sync UX Flow
+  - ADR-015: HabitInstance Naming
+  - ADR-016: Alembic Timing
+  - ADR-017: Environment Strategy
+  - ADR-018: Language Standards
+  - ADR-019: Test Naming Convention
+  - ADR-020: Business Rules Nomenclature
+
+**Consolidação de Arquitetura:**
+- Unificada estrutura em `01-architecture/` (removidos `02-architecture/` e `01-guides/`)
+- Adicionados documentos navegáveis:
+  - 00-architecture-overview.md (visão geral consolidada)
+  - 16-sync-architecture-v2.md (arquitetura de sincronização)
+  - 17-user-control-philosophy.md (filosofia de controle do usuário)
+  - 18-project-philosophy.md (filosofia de hábitos atômicos)
+
+**Consolidação de Testing:**
+- Unificada estrutura em `05-testing/` (removido `07-testing/`)
+- Adicionados documentos navegáveis:
+  - testing-philosophy.md (filosofia de testes)
+  - requirements-traceability-matrix.md (RTM completo)
+  - test-strategy.md (estratégia consolidada)
+- 5 scenarios de teste agora acessíveis (event-creation, conflict-detection, event-reordering, habit-generation, timer-lifecycle)
+
+**Impacto:**
+- 20 ADRs navegáveis (vs 11 anteriormente)
+- Estrutura de docs/ organizada e sem duplicações
+- Melhor navegabilidade do site de documentação
+
+**Commits:**
+- docs(mkdocs): Adiciona 9 ADRs faltantes na navegação (8b88b7b)
+- docs: Consolida arquitetura em 01-architecture/ (f3fcb5f)
+- docs: Consolida testing em 05-testing/ (f465497)
+
+
 ### Planejado
 
 - Refatoração HabitAtom (renomear HabitInstance para HabitAtom)
