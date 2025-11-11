@@ -107,6 +107,15 @@ nav:
       - "ADR-009: Flags Consolidation": 03-decisions/009-flags-consolidation.md
       - "ADR-010: Recurrence Model": 03-decisions/010-recurrence-model.md
       - "ADR-011: Conflict Philosophy": 03-decisions/011-conflict-philosophy.md
+      - "ADR-012: Sync Strategy": 03-decisions/012-sync-strategy.md
+      - "ADR-013: Offline-First Schema": 03-decisions/013-offline-first-schema.md
+      - "ADR-014: Sync UX Flow": 03-decisions/014-sync-ux-flow.md
+      - "ADR-015: HabitInstance Naming": 03-decisions/015-habitinstance-naming.md
+      - "ADR-016: Alembic Timing": 03-decisions/016-alembic-timing.md
+      - "ADR-017: Environment Strategy": 03-decisions/017-environment-strategy.md
+      - "ADR-018: Language Standards": 03-decisions/018-language-standards.md
+      - "ADR-019: Test Naming Convention": 03-decisions/ADR-019-test-naming-convention.md
+      - "ADR-020: Business Rules Nomenclature": 03-decisions/ADR-020-business-rules-nomenclature.md
 
   - Especificações:
       - Visão Geral: 04-specifications/README.md
