@@ -164,14 +164,19 @@ nav:
       - Testing: 06-development/testing.md
 
   - Testes:
-      - Estratégia: 07-testing/README.md
-      - Plano de Testes: 07-testing/test-plan.md
+      - Visão Geral: 05-testing/README.md
+      - Testing Philosophy: 05-testing/testing-philosophy.md
+      - Requirements Traceability Matrix: 05-testing/requirements-traceability-matrix.md
+      - Estratégia de Testes: 05-testing/test-strategy.md
       - Fixtures:
-          - Database: 07-testing/fixtures/database.md
-          - Time: 07-testing/fixtures/time.md
+          - Database: 05-testing/fixtures/database.md
+          - Time: 05-testing/fixtures/time.md
       - Scenarios:
-          - Event Creation: 07-testing/scenarios/event-creation.md
-          - Conflict Detection: 07-testing/scenarios/conflict-detection.md
+          - Event Creation: 05-testing/scenarios/event-creation.md
+          - Conflict Detection: 05-testing/scenarios/conflict-detection.md
+          - Event Reordering: 05-testing/scenarios/event-reordering.md
+          - Habit Generation: 05-testing/scenarios/habit-generation.md
+          - Timer Lifecycle: 05-testing/scenarios/timer-lifecycle.md
 
   - Guias do Usuário:
       - Portal: 08-user-guides/README.md
