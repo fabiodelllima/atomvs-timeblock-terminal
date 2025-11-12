@@ -12,6 +12,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 #### **Reorganização e Consolidação da Documentação**
 
 **Estrutura de Documentação:**
+
 - 9 ADRs agora navegáveis no mkdocs (ADR-012 a ADR-020)
   - ADR-012: Sync Strategy
   - ADR-013: Offline-First Schema
@@ -24,6 +25,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - ADR-020: Business Rules Nomenclature
 
 **Consolidação de Arquitetura:**
+
 - Unificada estrutura em `01-architecture/` (removidos `02-architecture/` e `01-guides/`)
 - Adicionados documentos navegáveis:
   - 00-architecture-overview.md (visão geral consolidada)
@@ -32,6 +34,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - 18-project-philosophy.md (filosofia de hábitos atômicos)
 
 **Consolidação de Testing:**
+
 - Unificada estrutura em `05-testing/` (removido `07-testing/`)
 - Adicionados documentos navegáveis:
   - testing-philosophy.md (filosofia de testes)
@@ -40,21 +43,157 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 - 5 scenarios de teste agora acessíveis (event-creation, conflict-detection, event-reordering, habit-generation, timer-lifecycle)
 
 **Impacto:**
+
 - 20 ADRs navegáveis (vs 11 anteriormente)
 - Estrutura de docs/ organizada e sem duplicações
 - Melhor navegabilidade do site de documentação
 
 **Commits:**
+
 - docs(mkdocs): Adiciona 9 ADRs faltantes na navegação (8b88b7b)
 - docs: Consolida arquitetura em 01-architecture/ (f3fcb5f)
 - docs: Consolida testing em 05-testing/ (f465497)
-
 
 ### Planejado
 
 - Refatoração HabitAtom (renomear HabitInstance para HabitAtom)
 - Documentação Viva com BDD
 - Funcionalidades avançadas de relatórios
+
+---
+
+## [1.3.0] - 2025-11-08
+
+### Adicionado em 2025-11-08
+
+#### **Consolidação de Testing e Qualidade**
+
+**Estrutura de Testing:**
+
+- Consolidada estrutura em `05-testing/` (removido `07-testing/` duplicado)
+- Adicionados documentos navegáveis:
+  - `testing-philosophy.md` - Filosofia de testes do projeto
+  - `requirements-traceability-matrix.md` - RTM completo com rastreabilidade BR → Test → Code
+  - `test-strategy.md` - Estratégia consolidada de testes
+- 5 scenarios de teste agora acessíveis:
+  - event-creation
+  - conflict-detection
+  - event-reordering
+  - habit-generation
+  - timer-lifecycle
+
+**Glossário Completo:**
+
+- Glossário expandido para 298 linhas em `01-architecture/12-glossary.md`
+- Todos termos principais definidos (TimeBlock, Habit, HabitInstance, Event, etc)
+- HabitAtom marcado como DEPRECATED (apenas marketing)
+- Relacionamentos entre conceitos documentados
+
+**Business Rules Formalizadas:**
+
+- `event-reordering.md` - Especificação formal completa (222 linhas)
+- Princípios fundamentais: Controle Explícito do Usuário, Informação sem Imposição
+- BR-EVENT-001 a BR-EVENT-007 documentadas
+- Mudança de propósito: Sistema apenas DETECTA conflitos, não propõe reordenamento automático
+
+**Impacto:**
+
+- Testing structure consolidada e sem duplicações
+- Glossário completo e preciso
+- Business Rules formalmente especificadas
+- Alinhamento filosofia: usuário sempre no controle
+
+**Commits:**
+
+- docs: Consolida testing em 05-testing/
+- docs(glossary): Expande glossário com todos termos
+- docs(specs): Formaliza Business Rules event-reordering
+
+---
+
+## [1.2.2] - 2025-11-10
+
+### Adicionado em 2025-11-10
+
+#### **Sistema de Logging Estruturado - Sprint 1.3**
+
+**Módulo de Logging:**
+
+- `cli/src/timeblock/utils/logger.py` (118 linhas)
+  - `setup_logger()` com rotating file handler
+  - `get_logger()` helper para obter logger configurado
+  - `disable_logging()` / `enable_logging()` para testes
+  - Formato estruturado: `[timestamp] [level] [module] message`
+  - Suporte a console e arquivo com rotação automática (10MB, 5 backups)
+
+**Testes de Logging:**
+
+- `cli/tests/unit/test_utils/test_logger.py` (277 linhas)
+- TestSetupLogger: 6+ testes de configuração
+- TestGetLogger: testes de obtenção de logger
+- TestDisableEnableLogging: testes de controle
+- 100% cobertura do módulo logger
+
+**Integração:**
+
+- Logs estruturados em services principais
+- Níveis configuráveis: DEBUG, INFO, WARNING, ERROR
+- Log rotation automática para evitar crescimento descontrolado
+
+**Métricas:**
+
+- 6+ novos testes (todos passando)
+- Módulo completo e documentado
+- Pronto para uso em produção
+
+**Commits:**
+
+- feat(logging): Implementa sistema de logging estruturado
+- test(logging): Adiciona 6 testes para logger.py
+- docs(logging): Documenta uso e configuração
+
+---
+
+## [1.2.1] - 2025-11-11
+
+### Adicionado em 2025-11-11
+
+#### **Reorganização e Consolidação da Documentação**
+
+**Estrutura de Documentação:**
+
+- 9 ADRs agora navegáveis no mkdocs (ADR-012 a ADR-020)
+  - ADR-012: Sync Strategy
+  - ADR-013: Offline-First Schema
+  - ADR-014: Sync UX Flow
+  - ADR-015: HabitInstance Naming
+  - ADR-016: Alembic Timing
+  - ADR-017: Environment Strategy
+  - ADR-018: Language Standards
+  - ADR-019: Test Naming Convention
+  - ADR-020: Business Rules Nomenclature
+
+**Consolidação de Arquitetura:**
+
+- Unificada estrutura em `01-architecture/` (removidos `02-architecture/` e `01-guides/`)
+- Adicionados documentos navegáveis:
+  - `00-architecture-overview.md` - Visão geral consolidada (20KB)
+  - `16-sync-architecture-v2.md` - Arquitetura de sincronização v2.0
+  - `17-user-control-philosophy.md` - Filosofia de controle do usuário (15KB)
+  - `18-project-philosophy.md` - Filosofia de hábitos atômicos (12KB)
+
+**Impacto:**
+
+- 20 ADRs navegáveis (vs 11 anteriormente) = +82%
+- Estrutura de docs/ organizada e sem duplicações
+- Melhor navegabilidade do site de documentação
+- Documentação de filosofia e princípios do projeto
+
+**Commits:**
+
+- docs(mkdocs): Adiciona 9 ADRs faltantes na navegação (8b88b7b)
+- docs: Consolida arquitetura em 01-architecture/ (f3fcb5f)
+- docs: Remove duplicações e organiza estrutura
 
 ---
 
