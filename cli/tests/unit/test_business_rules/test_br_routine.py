@@ -9,6 +9,7 @@ Valida BRs:
 
 from datetime import datetime, time
 
+import pytest
 from sqlmodel import Session, select
 
 from src.timeblock.models import Habit, Recurrence, Routine, Task
@@ -142,18 +143,14 @@ class TestBRRoutine002:
             scheduled_end=time(8, 30),
             recurrence=Recurrence.WEEKDAYS,
         )
+        session.commit()
         session.add(habit)
-        session.commit()
-        habit_id = habit.id
+        # Act & Assert - Hard delete COM habits deve falhar
+        from sqlalchemy.exc import IntegrityError
 
-        # Act
-        session.delete(routine)
-        session.commit()
-
-        # Assert
-        # Comportamento depende de cascade configurado no modelo
-        # TODO: Definir comportamento esperado (CASCADE ou RESTRICT)
-        _ = session.get(Habit, habit_id)
+        with pytest.raises(IntegrityError):
+            session.delete(routine)
+            session.commit()
 
 
 # BR-ROUTINE-003: Task Independent of Routine
