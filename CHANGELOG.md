@@ -202,14 +202,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 - docs: Consolida arquitetura em 01-architecture/ (f3fcb5f)
 - docs: Consolida testing em 05-testing/ (f465497)
 
-### Planejado
-
-- Sprint 2: HABIT (HabitService + recurrence logic)
-- Refatoração HabitAtom (renomear HabitInstance para HabitAtom)
-- Documentação Viva com BDD
-- Funcionalidades avançadas de relatórios
-
----
 
 ## [1.3.0] - 2025-11-08
 
