@@ -2,7 +2,7 @@
 
 from datetime import time
 from enum import Enum
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from .tag import Tag
 
 
-class Recurrence(str, Enum):
+class Recurrence(Enum):
     """Padrões de recorrência."""
 
     MONDAY = "MONDAY"
@@ -49,3 +49,28 @@ class Habit(SQLModel, table=True):
     routine: Routine | None = Relationship(back_populates="habits")
     instances: list[HabitInstance] = Relationship(back_populates="habit", cascade_delete=True)
     tag: Optional["Tag"] = Relationship(back_populates="habits")
+
+    def __init__(self, **data: Any):
+        """Valida recurrence antes de criar instância."""
+        if "recurrence" in data:
+            recurrence = data["recurrence"]
+
+            if isinstance(recurrence, Recurrence):
+                pass  # Já está correto
+
+            elif isinstance(recurrence, str):
+                valid_names = {r.name for r in Recurrence}
+                if recurrence not in valid_names:
+                    raise ValueError(
+                        f"Invalid recurrence pattern '{recurrence}'. "
+                        f"Must be one of: {sorted(valid_names)}"
+                    )
+                data["recurrence"] = Recurrence[recurrence]
+
+            else:
+                raise ValueError(
+                    f"Invalid recurrence type: {type(recurrence).__name__}. "
+                    f"Expected Recurrence enum or string."
+                )
+
+        super().__init__(**data)
