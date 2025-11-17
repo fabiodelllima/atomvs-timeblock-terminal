@@ -3,7 +3,9 @@
 import os
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any
 
+from sqlalchemy import event
 from sqlmodel import SQLModel, create_engine
 
 
@@ -18,9 +20,19 @@ def get_db_path() -> str:
 
 
 def get_engine():
-    """Get SQLite engine."""
+    """Get SQLite engine with foreign keys enabled."""
     db_path = get_db_path()
-    return create_engine(f"sqlite:///{db_path}", echo=False)
+    engine = create_engine(f"sqlite:///{db_path}", echo=False)
+
+    # Habilitar foreign keys no SQLite (CRÍTICO para RESTRICT)
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_conn: Any, connection_record: Any) -> None:  # noqa: ARG001
+        """Habilita foreign keys no SQLite."""
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+    return engine
 
 
 @contextmanager

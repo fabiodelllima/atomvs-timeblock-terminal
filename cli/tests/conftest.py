@@ -10,6 +10,7 @@ from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
 from src.timeblock.models import Event, EventStatus
+from src.timeblock.services.routine_service import RoutineService
 
 
 @pytest.fixture
@@ -54,3 +55,48 @@ def session(test_engine: Engine) -> Generator[Session]:
     with Session(test_engine) as session:
         yield session
         session.rollback()
+
+
+@pytest.fixture
+def routine_service(test_engine: Engine):
+    """Helper para criar RoutineService com session."""
+    def _create_routine(name: str, auto_activate: bool = False):
+        with Session(test_engine) as session:
+            service = RoutineService(session)
+            routine = service.create_routine(name, auto_activate)
+            session.commit()
+            session.refresh(routine)
+            return routine
+    return _create_routine
+
+
+@pytest.fixture
+def routine_delete_helper(test_engine: Engine):
+    """Helper para deletar routine (hard delete)."""
+    def _hard_delete(routine_id: int, force: bool = False):
+        with Session(test_engine) as session:
+            service = RoutineService(session)
+            service.hard_delete_routine(routine_id, force)
+            session.commit()
+    return _hard_delete
+
+
+@pytest.fixture
+def habit_service_helper(test_engine: Engine):
+    """Helper para criar habits no test_engine."""
+    def _create_habit(routine_id: int, title: str, scheduled_start, scheduled_end, recurrence, color=None):
+        from src.timeblock.models import Habit
+        with Session(test_engine) as session:
+            habit = Habit(
+                routine_id=routine_id,
+                title=title.strip(),
+                scheduled_start=scheduled_start,
+                scheduled_end=scheduled_end,
+                recurrence=recurrence,
+                color=color,
+            )
+            session.add(habit)
+            session.commit()
+            session.refresh(habit)
+            return habit
+    return _create_habit
