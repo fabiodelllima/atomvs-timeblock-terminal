@@ -2,7 +2,7 @@
 
 - **Domínio:** Routine
 - **Área:** Gerenciamento de Rotinas e Contexto
-- **Última atualização:** 14 de Novembro de 2025
+- **Última atualização:** 15 de Novembro de 2025
 
 ---
 
@@ -176,19 +176,102 @@ Rotina Trabalho
   └─ Code review
 ```
 
+### Delete Behaviors
+
+#### Soft Delete (padrão)
+
+```bash
+$ routine delete <id>
+```
+
+**Comportamento:**
+
+1. Define `is_active = False`
+2. Mantém dados no banco
+3. Habits continuam vinculados
+4. Pode reativar depois
+
+**Exemplo:**
+
+```bash
+$ routine delete 1
+[WARN] Desativar rotina "Rotina Matinal"?
+       - 8 hábitos permanecem vinculados
+       - Rotina pode ser reativada depois
+
+Confirmar? (s/N): s
+[OK] Rotina "Rotina Matinal" desativada
+```
+
+#### Hard Delete (--purge)
+
+```bash
+$ routine delete <id> --purge
+```
+
+**Comportamento quando rotina TEM habits (MVP):**
+
+```bash
+$ routine delete 1 --purge
+[ERROR] Não é possível deletar rotina com hábitos
+
+Rotina "Rotina Matinal" possui 8 hábitos:
+1. Academia
+2. Meditação
+...
+
+Ações disponíveis:
+1. Mover hábitos para outra rotina (Sprint 2)
+2. Deletar hábitos também com --cascade (Sprint 2)
+
+Para deletar a rotina vazia, remova os hábitos primeiro.
+```
+
+**Comportamento quando rotina SEM habits:**
+
+```bash
+$ routine delete 1 --purge
+[WARN] Deletar PERMANENTEMENTE rotina "Rotina Matinal"?
+       Esta ação NÃO pode ser desfeita.
+
+Confirmar? (s/N): s
+[OK] Rotina deletada permanentemente
+```
+
+**Fase 2: Cascade Delete (com flag adicional)**
+
+```bash
+$ routine delete 1 --purge --cascade
+[WARN] ATENÇÃO: Deletar PERMANENTEMENTE?
+       - Rotina "Rotina Matinal"
+       - 8 hábitos vinculados
+       - TODAS as instâncias desses hábitos
+       - TODOS os registros de tempo
+
+Esta ação NÃO pode ser desfeita.
+
+Digite o nome da rotina para confirmar: Rotina Matinal
+[OK] Rotina e 8 hábitos deletados permanentemente
+```
+
 ### Critérios de Aceitação
 
 - [ ] `routine_id` obrigatório (NOT NULL)
 - [ ] Foreign key válida (rotina deve existir)
 - [ ] Habit não pode existir sem rotina
-- [ ] Deletar rotina com habits: cascade ou block
-- [ ] Criar habit sem `routine_id`: erro
+- [ ] `routine delete <id>` faz soft delete (is_active=False)
+- [ ] `routine delete <id> --purge` sem habits funciona
+- [ ] `routine delete <id> --purge` COM habits bloqueia (MVP)
+- [ ] Diálogo de confirmação sempre presente
 
 ### Testes Relacionados
 
 - `test_br_routine_002_habit_requires_routine`
 - `test_br_routine_002_foreign_key_valid`
 - `test_br_routine_002_delete_cascade`
+- `test_br_routine_002_soft_delete_default`
+- `test_br_routine_002_hard_delete_no_habits`
+- `test_br_routine_002_hard_delete_with_habits_blocks`
 
 ### Exemplos
 
@@ -214,13 +297,13 @@ session.commit()
 #### Exemplo 2: Erro sem Routine
 
 ```python
-# ✗ Erro: routine_id obrigatório
+# Erro: routine_id obrigatório
 habit = Habit(
     routine_id=None,  # ValueError!
     title="Academia"
 )
 
-# ✗ Erro: rotina não existe
+# Erro: rotina não existe
 habit = Habit(
     routine_id=999,  # IntegrityError! (FK constraint)
     title="Academia"
@@ -235,7 +318,7 @@ $ routine activate "Rotina Matinal"
 [OK] Rotina "Rotina Matinal" ativada
 
 $ habit create --title "Leitura" --start 21:00 --end 22:00
-✓ Hábito criado na rotina ativa: Rotina Matinal
+[OK] Hábito criado na rotina ativa: Rotina Matinal
 
 # Hábito vinculado à rotina ativa (id=1)
 ```
@@ -264,7 +347,7 @@ class Task(SQLModel, table=True):
     status: TaskStatus
 
     # SEM relacionamento com Routine!
-    # routine_id = None  ✗ Campo não existe
+    # routine_id = None  # Campo não existe
 ```
 
 ### Justificativa
@@ -337,7 +420,7 @@ $ task list
 Tasks Pendentes:
 1. Dentista (25/11 14:30)
 2. Reunião cliente (30/11 10:00)
-# ✓ Mesmas tasks
+# Mesmas tasks
 ```
 
 ---
@@ -363,6 +446,44 @@ def get_active_routine(session: Session) -> Routine:
         raise ValueError("Nenhuma rotina ativa. Ative uma rotina primeiro.")
 
     return routine
+```
+
+### First Routine Flow
+
+**Cenário: Nenhuma Rotina Existe**
+
+Quando usuário tenta criar habit sem rotina existente:
+
+```bash
+$ habit create --title "Academia"
+[ERROR] Nenhuma rotina existe
+
+Para criar hábitos, primeiro crie uma rotina.
+
+Deseja criar uma rotina agora? (S/n): s
+
+Nome da rotina: Rotina Matinal
+[OK] Rotina "Rotina Matinal" criada e ativada
+
+Agora você pode criar o hábito "Academia". Continuar? (S/n): s
+
+[OK] Hábito "Academia" criado na rotina "Rotina Matinal"
+```
+
+**Alternativa: Rotina Padrão**
+
+```bash
+$ routine init
+[INFO] Criar rotina padrão?
+
+Opções:
+1. Rotina Diária (recomendado para iniciantes)
+2. Criar rotina personalizada
+
+Escolha (1/2): 1
+[OK] Rotina "Minha Rotina Diária" criada e ativada
+
+Próximo passo: habit create --title "Seu Primeiro Hábito"
 ```
 
 ### Comandos Afetados
@@ -410,6 +531,10 @@ habit create --routine 2 --title "Teste"
 - [ ] Erro claro se nenhuma rotina ativa
 - [ ] Flag `--all-routines` permite ver todos habits
 - [ ] `task` commands não dependem de rotina ativa
+- [ ] Criar habit sem rotina orienta criação de rotina
+- [ ] `routine init` oferece criar rotina padrão
+- [ ] Wizard interativo para primeira rotina
+- [ ] Primeira rotina criada fica ativa automaticamente
 
 ### Testes Relacionados
 
@@ -417,6 +542,9 @@ habit create --routine 2 --title "Teste"
 - `test_br_routine_004_habit_create_active_context`
 - `test_br_routine_004_error_no_active_routine`
 - `test_br_routine_004_all_routines_flag`
+- `test_br_routine_004_no_routine_prompts_creation`
+- `test_br_routine_004_routine_init_default`
+- `test_br_routine_004_first_routine_auto_active`
 
 ### Exemplos
 
@@ -500,6 +628,6 @@ Todos os Hábitos:
 
 ---
 
-**Última revisão:** 14 de Novembro de 2025
+**Última revisão:** 15 de Novembro de 2025
 
 **Status:** Documentação completa, ready para implementação

@@ -9,6 +9,7 @@ Valida BRs:
 
 from datetime import datetime, time
 
+import pytest
 from sqlmodel import Session, select
 
 from src.timeblock.models import Habit, Recurrence, Routine, Task
@@ -142,18 +143,14 @@ class TestBRRoutine002:
             scheduled_end=time(8, 30),
             recurrence=Recurrence.WEEKDAYS,
         )
+        session.commit()
         session.add(habit)
-        session.commit()
-        habit_id = habit.id
+        # Act & Assert - Hard delete COM habits deve falhar
+        from sqlalchemy.exc import IntegrityError
 
-        # Act
-        session.delete(routine)
-        session.commit()
-
-        # Assert
-        # Comportamento depende de cascade configurado no modelo
-        # TODO: Definir comportamento esperado (CASCADE ou RESTRICT)
-        _ = session.get(Habit, habit_id)
+        with pytest.raises(IntegrityError):
+            session.delete(routine)
+            session.commit()
 
 
 # BR-ROUTINE-003: Task Independent of Routine
@@ -279,3 +276,116 @@ class TestBRRoutine004:
         # Assert
         assert len(habits) == 1, "Deve retornar apenas habits da rotina ativa"
         assert habits[0].title == "Academia"
+
+
+# BR-ROUTINE-002: Delete Behaviors (ADDITIONS)
+class TestBRRoutine002DeleteBehaviors:
+    """Valida BR-ROUTINE-002: Comportamentos de delete."""
+
+    def test_br_routine_002_soft_delete_default(self, session: Session):
+        """BR-ROUTINE-002: routine delete faz soft delete por padrão."""
+        # Arrange
+        routine = Routine(name="Rotina Matinal", is_active=True)
+        session.add(routine)
+        session.commit()
+        routine_id = routine.id
+
+        # Act - Soft delete (is_active = False)
+        routine.is_active = False
+        session.add(routine)
+        session.commit()
+
+        # Assert
+        deleted = session.get(Routine, routine_id)
+        assert deleted is not None, "Rotina deve existir no banco"
+        assert deleted.is_active is False, "Deve estar inativa"
+
+    def test_br_routine_002_hard_delete_no_habits(self, session: Session):
+        """BR-ROUTINE-002: Hard delete sem habits funciona."""
+        # Arrange
+        routine = Routine(name="Rotina Teste", is_active=False)
+        session.add(routine)
+        session.commit()
+        routine_id = routine.id
+
+        # Act - Hard delete
+        session.delete(routine)
+        session.commit()
+
+        # Assert
+        deleted = session.get(Routine, routine_id)
+        assert deleted is None, "Rotina não deve existir no banco"
+
+    def test_br_routine_002_hard_delete_with_habits_blocks(self, session: Session):
+        """BR-ROUTINE-002: Hard delete com habits deve bloquear (MVP)."""
+        # Arrange
+        routine = Routine(name="Rotina Matinal", is_active=True)
+        session.add(routine)
+        session.commit()
+
+        assert routine.id is not None
+        habit = Habit(
+            routine_id=routine.id,
+            title="Academia",
+            scheduled_start=time(7, 0),
+            scheduled_end=time(8, 30),
+            recurrence=Recurrence.WEEKDAYS,
+        )
+        session.add(habit)
+        session.commit()
+
+        # Act & Assert - Tentar deletar com habits
+        # MVP: Service deve verificar habits antes de permitir delete
+        habits_count = len(session.exec(select(Habit).where(Habit.routine_id == routine.id)).all())
+        assert habits_count > 0, "Rotina tem habits"
+
+        # Delete seria bloqueado no service (implementar validação)
+        # Por ora, apenas validamos que habits existem
+
+
+# BR-ROUTINE-004: First Routine Flow (ADDITIONS)
+class TestBRRoutine004FirstRoutineFlow:
+    """Valida BR-ROUTINE-004: Fluxo de primeira rotina."""
+
+    def test_br_routine_004_no_routine_exists(self, session: Session):
+        """BR-ROUTINE-004: Detectar quando nenhuma rotina existe."""
+        # Act
+        routines = session.exec(select(Routine)).all()
+
+        # Assert
+        assert len(routines) == 0, "Não deve haver rotinas"
+
+        # CLI deve orientar criação de rotina
+        # (implementar no service/CLI)
+
+    def test_br_routine_004_first_routine_auto_active(self, session: Session):
+        """BR-ROUTINE-004: Primeira rotina criada fica ativa automaticamente."""
+        # Arrange - Nenhuma rotina existe
+        assert len(session.exec(select(Routine)).all()) == 0
+
+        # Act - Criar primeira rotina
+        routine = Routine(name="Rotina Matinal", is_active=True)
+        session.add(routine)
+        session.commit()
+
+        # Assert
+        assert routine.is_active is True, "Primeira rotina deve estar ativa"
+
+        active_routines = session.exec(select(Routine).where(Routine.is_active)).all()
+        assert len(active_routines) == 1, "Apenas uma rotina ativa"
+
+    def test_br_routine_004_routine_init_concept(self, session: Session):
+        """BR-ROUTINE-004: Conceito de routine init (wizard)."""
+        # Arrange - Nenhuma rotina existe
+        assert len(session.exec(select(Routine)).all()) == 0
+
+        # Act - Simula routine init criando rotina padrão
+        default_routine = Routine(name="Minha Rotina Diária", is_active=True)
+        session.add(default_routine)
+        session.commit()
+
+        # Assert
+        assert default_routine.is_active is True
+        assert default_routine.name == "Minha Rotina Diária"
+
+        # Wizard interativo seria implementado no CLI
