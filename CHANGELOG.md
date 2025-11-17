@@ -7,6 +7,76 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ## [Não Lançado]
 
+### Adicionado em 2025-11-16
+
+#### **Sprint 1: ROUTINE - Implementação Completa**
+
+**Models:**
+- `routine.py` - Modelo Routine com is_active=False por padrão (BR-ROUTINE-001)
+- `habit.py` - FK routine_id com ondelete=RESTRICT (BR-ROUTINE-002)
+
+**Services:**
+- `routine_service.py` - 5 operações principais:
+  - `create()` - Cria routine inativa
+  - `activate()` - Ativa routine e desativa outras
+  - `get_active()` - Retorna routine ativa
+  - `delete()` - Soft delete (padrão)
+  - `hard_delete()` - Hard delete condicional (sem habits)
+
+**Business Rules Implementadas (4/4):**
+- BR-ROUTINE-001: Single Active Constraint
+  - Apenas uma routine ativa por vez
+  - Ativação desativa outras automaticamente
+  - Nova routine criada inativa por padrão
+- BR-ROUTINE-002: Habit Belongs to Routine
+  - Habit vinculado obrigatoriamente a routine
+  - FK com ondelete=RESTRICT protege dados
+  - Delete behaviors: soft (padrão) e hard (condicional)
+- BR-ROUTINE-003: Task Independent of Routine
+  - Task não tem campo routine_id
+  - Delete routine mantém tasks intactas
+- BR-ROUTINE-004: Activation Cascade
+  - Primeira routine ativada automaticamente
+  - get_active retorna routine ativa
+  - Habits filtrados por routine ativa
+
+**Testes:**
+- 18 novos testes unitários validando 4 BRs (18/18 GREEN)
+- Classes organizadas por BR (TestBRRoutine001, TestBRRoutine002, etc)
+- Padrão test_br_* para rastreabilidade direta
+- 100% cobertura nos modelos routine e habit
+
+**Documentação:**
+- `docs/04-specifications/business-rules/routine.md` - 4 BRs formalizadas
+- `docs/06-bdd/scenarios/routine.feature` - 6 scenarios Gherkin
+- `docs/sprints/sprint-1-routine-summary.md` - Resumo executivo
+
+**Infrastructure:**
+- `conftest.py` - PRAGMA foreign_keys habilitado no SQLite
+- `conftest.py` - collections.abc.Generator (Python 3.9+)
+- Event listener para configuração automática de FK
+
+**Decisões Arquiteturais:**
+- SQLModel mantido (validação runtime + 50-70% menos código)
+- ondelete=RESTRICT protege integridade de dados
+- Soft delete como padrão (preserva histórico)
+
+**Métricas:**
+- Testes: 18/18 GREEN ✓
+- Coverage: 100% (models routine/habit)
+- Ruff: All checks passed
+- Arquivos modificados: 10 (+486 linhas / -93 linhas)
+
+**Commits:**
+- e97a1fd Merge branch 'feature/mvp-sprint1-routine' into develop
+- 10d00d1 feat(routine): Implementa Sprint 1 ROUTINE - 4 BRs validadas (18/18 GREEN)
+- 4e824a0 test(br): Adiciona 6 testes para delete behaviors e first routine
+- 47a778c docs(bdd): Adiciona 6 scenarios para delete behaviors e first routine
+- 3387ae8 docs(br): Atualiza routine.md com delete behaviors
+- 5f4e0fc docs(sprint): Adiciona resumo executivo do Sprint 1 ROUTINE
+
+---
+
 ### Adicionado em 2025-11-11
 
 #### **Reorganização e Consolidação da Documentação**
@@ -56,6 +126,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ### Planejado
 
+- Sprint 2: HABIT (HabitService + recurrence logic)
 - Refatoração HabitAtom (renomear HabitInstance para HabitAtom)
 - Documentação Viva com BDD
 - Funcionalidades avançadas de relatórios
