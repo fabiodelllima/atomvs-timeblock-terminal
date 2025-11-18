@@ -7,201 +7,54 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ## [Não Lançado]
 
-### Adicionado em 2025-11-17
+### Corrigido
 
-#### **Sprint 2: HABIT - Validação BR-HABIT-004**
+- **(2025-11-17)** Testes de integração com Dependency Injection
+  - 6 testes de timer integration corrigidos (FK constraints resolvidos)
+  - 4 testes de fixtures validation corrigidos
+  - Services agora aceitam session opcional: `session: Session | None = None`
+  - Testes isolados com transações compartilhadas
+  - Código produção mantém compatibilidade (backward compatible)
 
-**Models:**
+### Adicionado
 
-- `habit.py` - Validação de recurrence via **init** override
-  - Aceita enum Recurrence ou string válida
-  - Rejeita strings/tipos inválidos com mensagem clara
-  - Lista todos valores válidos no erro (95% cobertura)
+- **(2025-11-17)** Fixtures de integração para testes
 
-**Database:**
+  - `test_db` - Session com FK habilitado
+  - `sample_routine` - Routine pré-criada
+  - `sample_habits` - 3 Habits com recorrências diferentes
+  - `sample_task` - Task padrão
+  - PRAGMA foreign_keys=ON no integration_engine
 
-- `engine.py` - Foreign keys habilitadas no SQLite (PRAGMA foreign_keys=ON)
-  - Crítico para BR-HABIT-003 (routine delete blocked)
-
-**Services:**
-
-- `routine_service.py` - Refatoração de imports (importa de src.timeblock.models)
-
-**Tests:**
-
-- `conftest.py` - Fixtures para testes de Habit:
-  - `routine_service` - Helper para criar routines
-  - `routine_delete_helper` - Helper para deletar routines
-
-**Business Rules Implementadas (5/5):**
-
-- BR-HABIT-001: Title Validation
-
-  - Title não vazio após trim
-  - Title máximo 200 caracteres
-  - Trim automático aplicado
-
-- BR-HABIT-002: Time Range Validation
-
-  - scheduled_start < scheduled_end
-  - Horários iguais rejeitados
-  - Sem eventos duração zero
-
-- BR-HABIT-003: Routine Association
-
-  - routine_id obrigatório
-  - FK constraint valida existência
-  - Delete routine com habits bloqueado (RESTRICT)
-
-- BR-HABIT-004: Recurrence Pattern
-
-  - Recurrence deve ser enum válido
+- **(2025-11-17)** Validação BR-HABIT-004: Recurrence Pattern
+  - Model `habit.py` valida recurrence via **init** override
   - 10 padrões suportados (MONDAY-SUNDAY, WEEKDAYS, WEEKENDS, EVERYDAY)
-  - Validação via **init** override (Pydantic validators não funcionam com SQLModel table=True)
+  - Mensagens de erro claras listando valores válidos
+- **(2025-11-17)** Business Rules HABIT implementadas
+  - BR-HABIT-001: Title Validation (não vazio, max 200 chars, trim)
+  - BR-HABIT-002: Time Range Validation (start < end)
+  - BR-HABIT-003: Routine Association (FK constraint, delete RESTRICT)
+  - BR-HABIT-004: Recurrence Pattern (enum validado)
+  - BR-HABIT-005: Color Validation (hex format opcional)
 
-- BR-HABIT-005: Optional Color
-  - Color opcional (pode ser None)
-  - Se presente, máximo 7 caracteres (hex #RRGGBB)
+### Modificado
 
-**Documentação:**
+- **(2025-11-17)** Services refatorados com Dependency Injection
 
-- `docs/04-specifications/business-rules/habit.md` - 5 BRs documentadas
-- `docs/10-meta/sessao-br-habit-004-validacao-2025-11-17.md` - Resumo da sessão
+  - `task_service.py` - Todos métodos aceitam session opcional
+  - `timer_service.py` - start_timer, stop_timer, etc. com session
+  - `event_reordering_service.py` - detect_conflicts com session
+  - `habit_service.py` - CRUD completo com session opcional
+  - `habit_instance_service.py` - Geração e marcação com session
+  - Padrão: if session → usar injetada, else → criar própria
 
-**Testes:**
+- **(2025-11-17)** Database engine com FK habilitado
 
-- 13 novos testes unitários validando 5 BRs (13/13 GREEN)
-- Classes organizadas por BR (TestBRHabit001 a TestBRHabit005)
-- Padrão test*br*\* para rastreabilidade direta
+  - `engine.py` - PRAGMA foreign_keys=ON no SQLite
 
----
-
-### Adicionado em 2025-11-16
-
-#### **Sprint 1: ROUTINE - Implementação Completa**
-
-**Models:**
-
-- `routine.py` - Modelo Routine com is_active=False por padrão (BR-ROUTINE-001)
-- `habit.py` - FK routine_id com ondelete=RESTRICT (BR-ROUTINE-002)
-
-**Services:**
-
-- `routine_service.py` - 5 operações principais:
-  - `create()` - Cria routine inativa
-  - `activate()` - Ativa routine e desativa outras
-  - `get_active()` - Retorna routine ativa
-  - `delete()` - Soft delete (padrão)
-  - `hard_delete()` - Hard delete condicional (sem habits)
-
-**Business Rules Implementadas (4/4):**
-
-- BR-ROUTINE-001: Single Active Constraint
-  - Apenas uma routine ativa por vez
-  - Ativação desativa outras automaticamente
-  - Nova routine criada inativa por padrão
-- BR-ROUTINE-002: Habit Belongs to Routine
-  - Habit vinculado obrigatoriamente a routine
-  - FK com ondelete=RESTRICT protege dados
-  - Delete behaviors: soft (padrão) e hard (condicional)
-- BR-ROUTINE-003: Task Independent of Routine
-  - Task não tem campo routine_id
-  - Delete routine mantém tasks intactas
-- BR-ROUTINE-004: Activation Cascade
-  - Primeira routine ativada automaticamente
-  - get_active retorna routine ativa
-  - Habits filtrados por routine ativa
-
-**Testes:**
-
-- 18 novos testes unitários validando 4 BRs (18/18 GREEN)
-- Classes organizadas por BR (TestBRRoutine001, TestBRRoutine002, etc)
-- Padrão test*br*\* para rastreabilidade direta
-- 100% cobertura nos modelos routine e habit
-
-**Documentação:**
-
-- `docs/04-specifications/business-rules/routine.md` - 4 BRs formalizadas
-- `docs/06-bdd/scenarios/routine.feature` - 6 scenarios Gherkin
-- `docs/sprints/sprint-1-routine-summary.md` - Resumo executivo
-
-**Infrastructure:**
-
-- `conftest.py` - PRAGMA foreign_keys habilitado no SQLite
-- `conftest.py` - collections.abc.Generator (Python 3.9+)
-- Event listener para configuração automática de FK
-
-**Decisões Arquiteturais:**
-
-- SQLModel mantido (validação runtime + 50-70% menos código)
-- ondelete=RESTRICT protege integridade de dados
-- Soft delete como padrão (preserva histórico)
-
-**Métricas:**
-
-- Testes: 18/18 GREEN ✓
-- Coverage: 100% (models routine/habit)
-- Ruff: All checks passed
-- Arquivos modificados: 10 (+486 linhas / -93 linhas)
-
-**Commits:**
-
-- e97a1fd Merge branch 'feature/mvp-sprint1-routine' into develop
-- 10d00d1 feat(routine): Implementa Sprint 1 ROUTINE - 4 BRs validadas (18/18 GREEN)
-- 4e824a0 test(br): Adiciona 6 testes para delete behaviors e first routine
-- 47a778c docs(bdd): Adiciona 6 scenarios para delete behaviors e first routine
-- 3387ae8 docs(br): Atualiza routine.md com delete behaviors
-- 5f4e0fc docs(sprint): Adiciona resumo executivo do Sprint 1 ROUTINE
-
----
-
-### Adicionado em 2025-11-11
-
-#### **Reorganização e Consolidação da Documentação**
-
-**Estrutura de Documentação:**
-
-- 9 ADRs agora navegáveis no mkdocs (ADR-012 a ADR-020)
-  - ADR-012: Sync Strategy
-  - ADR-013: Offline-First Schema
-  - ADR-014: Sync UX Flow
-  - ADR-015: HabitInstance Naming
-  - ADR-016: Alembic Timing
-  - ADR-017: Environment Strategy
-  - ADR-018: Language Standards
-  - ADR-019: Test Naming Convention
-  - ADR-020: Business Rules Nomenclature
-
-**Consolidação de Arquitetura:**
-
-- Unificada estrutura em `01-architecture/` (removidos `02-architecture/` e `01-guides/`)
-- Adicionados documentos navegáveis:
-  - 00-architecture-overview.md (visão geral consolidada)
-  - 16-sync-architecture-v2.md (arquitetura de sincronização)
-  - 17-user-control-philosophy.md (filosofia de controle do usuário)
-  - 18-project-philosophy.md (filosofia de hábitos atômicos)
-
-**Consolidação de Testing:**
-
-- Unificada estrutura em `05-testing/` (removido `07-testing/`)
-- Adicionados documentos navegáveis:
-  - testing-philosophy.md (filosofia de testes)
-  - requirements-traceability-matrix.md (RTM completo)
-  - test-strategy.md (estratégia consolidada)
-- 5 scenarios de teste agora acessíveis (event-creation, conflict-detection, event-reordering, habit-generation, timer-lifecycle)
-
-**Impacto:**
-
-- 20 ADRs navegáveis (vs 11 anteriormente)
-- Estrutura de docs/ organizada e sem duplicações
-- Melhor navegabilidade do site de documentação
-
-**Commits:**
-
-- docs(mkdocs): Adiciona 9 ADRs faltantes na navegação (8b88b7b)
-- docs: Consolida arquitetura em 01-architecture/ (f3fcb5f)
-- docs: Consolida testing em 05-testing/ (f465497)
-
+- **(2025-11-17)** Imports refatorados
+  - `routine_service.py` - Importa de src.timeblock.models
+  - `conftest.py` - sqlalchemy.orm.Session → sqlmodel.Session
 
 ## [1.3.0] - 2025-11-08
 
