@@ -1,10 +1,11 @@
 """Fixtures para testes de integração."""
 
 from datetime import UTC, datetime, time
+from typing import Any
 
 import pytest
-from sqlalchemy import Engine
-from sqlalchemy.orm import Session
+from sqlalchemy import Engine, event
+from sqlmodel import Session
 from sqlmodel import SQLModel, create_engine
 
 from src.timeblock.models import Habit, Recurrence, Routine, Task
@@ -16,6 +17,17 @@ def integration_engine():
     engine = create_engine(
         "sqlite:///:memory:", connect_args={"check_same_thread": False}, echo=False
     )
+
+    # CRÍTICO: Habilitar foreign keys no SQLite
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(
+        dbapi_conn: Any,
+        connection_record: Any,  # noqa: ARG001
+    ) -> None:
+        """Habilita foreign keys no SQLite."""
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
     # Criar todas as tabelas
     SQLModel.metadata.create_all(engine)
     yield engine
