@@ -7,16 +7,61 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ## [Não Lançado]
 
-### Corrigido
+### BREAKING CHANGES
 
-- **(2025-11-17)** Testes de integração com Dependency Injection
-  - 6 testes de timer integration corrigidos (FK constraints resolvidos)
-  - 4 testes de fixtures validation corrigidos
-  - Services agora aceitam session opcional: `session: Session | None = None`
-  - Testes isolados com transações compartilhadas
-  - Código produção mantém compatibilidade (backward compatible)
+- **(2025-11-19)** Refatoração Status+Substatus em HabitInstance (BR-HABIT-INSTANCE-STATUS-001)
+  - Campo `status` mudou de `HabitInstanceStatus` (5 valores) para `Status` (3 valores)
+  - Valores antigos: PLANNED, IN_PROGRESS, PAUSED, COMPLETED, SKIPPED
+  - Valores novos: PENDING, DONE, NOT_DONE
+  - Mapeamento automático na migração:
+    - PLANNED/IN_PROGRESS/PAUSED → PENDING
+    - COMPLETED → DONE + done_substatus=FULL
+    - SKIPPED → NOT_DONE + not_done_substatus=SKIPPED_UNJUSTIFIED
+  - **Ação necessária:** Rodar migration_001_status_substatus.py
+  - **Rollback disponível:** função downgrade() (perda de dados novos)
+  - **Compatibilidade:** HabitInstanceStatus mantido como alias temporário (DEPRECATED)
 
 ### Adicionado
+
+- **(2025-11-19)** Enums para rastreamento detalhado (BR-HABIT-INSTANCE-STATUS-001)
+
+  - `Status`: PENDING, DONE, NOT_DONE
+  - `DoneSubstatus`: FULL (90-110%), PARTIAL (<90%), OVERDONE (110-150%), EXCESSIVE (>150%)
+  - `NotDoneSubstatus`: SKIPPED_JUSTIFIED, SKIPPED_UNJUSTIFIED, IGNORED
+  - `SkipReason`: HEALTH, WORK, FAMILY, TRAVEL, WEATHER, LACK_RESOURCES, EMERGENCY, OTHER
+
+- **(2025-11-19)** Novos campos em HabitInstance
+
+  - `done_substatus`: DoneSubstatus (calculado baseado em completion %)
+  - `not_done_substatus`: NotDoneSubstatus (categorização de skip/ignore)
+  - `skip_reason`: SkipReason (categoria do skip justificado)
+  - `skip_note`: str (nota adicional do usuário)
+  - `completion_percentage`: int (% de completion persistido)
+
+- **(2025-11-19)** Validações de consistência Status+Substatus
+
+  - DONE requer done_substatus obrigatório
+  - NOT_DONE requer not_done_substatus obrigatório
+  - PENDING não pode ter substatus
+  - Substatus são mutuamente exclusivos
+  - SKIPPED_JUSTIFIED requer skip_reason obrigatório
+  - skip_reason só permitido com SKIPPED_JUSTIFIED
+  - Método `validate_status_consistency()` implementado
+
+- **(2025-11-19)** Migração SQL (migration_001_status_substatus.py)
+
+  - Adiciona 5 colunas: done_substatus, not_done_substatus, skip_reason, skip_note, completion_percentage
+  - Migra dados automaticamente preservando informação
+  - Função upgrade() e downgrade() para rollback
+  - Metadata: version=001, name=status_substatus_refactoring
+
+- **(2025-11-19)** Documentação completa (BR-HABIT-INSTANCE-STATUS-001)
+
+  - BR-HABIT-INSTANCE-STATUS-001: Especificação detalhada
+  - 18 cenários BDD (Gherkin DADO/QUANDO/ENTÃO)
+  - ADR-021: Decisão arquitetural documentada
+  - 14 testes unitários (100% passando)
+  - Cobertura: 84% (habit_instance.py)
 
 - **(2025-11-17)** Fixtures de integração para testes
 
@@ -27,9 +72,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - PRAGMA foreign_keys=ON no integration_engine
 
 - **(2025-11-17)** Validação BR-HABIT-004: Recurrence Pattern
+
   - Model `habit.py` valida recurrence via **init** override
   - 10 padrões suportados (MONDAY-SUNDAY, WEEKDAYS, WEEKENDS, EVERYDAY)
   - Mensagens de erro claras listando valores válidos
+
 - **(2025-11-17)** Business Rules HABIT implementadas
   - BR-HABIT-001: Title Validation (não vazio, max 200 chars, trim)
   - BR-HABIT-002: Time Range Validation (start < end)
@@ -38,6 +85,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - BR-HABIT-005: Color Validation (hex format opcional)
 
 ### Modificado
+
+- **(2025-11-19)** HabitInstance model refatorado
+
+  - Status simplificado: 3 valores ao invés de 5
+  - Sistema Status+Substatus para granularidade
+  - Property `is_overdue` preservada (compatível)
+  - Exports atualizados em `models/__init__.py`
 
 - **(2025-11-17)** Services refatorados com Dependency Injection
 
@@ -55,6 +109,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 - **(2025-11-17)** Imports refatorados
   - `routine_service.py` - Importa de src.timeblock.models
   - `conftest.py` - sqlalchemy.orm.Session → sqlmodel.Session
+
+### Corrigido
+
+- **(2025-11-17)** Testes de integração com Dependency Injection
+  - 6 testes de timer integration corrigidos (FK constraints resolvidos)
+  - 4 testes de fixtures validation corrigidos
+  - Services agora aceitam session opcional: `session: Session | None = None`
+  - Testes isolados com transações compartilhadas
+  - Código produção mantém compatibilidade (backward compatible)
+
+---
 
 ## [1.3.0] - 2025-11-08
 
