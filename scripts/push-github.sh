@@ -14,7 +14,7 @@ set -euo pipefail
 #   2. Cria branch temporária para transformações
 #   3. Remove docs/ do git (mantém no filesystem)
 #   4. Executa strip-comments.py (remove comentários)
-#   5. Commita transformações
+#   5. Commita transformações (--no-verify)
 #   6. Push force para github/branch
 #   7. Cleanup: volta branch original, deleta temporária
 #
@@ -77,7 +77,7 @@ trap cleanup EXIT
 
 log_info "Removendo docs/ do git..."
 git rm -r --cached docs/ 2>/dev/null || true
-git commit -m "chore: Remove docs/ para GitHub showcase" --allow-empty
+git commit --no-verify -m "chore: Remove docs/ para GitHub showcase" --allow-empty
 
 log_info "Executando strip-comments.py..."
 cd "$PROJECT_ROOT"
@@ -86,7 +86,7 @@ python scripts/strip-comments.py
 if [ -n "$(git status --porcelain)" ]; then
     log_info "Commitando código transformado..."
     git add cli/src/
-    git commit -m "chore: Remove comentários inline para GitHub showcase"
+    git commit --no-verify -m "chore: Remove comentários inline para GitHub showcase"
 else
     log_warn "Nenhuma mudança após strip-comments.py"
 fi
