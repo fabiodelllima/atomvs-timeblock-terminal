@@ -1,0 +1,91 @@
+# GitLab CI/CD Pipeline - TimeBlock Organizer
+# Código completo com docs/ e notas internas
+
+image: python:3.13
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - cli/venv/
+
+stages:
+  - test
+  - build
+  - deploy
+
+before_script:
+  - cd cli
+  - python -m venv venv
+  - source venv/bin/activate
+  - pip install --upgrade pip
+  - pip install -r requirements.txt --break-system-packages
+
+test:unit:
+  stage: test
+  script:
+    - python -m pytest tests/unit/ -v --cov=src/timeblock --cov-report=xml --cov-report=term
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: cli/coverage.xml
+    expire_in: 1 week
+  only:
+    - branches
+    - merge_requests
+
+test:integration:
+  stage: test
+  script:
+    - python -m pytest tests/integration/ -v
+  only:
+    - branches
+    - merge_requests
+
+test:lint:
+  stage: test
+  script:
+    - ruff check src/timeblock
+  only:
+    - branches
+    - merge_requests
+
+test:typecheck:
+  stage: test
+  script:
+    - mypy src/timeblock --check-untyped-defs
+  allow_failure: true
+  only:
+    - branches
+    - merge_requests
+
+build:docs:
+  stage: build
+  script:
+    - cd ..
+    - pip install mkdocs mkdocs-material --break-system-packages
+    - mkdocs build --strict
+  artifacts:
+    paths:
+      - site/
+    expire_in: 1 week
+  only:
+    - develop
+    - main
+
+pages:
+  stage: deploy
+  script:
+    - cd ..
+    - pip install mkdocs mkdocs-material --break-system-packages
+    - mkdocs build --strict
+    - mv site public
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
