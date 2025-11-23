@@ -1,5 +1,4 @@
 """Shared fixtures for query tests."""
-
 from __future__ import annotations
 
 from collections.abc import Generator
@@ -30,8 +29,8 @@ def test_engine() -> Engine:
 
     @event.listens_for(engine, "connect")
     def set_sqlite_pragma(
-        dbapi_conn: Any,  # noqa: ARG001
-        connection_record: Any,  # noqa: ARG001
+        dbapi_conn: Any,
+        connection_record: Any,
     ) -> None:
         """Habilita foreign keys no SQLite."""
         cursor = dbapi_conn.cursor()
@@ -51,6 +50,12 @@ def session(test_engine: Engine) -> Generator[Session]:
 
 
 @pytest.fixture
+def test_db(session: Session) -> Session:
+    """Alias para session (compatibilidade com testes antigos)."""
+    return session
+
+
+@pytest.fixture
 def routine_service(session: Session) -> RoutineService:
     """Fixture que retorna instância de RoutineService."""
     return RoutineService(session)
@@ -61,7 +66,6 @@ def habit_service_helper(
     test_engine: Engine,
 ) -> Callable[..., Habit]:
     """Helper para criar habits no test_engine."""
-
     def _create_habit(
         routine_id: int,
         title: str,
@@ -89,7 +93,6 @@ def routine_delete_helper(
     session: Session,
 ) -> Callable[[int], None]:
     """Helper para deletar routines no test_engine."""
-
     def _delete_routine(routine_id: int) -> None:
         service = RoutineService(session)
         service.delete_routine(routine_id)

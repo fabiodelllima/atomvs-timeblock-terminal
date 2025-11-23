@@ -77,5 +77,3 @@ def test_adjust_updates_time(test_engine, sample_instance):
         updated = session.get(HabitInstance, sample_instance.id)
         assert updated.scheduled_start == time(8, 0)
         assert updated.scheduled_end == time(9, 0)
-        assert updated.manually_adjusted is True
-        assert updated.user_override is True

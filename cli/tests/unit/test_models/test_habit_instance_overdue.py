@@ -43,8 +43,6 @@ class TestHabitInstanceOverdue:
             scheduled_start=time(8, 0),
             scheduled_end=time(9, 0),
             status=Status.PENDING,
-            manually_adjusted=False,
-            user_override=False
         )
 
         # Act - Congelar tempo às 9h
@@ -69,8 +67,6 @@ class TestHabitInstanceOverdue:
             scheduled_start=time(14, 0),
             scheduled_end=time(15, 0),
             status=Status.PENDING,
-            manually_adjusted=False,
-            user_override=False
         )
 
         # Act
@@ -95,8 +91,6 @@ class TestHabitInstanceOverdue:
             scheduled_start=time(8, 0),
             scheduled_end=time(9, 0),
             status=Status.DONE,
-            manually_adjusted=False,
-            user_override=False
         )
 
         # Act
@@ -121,8 +115,6 @@ class TestHabitInstanceOverdue:
             scheduled_start=time(8, 0),
             scheduled_end=time(9, 0),
             status=Status.NOT_DONE,
-            manually_adjusted=False,
-            user_override=False
         )
 
         # Act
@@ -147,8 +139,6 @@ class TestHabitInstanceOverdue:
             scheduled_start=time(14, 0),
             scheduled_end=time(15, 0),
             status=Status.PENDING,
-            manually_adjusted=False,
-            user_override=False
         )
 
         # Act

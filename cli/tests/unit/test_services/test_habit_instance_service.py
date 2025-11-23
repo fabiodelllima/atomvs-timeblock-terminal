@@ -7,8 +7,8 @@ from sqlmodel import Session, SQLModel, create_engine
 from src.timeblock.models import (
     Habit,
     HabitInstance,
-    Status,
     Routine,
+    Status,
 )
 from src.timeblock.services.habit_instance_service import HabitInstanceService
 from src.timeblock.services.task_service import TaskService
@@ -59,7 +59,7 @@ def sample_instance(test_engine):
             date=date.today(),
             scheduled_start=time(7, 0),
             scheduled_end=time(8, 0),
-            status=Status.PLANNED
+            status=Status.PENDING
         )
         session.add(instance)
         session.commit()
@@ -128,14 +128,14 @@ class TestConflictDetection:
                 date=date.today(),
                 scheduled_start=time(9, 0),
                 scheduled_end=time(10, 0),
-                status=Status.PLANNED
+                status=Status.PENDING
             )
             inst2 = HabitInstance(
                 habit_id=habit.id,
                 date=date.today() + timedelta(days=1),
                 scheduled_start=time(15, 0),
                 scheduled_end=time(16, 0),
-                status=Status.PLANNED
+                status=Status.PENDING
             )
             session.add_all([inst1, inst2])
             session.commit()

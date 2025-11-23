@@ -128,13 +128,13 @@ class TestBREventListing:
                     title="Morning Meeting",
                     scheduled_start=now + timedelta(days=1),
                     scheduled_end=now + timedelta(days=1, hours=1),
-                    status=EventStatus.PLANNED,
+                    status=EventStatus.PENDING,
                 ),
                 Event(
                     title="Lunch Break",
                     scheduled_start=now + timedelta(days=1, hours=5),
                     scheduled_end=now + timedelta(days=1, hours=6),
-                    status=EventStatus.PLANNED,
+                    status=EventStatus.PENDING,
                 ),
             ]
             with Session(engine) as session:
