@@ -84,7 +84,6 @@ class TestBRTimer001:
         assert timelog.start_time is not None
         assert timelog.end_time is None
 
-    @pytest.mark.skip(reason="RED phase - requires global timer validation")
     def test_br_timer_001_only_one_active(
         self, session: Session, habit: Habit
     ):

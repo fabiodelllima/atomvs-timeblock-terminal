@@ -36,13 +36,11 @@ class TimerService:
             if not instance:
                 raise ValueError(f"HabitInstance {habit_instance_id} not found")
 
-            # Verificar se já existe timer ativo
-            statement = select(TimeLog).where(
-                TimeLog.habit_instance_id == habit_instance_id, TimeLog.end_time is None
-            )
+            # BR-TIMER-001: Verificar se já existe qualquer timer ativo (global)
+            statement = select(TimeLog).where(TimeLog.end_time.is_(None))
             existing_timer = sess.exec(statement).first()
             if existing_timer:
-                raise ValueError("Timer already active for this instance")
+                raise ValueError("Timer already active")
 
             timelog = TimeLog(
                 habit_instance_id=habit_instance_id,
