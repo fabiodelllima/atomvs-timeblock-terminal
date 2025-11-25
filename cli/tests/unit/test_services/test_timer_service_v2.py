@@ -240,7 +240,6 @@ class TestBRTimer006Stop:
 class TestBRTimer001Cancel:
     """BR-TIMER-001: Cancel timer functionality."""
 
-    @pytest.mark.skip(reason="RED phase - cancel_timer not implemented")
     def test_cancel_timer_deletes_timelog(
         self, session: Session, test_habit_instance: HabitInstance
     ):
@@ -254,20 +253,17 @@ class TestBRTimer001Cancel:
         result = session.get(TimeLog, timelog_id)
         assert result is None
 
-    @pytest.mark.skip(reason="RED phase - cancel_timer not implemented")
     def test_cancel_timer_keeps_instance_pending(
         self, session: Session, test_habit_instance: HabitInstance
     ):
         """Canceling keeps the HabitInstance in PENDING status."""
-        TimerService.start_timer(test_habit_instance.id, session)
 
-        timelog = TimerService.get_active_timer(test_habit_instance.id, session)
+        timelog = TimerService.start_timer(test_habit_instance.id, session)
         TimerService.cancel_timer(timelog.id, session)
 
         session.refresh(test_habit_instance)
         assert test_habit_instance.status == Status.PENDING
 
-    @pytest.mark.skip(reason="RED phase - cancel_timer not implemented")
     def test_cancel_non_existent_timer(self, session: Session):
         """Canceling non-existent timer raises error."""
         with pytest.raises(ValueError, match="not found"):
@@ -280,7 +276,6 @@ class TestBRTimer001Cancel:
 class TestGetAnyActiveTimer:
     """Helper to get any active timer without knowing habit_instance_id."""
 
-    @pytest.mark.skip(reason="RED phase - get_any_active_timer not implemented")
     def test_get_any_active_timer_found(
         self, session: Session, test_habit_instance: HabitInstance
     ):
@@ -292,14 +287,12 @@ class TestGetAnyActiveTimer:
         assert result is not None
         assert result.habit_instance_id == test_habit_instance.id
 
-    @pytest.mark.skip(reason="RED phase - get_any_active_timer not implemented")
     def test_get_any_active_timer_not_found(self, session: Session):
         """Returns None if no active timer."""
         result = TimerService.get_any_active_timer(session)
 
         assert result is None
 
-    @pytest.mark.skip(reason="RED phase - get_any_active_timer not implemented")
     def test_get_any_active_timer_after_stop(
         self, session: Session, test_habit_instance: HabitInstance
     ):

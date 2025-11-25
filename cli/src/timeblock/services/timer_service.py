@@ -259,3 +259,57 @@ class TimerService:
 
         with get_engine_context() as engine, Session(engine) as sess:
             return _get(sess)
+
+    @staticmethod
+    def cancel_timer(timelog_id: int, session: Session | None = None) -> None:
+        """Cancela timer ativo, deletando o TimeLog.
+
+        BR-TIMER-001: Cancel descarta registro sem marcar DONE.
+
+        Args:
+            timelog_id: ID do TimeLog
+            session: Optional session (for tests/transactions)
+
+        Raises:
+            ValueError: Se timer não existe
+        """
+
+        def _cancel(sess: Session) -> None:
+            timelog = sess.get(TimeLog, timelog_id)
+            if not timelog:
+                raise ValueError(f"TimeLog {timelog_id} not found")
+
+            # Limpar estado de pausa se estava pausado
+            TimerService._active_pause_start = None
+
+            sess.delete(timelog)
+            sess.commit()
+
+        if session is not None:
+            return _cancel(session)
+
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _cancel(sess)
+
+    @staticmethod
+    def get_any_active_timer(session: Session | None = None) -> TimeLog | None:
+        """Busca qualquer timer ativo (sem precisar saber habit_instance_id).
+
+        Útil para CLI quando usuário quer ver/parar timer atual.
+
+        Args:
+            session: Optional session
+
+        Returns:
+            TimeLog ativo ou None se não houver
+        """
+
+        def _get(sess: Session) -> TimeLog | None:
+            statement = select(TimeLog).where(TimeLog.end_time.is_(None))
+            return sess.exec(statement).first()
+
+        if session is not None:
+            return _get(session)
+
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _get(sess)
