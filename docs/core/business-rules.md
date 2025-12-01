@@ -21,6 +21,8 @@
 9. [Timer](#9-timer)
 10. [Event Reordering](#10-event-reordering)
 11. [Validações Globais](#11-validações-globais)
+12. [CLI](#12-cli)
+13. [Tag](#13-tag)
 
 ---
 
@@ -1255,9 +1257,9 @@ task list --all        # Todas
 
 ### BR-TASK-005: Atualização de Task
 
-**Descrição:** Task pendente pode ser atualizada.
+**Descrição:** Task pode ser atualizada conforme seu estado.
 
-**Campos Atualizáveis:**
+**Campos Atualizáveis (Task Pendente):**
 
 - title
 - description
@@ -1265,12 +1267,38 @@ task list --all        # Todas
 - color
 - tag_id
 
-**Restrição:** Task concluída não pode ser editada.
+**Campos Atualizáveis (Task Concluída):**
+
+- Apenas reversão de status (voltar para pendente)
+
+**Reversão de Status:**
+
+```bash
+# Via flag explícita
+task edit ID --status pending
+
+# Via comando de atalho
+task uncheck ID
+task reopen ID
+```
+
+**Comportamento da Reversão:**
+
+- Remove `completed_datetime` (= None)
+- Task volta para lista de pendentes
+- Permite edição completa novamente
+
+**Erro ao Editar Concluída:**
+
+```
+[ERROR] Tarefa já concluída. Use --status pending para reabrir antes de editar.
+```
 
 **Testes:**
 
 - `test_br_task_005_update_pending`
-- `test_br_task_005_update_completed_error`
+- `test_br_task_005_update_completed_only_status`
+- `test_br_task_005_reopen_allows_edit`
 
 ---
 
@@ -1657,6 +1685,144 @@ Iniciar timer mesmo assim? [Y/n]: y
 
 ---
 
+## 12. CLI
+
+### BR-CLI-001: Validação de Flags Dependentes
+
+**Descrição:** Flags que dependem de outras devem ser validadas antes da execução do comando.
+
+**Pares Obrigatórios:**
+
+| Flag Principal | Requer  | Comando Afetado |
+| -------------- | ------- | --------------- |
+| --start        | --end   | habit create    |
+| --end          | --start | habit create    |
+| --from         | --to    | report \*       |
+| --to           | --from  | report \*       |
+
+**Comportamento:**
+
+- Se apenas uma flag do par for fornecida: ERROR
+- Mensagem clara indicando a dependência
+
+**Exemplo de Erro:**
+
+```bash
+$ habit create --title "Academia" --start 07:00
+[ERROR] --start requer --end (e vice-versa)
+```
+
+**Testes:**
+
+- `test_br_cli_001_start_requires_end`
+- `test_br_cli_001_end_requires_start`
+- `test_br_cli_001_from_requires_to`
+- `test_br_cli_001_to_requires_from`
+
+---
+
+### BR-CLI-002: Formatos de Datetime Aceitos
+
+**Descrição:** Sistema aceita múltiplos formatos de data e hora para flexibilidade do usuário.
+
+**Formatos de Datetime (--datetime):**
+
+| Formato          | Exemplo          |
+| ---------------- | ---------------- |
+| YYYY-MM-DD HH:MM | 2025-12-25 14:30 |
+| YYYY-MM-DD HHhMM | 2025-12-25 14h30 |
+| YYYY-MM-DD HHh   | 2025-12-25 14h   |
+| DD-MM-YYYY HH:MM | 25-12-2025 14:30 |
+| DD-MM-YYYY HHhMM | 25-12-2025 14h30 |
+| DD-MM-YYYY HHh   | 25-12-2025 14h   |
+| DD/MM/YYYY HH:MM | 25/12/2025 14:30 |
+| DD/MM/YYYY HHhMM | 25/12/2025 14h30 |
+| DD/MM/YYYY HHh   | 25/12/2025 14h   |
+
+**Formatos de Date (--date, --from, --to):**
+
+| Formato    | Exemplo    |
+| ---------- | ---------- |
+| YYYY-MM-DD | 2025-12-25 |
+| DD-MM-YYYY | 25-12-2025 |
+| DD/MM/YYYY | 25/12/2025 |
+
+**Comportamento:**
+
+- Parser tenta cada formato em ordem
+- Primeiro match válido é usado
+- Formato inválido: ERROR com mensagem "Veja formatos aceitos com --help"
+
+**Testes:**
+
+- `test_br_cli_002_datetime_iso_format`
+- `test_br_cli_002_datetime_brazilian_format`
+- `test_br_cli_002_date_multiple_formats`
+
+---
+
+## 13. Tag
+
+### BR-TAG-001: Estrutura de Tag
+
+**Descrição:** Tag é entidade para categorização de habits e tasks.
+
+**Campos:**
+
+```python
+class Tag(SQLModel, table=True):
+    id: int | None
+    name: str | None           # Opcional (pode ser apenas cor)
+    color: str                 # Obrigatório, default "#fbd75b" (amarelo)
+```
+
+**Regras:**
+
+1. `color` é obrigatório (NOT NULL)
+2. `color` tem default amarelo (#fbd75b)
+3. `name` é opcional (pode criar tag apenas com cor)
+4. `name` se presente: 1-200 chars, único (case-insensitive)
+
+**Validação de Cor:**
+
+- Formato hexadecimal: #RRGGBB ou #RGB
+- Nomes CSS aceitos: red, blue, green, etc.
+
+**Testes:**
+
+- `test_br_tag_001_color_required`
+- `test_br_tag_001_color_default_yellow`
+- `test_br_tag_001_name_optional`
+- `test_br_tag_001_name_unique`
+
+---
+
+### BR-TAG-002: Associação com Eventos
+
+**Descrição:** Tags podem ser associadas a Habits e Tasks.
+
+**Relacionamento:**
+
+```
+Tag (1) ----< Habits (N)
+Tag (1) ----< Tasks (N)
+```
+
+**Regras:**
+
+1. Habit pode ter 0 ou 1 tag (tag_id nullable)
+2. Task pode ter 0 ou 1 tag (tag_id nullable)
+3. Deletar tag NÃO deleta habits/tasks associados
+4. Deletar tag seta tag_id = NULL nos associados
+
+**Testes:**
+
+- `test_br_tag_002_habit_optional_tag`
+- `test_br_tag_002_task_optional_tag`
+- `test_br_tag_002_delete_tag_nullifies`
+
+---
+
 ## Referências
 
 - **ADRs:** `docs/decisions/`
@@ -1667,6 +1833,6 @@ Iniciar timer mesmo assim? [Y/n]: y
 
 ---
 
-- **Documento consolidado em:** 28 de Novembro de 2025
-- **Total de regras:** 45 BRs
-- **Este é o SSOT para regras de negócio**
+**Documento consolidado em:** 28 de Novembro de 2025
+
+**Total de regras:** 50 BRs

@@ -1005,5 +1005,4 @@ Footer opcional
 
 ---
 
-- **Documento consolidado em:** 28 de Novembro de 2025
-- **Este é o SSOT para arquitetura do sistema**
+**Documento consolidado em:** 28 de Novembro de 2025
