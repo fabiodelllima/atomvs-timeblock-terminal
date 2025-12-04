@@ -1879,6 +1879,132 @@ Funcionalidade: Cálculo de Streak
 
 ---
 
+## Estratégia Dual-Repository
+
+### Visão Geral
+
+O TimeBlock Organizer mantém dois repositórios Git sincronizados com propósitos distintos:
+
+#### **GitLab (origin) - Repositório de Desenvolvimento**
+
+- URL: `git@gitlab.com:delimafabio/timeblock-organizer.git`
+- Propósito: Workspace completo de desenvolvimento
+- Contém: Documentação completa, ADRs, comentários inline, notas de sessão
+- Audiência: Desenvolvimento interno, aprendizado, portfolio detalhado
+
+#### **GitHub (github) - Showcase Público**
+
+- URL: `git@github.com:fabiodelllima/timeblock-organizer.git`
+- Propósito: Codebase limpo de produção
+- Contém: Código de produção, README público, licença
+- Audiência: Recrutadores, portfolio público, demonstração de código
+
+### Workflow Diário
+
+**Desenvolvimento Normal (GitLab):**
+
+```bash
+# Trabalhar em feature
+git add .
+git commit -m "feat(domain): Adiciona nova funcionalidade"
+git push origin develop
+```
+
+**Atualização Showcase (GitHub):**
+
+```bash
+# Push limpo para repositório público
+./scripts/push-github.sh
+```
+
+### Script de Automação
+
+**Localização:** `scripts/push-github.sh`
+
+**Processo:**
+
+1. Cria branch temporária `temp-github-push`
+2. Remove diretório `docs/` do índice git
+3. Executa `strip-comments.py` para remover comentários inline
+4. Faz commit das transformações com `--no-verify`
+5. Force push para `github/develop`
+6. Limpa branch temporária automaticamente
+
+**Filtragem de Conteúdo:**
+
+Removido do GitHub:
+
+- Diretório `docs/` (arc42, ADRs, especificações, diagramas)
+- Comentários inline em português explicando business rules
+- Notas internas e anotações de desenvolvimento
+- Resumos de sessões e meta-documentação
+
+Preservado no GitHub:
+
+- Código de produção com interfaces públicas
+- README com instruções de setup
+- Licença e guidelines de contribuição
+- Suite de testes demonstrando qualidade
+
+### Implementação Técnica
+
+**Configuração de Remotes:**
+
+```bash
+git remote -v
+# origin  git@gitlab.com:delimafabio/timeblock-organizer.git (fetch)
+# origin  git@gitlab.com:delimafabio/timeblock-organizer.git (push)
+# github  git@github.com:fabiodelllima/timeblock-organizer.git (fetch)
+# github  git@github.com:fabiodelllima/timeblock-organizer.git (push)
+```
+
+**Autenticação:**
+
+- Ambos repositórios usam chaves SSH
+- GitLab: Autenticação primária de desenvolvimento
+- GitHub: Autenticação de showcase público
+- Não requer personal access tokens
+
+**Sincronização de Branches:**
+
+- GitLab é source of truth
+- GitHub espelha estrutura do GitLab (develop, main, feature branches)
+- Force push resolve qualquer divergência
+- Estrutura de histórico permanece idêntica
+
+### Manutenção
+
+**Atualizando GitHub:**
+
+- Frequência: Após features significativas ou milestones
+- Gatilho: Execução manual de `./scripts/push-github.sh`
+- Timing: Antes de compartilhar portfolio com recrutadores
+
+**Resolução de Conflitos:**
+
+- GitLab sempre tem precedência
+- Force push sobrescreve divergências do GitHub
+- Conflitos de merge impossíveis (sincronização unidirecional)
+
+**Estratégia CI/CD:**
+
+- GitLab: CI/CD completo com testes, linting, cobertura
+- GitHub: CI/CD mínimo ou GitHub Actions para showcase
+- Ambos validam qualidade de código independentemente
+
+### Justificativa
+
+**Por Que Dois Repositórios?**
+
+1. **Apresentação Profissional:** Recrutadores veem código limpo e production-ready sem notas internas
+2. **Documentação de Aprendizado:** GitLab preserva jornada completa de aprendizado e processo de decisão
+3. **Separação de Concerns:** Complexidade de desenvolvimento separada da interface pública
+4. **Otimização de Portfolio:** Diferentes audiências requerem diferentes níveis de detalhe
+
+**Decisões de Arquitetura:** Ver ADR-018 (Language Standards) e ADR-017 (Environment Strategy) para decisões relacionadas sobre organização de código e estratégias de deployment.
+
+---
+
 **Documento consolidado em:** 01 de Dezembro de 2025
 
 **Alinhamento verificado com:**
