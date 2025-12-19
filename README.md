@@ -1,445 +1,432 @@
 # TimeBlock Organizer
 
-> Sistema desenvolvido para gerenciamento de tempo via CLI com reordenamento automático de eventos
+> Gerenciador de tempo CLI baseado em time blocking e hábitos atômicos
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/fabiodelllima/timeblock-organizer/releases/tag/v1.2.0)
-[![Python](https://img.shields.io/badge/python-3.13+-green.svg)](https://www.python.org/downloads/)
-[![Tests](https://img.shields.io/badge/tests-57%20passing-success.svg)](tests/)
-[![Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen.svg)](tests/)
-[![CI](https://img.shields.io/badge/CI-setup%20pending-yellow.svg)](.github/workflows/ci.yml)
+```
+╔══════════════════════════════════════════════════════════════════╗
+║  TimeBlock Organizer v2.0.0                                      ║
+║  ──────────────────────────────────────────────────────────────  ║
+║  [x] 492 testes  [x] 99% cobertura  [x] 22 ADRs  [x] 50+ BRs     ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+[![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/tests-492%20passing-success.svg)](cli/tests/)
+[![Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)](cli/tests/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Docs](https://img.shields.io/badge/docs-complete-success.svg)](docs/)
 
 ## Visão Geral
 
-TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando time blocking e detectação automática de conflitos e sugere reordenamento de eventos baseado em prioridades.
+TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando time blocking e inspirada em "Atomic Habits" de James Clear. O sistema aprende com padrões do usuário ao invés de impor agendamentos rígidos.
 
-**Diferencial:** Sistema adaptativo que reorganiza sua agenda automaticamente quando surgem conflitos, respeitando prioridades e minimizando interrupções.
+**Filosofia:** Usuário no controle. Conflitos são informados, nunca bloqueados.
 
-**Roadmap v2.0:** Sincronização offline-first entre Linux e Android (Termux) - [Ver Roadmap](docs/archived/10-meta/ROADMAP.md)
-
-## Status do Projeto
-
-- **Versão Atual:** v1.2.0 (Produção)
-- **Próxima Release:** v2.0.0-alpha (Mar 2026)
-- **Features em Desenvolvimento:**
-  - Queue-Based Sync (ADR-012)
-  - Offline-First Schema (ADR-013)
-  - Connect Command (ADR-014)
-  - 26 E2E Tests
-- **Documentação:** [Architecture](docs/core/architecture.md) | [Philosophy](docs/core/architecture.md#filosofia) | [ADRs](docs/decisions/)
-
-## Funcionalidades Principais
-
-### Sistema de Reordenamento Automático (v1.2.0)
-
-Detecção inteligente de conflitos com reorganização automática:
-
-- **Detecção Automática:** Identifica sobreposições ao criar ou modificar eventos
-- **Cálculo de Prioridades:** CRITICAL, HIGH, NORMAL, LOW baseado em status e prazos
-- **Reordenamento Inteligente:** Move eventos de baixa prioridade, mantém críticos fixos
-- **Confirmação Interativa:** Preview completo antes de aplicar mudanças
-
-```bash
-# Exemplo: Mover tarefa para horário conflitante
-$ timeblock task update 5 --scheduled-datetime "2025-11-01 10:00"
-
-[AVISO] 2 conflitos detectados
-
-Conflitos:
-+----------------+-----------------+------------+
-| Evento         | Horário         | Prioridade |
-+----------------+-----------------+------------+
-| Deep Work      | 10:00 - 12:00   | LOW        |
-| Code Review    | 11:00 - 11:30   | NORMAL     |
-+----------------+-----------------+------------+
-
-Aplicar reordenamento? [Y/n]: y
-[OK] Reordenamento aplicado!
-```
-
-### Comandos Disponíveis
-
-**Gerenciamento Básico:**
-
-- `init` - Inicializa banco de dados SQLite
-- `add` - Cria eventos com validações automáticas
-- `list` - Lista eventos com filtros por data
-
-**Hábitos e Rotinas:**
-
-- `routine create/list/activate` - Gerencia rotinas recorrentes
-- `habit create/list/update` - Cria e gerencia hábitos
-- `schedule generate` - Gera instâncias de hábitos
-
-**Tarefas e Timer:**
-
-- `task create/list/complete` - Gerencia tarefas únicas
-- `timer start/stop/status` - Rastreia tempo real
-
-**Event Reordering:**
-
-- `reschedule <id>` - Detecta e aplica reordenamento
-- `reschedule preview <id>` - Apenas visualiza proposta
-
-**Relatórios:**
-
-- `report daily/weekly/habit` - Análises e estatísticas
-
-### Recursos Técnicos
-
-- Suporte a múltiplos formatos de hora (HH:MM, HHh, HHhMM)
-- Detecção de eventos que cruzam meia-noite
-- Validação robusta de conflitos e durações
-- Persistência em SQLite local-first
-- Interface Rich para tabelas formatadas
-- 219 testes automatizados (50% cobertura)
+---
 
 ## Arquitetura
 
-### Contexto do Sistema
-
-```mermaid
-graph TB
-    User([Usuário<br/>Gerencia tempo e hábitos])
-    TimeBlock[TimeBlock Organizer<br/>CLI para hábitos e agenda]
-    Calendar[Calendário Externo<br/>Google Calendar, Outlook]
-    Notification[Sistema de Notificações<br/>OS Native]
-
-    User -->|Usa CLI/TUI| TimeBlock
-    TimeBlock -.->|Sync futuro| Calendar
-    TimeBlock -->|Envia lembretes| Notification
-
-    style TimeBlock fill:#1168bd,stroke:#0b4884,color:#fff
-    style Calendar fill:#999,stroke:#666,color:#fff
-    style Notification fill:#999,stroke:#666,color:#fff
-    style User fill:#08427b,stroke:#052e56,color:#fff
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        TIMEBLOCK ORGANIZER                          │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐              │
+│  │   ROUTINE   │───>│    HABIT    │───>│ HABIT ATOM  │              │
+│  │  (coleção)  │    │  (template) │    │ (instância) │              │
+│  └─────────────┘    └─────────────┘    └─────────────┘              │
+│         │                  │                  │                     │
+│         │                  │                  v                     │
+│         │                  │           ┌─────────────┐              │
+│         │                  │           │    TIMER    │              │
+│         │                  │           │  (tracking) │              │
+│         │                  │           └─────────────┘              │
+│         │                  │                                        │
+│         v                  v                                        │
+│  ┌─────────────────────────────────────────────────────┐            │
+│  │                      TASK                           │            │
+│  │               (evento pontual)                      │            │
+│  └─────────────────────────────────────────────────────┘            │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Modelo de Dados
+### Fluxo de Dados
 
-```mermaid
-erDiagram
-    Habit ||--o{ HabitInstance : generates
-    Routine ||--o{ Habit : contains
-
-    Habit {
-        int id PK
-        string name
-        time scheduled_start
-        int duration_minutes
-        string recurrence_rule
-    }
-
-    HabitInstance {
-        int id PK
-        int habit_id FK
-        date date
-        time scheduled_start
-        string status
-        bool user_override
-    }
-
-    Task {
-        int id PK
-        string title
-        datetime scheduled_datetime
-        datetime deadline
-        string status
-    }
-
-    TimeLog {
-        int id PK
-        datetime start_time
-        datetime end_time
-        int task_id FK
-    }
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐     ┌────────────┐
+│   CLI    │────>│ COMMANDS │────>│ SERVICES │────>│   MODELS   │
+│  (Typer) │     │          │     │          │     │ (SQLModel) │
+└──────────┘     └──────────┘     └──────────┘     └────────────┘
+                                        │                │
+                                        v                v
+                                  ┌──────────┐     ┌──────────┐
+                                  │  UTILS   │     │  SQLite  │
+                                  │          │     │    DB    │
+                                  └──────────┘     └──────────┘
 ```
 
-### Fluxo de Event Reordering
+### Camadas
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant CLI
-    participant Service as EventReorderingService
-    participant Detector as ConflictDetector
-    participant Generator as ProposalGenerator
-
-    User->>CLI: reschedule preview <id>
-    CLI->>Service: detect_conflicts(event_id)
-    Service->>Detector: get_overlapping_events()
-    Detector-->>Service: conflicting_events
-
-    Service->>Service: calculate_priorities()
-    Service->>Generator: propose_reordering()
-    Generator-->>Service: ReorderingProposal
-
-    Service-->>CLI: proposal
-    CLI->>User: Display preview table
-
-    User->>CLI: confirm "y"
-    CLI->>Service: apply_reordering(proposal)
-    Service-->>CLI: success
-    CLI->>User: [OK] Aplicado!
+```
+╔═══════════════════════════════════════════════════════════════════╗
+║ PRESENTATION                                                      ║
+║ ┌───────────────────────────────────────────────────────────────┐ ║
+║ │ commands/  │ routine, habit, task, timer, tag, report         │ ║
+║ └───────────────────────────────────────────────────────────────┘ ║
+╠═══════════════════════════════════════════════════════════════════╣
+║ BUSINESS LOGIC                                                    ║
+║ ┌───────────────────────────────────────────────────────────────┐ ║
+║ │ services/  │ routine, habit, habit_instance, task, timer...   │ ║
+║ └───────────────────────────────────────────────────────────────┘ ║
+╠═══════════════════════════════════════════════════════════════════╣
+║ DATA ACCESS                                                       ║
+║ ┌───────────────────────────────────────────────────────────────┐ ║
+║ │ models/    │ Routine, Habit, HabitInstance, Task, TimeLog     │ ║
+║ │ database/  │ engine, migrations                               │ ║
+║ └───────────────────────────────────────────────────────────────┘ ║
+╚═══════════════════════════════════════════════════════════════════╝
 ```
 
-### Estados de Hábito
+---
 
-```mermaid
-stateDiagram-v2
-    [*] --> PLANNED
-    PLANNED --> IN_PROGRESS: start timer
-    PLANNED --> SKIPPED: skip
-    PLANNED --> OVERDUE: past deadline
+## Estados do Sistema
 
-    IN_PROGRESS --> COMPLETED: complete
-    IN_PROGRESS --> PAUSED: pause
-    IN_PROGRESS --> SKIPPED: skip
+### HabitInstance Status
 
-    PAUSED --> IN_PROGRESS: resume
-    PAUSED --> SKIPPED: skip
+```
+                    ┌─────────────┐
+                    │   PENDING   │
+                    │  (aguarda)  │
+                    └──────┬──────┘
+                           │
+           ┌───────────────┼───────────────┐
+           │               │               │
+           v               v               v
+    ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+    │    DONE     │ │  NOT_DONE   │ │   OVERDUE   │
+    │ (completo)  │ │  (pulado)   │ │  (atrasado) │
+    └─────────────┘ └─────────────┘ └─────────────┘
+           │               │
+           v               v
+    ┌─────────────┐ ┌─────────────────────┐
+    │  Substatus  │ │  Substatus          │
+    ├─────────────┤ ├─────────────────────┤
+    │ FULL        │ │ SKIPPED_JUSTIFIED   │
+    │ PARTIAL     │ │ SKIPPED_UNJUSTIFIED │
+    │ OVERDONE    │ │ IGNORED             │
+    │ EXCESSIVE   │ └─────────────────────┘
+    └─────────────┘
 
-    OVERDUE --> COMPLETED: complete late
-    OVERDUE --> SKIPPED: skip
-
-    COMPLETED --> [*]
-    SKIPPED --> [*]
 ```
 
-## Instalação
+### Timer Flow
 
-### Requisitos
-
-- Python 3.13 ou superior
-- pip (gerenciador de pacotes Python)
-
-### Setup
-
-```bash
-# Clone o repositório
-git clone https://github.com/fabiodelllima/timeblock-organizer.git
-cd timeblock-organizer/cli
-
-# Crie ambiente virtual
-python -m venv venv
-
-# Ative o ambiente virtual
-# Linux/Mac:
-source venv/bin/activate
-# Windows:
-venv\Scripts\activate
-
-# Instale dependências
-pip install -e .
-
-# Inicialize o banco de dados
-timeblock init
+```
+    ┌─────────┐
+    │  IDLE   │
+    └────┬────┘
+         │ start
+         v
+    ┌─────────┐
+    │ RUNNING │<─────────┐
+    └────┬────┘          │
+         │               │
+    ┌────┴────┐     resume
+    │         │          │
+    v         v          │
+┌───────┐ ┌───────┐      │
+│ stop  │ │ pause │──────┘
+└───┬───┘ └───────┘
+    │
+    v
+┌─────────┐
+│  DONE   │
+└─────────┘
 ```
 
-## Guia Rápido
+---
 
-### 1. Criar Rotina Matinal
+## Estrutura do Projeto
 
-```bash
-# Criar rotina
-timeblock routine create "Rotina Matinal"
-
-# Adicionar hábitos
-timeblock habit create "Despertar" --duration 15 --time 07:00
-timeblock habit create "Café da Manhã" --duration 30 --time 07:20
-
-# Gerar instâncias para a semana
-timeblock schedule generate --days 7
 ```
-
-### 2. Gerenciar Tarefas
-
-```bash
-# Criar tarefa
-timeblock task create "Reunião Cliente" \
-  --scheduled-datetime "2025-11-05 14:00" \
-  --duration 60
-
-# Listar tarefas
-timeblock task list
-
-# Completar tarefa
-timeblock task complete 1
-```
-
-### 3. Usar Timer
-
-```bash
-# Iniciar timer para tarefa
-timeblock timer start --task-id 5
-
-# Pausar
-timeblock timer pause
-
-# Retomar
-timeblock timer resume
-
-# Parar
-timeblock timer stop
-```
-
-### 4. Reordenamento Automático
-
-```bash
-# Visualizar proposta sem aplicar
-timeblock reschedule preview 10
-
-# Aplicar com confirmação
-timeblock reschedule 10
-
-# Aplicar automaticamente
-timeblock reschedule 10 --auto-approve
-```
-
-### 5. Relatórios
-
-```bash
-# Relatório diário
-timeblock report daily
-
-# Relatório semanal
-timeblock report weekly
-
-# Relatório de hábito específico
-timeblock report habit --id 3
-```
-
-## Exemplos de Uso
-
-### Formato Coloquial de Hora
-
-```bash
-# Formato brasileiro natural
-timeblock add "Academia" -s 7h -e 8h30
-timeblock add "Estudar Python" -s 14h -e 16h
-timeblock add "Café da Tarde" -s 15h30 -e 16h
-```
-
-### Eventos Recorrentes
-
-```bash
-# Criar hábito diário
-timeblock habit create "Leitura" \
-  --time 21:00 \
-  --duration 30 \
-  --recurrence "DAILY"
-
-# Criar hábito semanal
-timeblock habit create "Revisão Semanal" \
-  --time 18:00 \
-  --duration 60 \
-  --recurrence "WEEKLY"
-```
-
-## Desenvolvimento
-
-### Estrutura do Projeto
-
-```terminal
 timeblock-organizer/
 ├── cli/
 │   ├── src/timeblock/
 │   │   ├── commands/          # Comandos CLI
-│   │   ├── models/            # Modelos SQLModel
-│   │   ├── services/          # Lógica de negócio
-│   │   ├── utils/             # Utilitários
-│   │   └── main.py            # Entry point
-│   └── tests/                 # Testes unitários e integração
-├── docs/                      # Documentação completa
-│   ├── 01-architecture/       # Arquitetura arc42
-│   ├── 02-diagrams/           # Diagramas Mermaid
-│   ├── 03-decisions/          # ADRs
-│   ├── 04-specifications/     # Especificações
-│   └── 10-meta/               # Meta documentação
-└── README.md
+│   │   │   ├── routine.py     #   Gerencia rotinas
+│   │   │   ├── habit.py       #   Gerencia hábitos e instâncias
+│   │   │   ├── task.py        #   Gerencia tarefas
+│   │   │   ├── timer.py       #   Controle de timer
+│   │   │   ├── tag.py         #   Gerencia tags
+│   │   │   └── report.py      #   Relatórios
+│   │   │
+│   │   ├── services/          # Camada de negócio
+│   │   │   ├── routine_service.py
+│   │   │   ├── habit_service.py
+│   │   │   ├── habit_instance_service.py
+│   │   │   ├── task_service.py
+│   │   │   ├── timer_service.py
+│   │   │   └── tag_service.py
+│   │   │
+│   │   ├── models/            # Modelos de dados
+│   │   │   ├── routine.py
+│   │   │   ├── habit.py
+│   │   │   ├── habit_instance.py
+│   │   │   ├── task.py
+│   │   │   ├── time_log.py
+│   │   │   ├── tag.py
+│   │   │   └── enums.py
+│   │   │
+│   │   ├── database/          # Persistência
+│   │   │   ├── engine.py
+│   │   │   └── migrations/
+│   │   │
+│   │   └── utils/             # Helpers
+│   │
+│   └── tests/                 # 492 testes
+│       ├── unit/              #   ~350 (70%)
+│       ├── integration/       #   ~120 (25%)
+│       ├── e2e/               #   ~22 (5%)
+│       └── bdd/               #   Cenários Gherkin
+│
+├── docs/
+│   └── core/                  # Documentação válida
+│       ├── architecture.md    #   29 KB
+│       ├── business-rules.md  #   44 KB (50+ BRs)
+│       ├── cli-reference.md   #   65 KB
+│       └── workflows.md       #   133 KB
+│
+└── scripts/                   # Automação
 ```
-
-### Executar Testes
-
-```bash
-cd cli
-
-# Todos os testes
-pytest
-
-# Com cobertura
-pytest --cov=src/timeblock --cov-report=term-missing
-
-# Testes específicos
-pytest tests/unit/test_services/test_event_reordering*.py -v
-
-# Testes de integração
-pytest tests/integration/ -v
-```
-
-### Qualidade de Código
-
-```bash
-# Linting
-ruff check src/
-
-# Type checking
-mypy src/
-
-# Formatação
-ruff format src/
-```
-
-## Roadmap
-
-### v1.2.0 - Refatoração HabitAtom (Próximo)
-
-- Renomear HabitInstance → HabitAtom
-- Reforçar filosofia Atomic Habits
-- Melhorar testes como documentação viva
-- ETA: 2 semanas
-
-### v1.3.0 - Living Documentation (Médio Prazo)
-
-- BDD com Gherkin
-- Testes como especificação
-- Documentação auto-gerada
-
-### v2.0.0 - Sistema Completo (Futuro)
-
-- Interface TUI (Textual)
-- Sincronização com calendários externos
-- Notificações nativas
-- Analytics avançados
-- IA para sugestões
-
-## Documentação
-
-- [Documentação Completa](docs/)
-- [Guia de Arquitetura](docs/core/)
-- [Decisões Técnicas (ADRs)](docs/decisions/)
-- [Especificações](docs/core/business-rules.md)
-- [CHANGELOG](CHANGELOG.md)
-
-## Filosofia
-
-TimeBlock é baseado em "Atomic Habits" de James Clear:
-
-> "Você não se eleva ao nível das suas metas. Você cai ao nível dos seus sistemas."
-
-O sistema foca em:
-
-- **Consistência sobre intensidade:** Pequenos hábitos diários
-- **Recompensa imediata:** Feedback visual instantâneo
-- **Redução de fricção:** CLI rápida e intuitiva
-- **Identidade:** Construir quem você quer ser
-
-## Licença
-
-MIT License - veja [LICENSE](LICENSE) para detalhes.
 
 ---
 
-- **Status:** v1.2.0 - Event Reordering completo (01 Nov 2025)
-- **Próximo Release:** v1.3.0 - Refatoração HabitAtom (ETA: 15 Nov 2025)
+## Instalação
+
+```bash
+git clone https://github.com/fabiodelllima/timeblock-organizer.git
+cd timeblock-organizer/cli
+
+python -m venv venv
+source venv/bin/activate
+
+pip install -e .
+```
+
+---
+
+## Comandos
+
+### Visão Geral
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│ RECURSO      │ DESCRIÇÃO                                           │
+├────────────────────────────────────────────────────────────────────┤
+│ routine      │ Gerencia rotinas (coleções de hábitos)              │
+│ habit        │ Gerencia hábitos (templates recorrentes)            │
+│ habit atom   │ Gerencia instâncias de hábitos (ocorrências)        │
+│ task         │ Gerencia tarefas (eventos únicos)                   │
+│ timer        │ Controla cronômetro                                 │
+│ tag          │ Gerencia categorias (cor + título)                  │
+│ report       │ Gera relatórios de produtividade                    │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+### Comandos por Recurso
+
+```
+routine
+├── create     Cria nova rotina
+├── edit       Edita rotina existente
+├── delete     Remove rotina
+├── list       Lista rotinas
+├── activate   Ativa rotina
+└── deactivate Desativa rotina
+
+habit
+├── create     Cria novo hábito
+├── edit       Edita hábito existente
+├── delete     Remove hábito
+├── list       Lista hábitos
+├── renew      Renova instâncias
+├── details    Mostra detalhes
+└── skip       Wizard para pular instância
+
+habit atom
+├── create     Cria instância avulsa
+├── edit       Edita instância
+├── delete     Remove instância
+├── list       Lista instâncias
+├── skip       Pula instância
+└── log        Registra tempo manualmente
+
+task
+├── create     Cria nova tarefa
+├── edit       Edita tarefa
+├── delete     Remove tarefa
+├── list       Lista tarefas
+├── complete   Marca como concluída
+└── uncheck    Reverte para pendente
+
+timer
+├── start      Inicia cronômetro
+├── pause      Pausa cronômetro
+├── resume     Retoma cronômetro
+├── stop       Para e salva
+├── reset      Cancela sem salvar
+└── status     Mostra status atual
+```
+
+### Exemplos
+
+```bash
+# Rotinas
+timeblock routine create "Rotina Matinal"
+timeblock routine activate 1
+timeblock routine list
+
+# Hábitos
+timeblock habit create --title "Ginásio" --start 07:00 --end 08:30 --repeat weekdays
+timeblock habit renew 1 month 3      # Renova para 3 meses
+timeblock habit list
+
+# Instâncias (habit atom)
+timeblock habit atom list            # Lista instâncias de hoje
+timeblock habit atom list -w         # Lista da semana
+timeblock habit atom skip 42         # Pula instância
+
+# Timer
+timeblock timer start 42             # Inicia timer para instância 42
+timeblock timer pause
+timeblock timer resume
+timeblock timer stop
+
+# Tarefas
+timeblock task create -l "Dentista" -D "2025-12-01 14:30"
+timeblock task list
+timeblock task complete 1
+```
+
+---
+
+## Stack Tecnológico
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│ COMPONENTE      │ TECNOLOGIA           │ VERSÃO                    │
+├────────────────────────────────────────────────────────────────────┤
+│ Runtime         │ Python               │ 3.13+                     │
+│ ORM             │ SQLModel             │ 0.0.14+                   │
+│ CLI Framework   │ Typer                │ 0.9.0+                    │
+│ Terminal UI     │ Rich                 │ 13.7.0+                   │
+│ Database        │ SQLite               │ 3.x                       │
+│ Testing         │ pytest + pytest-cov  │ 8.0.0+                    │
+│ Linting         │ ruff                 │ 0.1.0+                    │
+│ Type Checking   │ mypy                 │ 1.8.0+                    │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Métricas
+
+```
+╔════════════════════════════════════════════════════════════════════╗
+║                         MÉTRICAS v2.0.0                            ║
+╠════════════════════════════════════════════════════════════════════╣
+║                                                                    ║
+║   Testes          492        ████████████████████████████  100%    ║
+║   Cobertura       99%        ███████████████████████████░   99%    ║
+║   Modelos         7+1        ████████░░░░░░░░░░░░░░░░░░░░   27%    ║
+║   Services        8          ████████░░░░░░░░░░░░░░░░░░░░   27%    ║
+║   ADRs            22         ██████████████████████░░░░░░   73%    ║
+║   Business Rules  50+        ██████████████████████████░░   87%    ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## Documentação
+
+A documentação válida está consolidada em `docs/core/`:
+
+```
+docs/core/
+├── architecture.md     # Stack, camadas, princípios      (29 KB)
+├── business-rules.md   # 50+ BRs formalizadas            (44 KB)
+├── cli-reference.md    # Referência completa CLI         (65 KB)
+└── workflows.md        # Fluxos, estados, cenários BDD   (133 KB)
+```
+
+---
+
+## Desenvolvimento
+
+### Metodologia
+
+```
+┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
+│   DOCS   │────>│   BDD    │────>│   TDD    │────>│   CODE   │
+│          │     │          │     │          │     │          │
+│ BR-XXX   │     │ Gherkin  │     │ test_*   │     │ impl     │
+└──────────┘     └──────────┘     └──────────┘     └──────────┘
+```
+
+1. Documentar Business Rule (BR-DOMAIN-XXX)
+2. Escrever cenário BDD (DADO/QUANDO/ENTÃO)
+3. Criar teste que falha (RED)
+4. Implementar código (GREEN)
+5. Refatorar mantendo testes verdes
+
+### Comandos
+
+```bash
+# Testes
+python -m pytest tests/ -v
+python -m pytest tests/unit/ -v --cov=src/timeblock
+
+# Qualidade
+ruff check .
+ruff format .
+mypy src/
+```
+
+### Commits
+
+```
+type(scope): Descrição em português
+
+Tipos: feat, fix, refactor, test, docs, chore
+```
+
+---
+
+## Roadmap
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│ VERSÃO   │ STATUS        │ FEATURES                                │
+├────────────────────────────────────────────────────────────────────┤
+│ v1.0.0   │ [DONE]        │ CLI básica, CRUD eventos                │
+│ v1.1.0   │ [DONE]        │ Event reordering                        │
+│ v1.2.x   │ [DONE]        │ Logging, docs consolidados              │
+│ v1.3.0   │ [DONE]        │ Business rules formalizadas             │
+│ v2.0.0   │ [CURRENT]     │ Status/substatus, migrations            │
+├────────────────────────────────────────────────────────────────────┤
+│ v2.1.0   │ [PLANNED]     │ reason, import/export                   │
+│ v2.2.0   │ [PLANNED]     │ Sync offline-first                      │
+│ v3.0.0   │ [FUTURE]      │ API REST (FastAPI)                      │
+│ v4.0.0   │ [FUTURE]      │ TUI (Textual)                           │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+```
+╔════════════════════════════════════════════════════════════════════╗
+║                    TimeBlock Organizer v2.0.0                      ║
+║                        Dezembro 2025                               ║
+╚════════════════════════════════════════════════════════════════════╝
+```
