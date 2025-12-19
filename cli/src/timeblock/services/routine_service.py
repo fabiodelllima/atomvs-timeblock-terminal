@@ -1,6 +1,4 @@
-"""Service para gerenciar rotinas."""
-
-from datetime import datetime
+"""Service para gerenciamento de rotinas."""
 
 from sqlmodel import Session, select
 
@@ -8,125 +6,165 @@ from src.timeblock.models import Routine
 
 
 class RoutineService:
-    """Gerencia operações CRUD de rotinas."""
+    """Serviço de gerenciamento de rotinas."""
 
     def __init__(self, session: Session) -> None:
-        """Inicializa o service com uma sessão de database.
-
-        Args:
-            session: Sessão SQLModel para operações de database
-        """
+        """Inicializa service com session."""
         self.session = session
 
-    def create_routine(self, name: str) -> Routine:
-        """Cria uma nova rotina.
+    def create_routine(self, name: str, auto_activate: bool = False) -> Routine:
+        """
+        Cria nova rotina.
 
         Args:
             name: Nome da rotina
+            auto_activate: Se True, ativa automaticamente (apenas se for primeira)
 
         Returns:
             Routine criada
 
-        Raises:
-            ValueError: Se o nome for vazio ou maior que 200 caracteres
+        Business Rules:
+            - BR-ROUTINE-001: Nova routine criada inativa por padrão
+            - BR-ROUTINE-004: Primeira routine ativada automaticamente
         """
-        if not name or not name.strip():
-            raise ValueError("Nome da rotina não pode ser vazio")
-
+        name = name.strip()
         if len(name) > 200:
             raise ValueError("Nome da rotina não pode ter mais de 200 caracteres")
+        if not name:
+            raise ValueError("Nome da rotina não pode ser vazio")
 
-        routine = Routine(
-            name=name.strip(),
-            is_active=True,
-            created_at=datetime.now(),
-        )
+        # Verificar se é primeira rotina
+        existing = self.session.exec(select(Routine)).first()
+        is_first = existing is None
 
+        routine = Routine(name=name, is_active=False)
         self.session.add(routine)
-        self.session.commit()
-        self.session.refresh(routine)
+        self.session.flush()  # Gera ID
+
+        # BR-ROUTINE-004: Primeira routine ativada automaticamente
+        if is_first or auto_activate:
+            self._activate_routine_internal(routine)
 
         return routine
 
     def get_routine(self, routine_id: int) -> Routine | None:
-        """Busca uma rotina por ID.
-
-        Args:
-            routine_id: ID da rotina
-
-        Returns:
-            Routine encontrada ou None
-        """
+        """Busca rotina por ID."""
         return self.session.get(Routine, routine_id)
 
-    def list_routines(self, active_only: bool = True) -> list[Routine]:
-        """Lista rotinas.
-
-        Args:
-            active_only: Se True, retorna apenas rotinas ativas
-
-        Returns:
-            Lista de rotinas
+    def get_active_routine(self) -> Routine | None:
         """
-        statement = select(Routine)
+        Retorna routine ativa.
 
+        Business Rules:
+            - BR-ROUTINE-004: get_active retorna routine ativa
+        """
+        return self.session.exec(select(Routine).where(Routine.is_active == True)).first()  # noqa: E712
+
+    def list_routines(self, active_only: bool = False) -> list[Routine]:
+        """Lista rotinas."""
+        statement = select(Routine)
         if active_only:
             statement = statement.where(Routine.is_active == True)  # noqa: E712
+        return list(self.session.exec(statement).all())
 
-        statement = statement.order_by(Routine.created_at.desc())
-
-        results = self.session.exec(statement)
-        return list(results.all())
-
-    def activate_routine(self, routine_id: int) -> None:
-        """Ativa uma rotina.
-
-        Args:
-            routine_id: ID da rotina
-
-        Raises:
-            ValueError: Se a rotina não existir
+    def activate_routine(self, routine_id: int) -> Routine:
         """
-        routine = self.get_routine(routine_id)
+        Ativa rotina e desativa outras.
 
+        Business Rules:
+            - BR-ROUTINE-001: Apenas uma routine ativa por vez
+        """
+        routine = self.session.get(Routine, routine_id)
         if routine is None:
-            raise ValueError(f"Rotina com ID {routine_id} não encontrada")
+            raise ValueError(f"Rotina {routine_id} não encontrada")
 
+        self._activate_routine_internal(routine)
+        return routine
+
+    def _activate_routine_internal(self, routine: Routine) -> None:
+        """
+        Ativa routine e desativa outras (método interno).
+
+        Business Rules:
+            - BR-ROUTINE-001: Ativação desativa outras automaticamente
+        """
+        # Desativar todas
+        for other in self.session.exec(select(Routine).where(Routine.is_active == True)).all():  # noqa: E712
+            other.is_active = False
+            self.session.add(other)
+
+        # Ativar esta
         routine.is_active = True
         self.session.add(routine)
-        self.session.commit()
 
     def deactivate_routine(self, routine_id: int) -> None:
-        """Desativa uma rotina.
-
-        Args:
-            routine_id: ID da rotina
-
-        Raises:
-            ValueError: Se a rotina não existir
-        """
-        routine = self.get_routine(routine_id)
-
+        """Desativa rotina."""
+        routine = self.session.get(Routine, routine_id)
         if routine is None:
-            raise ValueError(f"Rotina com ID {routine_id} não encontrada")
+            raise ValueError(f"Rotina {routine_id} não encontrada")
 
         routine.is_active = False
         self.session.add(routine)
-        self.session.commit()
 
     def delete_routine(self, routine_id: int) -> None:
-        """Remove uma rotina do database.
+        """
+        Soft delete de rotina (marca deleted_at).
+
+        MVP: Soft delete simples.
+        Fase 2: Implementar soft delete em cascata.
+
+        Business Rules:
+            - BR-ROUTINE-002: Soft delete como padrão (preserva histórico)
+        """
+        routine = self.session.get(Routine, routine_id)
+        if routine is None:
+            raise ValueError(f"Rotina {routine_id} não encontrada")
+
+        # TODO Fase 2: Implementar soft delete
+        # Por ora, fazer hard delete simples
+        self.session.delete(routine)
+
+    def hard_delete_routine(self, routine_id: int, force: bool = False) -> None:
+        """
+        Deleta rotina PERMANENTEMENTE (HARD DELETE).
+
+        FK RESTRICT bloqueia delete se tiver habits.
+        Fase 2: force=True permite cascade delete.
 
         Args:
-            routine_id: ID da rotina
+            routine_id: ID da rotina a deletar
+            force: Se True, permite cascade delete (Fase 2)
 
         Raises:
-            ValueError: Se a rotina não existir
+            IntegrityError: Se rotina tem habits (FK RESTRICT do banco)
+            ValueError: Se rotina não existe
+
+        Business Rules:
+            - BR-ROUTINE-002: Hard delete bloqueia se tiver habits (FK RESTRICT)
+            - BR-HABIT-003: Delete routine com habits bloqueado pelo banco
         """
-        routine = self.get_routine(routine_id)
-
+        routine = self.session.get(Routine, routine_id)
         if routine is None:
-            raise ValueError(f"Rotina com ID {routine_id} não encontrada")
+            raise ValueError(f"Rotina {routine_id} não encontrada")
 
+        # TODO Fase 2: Implementar cascade delete quando force=True
+        # Deixar FK RESTRICT do banco bloquear delete se tiver habits
         self.session.delete(routine)
         self.session.commit()
+
+    def update_routine(self, routine_id: int, name: str | None = None) -> Routine | None:
+        """Atualiza nome da rotina."""
+        routine = self.session.get(Routine, routine_id)
+        if routine is None:
+            return None
+
+        if name is not None:
+            name = name.strip()
+        if len(name) > 200:
+            raise ValueError("Nome da rotina não pode ter mais de 200 caracteres")
+            if not name:
+                raise ValueError("Nome da rotina não pode ser vazio")
+            routine.name = name
+            self.session.add(routine)
+
+        return routine

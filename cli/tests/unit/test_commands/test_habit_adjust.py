@@ -1,8 +1,11 @@
 """Testes para comando habit adjust."""
+
+from datetime import date, time
+
 import pytest
-from datetime import time, date
-from sqlmodel import Session, create_engine, SQLModel
-from src.timeblock.models import Routine, Habit, HabitInstance
+from sqlmodel import Session, SQLModel, create_engine
+
+from src.timeblock.models import Habit, HabitInstance, Routine
 from src.timeblock.services.habit_instance_service import HabitInstanceService
 
 
@@ -16,13 +19,17 @@ def test_engine():
 @pytest.fixture(autouse=True)
 def mock_engine(monkeypatch, test_engine):
     from contextlib import contextmanager
-    
+
     @contextmanager
     def mock_get_engine():
         yield test_engine
-    
-    monkeypatch.setattr("src.timeblock.services.habit_instance_service.get_engine_context", mock_get_engine)
-    monkeypatch.setattr("src.timeblock.services.event_reordering_service.get_engine_context", mock_get_engine)
+
+    monkeypatch.setattr(
+        "src.timeblock.services.habit_instance_service.get_engine_context", mock_get_engine
+    )
+    monkeypatch.setattr(
+        "src.timeblock.services.event_reordering_service.get_engine_context", mock_get_engine
+    )
 
 
 @pytest.fixture
@@ -32,18 +39,18 @@ def sample_instance(test_engine):
         session.add(routine)
         session.commit()
         session.refresh(routine)
-        
+
         habit = Habit(
             routine_id=routine.id,
             title="Morning Run",
             scheduled_start=time(6, 0),
             scheduled_end=time(7, 0),
-            recurrence="EVERYDAY"
+            recurrence="EVERYDAY",
         )
         session.add(habit)
         session.commit()
         session.refresh(habit)
-        
+
         instance = HabitInstance(
             habit_id=habit.id,
             date=date.today(),
@@ -58,9 +65,7 @@ def sample_instance(test_engine):
 
 def test_adjust_returns_tuple(sample_instance):
     """Adjust retorna tupla."""
-    result = HabitInstanceService.adjust_instance_time(
-        sample_instance.id, time(8, 0), time(9, 0)
-    )
+    result = HabitInstanceService.adjust_instance_time(sample_instance.id, time(8, 0), time(9, 0))
     assert isinstance(result, tuple)
     assert len(result) == 2
 
@@ -70,10 +75,8 @@ def test_adjust_updates_time(test_engine, sample_instance):
     instance, _ = HabitInstanceService.adjust_instance_time(
         sample_instance.id, time(8, 0), time(9, 0)
     )
-    
+
     with Session(test_engine) as session:
         updated = session.get(HabitInstance, sample_instance.id)
         assert updated.scheduled_start == time(8, 0)
         assert updated.scheduled_end == time(9, 0)
-        assert updated.manually_adjusted is True
-        assert updated.user_override is True

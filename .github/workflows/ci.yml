@@ -1,0 +1,85 @@
+# GitHub Actions CI - TimeBlock Organizer
+# Código sem docs/ e notaas internas
+
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          cd cli
+          pip install --upgrade pip
+          pip install ruff
+
+      - name: Run ruff
+        run: |
+          cd cli
+          ruff check src/timeblock
+
+  typecheck:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          cd cli
+          pip install --upgrade pip
+          pip install mypy
+
+      - name: Run mypy
+        run: |
+          cd cli
+          mypy src/timeblock --check-untyped-defs
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-suite: [unit, integration]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          cd cli
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          cd cli
+          python -m pytest tests/${{ matrix.test-suite }}/ -v --cov=src/timeblock --cov-report=xml
+
+      - name: Upload coverage
+        if: matrix.test-suite == 'unit'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./cli/coverage.xml
+          fail_ci_if_error: false

@@ -1,6 +1,6 @@
 """Routine model for weekly habit templates."""
+
 from datetime import datetime
-from typing import Optional
 from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
@@ -12,11 +12,11 @@ if TYPE_CHECKING:
 class Routine(SQLModel, table=True):
     """Template semanal de habits."""
 
-    __tablename__ = "routines"
+    __tablename__ = "routines"  # type: ignore[assignment]
 
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, max_length=200)
-    is_active: bool = Field(default=True)
+    is_active: bool = Field(default=False)  # BR-ROUTINE-001: Não ativa por padrão
     created_at: datetime = Field(default_factory=datetime.now)
 
     # Relationships

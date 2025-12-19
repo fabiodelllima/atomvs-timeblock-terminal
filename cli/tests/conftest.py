@@ -1,106 +1,154 @@
-"""Global pytest configuration."""
-
-from pathlib import Path
-
-import pytest
-
-from src.timeblock.database import create_db_and_tables
-
-
-@pytest.fixture(scope="session", autouse=True)
-def backup_real_db():
-    """Backup real database before tests, restore after."""
-    real_db = Path("data/timeblock.db")
-    backup = Path("data/timeblock.db.backup")
-    # Backup if exists
-    if real_db.exists():
-        real_db.rename(backup)
-    yield
-    # Restore
-    if backup.exists():
-        if real_db.exists():
-            real_db.unlink()
-        backup.rename(real_db)
-
-
-@pytest.fixture
-def test_db(tmp_path, monkeypatch):
-    """Create temporary test database with tables."""
-    db_path = tmp_path / "test.db"
-    monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_path))
-    create_db_and_tables()
-    yield db_path
-
-
 """Shared fixtures for query tests."""
 
-from datetime import UTC, datetime, timedelta
+from __future__ import annotations
+
+from collections.abc import Generator
+from datetime import UTC, datetime, time
+from typing import TYPE_CHECKING, Any
 
 import pytest
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
-from src.timeblock.models import Event, EventStatus, Routine, Habit, HabitInstance, Task, Tag
+from src.timeblock.models import (
+    Event,
+    Habit,
+    Recurrence,
+)
+from src.timeblock.models.enums import Status
+from src.timeblock.services.routine_service import RoutineService
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
-@pytest.fixture(scope="function")
-def test_engine():
-    """Create in-memory SQLite database for testing."""
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        echo=False,
-    )
+@pytest.fixture
+def test_engine() -> Engine:
+    """Engine SQLite em memória para testes isolados."""
+    engine = create_engine("sqlite:///:memory:")
+
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(
+        dbapi_conn: Any,
+        connection_record: Any,
+    ) -> None:
+        """Habilita foreign keys no SQLite."""
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
     SQLModel.metadata.create_all(engine)
-    yield engine
-    SQLModel.metadata.drop_all(engine)
-    engine.dispose()
+    return engine
 
 
 @pytest.fixture
-def now_time():
-    """Fixed datetime for consistent testing."""
-    return datetime.now(UTC)
+def session(test_engine: Engine) -> Generator[Session]:
+    """Sessão de banco de dados para testes."""
+    with Session(test_engine) as session:
+        yield session
+        session.rollback()
 
 
 @pytest.fixture
-def sample_events(test_db, now_time):
-    """Populate database with 5 sample events."""
-    events = [
-        Event(
-            title="Event 1",
-            scheduled_start=now_time - timedelta(days=2),
-            scheduled_end=now_time - timedelta(days=2, hours=-1),
-            status=EventStatus.COMPLETED,
-        ),
-        Event(
-            title="Event 2",
-            scheduled_start=now_time - timedelta(days=1),
-            scheduled_end=now_time - timedelta(days=1, hours=-1),
-            status=EventStatus.COMPLETED,
-        ),
-        Event(
-            title="Event 3",
-            scheduled_start=now_time,
-            scheduled_end=now_time + timedelta(hours=1),
-            status=EventStatus.PLANNED,
-        ),
-        Event(
-            title="Event 4",
-            scheduled_start=now_time + timedelta(days=1),
-            scheduled_end=now_time + timedelta(days=1, hours=1),
-            status=EventStatus.PLANNED,
-        ),
-        Event(
-            title="Event 5",
-            scheduled_start=now_time + timedelta(days=2),
-            scheduled_end=now_time + timedelta(days=2, hours=1),
-            status=EventStatus.PLANNED,
-        ),
-    ]
+def test_db(session: Session) -> Session:
+    """Alias para session (compatibilidade com testes antigos)."""
+    return session
 
-    with Session(test_db) as session:
-        for event in events:
-            session.add(event)
-        session.commit()
 
-    return events
+@pytest.fixture
+def routine_service(session: Session) -> RoutineService:
+    """Fixture que retorna instância de RoutineService."""
+    return RoutineService(session)
+
+
+@pytest.fixture
+def habit_service_helper(
+    test_engine: Engine,
+) -> Callable[..., Habit]:
+    """Helper para criar habits no test_engine."""
+
+    def _create_habit(
+        routine_id: int,
+        title: str,
+        scheduled_start: time,
+        scheduled_end: time,
+        recurrence: Recurrence,
+        color: str | None = None,
+    ) -> Habit:
+        from src.timeblock.services.habit_service import HabitService
+
+        return HabitService.create_habit(
+            routine_id=routine_id,
+            title=title,
+            scheduled_start=scheduled_start,
+            scheduled_end=scheduled_end,
+            recurrence=recurrence,
+            color=color,
+        )
+
+    return _create_habit
+
+
+@pytest.fixture
+def routine_delete_helper(
+    session: Session,
+) -> Callable[[int], None]:
+    """Helper para deletar routines no test_engine."""
+
+    def _delete_routine(routine_id: int) -> None:
+        service = RoutineService(session)
+        service.delete_routine(routine_id)
+
+    return _delete_routine
+
+
+@pytest.fixture
+def sample_time_start() -> time:
+    """Fixture que retorna hora de início padrão."""
+    return time(9, 0)
+
+
+@pytest.fixture
+def sample_time_end() -> time:
+    """Fixture que retorna hora de fim padrão."""
+    return time(10, 0)
+
+
+@pytest.fixture
+def sample_date() -> datetime:
+    """Fixture que retorna data padrão."""
+    return datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+@pytest.fixture
+def sample_event(
+    session: Session,
+    sample_time_start: time,
+    sample_time_end: time,
+    sample_date: datetime,
+) -> Event:
+    """Fixture que cria um evento de exemplo."""
+    event = Event(
+        title="Sample Event",
+        scheduled_datetime=sample_date,
+        scheduled_start=sample_time_start,
+        scheduled_end=sample_time_end,
+        status=Status.PENDING,
+    )
+    session.add(event)
+    session.commit()
+    session.refresh(event)
+    return event
+
+
+@pytest.fixture
+def mock_session(monkeypatch: pytest.MonkeyPatch) -> Any:
+    """Mock de session para testes de services."""
+    from unittest.mock import Mock
+
+    session = Mock()
+    session.get.return_value = None
+    session.exec.return_value.all.return_value = []
+    session.commit.return_value = None
+    return session

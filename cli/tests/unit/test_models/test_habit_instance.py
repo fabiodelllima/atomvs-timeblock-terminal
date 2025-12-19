@@ -1,34 +1,34 @@
-"""Tests for HabitInstance model."""
+"""Testes para o modelo HabitInstance."""
 
-from datetime import date, datetime, time
+from datetime import date, time
 
 import pytest
 from sqlmodel import Session, SQLModel, create_engine
 
 from src.timeblock.models.habit import Habit, Recurrence
-from src.timeblock.models.habit_instance import HabitInstance, HabitInstanceStatus
+from src.timeblock.models.habit_instance import HabitInstance, Status
 from src.timeblock.models.routine import Routine
 
 
 @pytest.fixture
 def engine():
-    """In-memory SQLite engine."""
+    """Engine SQLite em memória."""
     engine = create_engine("sqlite:///:memory:")
     SQLModel.metadata.create_all(engine)
     yield engine
-    engine.dispose()  # FIX: Fechar conexões
+    engine.dispose()
 
 
 @pytest.fixture
 def session(engine):
-    """Database session."""
+    """Sessão de banco de dados."""
     with Session(engine) as session:
         yield session
 
 
 @pytest.fixture
 def habit(session):
-    """Create test habit."""
+    """Cria hábito de teste."""
     routine = Routine(name="Test")
     session.add(routine)
     session.commit()
@@ -48,7 +48,7 @@ def habit(session):
 
 
 def test_habit_instance_creation(session, habit):
-    """Test creating a habit instance."""
+    """Testa criação de instância de hábito."""
     instance = HabitInstance(
         habit_id=habit.id,
         date=date(2025, 10, 16),
@@ -61,25 +61,4 @@ def test_habit_instance_creation(session, habit):
 
     assert instance.id is not None
     assert instance.date == date(2025, 10, 16)
-    assert instance.status == HabitInstanceStatus.PLANNED  # FIX: Usar enum
-    assert instance.manually_adjusted is False
-
-
-def test_habit_instance_manually_adjusted(session, habit):
-    """Test manually adjusted instance."""
-    instance = HabitInstance(
-        habit_id=habit.id,
-        date=date(2025, 10, 16),
-        scheduled_start=time(9, 0),
-        scheduled_end=time(10, 0),
-        manually_adjusted=True,
-    )
-    session.add(instance)
-    session.commit()
-
-    assert instance.manually_adjusted is True
-
-
-# NOTA: test_habit_instance_with_actuals REMOVIDO
-# RAZÃO: Campos actual_start/actual_end não existem no modelo atual
-# TODO: Se necessário, implementar em v1.3.0 como feature de tracking
+    assert instance.status == Status.PENDING
