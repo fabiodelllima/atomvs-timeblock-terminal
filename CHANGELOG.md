@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ### Alterado (Documentação)
 
+- **(2025-12-21)** Roadmap v1.5-v4.0 e ADR-023
+  - Adicionada ADR-023: Microservices Ecosystem (Kafka, CloudEvents)
+  - Documentado roadmap completo em architecture.md:
+    - v1.5.0: Infra Foundation (Docker, CI/CD)
+    - v2.0.0: FastAPI REST API + Observabilidade (Prometheus, Grafana, Loki)
+    - v3.0.0: Microservices Ecosystem (Apache Kafka)
+    - v4.0.0: Android App (Kotlin)
+  - Atualizado índice de ADRs: 22 → 23 (1 proposta)
+
 - **(2025-12-01)** Reorganização completa de docs/
   - Consolidado 4 documentos principais em `docs/core/`:
     - architecture.md (v2.0.0)

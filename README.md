@@ -3,11 +3,11 @@
 > Gerenciador de tempo CLI baseado em time blocking e hábitos atômicos
 
 ```
-╔══════════════════════════════════════════════════════════════════╗
-║  TimeBlock Organizer v2.0.0                                      ║
-║  ──────────────────────────────────────────────────────────────  ║
-║  [x] 492 testes  [x] 99% cobertura  [x] 22 ADRs  [x] 50+ BRs     ║
-╚══════════════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════╗
+║  TimeBlock Organizer v2.0.0                                   ║
+║  ───────────────────────────────────────────────────────────  ║
+║  [x] 492 testes  [x] 99% cobertura  [x] 23 ADRs  [x] 50+ BRs  ║
+╚═══════════════════════════════════════════════════════════════╝
 ```
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
@@ -287,7 +287,7 @@ timeblock routine activate 1
 timeblock routine list
 
 # Hábitos
-timeblock habit create --title "Ginásio" --start 07:00 --end 08:30 --repeat weekdays
+timeblock habit create --title "Academia" --start 07:00 --end 08:30 --repeat weekdays
 timeblock habit renew 1 month 3      # Renova para 3 meses
 timeblock habit list
 
@@ -340,7 +340,7 @@ timeblock task complete 1
 ║   Cobertura       99%        ███████████████████████████░   99%    ║
 ║   Modelos         7+1        ████████░░░░░░░░░░░░░░░░░░░░   27%    ║
 ║   Services        8          ████████░░░░░░░░░░░░░░░░░░░░   27%    ║
-║   ADRs            22         ██████████████████████░░░░░░   73%    ║
+║   ADRs            23         ██████████████████████░░░░░░   73%    ║
 ║   Business Rules  50+        ██████████████████████████░░   87%    ║
 ║                                                                    ║
 ╚════════════════════════════════════════════════════════════════════╝
@@ -407,26 +407,17 @@ Tipos: feat, fix, refactor, test, docs, chore
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│ VERSÃO   │ STATUS        │ FEATURES                                │
+│ VERSÃO │ STATUS    │ FEATURES                                      │
 ├────────────────────────────────────────────────────────────────────┤
-│ v1.0.0   │ [DONE]        │ CLI básica, CRUD eventos                │
-│ v1.1.0   │ [DONE]        │ Event reordering                        │
-│ v1.2.x   │ [DONE]        │ Logging, docs consolidados              │
-│ v1.3.0   │ [DONE]        │ Business rules formalizadas             │
-│ v2.0.0   │ [CURRENT]     │ Status/substatus, migrations            │
+│ v1.0.0 │ [DONE]    │ CLI básica, CRUD eventos                      │
+│ v1.1.0 │ [DONE]    │ Event reordering                              │
+│ v1.2.x │ [DONE]    │ Logging, docs consolidados                    │
+│ v1.3.0 │ [DONE]    │ Business rules formalizadas                   │
+│ v1.4.0 │ [CURRENT] │ MVP Event Reordering, E2E tests               │
 ├────────────────────────────────────────────────────────────────────┤
-│ v2.1.0   │ [PLANNED]     │ reason, import/export                   │
-│ v2.2.0   │ [PLANNED]     │ Sync offline-first                      │
-│ v3.0.0   │ [FUTURE]      │ API REST (FastAPI)                      │
-│ v4.0.0   │ [FUTURE]      │ TUI (Textual)                           │
+│ v1.5.0 │ [PLANNED] │ Infra Foundation (Docker, CI/CD)              │
+│ v2.0.0 │ [PLANNED] │ FastAPI REST API + Observabilidade            │
+│ v3.0.0 │ [FUTURE]  │ Microservices Ecosystem (Kafka)               │
+│ v4.0.0 │ [FUTURE]  │ Android App (Kotlin)                          │
 └────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-```
-╔════════════════════════════════════════════════════════════════════╗
-║                    TimeBlock Organizer v2.0.0                      ║
-║                        Dezembro 2025                               ║
-╚════════════════════════════════════════════════════════════════════╝
 ```
