@@ -54,6 +54,10 @@ jobs:
           python-version: "3.13"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Initialize database
+        run: |
+          cd cli
+          python -c "from src.timeblock.database.engine import create_db_and_tables; create_db_and_tables()"
       - name: Run tests
         run: |
           cd cli
