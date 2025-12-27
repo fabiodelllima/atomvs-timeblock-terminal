@@ -39,7 +39,7 @@ jobs:
       - name: Run mypy
         run: |
           cd cli
-          mypy src/timeblock --check-untyped-defs
+          mypy src/timeblock --check-untyped-defs --explicit-package-bases
 
   test:
     runs-on: ubuntu-latest
