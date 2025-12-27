@@ -1,6 +1,5 @@
 # GitLab CI/CD Pipeline - TimeBlock Organizer
 # Código completo com docs/ e notas internas
-
 image: python:3.13
 
 variables:
@@ -22,6 +21,7 @@ before_script:
   - source venv/bin/activate
   - pip install --upgrade pip
   - pip install -r requirements.txt --break-system-packages
+  - python -c "from src.timeblock.database.engine import create_db_and_tables; create_db_and_tables()"
 
 test:unit:
   stage: test
