@@ -2,6 +2,8 @@
 # Código sem docs/ e notaas internas
 
 name: CI
+permissions:
+  contents: read
 
 on:
   push:
