@@ -1,35 +1,33 @@
-"""Testes para HabitService - operações CRUD."""
+"""Testes para HabitService - operações CRUD.
+
+BRs validadas:
+- BR-HABIT-001: Estrutura de Habito
+- BR-HABIT-004: Modificação de Habito
+- BR-HABIT-005: Deleção de Habito
+"""
 
 from datetime import time
 
 import pytest
-from sqlmodel import Session, SQLModel, create_engine
+from sqlalchemy.engine import Engine
+from sqlmodel import Session
 
 from src.timeblock.models import Recurrence, Routine
 from src.timeblock.services.habit_service import HabitService
 
 
 @pytest.fixture
-def test_engine():
-    """Engine SQLite em memória para testes."""
-    engine = create_engine("sqlite:///:memory:")
-    SQLModel.metadata.create_all(engine)
-    return engine
-
-
-@pytest.fixture
-def test_routine(test_engine):
+def test_routine(session: Session) -> Routine:
     """Cria rotina de teste."""
-    with Session(test_engine) as session:
-        routine = Routine(name="Test Routine", is_active=True)
-        session.add(routine)
-        session.commit()
-        session.refresh(routine)
-        return routine
+    routine = Routine(name="Test Routine", is_active=True)
+    session.add(routine)
+    session.commit()
+    session.refresh(routine)
+    return routine
 
 
 @pytest.fixture(autouse=True)
-def mock_engine(monkeypatch, test_engine):
+def mock_engine(monkeypatch, test_engine: Engine):
     """Mock do get_engine_context."""
     from contextlib import contextmanager
 
@@ -41,9 +39,9 @@ def mock_engine(monkeypatch, test_engine):
 
 
 class TestCreateHabit:
-    """Testes para create_habit."""
+    """Testes para create_habit. Validates BR-HABIT-001."""
 
-    def test_create_habit_success(self, test_routine):
+    def test_create_habit_success(self, test_routine: Routine) -> None:
         """Cria hábito com sucesso."""
         habit = HabitService.create_habit(
             routine_id=test_routine.id,
@@ -56,7 +54,7 @@ class TestCreateHabit:
         assert habit.title == "Exercício"
         assert habit.routine_id == test_routine.id
 
-    def test_create_habit_with_color(self, test_routine):
+    def test_create_habit_with_color(self, test_routine: Routine) -> None:
         """Cria hábito com cor."""
         habit = HabitService.create_habit(
             routine_id=test_routine.id,
@@ -68,7 +66,7 @@ class TestCreateHabit:
         )
         assert habit.color == "#FF5733"
 
-    def test_create_habit_strips_whitespace(self, test_routine):
+    def test_create_habit_strips_whitespace(self, test_routine: Routine) -> None:
         """Remove espaços do título."""
         habit = HabitService.create_habit(
             routine_id=test_routine.id,
@@ -79,7 +77,7 @@ class TestCreateHabit:
         )
         assert habit.title == "Leitura"
 
-    def test_create_habit_with_empty_title(self, test_routine):
+    def test_create_habit_with_empty_title(self, test_routine: Routine) -> None:
         """Rejeita título vazio."""
         with pytest.raises(ValueError, match="cannot be empty"):
             HabitService.create_habit(
@@ -90,7 +88,7 @@ class TestCreateHabit:
                 recurrence=Recurrence.EVERYDAY,
             )
 
-    def test_create_habit_with_title_too_long(self, test_routine):
+    def test_create_habit_with_title_too_long(self, test_routine: Routine) -> None:
         """Rejeita título muito longo."""
         with pytest.raises(ValueError, match="cannot exceed 200"):
             HabitService.create_habit(
@@ -101,7 +99,7 @@ class TestCreateHabit:
                 recurrence=Recurrence.EVERYDAY,
             )
 
-    def test_create_habit_with_invalid_times(self, test_routine):
+    def test_create_habit_with_invalid_times(self, test_routine: Routine) -> None:
         """Rejeita start >= end."""
         with pytest.raises(ValueError, match="Start time must be before end time"):
             HabitService.create_habit(
@@ -116,7 +114,7 @@ class TestCreateHabit:
 class TestGetHabit:
     """Testes para get_habit."""
 
-    def test_get_habit_found(self, test_routine):
+    def test_get_habit_found(self, test_routine: Routine) -> None:
         """Busca hábito existente."""
         created = HabitService.create_habit(
             routine_id=test_routine.id,
@@ -130,7 +128,7 @@ class TestGetHabit:
         assert found.id == created.id
         assert found.title == "Yoga"
 
-    def test_get_habit_not_found(self):
+    def test_get_habit_not_found(self) -> None:
         """Retorna None para ID inexistente."""
         assert HabitService.get_habit(9999) is None
 
@@ -138,59 +136,57 @@ class TestGetHabit:
 class TestListHabits:
     """Testes para list_habits."""
 
-    def test_list_habits_all(self, test_routine, test_engine):
+    def test_list_habits_all(self, test_routine: Routine, session: Session) -> None:
         """Lista todos os hábitos."""
-        with Session(test_engine) as session:
-            routine2 = Routine(name="Routine 2", is_active=True)
-            session.add(routine2)
-            session.commit()
-            session.refresh(routine2)
+        routine2 = Routine(name="Routine 2", is_active=True)
+        session.add(routine2)
+        session.commit()
+        session.refresh(routine2)
 
-            HabitService.create_habit(
-                routine_id=test_routine.id,
-                title="Habit 1",
-                scheduled_start=time(7, 0),
-                scheduled_end=time(8, 0),
-                recurrence=Recurrence.EVERYDAY,
-            )
-            HabitService.create_habit(
-                routine_id=routine2.id,
-                title="Habit 2",
-                scheduled_start=time(9, 0),
-                scheduled_end=time(10, 0),
-                recurrence=Recurrence.WEEKDAYS,
-            )
+        HabitService.create_habit(
+            routine_id=test_routine.id,
+            title="Habit 1",
+            scheduled_start=time(7, 0),
+            scheduled_end=time(8, 0),
+            recurrence=Recurrence.EVERYDAY,
+        )
+        HabitService.create_habit(
+            routine_id=routine2.id,
+            title="Habit 2",
+            scheduled_start=time(9, 0),
+            scheduled_end=time(10, 0),
+            recurrence=Recurrence.WEEKDAYS,
+        )
 
         habits = HabitService.list_habits()
         assert len(habits) == 2
 
-    def test_list_habits_by_routine(self, test_routine, test_engine):
+    def test_list_habits_by_routine(self, test_routine: Routine, session: Session) -> None:
         """Filtra hábitos por rotina."""
-        with Session(test_engine) as session:
-            routine2 = Routine(name="Routine 2", is_active=True)
-            session.add(routine2)
-            session.commit()
-            session.refresh(routine2)
+        routine2 = Routine(name="Routine 2", is_active=True)
+        session.add(routine2)
+        session.commit()
+        session.refresh(routine2)
 
-            HabitService.create_habit(
-                routine_id=test_routine.id,
-                title="Habit 1",
-                scheduled_start=time(7, 0),
-                scheduled_end=time(8, 0),
-                recurrence=Recurrence.EVERYDAY,
-            )
-            HabitService.create_habit(
-                routine_id=routine2.id,
-                title="Habit 2",
-                scheduled_start=time(9, 0),
-                scheduled_end=time(10, 0),
-                recurrence=Recurrence.WEEKDAYS,
-            )
+        HabitService.create_habit(
+            routine_id=test_routine.id,
+            title="Habit 1",
+            scheduled_start=time(7, 0),
+            scheduled_end=time(8, 0),
+            recurrence=Recurrence.EVERYDAY,
+        )
+        HabitService.create_habit(
+            routine_id=routine2.id,
+            title="Habit 2",
+            scheduled_start=time(9, 0),
+            scheduled_end=time(10, 0),
+            recurrence=Recurrence.WEEKDAYS,
+        )
 
         habits = HabitService.list_habits(routine_id=test_routine.id)
         assert len(habits) == 1
         assert habits[0].routine_id == test_routine.id
 
-    def test_list_habits_empty(self):
+    def test_list_habits_empty(self) -> None:
         """Retorna lista vazia."""
         assert HabitService.list_habits() == []

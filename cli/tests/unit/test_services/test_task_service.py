@@ -1,23 +1,21 @@
-"""Testes para TaskService."""
+"""Testes para TaskService.
+
+BRs validadas:
+- BR-TASK-001: Estrutura de Task
+- BR-TASK-002: Completar Task
+- BR-TASK-003: Deleção de Task
+"""
 
 from datetime import datetime
 
 import pytest
-from sqlmodel import SQLModel, create_engine
+from sqlalchemy.engine import Engine
 
 from src.timeblock.services.task_service import TaskService
 
 
-@pytest.fixture
-def test_engine():
-    """Engine SQLite em memória."""
-    engine = create_engine("sqlite:///:memory:")
-    SQLModel.metadata.create_all(engine)
-    return engine
-
-
 @pytest.fixture(autouse=True)
-def mock_engine(monkeypatch, test_engine):
+def mock_engine(monkeypatch, test_engine: Engine):
     """Mock do get_engine_context."""
     from contextlib import contextmanager
 
@@ -29,9 +27,9 @@ def mock_engine(monkeypatch, test_engine):
 
 
 class TestCreateTask:
-    """Testes para create_task."""
+    """Testes para create_task. Validates BR-TASK-001."""
 
-    def test_create_task_success(self):
+    def test_create_task_success(self) -> None:
         """Cria tarefa com sucesso."""
         task = TaskService.create_task(
             title="Dentist",
@@ -41,7 +39,7 @@ class TestCreateTask:
         assert task.title == "Dentist"
         assert task.scheduled_datetime == datetime(2025, 10, 20, 14, 0)
 
-    def test_create_task_with_description(self):
+    def test_create_task_with_description(self) -> None:
         """Cria tarefa com descrição."""
         task = TaskService.create_task(
             title="Meeting",
@@ -50,7 +48,7 @@ class TestCreateTask:
         )
         assert task.description == "Discuss Q4 results"
 
-    def test_create_task_with_color(self):
+    def test_create_task_with_color(self) -> None:
         """Cria tarefa com cor."""
         task = TaskService.create_task(
             title="Important",
@@ -59,7 +57,7 @@ class TestCreateTask:
         )
         assert task.color == "#FF0000"
 
-    def test_create_task_strips_whitespace(self):
+    def test_create_task_strips_whitespace(self) -> None:
         """Remove espaços do título."""
         task = TaskService.create_task(
             title="  Task  ",
@@ -67,7 +65,7 @@ class TestCreateTask:
         )
         assert task.title == "Task"
 
-    def test_create_task_with_empty_title(self):
+    def test_create_task_with_empty_title(self) -> None:
         """Rejeita título vazio."""
         with pytest.raises(ValueError, match="cannot be empty"):
             TaskService.create_task(
@@ -75,7 +73,7 @@ class TestCreateTask:
                 scheduled_datetime=datetime(2025, 10, 20, 12, 0),
             )
 
-    def test_create_task_with_title_too_long(self):
+    def test_create_task_with_title_too_long(self) -> None:
         """Rejeita título muito longo."""
         with pytest.raises(ValueError, match="cannot exceed 200"):
             TaskService.create_task(
@@ -87,7 +85,7 @@ class TestCreateTask:
 class TestGetTask:
     """Testes para get_task."""
 
-    def test_get_task_found(self):
+    def test_get_task_found(self) -> None:
         """Busca tarefa existente."""
         created = TaskService.create_task(
             title="Task",
@@ -97,7 +95,7 @@ class TestGetTask:
         assert found is not None
         assert found.id == created.id
 
-    def test_get_task_not_found(self):
+    def test_get_task_not_found(self) -> None:
         """Retorna None se não existe."""
         assert TaskService.get_task(9999) is None
 
@@ -105,7 +103,7 @@ class TestGetTask:
 class TestListTasks:
     """Testes para list_tasks."""
 
-    def test_list_tasks_all(self):
+    def test_list_tasks_all(self) -> None:
         """Lista todas as tarefas."""
         TaskService.create_task("Task 1", datetime(2025, 10, 20, 10, 0))
         TaskService.create_task("Task 2", datetime(2025, 10, 21, 11, 0))
@@ -114,7 +112,7 @@ class TestListTasks:
         tasks = TaskService.list_tasks()
         assert len(tasks) == 3
 
-    def test_list_tasks_with_start(self):
+    def test_list_tasks_with_start(self) -> None:
         """Filtra por data inicial."""
         TaskService.create_task("Task 1", datetime(2025, 10, 20, 10, 0))
         TaskService.create_task("Task 2", datetime(2025, 10, 21, 11, 0))
@@ -123,7 +121,7 @@ class TestListTasks:
         tasks = TaskService.list_tasks(start=datetime(2025, 10, 21, 0, 0))
         assert len(tasks) == 2
 
-    def test_list_tasks_with_end(self):
+    def test_list_tasks_with_end(self) -> None:
         """Filtra por data final."""
         TaskService.create_task("Task 1", datetime(2025, 10, 20, 10, 0))
         TaskService.create_task("Task 2", datetime(2025, 10, 21, 11, 0))
@@ -132,7 +130,7 @@ class TestListTasks:
         tasks = TaskService.list_tasks(end=datetime(2025, 10, 21, 23, 59))
         assert len(tasks) == 2
 
-    def test_list_tasks_with_range(self):
+    def test_list_tasks_with_range(self) -> None:
         """Filtra por período."""
         TaskService.create_task("Task 1", datetime(2025, 10, 20, 10, 0))
         TaskService.create_task("Task 2", datetime(2025, 10, 21, 11, 0))
@@ -147,9 +145,9 @@ class TestListTasks:
 
 
 class TestCompleteTask:
-    """Testes para complete_task."""
+    """Testes para complete_task. Validates BR-TASK-002."""
 
-    def test_complete_task_success(self):
+    def test_complete_task_success(self) -> None:
         """Completa tarefa com sucesso."""
         task = TaskService.create_task(
             title="Task",
@@ -160,15 +158,15 @@ class TestCompleteTask:
         assert completed is not None
         assert completed.completed_datetime is not None
 
-    def test_complete_task_not_found(self):
+    def test_complete_task_not_found(self) -> None:
         """Retorna None se não existe."""
         assert TaskService.complete_task(9999) is None
 
 
 class TestDeleteTask:
-    """Testes para delete_task."""
+    """Testes para delete_task. Validates BR-TASK-003."""
 
-    def test_delete_task_success(self):
+    def test_delete_task_success(self) -> None:
         """Remove tarefa com sucesso."""
         task = TaskService.create_task(
             title="Task",
@@ -178,7 +176,7 @@ class TestDeleteTask:
         assert TaskService.delete_task(task.id) is True
         assert TaskService.get_task(task.id) is None
 
-    def test_delete_task_not_found(self):
+    def test_delete_task_not_found(self) -> None:
         """Retorna False se não existe."""
         assert TaskService.delete_task(9999) is False
 
@@ -187,7 +185,7 @@ class TestDeleteTask:
 class TestUpdateTaskWithReordering:
     """Testes para update_task com detecção de conflitos."""
 
-    def test_update_task_no_datetime_change_no_proposal(self):
+    def test_update_task_no_datetime_change_no_proposal(self) -> None:
         """Sem mudança de datetime, não detecta conflitos."""
         task = TaskService.create_task(
             title="Task",

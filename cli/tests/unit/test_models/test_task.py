@@ -1,30 +1,17 @@
-"""Tests for Task model."""
+"""Tests for Task model.
+
+BR validada: BR-TASK-001 (Estrutura de Task)
+"""
 
 from datetime import datetime
 
-import pytest
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session
 
 from src.timeblock.models.task import Task
 
 
-@pytest.fixture
-def engine():
-    """In-memory SQLite engine."""
-    engine = create_engine("sqlite:///:memory:")
-    SQLModel.metadata.create_all(engine)
-    return engine
-
-
-@pytest.fixture
-def session(engine):
-    """Database session."""
-    with Session(engine) as session:
-        yield session
-
-
-def test_task_creation(session):
-    """Test creating a task."""
+def test_task_creation(session: Session) -> None:
+    """Test creating a task. Validates BR-TASK-001."""
     task = Task(
         title="Doctor Appointment",
         scheduled_datetime=datetime(2025, 10, 17, 14, 0),
@@ -38,8 +25,8 @@ def test_task_creation(session):
     assert task.completed_datetime is None
 
 
-def test_task_completion(session):
-    """Test completing a task."""
+def test_task_completion(session: Session) -> None:
+    """Test completing a task. Validates BR-TASK-001."""
     task = Task(
         title="Task",
         scheduled_datetime=datetime(2025, 10, 17, 10, 0),
@@ -51,8 +38,8 @@ def test_task_completion(session):
     assert task.completed_datetime is not None
 
 
-def test_task_with_description(session):
-    """Test task with description and color."""
+def test_task_with_description(session: Session) -> None:
+    """Test task with description and color. Validates BR-TASK-001."""
     task = Task(
         title="Meeting",
         scheduled_datetime=datetime(2025, 10, 17, 15, 0),
