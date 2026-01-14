@@ -4,8 +4,8 @@ Timer Service v2 Tests - BR-TIMER-001 and BR-TIMER-006.
 Tests for pause/resume/cancel functionality following ADR-021.
 """
 
-from time import sleep
 from datetime import date, time
+from time import sleep
 
 import pytest
 from sqlmodel import Session

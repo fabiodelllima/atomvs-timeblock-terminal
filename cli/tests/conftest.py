@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def test_engine() -> Engine:
+def test_engine() -> Generator[Engine]:
     """Engine SQLite em memória para testes isolados."""
     engine = create_engine("sqlite:///:memory:")
 
@@ -39,11 +39,12 @@ def test_engine() -> Engine:
         cursor.close()
 
     SQLModel.metadata.create_all(engine)
-    return engine
+    yield engine
+    engine.dispose()
 
 
 @pytest.fixture
-def session(test_engine: Engine) -> Generator[Session]:
+def session(test_engine: Engine) -> Generator[Session, None, None]:
     """Sessão de banco de dados para testes."""
     with Session(test_engine) as session:
         yield session
@@ -129,17 +130,17 @@ def sample_event(
     sample_date: datetime,
 ) -> Event:
     """Fixture que cria um evento de exemplo."""
-    event = Event(
+    event_obj = Event(
         title="Sample Event",
         scheduled_datetime=sample_date,
         scheduled_start=sample_time_start,
         scheduled_end=sample_time_end,
         status=Status.PENDING,
     )
-    session.add(event)
+    session.add(event_obj)
     session.commit()
-    session.refresh(event)
-    return event
+    session.refresh(event_obj)
+    return event_obj
 
 
 @pytest.fixture

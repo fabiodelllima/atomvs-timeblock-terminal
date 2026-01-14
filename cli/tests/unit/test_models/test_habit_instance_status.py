@@ -4,7 +4,7 @@ Refatoração Status + Substatus do modelo HabitInstance.
 Valida transições de estado, cálculo de substatus e validações.
 """
 
-from datetime import date, datetime, time, timedelta
+from datetime import date, time
 
 import pytest
 
