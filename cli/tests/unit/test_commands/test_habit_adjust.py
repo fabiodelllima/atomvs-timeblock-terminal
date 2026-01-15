@@ -9,8 +9,8 @@ import pytest
 from sqlalchemy.engine import Engine
 from sqlmodel import Session
 
-from src.timeblock.models import Habit, HabitInstance, Routine
-from src.timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.models import Habit, HabitInstance, Routine
+from timeblock.services.habit_instance_service import HabitInstanceService
 
 
 @pytest.fixture(autouse=True)
@@ -23,11 +23,11 @@ def mock_engine(monkeypatch, test_engine: Engine):
         yield test_engine
 
     monkeypatch.setattr(
-        "src.timeblock.services.habit_instance_service.get_engine_context",
+        "timeblock.services.habit_instance_service.get_engine_context",
         mock_get_engine,
     )
     monkeypatch.setattr(
-        "src.timeblock.services.event_reordering_service.get_engine_context",
+        "timeblock.services.event_reordering_service.get_engine_context",
         mock_get_engine,
     )
 

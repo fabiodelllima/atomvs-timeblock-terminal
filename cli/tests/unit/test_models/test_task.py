@@ -7,7 +7,7 @@ from datetime import datetime
 
 from sqlmodel import Session
 
-from src.timeblock.models.task import Task
+from timeblock.models.task import Task
 
 
 def test_task_creation(session: Session) -> None:

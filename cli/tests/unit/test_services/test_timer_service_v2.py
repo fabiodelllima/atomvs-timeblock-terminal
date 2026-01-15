@@ -10,9 +10,9 @@ from time import sleep
 import pytest
 from sqlmodel import Session
 
-from src.timeblock.models import Habit, HabitInstance, Recurrence, Routine, TimeLog
-from src.timeblock.models.enums import Status
-from src.timeblock.services.timer_service import TimerService
+from timeblock.models import Habit, HabitInstance, Recurrence, Routine, TimeLog
+from timeblock.models.enums import Status
+from timeblock.services.timer_service import TimerService
 
 
 # ============================================================

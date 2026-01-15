@@ -10,8 +10,8 @@ from datetime import time
 import pytest
 from sqlmodel import Session
 
-from src.timeblock.models.habit import Habit, Recurrence
-from src.timeblock.models.routine import Routine
+from timeblock.models.habit import Habit, Recurrence
+from timeblock.models.routine import Routine
 
 
 @pytest.fixture

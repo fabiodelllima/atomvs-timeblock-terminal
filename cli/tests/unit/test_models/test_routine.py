@@ -7,7 +7,7 @@ BRs validadas:
 
 from sqlmodel import Session
 
-from src.timeblock.models.routine import Routine
+from timeblock.models.routine import Routine
 
 
 def test_routine_creation(session: Session) -> None:

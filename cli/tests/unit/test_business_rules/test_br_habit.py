@@ -14,8 +14,8 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session
 
-from src.timeblock.models import Habit, Recurrence
-from src.timeblock.services.habit_service import HabitService
+from timeblock.models import Habit, Recurrence
+from timeblock.services.habit_service import HabitService
 
 
 class TestBRHabit001TitleValidation:
