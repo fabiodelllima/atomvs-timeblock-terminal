@@ -4,7 +4,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from ..models import Event
+from timeblock.models import Event
 
 
 def build_events_query(

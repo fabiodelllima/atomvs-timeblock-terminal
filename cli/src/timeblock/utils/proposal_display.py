@@ -4,7 +4,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from src.timeblock.services.event_reordering_models import ReorderingProposal
+from timeblock.services.event_reordering_models import ReorderingProposal
 
 
 def display_proposal(proposal: ReorderingProposal, console: Console):

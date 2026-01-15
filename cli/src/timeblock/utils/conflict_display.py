@@ -3,7 +3,7 @@
 from rich.console import Console
 from rich.table import Table
 
-from src.timeblock.services.event_reordering_models import Conflict
+from timeblock.services.event_reordering_models import Conflict
 
 
 def display_conflicts(conflicts: list[Conflict], console: Console) -> None:

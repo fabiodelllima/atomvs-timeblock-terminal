@@ -4,7 +4,8 @@ from datetime import UTC, datetime, timedelta
 
 from rich.console import Console
 
-from ..models import Event
+from timeblock.models import Event
+
 from .formatters import create_events_table
 
 
