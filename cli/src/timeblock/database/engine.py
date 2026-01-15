@@ -50,7 +50,7 @@ def create_db_and_tables():
     Importa todos os modelos para registrar no SQLModel.metadata
     antes de criar as tabelas.
     """
-    from src.timeblock.models import (  # noqa: F401
+    from timeblock.models import (  # noqa: F401
         Habit,
         HabitInstance,
         Routine,
