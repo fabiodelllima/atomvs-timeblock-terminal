@@ -52,9 +52,9 @@ def isolated_db(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Pat
     import sys
 
     for module in [
-        "src.timeblock.database",
-        "src.timeblock.commands.init",
-        "src.timeblock.main",
+        "timeblock.database",
+        "timeblock.commands.init",
+        "timeblock.main",
     ]:
         if module in sys.modules:
             del sys.modules[module]
@@ -90,7 +90,7 @@ class TestBRSystemInitialization:
         """
         # TECHNICAL DEBT: Import aqui devido a global state em engine.py
         # Ver docstring do módulo para detalhes sobre o problema arquitetural
-        from src.timeblock.main import app
+        from timeblock.main import app
 
         runner = CliRunner()
         # ACT
@@ -117,7 +117,7 @@ class TestBRSystemInitialization:
             Sistema deve pedir confirmação explícita.
         """
         # TECHNICAL DEBT: Import aqui devido a global state em engine.py
-        from src.timeblock.main import app
+        from timeblock.main import app
 
         runner = CliRunner()
         # ARRANGE - Primeira inicialização
@@ -142,7 +142,7 @@ class TestBRSystemInitialization:
             - BR-SYSTEM-INIT-003: Cancelamento de recriação
         """
         # TECHNICAL DEBT: Import aqui devido a global state em engine.py
-        from src.timeblock.main import app
+        from timeblock.main import app
 
         runner = CliRunner()
         # ARRANGE - Primeira inicialização
@@ -171,7 +171,7 @@ class TestBRSystemInitialization:
             - BR-SYSTEM-INIT-004: Tratamento de erros de criação
         """
         # TECHNICAL DEBT: Import aqui devido a global state em engine.py
-        from src.timeblock.main import app
+        from timeblock.main import app
 
         runner = CliRunner()
 
@@ -179,7 +179,7 @@ class TestBRSystemInitialization:
         def mock_create_error() -> None:
             raise Exception("Simulated database error")
 
-        monkeypatch.setattr("src.timeblock.commands.init.create_db_and_tables", mock_create_error)
+        monkeypatch.setattr("timeblock.commands.init.create_db_and_tables", mock_create_error)
         # ACT
         result = runner.invoke(app, ["init"])
         # ASSERT

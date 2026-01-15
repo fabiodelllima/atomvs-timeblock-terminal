@@ -11,7 +11,7 @@ Referências:
 
 from typer.testing import CliRunner
 
-from src.timeblock.main import app
+from timeblock.main import app
 
 
 class TestBRCLIMainCommands:

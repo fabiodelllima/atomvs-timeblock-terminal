@@ -11,13 +11,13 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
-from src.timeblock.models import (
+from timeblock.models import (
     Event,
     Habit,
     Recurrence,
 )
-from src.timeblock.models.enums import Status
-from src.timeblock.services.routine_service import RoutineService
+from timeblock.models.enums import Status
+from timeblock.services.routine_service import RoutineService
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -77,7 +77,7 @@ def habit_service_helper(
         recurrence: Recurrence,
         color: str | None = None,
     ) -> Habit:
-        from src.timeblock.services.habit_service import HabitService
+        from timeblock.services.habit_service import HabitService
 
         return HabitService.create_habit(
             routine_id=routine_id,

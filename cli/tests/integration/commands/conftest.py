@@ -8,7 +8,7 @@ import pytest
 from sqlmodel import SQLModel, create_engine
 from typer.testing import CliRunner
 
-from src.timeblock.main import app
+from timeblock.main import app
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def mock_get_session(integration_session):
     def _get_session():
         yield integration_session
 
-    with patch("src.timeblock.database.engine.get_session", _get_session):
+    with patch("timeblock.database.engine.get_session", _get_session):
         yield
 
 
@@ -37,7 +37,7 @@ def mock_get_engine_context(integration_engine):
     def _get_engine():
         yield integration_engine
 
-    with patch("src.timeblock.database.engine.get_engine_context", _get_engine):
+    with patch("timeblock.database.engine.get_engine_context", _get_engine):
         yield
 
 
@@ -53,7 +53,7 @@ def isolated_db(tmp_path, monkeypatch):
     db_path = tmp_path / "test_cli.db"
     monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_path))
 
-    from src.timeblock import config
+    from timeblock import config
 
     monkeypatch.setattr(config, "DATABASE_PATH", db_path)
 
