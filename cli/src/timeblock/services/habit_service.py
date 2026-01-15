@@ -4,8 +4,8 @@ from datetime import time
 
 from sqlmodel import Session, select
 
-from src.timeblock.database import get_engine_context
-from src.timeblock.models import Habit, Recurrence
+from timeblock.database import get_engine_context
+from timeblock.models import Habit, Recurrence
 
 
 class HabitService:

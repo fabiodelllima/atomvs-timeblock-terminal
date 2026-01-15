@@ -4,10 +4,10 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from ..database.engine import get_engine_context
-from ..models.enums import DoneSubstatus, Status
-from ..models.habit_instance import HabitInstance
-from ..models.time_log import TimeLog
+from timeblock.database.engine import get_engine_context
+from timeblock.models.enums import DoneSubstatus, Status
+from timeblock.models.habit_instance import HabitInstance
+from timeblock.models.time_log import TimeLog
 
 
 class TimerService:

@@ -4,8 +4,8 @@ from datetime import date, datetime, timedelta
 
 from sqlmodel import Session, or_, select
 
-from src.timeblock.database import get_engine_context
-from src.timeblock.models import Event, HabitInstance, Task
+from timeblock.database import get_engine_context
+from timeblock.models import Event, HabitInstance, Task
 
 from .event_reordering_models import Conflict, ConflictType
 
