@@ -2,7 +2,7 @@
 
 import typer
 
-from src.timeblock.commands import (
+from timeblock.commands import (
     add,
     habit,
     init,
@@ -14,7 +14,7 @@ from src.timeblock.commands import (
     task,
     timer,
 )
-from src.timeblock.commands import list as list_cmd
+from timeblock.commands import list as list_cmd
 
 app = typer.Typer(
     name="timeblock",
