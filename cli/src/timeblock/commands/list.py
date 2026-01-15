@@ -4,10 +4,10 @@ import typer
 from rich.console import Console
 from sqlmodel import Session
 
-from ..database import get_engine_context
-from ..utils.event_date_filters import DateFilterBuilder
-from ..utils.event_list_presenter import ListPresenter
-from ..utils.queries import fetch_events_in_range
+from timeblock.database import get_engine_context
+from timeblock.utils.event_date_filters import DateFilterBuilder
+from timeblock.utils.event_list_presenter import ListPresenter
+from timeblock.utils.queries import fetch_events_in_range
 
 console = Console()
 

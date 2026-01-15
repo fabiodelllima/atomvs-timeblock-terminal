@@ -5,8 +5,8 @@ from datetime import datetime
 import typer
 from rich.console import Console
 
-from src.timeblock.services.event_reordering_service import EventReorderingService
-from src.timeblock.utils.conflict_display import display_conflicts
+from timeblock.services.event_reordering_service import EventReorderingService
+from timeblock.utils.conflict_display import display_conflicts
 
 app = typer.Typer(help="Comandos de detecção de conflitos")
 console = Console()
