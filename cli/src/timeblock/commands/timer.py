@@ -11,11 +11,11 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
 
-from src.timeblock.services.habit_instance_service import HabitInstanceService
-from src.timeblock.services.habit_service import HabitService
-from src.timeblock.services.task_service import TaskService
-from src.timeblock.services.timer_service import TimerService
-from src.timeblock.utils.conflict_display import display_conflicts
+from timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.services.habit_service import HabitService
+from timeblock.services.task_service import TaskService
+from timeblock.services.timer_service import TimerService
+from timeblock.utils.conflict_display import display_conflicts
 
 app = typer.Typer(help="Gerenciar timer de tracking")
 console = Console()

@@ -9,6 +9,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ### Alterado (Documentação)
 
+- **(2026-01-15)** Padronização de Import Paths
+
+  - Corrigido imports de `src.timeblock.*` para `timeblock.*` em todo codebase
+  - Atualizado mock/monkeypatch paths em 45+ arquivos de teste
+  - Resolvido isolamento de sessão em testes (session injection)
+  - Corrigido conftest.py truncado da sessão anterior
+  - Métricas atualizadas: 454 testes passando, 61% cobertura
+
 - **(2025-01-11)** Housekeeping e correção de métricas
 
   - Deletadas 15 branches obsoletas (feat/_, fix/ci-_, refactor/\*)

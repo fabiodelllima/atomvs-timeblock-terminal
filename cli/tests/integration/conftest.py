@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import Engine, event
 from sqlmodel import Session, SQLModel, create_engine
 
-from src.timeblock.models import Habit, Recurrence, Routine, Task
+from timeblock.models import Habit, Recurrence, Routine, Task
 
 
 @pytest.fixture(scope="function")

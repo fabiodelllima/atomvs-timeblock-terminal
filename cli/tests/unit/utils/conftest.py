@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from sqlmodel import Session, select
 
-from src.timeblock.models.event import Event, EventStatus
+from timeblock.models.event import Event, EventStatus
 
 
 @pytest.fixture

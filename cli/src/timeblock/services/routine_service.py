@@ -2,7 +2,7 @@
 
 from sqlmodel import Session, select
 
-from src.timeblock.models import Routine
+from timeblock.models import Routine
 
 
 class RoutineService:
@@ -160,8 +160,8 @@ class RoutineService:
 
         if name is not None:
             name = name.strip()
-        if len(name) > 200:
-            raise ValueError("Nome da rotina não pode ter mais de 200 caracteres")
+            if len(name) > 200:
+                raise ValueError("Nome da rotina não pode ter mais de 200 caracteres")
             if not name:
                 raise ValueError("Nome da rotina não pode ser vazio")
             routine.name = name

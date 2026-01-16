@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import pytest
 from typer.testing import CliRunner
 
-from src.timeblock.main import app
+from timeblock.main import app
 
 
 @pytest.fixture

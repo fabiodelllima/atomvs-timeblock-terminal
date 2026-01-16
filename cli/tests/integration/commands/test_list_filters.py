@@ -38,9 +38,9 @@ def isolated_db(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Pat
     import sys
 
     for mod in [
-        "src.timeblock.database",
-        "src.timeblock.commands.list",
-        "src.timeblock.main",
+        "timeblock.database",
+        "timeblock.commands.list",
+        "timeblock.main",
     ]:
         sys.modules.pop(mod, None)
     yield db_path
@@ -58,7 +58,7 @@ def sample_events(isolated_db: Path) -> CliRunner:
         CliRunner já inicializado com eventos de teste.
     """
     # TECHNICAL DEBT: Import aqui devido a global state
-    from src.timeblock.main import app
+    from timeblock.main import app
 
     runner = CliRunner()
     # Inicializar banco
@@ -97,7 +97,7 @@ class TestBREventListFilters:
             - BR-EVENT-FILTER-001: Filtro por mês
         """
         # TECHNICAL DEBT: Import aqui devido a global state
-        from src.timeblock.main import app
+        from timeblock.main import app
 
         # ACT
         result = sample_events.invoke(app, ["list", "--month", "0"])
@@ -117,7 +117,7 @@ class TestBREventListFilters:
             - BR-EVENT-FILTER-002: Filtro por semana
         """
         # TECHNICAL DEBT: Import aqui devido a global state
-        from src.timeblock.main import app
+        from timeblock.main import app
 
         # ACT
         result = sample_events.invoke(app, ["list", "--week", "0"])
@@ -137,7 +137,7 @@ class TestBREventListFilters:
             - BR-EVENT-FILTER-003: Filtro por dia
         """
         # TECHNICAL DEBT: Import aqui devido a global state
-        from src.timeblock.main import app
+        from timeblock.main import app
 
         # ACT
         result = sample_events.invoke(app, ["list", "--day", "0"])
@@ -157,7 +157,7 @@ class TestBREventListFilters:
             - BR-EVENT-FILTER-004: Limite de resultados
         """
         # TECHNICAL DEBT: Import aqui devido a global state
-        from src.timeblock.main import app
+        from timeblock.main import app
 
         # ACT
         result = sample_events.invoke(app, ["list", "--limit", "5"])
@@ -180,7 +180,7 @@ class TestBREventListFilters:
             - BR-EVENT-FILTER-005: Exibir todos os eventos
         """
         # TECHNICAL DEBT: Import aqui devido a global state
-        from src.timeblock.main import app
+        from timeblock.main import app
 
         # ACT
         result = sample_events.invoke(app, ["list", "--all"])
@@ -207,7 +207,7 @@ class TestBREventListFilters:
             onde o mesmo teste aparecia 3 vezes.
         """
         # TECHNICAL DEBT: Import aqui devido a global state
-        from src.timeblock.main import app
+        from timeblock.main import app
 
         runner = CliRunner()
         runner.invoke(app, ["init"])
@@ -216,7 +216,7 @@ class TestBREventListFilters:
         def mock_fetch_error(*args: object, **kwargs: object) -> NoReturn:
             raise Exception("Database connection failed")
 
-        monkeypatch.setattr("src.timeblock.commands.list.fetch_events_in_range", mock_fetch_error)
+        monkeypatch.setattr("timeblock.commands.list.fetch_events_in_range", mock_fetch_error)
         # ACT
         result = runner.invoke(app, ["list"])
         # ASSERT

@@ -8,13 +8,13 @@ from datetime import date, time
 
 import pytest
 
-from src.timeblock.models.enums import (
+from timeblock.models.enums import (
     DoneSubstatus,
     NotDoneSubstatus,
     SkipReason,
     Status,
 )
-from src.timeblock.models.habit_instance import HabitInstance
+from timeblock.models.habit_instance import HabitInstance
 
 
 class TestBRStatus001TimerStopCalculatesSubstatus:

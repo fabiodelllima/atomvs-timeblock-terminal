@@ -7,7 +7,7 @@ from datetime import date, time
 
 from freezegun import freeze_time
 
-from src.timeblock.models import HabitInstance, Status
+from timeblock.models import HabitInstance, Status
 
 
 class TestHabitInstanceOverdue:

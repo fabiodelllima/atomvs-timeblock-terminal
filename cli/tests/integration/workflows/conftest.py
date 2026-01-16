@@ -14,7 +14,7 @@ def e2e_db_path(tmp_path):
 @pytest.fixture
 def complete_routine_setup(integration_session, sample_routine, sample_habits):
     """Setup completo: rotina + hábitos + instâncias geradas."""
-    from src.timeblock.services.habit_instance_service import HabitInstanceService
+    from timeblock.services.habit_instance_service import HabitInstanceService
 
     today = date.today()
     end_date = today + timedelta(days=7)

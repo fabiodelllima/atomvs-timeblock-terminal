@@ -17,8 +17,8 @@ from pytest import MonkeyPatch
 from sqlalchemy.engine import Engine
 from sqlmodel import Session
 
-from src.timeblock.models import Recurrence, Routine
-from src.timeblock.services.habit_service import HabitService
+from timeblock.models import Recurrence, Routine
+from timeblock.services.habit_service import HabitService
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def mock_engine(monkeypatch: MonkeyPatch, test_engine: Engine) -> None:
     def mock_get_engine():
         yield test_engine
 
-    monkeypatch.setattr("src.timeblock.services.habit_service.get_engine_context", mock_get_engine)
+    monkeypatch.setattr("timeblock.services.habit_service.get_engine_context", mock_get_engine)
 
 
 class TestBRHabit001Creation:

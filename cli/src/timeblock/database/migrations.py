@@ -4,8 +4,8 @@ from pathlib import Path
 
 from sqlmodel import SQLModel, create_engine
 
-from ..config import DATABASE_PATH
-from ..models import Habit, HabitInstance, Routine, Task, TimeLog
+from timeblock.config import DATABASE_PATH
+from timeblock.models import Habit, HabitInstance, Routine, Task, TimeLog
 
 
 def migrate_v2(db_path: Path | None = None) -> None:

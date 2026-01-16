@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from src.timeblock.services.event_reordering_models import Conflict, ConflictType
+from timeblock.services.event_reordering_models import Conflict, ConflictType
 
 
 class TestBREvent002ConflictDataclass:

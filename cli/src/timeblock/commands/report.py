@@ -6,10 +6,10 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from src.timeblock.services.habit_instance_service import HabitInstanceService
-from src.timeblock.services.habit_service import HabitService
-from src.timeblock.services.task_service import TaskService
-from src.timeblock.services.timer_service import TimerService
+from timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.services.habit_service import HabitService
+from timeblock.services.task_service import TaskService
+from timeblock.services.timer_service import TimerService
 
 app = typer.Typer(help="Gerar relatórios e análises")
 console = Console()

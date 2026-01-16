@@ -10,14 +10,14 @@ from unittest.mock import patch
 
 from sqlmodel import Session
 
-from src.timeblock.models import HabitInstance, Task
-from src.timeblock.services.event_reordering_service import EventReorderingService
+from timeblock.models import HabitInstance, Task
+from timeblock.services.event_reordering_service import EventReorderingService
 
 
 class TestDetectConflicts:
     """Tests for detect_conflicts. Validates BR-REORDER-001."""
 
-    @patch("src.timeblock.services.event_reordering_service.get_engine_context")
+    @patch("timeblock.services.event_reordering_service.get_engine_context")
     def test_no_conflicts(self, mock_context, test_engine, session: Session) -> None:
         """No conflicts when events don't overlap."""
         mock_context.return_value.__enter__.return_value = test_engine
@@ -30,14 +30,14 @@ class TestDetectConflicts:
         conflicts = EventReorderingService.detect_conflicts(task.id, "task")
         assert len(conflicts) == 0
 
-    @patch("src.timeblock.services.event_reordering_service.get_engine_context")
+    @patch("timeblock.services.event_reordering_service.get_engine_context")
     def test_event_not_found(self, mock_context, test_engine) -> None:
         """Returns empty list when event doesn't exist."""
         mock_context.return_value.__enter__.return_value = test_engine
         conflicts = EventReorderingService.detect_conflicts(9999, "task")
         assert len(conflicts) == 0
 
-    @patch("src.timeblock.services.event_reordering_service.get_engine_context")
+    @patch("timeblock.services.event_reordering_service.get_engine_context")
     def test_task_overlaps_with_task(self, mock_context, test_engine, session: Session) -> None:
         """Detects conflict between two overlapping tasks."""
         mock_context.return_value.__enter__.return_value = test_engine

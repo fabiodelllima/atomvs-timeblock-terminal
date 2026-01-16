@@ -6,9 +6,9 @@ import typer
 from rich.console import Console
 from sqlmodel import Session
 
-from ..database import get_engine_context
-from ..models import Event, EventStatus
-from ..utils.validators import is_valid_hex_color, parse_time, validate_time_range
+from timeblock.database import get_engine_context
+from timeblock.models import Event, EventStatus
+from timeblock.utils.validators import is_valid_hex_color, parse_time, validate_time_range
 
 console = Console()
 

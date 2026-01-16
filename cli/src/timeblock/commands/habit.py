@@ -8,14 +8,14 @@ from dateutil.relativedelta import relativedelta  # type: ignore[import-untyped]
 from rich.console import Console
 from sqlmodel import Session
 
-from src.timeblock.database import get_engine_context
-from src.timeblock.models import Recurrence
-from src.timeblock.models.enums import SkipReason
-from src.timeblock.models.habit_instance import HabitInstance
-from src.timeblock.services.habit_instance_service import HabitInstanceService
-from src.timeblock.services.habit_service import HabitService
-from src.timeblock.services.routine_service import RoutineService
-from src.timeblock.utils.conflict_display import display_conflicts
+from timeblock.database import get_engine_context
+from timeblock.models import Recurrence
+from timeblock.models.enums import SkipReason
+from timeblock.models.habit_instance import HabitInstance
+from timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.services.habit_service import HabitService
+from timeblock.services.routine_service import RoutineService
+from timeblock.utils.conflict_display import display_conflicts
 
 app = typer.Typer(help="Gerenciar hábitos")
 console = Console()

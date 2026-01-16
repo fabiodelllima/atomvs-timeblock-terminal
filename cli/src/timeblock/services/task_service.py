@@ -4,9 +4,9 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from src.timeblock.database import get_engine_context
+from timeblock.database import get_engine_context
+from timeblock.models import Task
 
-from ..models import Task
 from .event_reordering_models import Conflict
 from .event_reordering_service import EventReorderingService
 

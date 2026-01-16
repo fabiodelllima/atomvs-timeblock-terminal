@@ -9,10 +9,10 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from src.timeblock.services.event_reordering_service import EventReorderingService
-from src.timeblock.services.habit_instance_service import HabitInstanceService
-from src.timeblock.services.habit_service import HabitService
-from src.timeblock.utils.proposal_display import confirm_apply_proposal, display_proposal
+from timeblock.services.event_reordering_service import EventReorderingService
+from timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.services.habit_service import HabitService
+from timeblock.utils.proposal_display import confirm_apply_proposal, display_proposal
 
 app = typer.Typer(help="Gerenciar agenda de hábitos")
 console = Console()

@@ -5,7 +5,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from ..database import create_db_and_tables, get_db_path
+from timeblock.database import create_db_and_tables, get_db_path
 
 console = Console()
 

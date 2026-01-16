@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from src.timeblock.utils.date_helpers import (
+from timeblock.utils.date_helpers import (
     add_months,
     get_day_range,
     get_month_range,

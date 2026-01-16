@@ -2,7 +2,7 @@
 
 from rich.table import Table
 
-from ..models import Event
+from timeblock.models import Event
 
 # Status color mapping for terminal display
 STATUS_COLORS = {

@@ -18,7 +18,7 @@ from sqlmodel import SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 from typer.testing import CliRunner
 
-from src.timeblock.main import app
+from timeblock.main import app
 
 
 @pytest.fixture(scope="function")
@@ -49,8 +49,8 @@ def isolated_db(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
         finally:
             pass
 
-    monkeypatch.setattr("src.timeblock.database.get_engine_context", mock_engine_context)
-    monkeypatch.setattr("src.timeblock.commands.list.get_engine_context", mock_engine_context)
+    monkeypatch.setattr("timeblock.database.get_engine_context", mock_engine_context)
+    monkeypatch.setattr("timeblock.commands.list.get_engine_context", mock_engine_context)
 
     SQLModel.metadata.create_all(engine)
 

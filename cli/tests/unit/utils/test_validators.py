@@ -4,7 +4,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from src.timeblock.utils.validators import (
+from timeblock.utils.validators import (
     is_valid_hex_color,
     parse_time,
     validate_time_range,

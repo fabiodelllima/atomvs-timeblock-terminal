@@ -1,6 +1,6 @@
 """Tests for list command helper functions."""
 
-from src.timeblock.commands.list import _describe_filter
+from timeblock.commands.list import _describe_filter
 
 
 def test_describe_filter_with_month():

@@ -12,9 +12,9 @@ Referências:
 from sqlmodel import Session, select
 from typer.testing import CliRunner
 
-from src.timeblock.database import get_engine
-from src.timeblock.main import app
-from src.timeblock.models import Event
+from timeblock.database import get_engine
+from timeblock.main import app
+from timeblock.models import Event
 
 
 class TestBRTaskCreationSuccess:

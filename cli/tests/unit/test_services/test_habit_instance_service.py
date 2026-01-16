@@ -10,14 +10,14 @@ from datetime import date, datetime, time, timedelta
 import pytest
 from sqlmodel import Session
 
-from src.timeblock.models import (
+from timeblock.models import (
     Habit,
     HabitInstance,
     Routine,
     Status,
 )
-from src.timeblock.services.habit_instance_service import HabitInstanceService
-from src.timeblock.services.task_service import TaskService
+from timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.services.task_service import TaskService
 
 
 @pytest.fixture(autouse=True)
@@ -30,15 +30,15 @@ def mock_engine(monkeypatch, test_engine):
         yield test_engine
 
     monkeypatch.setattr(
-        "src.timeblock.services.habit_instance_service.get_engine_context",
+        "timeblock.services.habit_instance_service.get_engine_context",
         mock_get_engine,
     )
     monkeypatch.setattr(
-        "src.timeblock.services.task_service.get_engine_context",
+        "timeblock.services.task_service.get_engine_context",
         mock_get_engine,
     )
     monkeypatch.setattr(
-        "src.timeblock.services.event_reordering_service.get_engine_context",
+        "timeblock.services.event_reordering_service.get_engine_context",
         mock_get_engine,
     )
 

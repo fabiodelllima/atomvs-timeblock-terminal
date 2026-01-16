@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from src.timeblock.models.habit import Recurrence
-from src.timeblock.services.habit_instance_service import HabitInstanceService
-from src.timeblock.services.habit_service import HabitService
-from src.timeblock.services.routine_service import RoutineService
-from src.timeblock.services.task_service import TaskService
-from src.timeblock.services.timer_service import TimerService
+from timeblock.models.habit import Recurrence
+from timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.services.habit_service import HabitService
+from timeblock.services.routine_service import RoutineService
+from timeblock.services.task_service import TaskService
+from timeblock.services.timer_service import TimerService
 
 
 @pytest.mark.skip(reason="TODO: Atualizar para API v2 - start_timer(habit_instance_id) apenas")

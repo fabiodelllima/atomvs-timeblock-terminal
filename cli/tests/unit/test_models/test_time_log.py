@@ -7,7 +7,7 @@ from datetime import datetime
 
 from sqlmodel import Session
 
-from src.timeblock.models.time_log import TimeLog
+from timeblock.models.time_log import TimeLog
 
 
 def test_time_log_creation(session: Session) -> None:

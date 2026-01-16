@@ -4,7 +4,7 @@ from datetime import UTC, timedelta
 
 from sqlmodel import Session
 
-from src.timeblock.utils.queries import (
+from timeblock.utils.queries import (
     build_events_query,
     fetch_events,
     fetch_events_in_range,

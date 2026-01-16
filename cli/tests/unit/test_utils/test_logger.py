@@ -5,7 +5,7 @@ import tempfile
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from src.timeblock.utils.logger import disable_logging, enable_logging, get_logger, setup_logger
+from timeblock.utils.logger import disable_logging, enable_logging, get_logger, setup_logger
 
 
 class TestSetupLogger:

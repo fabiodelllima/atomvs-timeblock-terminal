@@ -11,7 +11,7 @@ from datetime import datetime
 import pytest
 from sqlalchemy.engine import Engine
 
-from src.timeblock.services.task_service import TaskService
+from timeblock.services.task_service import TaskService
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +23,7 @@ def mock_engine(monkeypatch, test_engine: Engine):
     def mock_get_engine():
         yield test_engine
 
-    monkeypatch.setattr("src.timeblock.services.task_service.get_engine_context", mock_get_engine)
+    monkeypatch.setattr("timeblock.services.task_service.get_engine_context", mock_get_engine)
 
 
 class TestCreateTask:

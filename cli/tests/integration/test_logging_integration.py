@@ -7,9 +7,9 @@ from pathlib import Path
 import pytest
 from sqlmodel import Session, SQLModel, create_engine
 
-from src.timeblock.models import Habit, Recurrence, Routine
-from src.timeblock.services.habit_instance_service import HabitInstanceService
-from src.timeblock.utils.logger import disable_logging, enable_logging, setup_logger
+from timeblock.models import Habit, Recurrence, Routine
+from timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.utils.logger import disable_logging, enable_logging, setup_logger
 
 
 @pytest.fixture
@@ -31,7 +31,7 @@ def mock_engine(monkeypatch, test_engine):
         yield test_engine
 
     monkeypatch.setattr(
-        "src.timeblock.services.habit_instance_service.get_engine_context", mock_get_engine
+        "timeblock.services.habit_instance_service.get_engine_context", mock_get_engine
     )
 
 
@@ -72,7 +72,7 @@ class TestServiceLogging:
 
             # Preparação: Configura logging para arquivo
             setup_logger(
-                "src.timeblock.services.habit_instance_service",
+                "timeblock.services.habit_instance_service",
                 level="INFO",
                 log_file=log_file,
                 console=False,
@@ -106,7 +106,7 @@ class TestServiceLogging:
             instance_id = instances[0].id
 
             setup_logger(
-                "src.timeblock.services.habit_instance_service",
+                "timeblock.services.habit_instance_service",
                 level="INFO",
                 log_file=log_file,
                 console=False,
@@ -132,7 +132,7 @@ class TestServiceLogging:
 
             # Preparação: Configura logging
             setup_logger(
-                "src.timeblock.services.habit_instance_service",
+                "timeblock.services.habit_instance_service",
                 level="ERROR",
                 log_file=log_file,
                 console=False,
@@ -159,7 +159,7 @@ class TestServiceLogging:
 
             # Preparação: Configura logging
             setup_logger(
-                "src.timeblock.services.habit_instance_service",
+                "timeblock.services.habit_instance_service",
                 level="WARNING",
                 log_file=log_file,
                 console=False,

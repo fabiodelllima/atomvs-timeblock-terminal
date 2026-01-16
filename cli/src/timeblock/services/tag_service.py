@@ -2,8 +2,8 @@
 
 from sqlmodel import Session, select
 
-from src.timeblock.database import get_engine_context
-from src.timeblock.models import Tag
+from timeblock.database import get_engine_context
+from timeblock.models import Tag
 
 
 class TagService:

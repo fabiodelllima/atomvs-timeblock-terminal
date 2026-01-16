@@ -4,11 +4,11 @@ from datetime import date, time, timedelta
 
 from sqlmodel import Session, select
 
-from src.timeblock.database import get_engine_context
-from src.timeblock.models import Habit, HabitInstance, Recurrence
-from src.timeblock.models.enums import NotDoneSubstatus, SkipReason, Status
-from src.timeblock.models.time_log import TimeLog
-from src.timeblock.utils.logger import get_logger
+from timeblock.database import get_engine_context
+from timeblock.models import Habit, HabitInstance, Recurrence
+from timeblock.models.enums import NotDoneSubstatus, SkipReason, Status
+from timeblock.models.time_log import TimeLog
+from timeblock.utils.logger import get_logger
 
 from .event_reordering_models import Conflict
 from .event_reordering_service import EventReorderingService
