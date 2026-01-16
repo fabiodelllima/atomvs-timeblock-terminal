@@ -6,10 +6,8 @@ from timeblock.commands import (
     add,
     habit,
     init,
-    report,
     reschedule,
     routine,
-    schedule,
     tag,
     task,
     timer,
@@ -30,10 +28,8 @@ app.command("list")(list_cmd.list_events)
 # Comandos v2.0
 app.add_typer(routine.app, name="routine")
 app.add_typer(habit.app, name="habit")
-app.add_typer(schedule.app, name="schedule")
 app.add_typer(task.app, name="task")
 app.add_typer(timer.app, name="timer")
-app.add_typer(report.app, name="report")
 app.add_typer(tag.app, name="tag")
 app.add_typer(reschedule.app, name="reschedule")
 
