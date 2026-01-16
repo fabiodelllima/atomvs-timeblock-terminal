@@ -10,7 +10,9 @@ from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
+from sqlmodel import Session
 
+from timeblock.database import get_engine_context
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.services.task_service import TaskService
@@ -50,15 +52,19 @@ def _display_timer(timelog_id: int):
                 minutes, seconds = divmod(remainder, 60)
 
                 # Determinar atividade
+                activity = "Atividade"
                 if timelog.habit_instance_id:
                     instance = HabitInstanceService.get_instance(timelog.habit_instance_id)
-                    habit = HabitService.get_habit(instance.habit_id)
-                    activity = f"{habit.title} ({instance.date.strftime('%d/%m/%Y')})"
+                    if instance:
+                        with get_engine_context() as engine, Session(engine) as session:
+                            habit_service = HabitService(session)
+                            habit = habit_service.get_habit(instance.habit_id)
+                            if habit:
+                                activity = f"{habit.title} ({instance.date.strftime('%d/%m/%Y')})"
                 elif timelog.task_id:
                     task = TaskService.get_task(timelog.task_id)
-                    activity = f"{task.title}"
-                else:
-                    activity = "Atividade"
+                    if task:
+                        activity = f"{task.title}"
 
                 # Criar display
                 text = Text()
@@ -95,7 +101,7 @@ def _display_timer(timelog_id: int):
                 )
                 return
             except Exception as e:
-                console.print(f"\n[red]✗ Erro: {e}[/red]")
+                console.print(f"\n[red]Erro: {e}[/red]")
                 return
 
 
@@ -115,7 +121,7 @@ def start_timer(
         active = TimerService.get_active_timer()
         if active:
             console.print(
-                "[red]✗ Já existe um timer ativo. Use 'timer stop' ou 'timer cancel' primeiro.[/red]"
+                "[red]Já existe um timer ativo. Use 'timer stop' ou 'timer cancel' primeiro.[/red]"
             )
             raise typer.Exit(1)
 
@@ -127,8 +133,10 @@ def start_timer(
             # Buscar detalhes
             if schedule:
                 instance = HabitInstanceService.get_instance(schedule)
-                habit = HabitService.get_habit(instance.habit_id)
-                activity = f"{habit.title} ({instance.date.strftime('%d/%m/%Y')})"
+                with get_engine_context() as engine, Session(engine) as session:
+                    habit_service = HabitService(session)
+                    habit = habit_service.get_habit(instance.habit_id)
+                    activity = f"{habit.title} ({instance.date.strftime('%d/%m/%Y')})"
             else:
                 task_obj = TaskService.get_task(task)
                 activity = task_obj.title
@@ -149,27 +157,29 @@ def start_timer(
             selected = _get_selected_schedule()
             if not selected:
                 console.print(
-                    "[red]✗ Nenhuma instância selecionada. "
+                    "[red]Nenhuma instância selecionada. "
                     "Use 'timeblock schedule select <id>' ou '--schedule <id>'[/red]"
                 )
                 raise typer.Exit(1)
 
             instance = HabitInstanceService.get_instance(selected)
-            habit = HabitService.get_habit(instance.habit_id)
+            with get_engine_context() as engine, Session(engine) as session:
+                habit_service = HabitService(session)
+                habit = habit_service.get_habit(instance.habit_id)
 
-            if not typer.confirm(f"Iniciar timer para {habit.title}?", default=True):
-                console.print("[yellow]Cancelado.[/yellow]")
-                return
+                if not typer.confirm(f"Iniciar timer para {habit.title}?", default=True):
+                    console.print("[yellow]Cancelado.[/yellow]")
+                    return
 
             timelog, conflicts = TimerService.start_timer(habit_instance_id=selected)
 
         console.print(
-            f"\n[green]✓ Timer iniciado às {timelog.start_time.strftime('%H:%M')}![/green]\n"
+            f"\n[green]Timer iniciado às {timelog.start_time.strftime('%H:%M')}![/green]\n"
         )
 
         # Exibir conflitos se houver, mas não bloqueia
         if conflicts:
-            console.print("[yellow]⚠ Atenção: Conflitos detectados no horário atual:[/yellow]")
+            console.print("[yellow]Atenção: Conflitos detectados no horário atual:[/yellow]")
             display_conflicts(conflicts, console)
             console.print(
                 "[dim]Timer foi iniciado. Você pode ajustar eventos conflitantes depois.[/dim]\n"
@@ -179,7 +189,7 @@ def start_timer(
         _display_timer(timelog.id)
 
     except ValueError as e:
-        console.print(f"[red]✗ Erro: {e}[/red]")
+        console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
 
@@ -189,14 +199,14 @@ def pause_timer():
     try:
         active = TimerService.get_active_timer()
         if not active:
-            console.print("[red]✗ Nenhum timer ativo[/red]")
+            console.print("[red]Nenhum timer ativo[/red]")
             raise typer.Exit(1)
 
         TimerService.pause_timer(active.id)
         console.print("[yellow][||] Timer pausado[/yellow]")
 
     except ValueError as e:
-        console.print(f"[red]✗ Erro: {e}[/red]")
+        console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
 
@@ -206,7 +216,7 @@ def resume_timer():
     try:
         active = TimerService.get_active_timer()
         if not active:
-            console.print("[red]✗ Nenhum timer ativo[/red]")
+            console.print("[red]Nenhum timer ativo[/red]")
             raise typer.Exit(1)
 
         TimerService.resume_timer(active.id)
@@ -216,7 +226,7 @@ def resume_timer():
         _display_timer(active.id)
 
     except ValueError as e:
-        console.print(f"[red]✗ Erro: {e}[/red]")
+        console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
 
@@ -226,7 +236,7 @@ def stop_timer():
     try:
         active = TimerService.get_active_timer()
         if not active:
-            console.print("[red]✗ Nenhum timer ativo[/red]")
+            console.print("[red]Nenhum timer ativo[/red]")
             raise typer.Exit(1)
 
         # Parar timer
@@ -239,14 +249,14 @@ def stop_timer():
         minutes, seconds = divmod(remainder, 60)
 
         # Output
-        console.print("\n[green]✓ Timer finalizado![/green]\n")
+        console.print("\n[green]Timer finalizado![/green]\n")
         console.print(f"Duração total: {hours}h {minutes}min {seconds}s")
         console.print(f"Início: {timelog.start_time.strftime('%H:%M')}")
         console.print(f"Fim: {timelog.end_time.strftime('%H:%M')}")
         console.print()
 
     except ValueError as e:
-        console.print(f"[red]✗ Erro: {e}[/red]")
+        console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
 
@@ -256,7 +266,7 @@ def cancel_timer():
     try:
         active = TimerService.get_active_timer()
         if not active:
-            console.print("[red]✗ Nenhum timer ativo[/red]")
+            console.print("[red]Nenhum timer ativo[/red]")
             raise typer.Exit(1)
 
         if not typer.confirm("Cancelar timer? (não será salvo)", default=False):
@@ -264,10 +274,10 @@ def cancel_timer():
             return
 
         TimerService.cancel_timer(active.id)
-        console.print("[yellow]✓ Timer cancelado (não salvo)[/yellow]")
+        console.print("[yellow]Timer cancelado (não salvo)[/yellow]")
 
     except ValueError as e:
-        console.print(f"[red]✗ Erro: {e}[/red]")
+        console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
 
@@ -288,20 +298,24 @@ def timer_status():
         minutes, seconds = divmod(remainder, 60)
 
         # Determinar atividade
+        activity = "Atividade"
         if active.habit_instance_id:
             instance = HabitInstanceService.get_instance(active.habit_instance_id)
-            habit = HabitService.get_habit(instance.habit_id)
-            activity = f"{habit.title} ({instance.date.strftime('%d/%m/%Y')})"
+            if instance:
+                with get_engine_context() as engine, Session(engine) as session:
+                    habit_service = HabitService(session)
+                    habit = habit_service.get_habit(instance.habit_id)
+                    if habit:
+                        activity = f"{habit.title} ({instance.date.strftime('%d/%m/%Y')})"
         elif active.task_id:
             task = TaskService.get_task(active.task_id)
-            activity = task.title
-        else:
-            activity = "Atividade"
+            if task:
+                activity = task.title
 
         console.print(f"\n[bold]Timer Ativo:[/bold] {activity}")
         console.print(f"Tempo decorrido: {hours:02d}:{minutes:02d}:{seconds:02d}")
         console.print(f"Iniciado: {active.start_time.strftime('%H:%M')}\n")
 
     except ValueError as e:
-        console.print(f"[red]✗ Erro: {e}[/red]")
+        console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
