@@ -6,13 +6,13 @@
 ╔═══════════════════════════════════════════════════════════════╗
 ║  TimeBlock Organizer v1.3.0                                   ║
 ║  ───────────────────────────────────────────────────────────  ║
-║  [x] 441 testes  [x] 39% cobertura  [x] 25 ADRs  [x] 50 BRs   ║
+║  [x] 454 testes  [x] 61% cobertura  [x] 25 ADRs  [x] 50 BRs   ║
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-441%20passing-success.svg)](cli/tests/)
-[![Coverage](https://img.shields.io/badge/coverage-39%25-yellow.svg)](cli/tests/)
+[![Tests](https://img.shields.io/badge/tests-454%20passing-success.svg)](cli/tests/)
+[![Coverage](https://img.shields.io/badge/coverage-61%25-yellow.svg)](cli/tests/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Visão Geral
@@ -182,9 +182,9 @@ timeblock-organizer/
 │   │   │
 │   │   └── utils/             # Helpers
 │   │
-│   └── tests/                 # 441 testes
+│   └── tests/                 # 454 testes
 │       ├── unit/              #   377 (85%)
-│       ├── integration/       #   64 (15%)
+│       ├── integration/       #   64  (15%)
 │       ├── e2e/
 │       └── bdd/
 │
@@ -337,8 +337,8 @@ timeblock task complete 1
 ║                         MÉTRICAS v1.3.0                            ║
 ╠════════════════════════════════════════════════════════════════════╣
 ║                                                                    ║
-║   Testes          441        ████████████████████████████  100%    ║
-║   Cobertura       39%        ███████████░░░░░░░░░░░░░░░░░   39%    ║
+║   Testes          454        ████████████████████████████  100%    ║
+║   Cobertura       61%        ████████████████░░░░░░░░░░░░   61%    ║
 ║   Modelos         8          ████████░░░░░░░░░░░░░░░░░░░░   27%    ║
 ║   Services        9          █████████░░░░░░░░░░░░░░░░░░░   30%    ║
 ║   ADRs            25         █████████████████████████░░░   83%    ║
