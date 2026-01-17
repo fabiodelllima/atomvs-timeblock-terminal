@@ -226,7 +226,7 @@ def pause_timer():
             console.print("[red]Nenhum timer ativo[/red]")
             raise typer.Exit(1)
 
-        TimerService.pause_timer(active.id)
+        TimerService.pause_timer(active.id)  # type: ignore[arg-type]
         console.print("[yellow][||] Timer pausado[/yellow]")
 
     except ValueError as e:
@@ -243,11 +243,11 @@ def resume_timer():
             console.print("[red]Nenhum timer ativo[/red]")
             raise typer.Exit(1)
 
-        TimerService.resume_timer(active.id)
+        TimerService.resume_timer(active.id)  # type: ignore[arg-type]
         console.print("[green][>] Timer retomado[/green]")
 
         # Mostrar display novamente
-        _display_timer(active.id)
+        _display_timer(active.id)  # type: ignore[arg-type]
 
     except ValueError as e:
         console.print(f"[red]Erro: {e}[/red]")
@@ -264,7 +264,7 @@ def stop_timer():
             raise typer.Exit(1)
 
         # Parar timer
-        timelog = TimerService.stop_timer(active.id)
+        timelog = TimerService.stop_timer(active.id)  # type: ignore[arg-type]
 
         if timelog.end_time is None:
             console.print("[red]Erro ao finalizar timer[/red]")
@@ -301,7 +301,7 @@ def cancel_timer():
             console.print("[yellow]Operação cancelada.[/yellow]")
             return
 
-        TimerService.cancel_timer(active.id)
+        TimerService.cancel_timer(active.id)  # type: ignore[arg-type]
         console.print("[yellow]Timer cancelado (não salvo)[/yellow]")
 
     except ValueError as e:

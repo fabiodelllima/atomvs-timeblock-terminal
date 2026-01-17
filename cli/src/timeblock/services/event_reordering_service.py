@@ -116,8 +116,8 @@ class EventReorderingService:
             # Busca todos os eventos do dia
             event_stmt = select(Event).where(
                 or_(
-                    Event.scheduled_start.between(day_start, day_end)  ,  # type: ignore[attr-defined]
-                    Event.scheduled_end.between(day_start, day_end)  ,  # type: ignore[attr-defined]
+                    Event.scheduled_start.between(day_start, day_end),  # type: ignore[attr-defined]
+                    Event.scheduled_end.between(day_start, day_end),  # type: ignore[attr-defined]
                     (Event.scheduled_start <= day_start) & (Event.scheduled_end >= day_end),
                 )
             )
@@ -126,21 +126,27 @@ class EventReorderingService:
             # Verifica cada task contra os outros
             for task in tasks:
                 task_conflicts = EventReorderingService.detect_conflicts(
-                    task.id, "task", session=sess  # type: ignore[arg-type]
+                    task.id,  # type: ignore[arg-type]
+                    "task",
+                    session=sess,
                 )
                 all_conflicts.extend(task_conflicts)
 
             # Verifica cada instância de hábito contra os outros
             for habit in habits:
                 habit_conflicts = EventReorderingService.detect_conflicts(
-                    habit.id, "habit_instance", session=sess  # type: ignore[arg-type]
+                    habit.id,  # type: ignore[arg-type]
+                    "habit_instance",
+                    session=sess,
                 )
                 all_conflicts.extend(habit_conflicts)
 
             # Verifica cada evento contra os outros
             for event in events:
                 event_conflicts = EventReorderingService.detect_conflicts(
-                    event.id, "event", session=sess  # type: ignore[arg-type]
+                    event.id,  # type: ignore[arg-type]
+                    "event",
+                    session=sess,
                 )
                 all_conflicts.extend(event_conflicts)
 
