@@ -30,6 +30,7 @@ class TimerService:
         Returns:
             TimeLog se encontrado, None caso contrário.
         """
+
         def _get(sess: Session) -> TimeLog | None:
             return sess.get(TimeLog, timelog_id)
 
@@ -59,13 +60,12 @@ class TimerService:
         Returns:
             Lista de timelogs (vazia se nenhum resultado).
         """
+
         def _list(sess: Session) -> list[TimeLog]:
             statement = select(TimeLog)
 
             if habit_instance_id is not None:
-                statement = statement.where(
-                    TimeLog.habit_instance_id == habit_instance_id
-                )
+                statement = statement.where(TimeLog.habit_instance_id == habit_instance_id)
 
             if date_start is not None:
                 start_datetime = datetime.combine(date_start, datetime.min.time())
@@ -75,7 +75,7 @@ class TimerService:
                 end_datetime = datetime.combine(date_end, datetime.max.time())
                 statement = statement.where(TimeLog.start_time <= end_datetime)
 
-            statement = statement.order_by(TimeLog.start_time)
+            statement = statement.order_by(TimeLog.start_time)  # type: ignore[arg-type]
             return list(sess.exec(statement).all())
 
         if session is not None:
@@ -83,8 +83,6 @@ class TimerService:
 
         with get_engine_context() as engine, Session(engine) as sess:
             return _list(sess)
-
-
 
     @staticmethod
     def start_timer(habit_instance_id: int, session: Session | None = None) -> TimeLog:
@@ -107,7 +105,7 @@ class TimerService:
                 raise ValueError(f"HabitInstance {habit_instance_id} not found")
 
             # BR-TIMER-001: Verificar se já existe qualquer timer ativo (global)
-            statement = select(TimeLog).where(TimeLog.end_time.is_(None))
+            statement = select(TimeLog).where(TimeLog.end_time.is_(None))  # type: ignore[union-attr]
             existing_timer = sess.exec(statement).first()
             if existing_timer:
                 raise ValueError("Timer already active")
@@ -373,7 +371,7 @@ class TimerService:
         """
 
         def _get(sess: Session) -> TimeLog | None:
-            statement = select(TimeLog).where(TimeLog.end_time.is_(None))
+            statement = select(TimeLog).where(TimeLog.end_time.is_(None))  # type: ignore[union-attr]
             return sess.exec(statement).first()
 
         if session is not None:

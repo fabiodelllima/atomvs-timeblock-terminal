@@ -76,7 +76,7 @@ class HabitInstanceService:
             if date_end is not None:
                 statement = statement.where(HabitInstance.date <= date_end)
 
-            statement = statement.order_by(HabitInstance.date)
+            statement = statement.order_by(HabitInstance.date)  # type: ignore[arg-type]
             return list(sess.exec(statement).all())
 
         if session is not None:
