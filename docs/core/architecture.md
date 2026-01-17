@@ -350,6 +350,80 @@ class HabitInstanceService:
 - Concorrência (sem race conditions)
 - Simplicidade (fácil entender fluxo)
 
+#### 4.2.1. Service API Contract
+
+Todo service implementa métodos CRUD seguindo padrões consistentes.
+
+**Pattern: get_by_id**
+
+```python
+def get_{entity}(
+    self,
+    entity_id: int,
+    session: Session | None = None
+) -> Entity | None:
+    """Recupera entidade por ID.
+
+    Returns:
+        Entity se encontrada, None caso contrário.
+    """
+```
+
+**Pattern: list**
+
+```python
+def list_{entities}(
+    self,
+    filters: dict | None = None,
+    session: Session | None = None
+) -> list[Entity]:
+    """Lista entidades com filtros opcionais.
+
+    Returns:
+        Lista de entidades (vazia se nenhuma corresponder).
+    """
+```
+
+**TimerService**
+
+```python
+class TimerService:
+    # CRUD
+    def get_timelog(self, timelog_id: int, session: Session | None = None) -> TimeLog | None
+    def get_active_timer(self, session: Session | None = None) -> TimeLog | None
+    def list_timelogs(self, filters: dict | None = None, session: Session | None = None) -> list[TimeLog]
+
+    # Operations
+    def start_timer(self, habit_instance_id: int | None = None, task_id: int | None = None, session: Session | None = None) -> tuple[TimeLog, list[Conflict] | None]
+    def stop_timer(self, timelog_id: int, session: Session | None = None) -> TimeLog
+    def pause_timer(self, timelog_id: int, session: Session | None = None) -> TimeLog
+    def resume_timer(self, timelog_id: int, session: Session | None = None) -> TimeLog
+    def cancel_timer(self, timelog_id: int, session: Session | None = None) -> None
+```
+
+**HabitInstanceService**
+
+```python
+class HabitInstanceService:
+    # CRUD
+    def get_instance(self, instance_id: int, session: Session | None = None) -> HabitInstance | None
+    def list_instances(self, habit_id: int | None = None, date_start: date | None = None, date_end: date | None = None, session: Session | None = None) -> list[HabitInstance]
+
+    # Operations
+    def generate_instances(self, habit_id: int, start_date: date, end_date: date, session: Session | None = None) -> list[HabitInstance]
+    def adjust_instance_time(self, instance_id: int, new_start: time | None = None, new_end: time | None = None, session: Session | None = None) -> tuple[HabitInstance, list[Conflict] | None]
+    def skip_habit_instance(self, instance_id: int, reason: SkipReason, note: str | None = None, session: Session | None = None) -> HabitInstance
+    def mark_completed(self, instance_id: int, session: Session | None = None) -> HabitInstance
+```
+
+**Regras de Retorno**
+
+| Tipo       | Comportamento                                                    |
+| ---------- | ---------------------------------------------------------------- |
+| get\_\*    | Retorna `None` para ID inexistente, nunca lança exception        |
+| list\_\*   | Retorna `[]` se nenhum resultado, nunca retorna `None`           |
+| operations | Lança `ValueError` para inputs inválidos ou estado inconsistente |
+
 ### 4.3. Models Layer
 
 **Localização:** `cli/src/timeblock/models/`
@@ -493,7 +567,7 @@ utils/
        │ 1:N
        v
 ┌─────────────┐      1:N     ┌──────────────────┐
-│    Habit    │─────────────→│  HabitInstance   │
+│    Habit    │─────────────>│  HabitInstance   │
 │─────────────│              │──────────────────│
 │ id          │              │ id               │
 │ routine_id  │              │ habit_id         │
@@ -706,7 +780,7 @@ Usuário ajusta horário
        /      \
     Sim       Não
      │         │
-     v         └──→ [OK] Atualizado
+     v         └──> [OK] Atualizado
 ┌──────────────────────┐
 │ Apresenta conflitos  │  4. Mostra ao usuário
 └──────────┬───────────┘  5. Pede confirmação
@@ -716,7 +790,7 @@ Usuário ajusta horário
        /      \
     Sim       Não
      │         │
-     v         └──→ Cancelado
+     v         └──> Cancelado
    Salva
 ```
 
@@ -724,7 +798,7 @@ Usuário ajusta horário
 
 ```
 ┌──────────┐     start     ┌─────────┐
-│ NO TIMER │──────────────→│ RUNNING │
+│ NO TIMER │──────────────>│ RUNNING │
 └──────────┘               └────┬────┘
      ^                          │
      │                     ┌────┴────┐
@@ -1137,16 +1211,16 @@ Microservices
 O TimeBlock suporta múltiplas estratégias de deployment, desde desenvolvimento local até servidor dedicado 24/7.
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                    DEPLOYMENT PROGRESSION                        │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  v1.x          v2.0-alpha       v2.0-stable         v3.0+        │
-│  ─────         ──────────       ───────────         ─────        │
-│  CLI Local  →  Desktop Server → Raspberry Pi    →   Cloud/Hybrid │
-│  SQLite        FastAPI+SQLite   Docker+PostgreSQL   Kafka+K8s    │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                    DEPLOYMENT PROGRESSION                           │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  v1.x           v2.0-alpha        v2.0-stable          v3.0+        │
+│  ─────          ──────────        ───────────          ─────        │
+│  CLI Local  =>  Desktop Server => Raspberry Pi     =>  Cloud/Hybrid │
+│  SQLite         FastAPI+SQLite    Docker+PostgreSQL    Kafka+K8s    │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 10.2. Opções de Servidor
@@ -1331,4 +1405,4 @@ Ver também: [ADR-025: Processo de Desenvolvimento](../decisions/ADR-025-develop
 
 ---
 
-**Última atualização:** 21 de Dezembro de 2025
+**Última atualização:** 17 de Janeiro de 2026

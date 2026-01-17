@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator
-from datetime import UTC, datetime, time
+from datetime import UTC, datetime, time, timedelta
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -13,25 +13,27 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from timeblock.models import (
     Event,
+    EventStatus,
     Habit,
     Recurrence,
 )
-from timeblock.models.enums import Status
 from timeblock.services.routine_service import RoutineService
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from timeblock.services.habit_service import HabitService
+
 
 @pytest.fixture
-def test_engine() -> Generator[Engine]:
+def test_engine() -> Generator[Engine, None, None]:
     """Engine SQLite em memória para testes isolados."""
     engine = create_engine("sqlite:///:memory:")
 
     @event.listens_for(engine, "connect")
     def set_sqlite_pragma(
         dbapi_conn: Any,
-        connection_record: Any,
+        _connection_record: Any,
     ) -> None:
         """Habilita foreign keys no SQLite."""
         cursor = dbapi_conn.cursor()
@@ -64,10 +66,19 @@ def routine_service(session: Session) -> RoutineService:
 
 
 @pytest.fixture
-def habit_service_helper(
-    test_engine: Engine,
-) -> Callable[..., Habit]:
-    """Helper para criar habits no test_engine."""
+def habit_service(session: Session) -> HabitService:
+    """Fixture que retorna instância de HabitService."""
+    from timeblock.services.habit_service import HabitService
+
+    return HabitService(session)
+
+
+@pytest.fixture
+def habit_service_helper(session: Session) -> Callable[..., Habit]:
+    """Helper para criar habits usando session injetada."""
+    from timeblock.services.habit_service import HabitService
+
+    service = HabitService(session)
 
     def _create_habit(
         routine_id: int,
@@ -77,9 +88,7 @@ def habit_service_helper(
         recurrence: Recurrence,
         color: str | None = None,
     ) -> Habit:
-        from timeblock.services.habit_service import HabitService
-
-        return HabitService.create_habit(
+        return service.create_habit(
             routine_id=routine_id,
             title=title,
             scheduled_start=scheduled_start,
@@ -125,17 +134,16 @@ def sample_date() -> datetime:
 @pytest.fixture
 def sample_event(
     session: Session,
-    sample_time_start: time,
-    sample_time_end: time,
     sample_date: datetime,
 ) -> Event:
     """Fixture que cria um evento de exemplo."""
+    start = sample_date.replace(hour=9, minute=0)
+    end = sample_date.replace(hour=10, minute=0)
     event_obj = Event(
         title="Sample Event",
-        scheduled_datetime=sample_date,
-        scheduled_start=sample_time_start,
-        scheduled_end=sample_time_end,
-        status=Status.PENDING,
+        scheduled_start=start,
+        scheduled_end=end,
+        status=EventStatus.PLANNED,
     )
     session.add(event_obj)
     session.commit()
@@ -144,7 +152,7 @@ def sample_event(
 
 
 @pytest.fixture
-def mock_session(monkeypatch: pytest.MonkeyPatch) -> Any:
+def mock_session() -> Any:
     """Mock de session para testes de services."""
     from unittest.mock import Mock
 

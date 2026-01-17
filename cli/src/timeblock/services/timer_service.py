@@ -1,6 +1,6 @@
 """Service para gerenciar timers de HabitInstance."""
 
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlmodel import Session, select
 
@@ -15,6 +15,74 @@ class TimerService:
 
     # Estado em memória para pause tracking (BR-TIMER-006 MVP)
     _active_pause_start: datetime | None = None
+
+    def get_timelog(
+        self,
+        timelog_id: int,
+        session: Session | None = None,
+    ) -> TimeLog | None:
+        """Recupera TimeLog por ID.
+
+        Args:
+            timelog_id: ID do timelog
+            session: Sessão opcional
+
+        Returns:
+            TimeLog se encontrado, None caso contrário.
+        """
+
+        def _get(sess: Session) -> TimeLog | None:
+            return sess.get(TimeLog, timelog_id)
+
+        if session is not None:
+            return _get(session)
+
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _get(sess)
+
+    def list_timelogs(
+        self,
+        habit_instance_id: int | None = None,
+        date_start: date | None = None,
+        date_end: date | None = None,
+        session: Session | None = None,
+    ) -> list[TimeLog]:
+        """Lista timelogs com filtros opcionais.
+
+        BR-TIMER-008: Listagem de TimeLogs.
+
+        Args:
+            habit_instance_id: Filtra por instância específica
+            date_start: Data inicial do período
+            date_end: Data final do período
+            session: Sessão opcional
+
+        Returns:
+            Lista de timelogs (vazia se nenhum resultado).
+        """
+
+        def _list(sess: Session) -> list[TimeLog]:
+            statement = select(TimeLog)
+
+            if habit_instance_id is not None:
+                statement = statement.where(TimeLog.habit_instance_id == habit_instance_id)
+
+            if date_start is not None:
+                start_datetime = datetime.combine(date_start, datetime.min.time())
+                statement = statement.where(TimeLog.start_time >= start_datetime)
+
+            if date_end is not None:
+                end_datetime = datetime.combine(date_end, datetime.max.time())
+                statement = statement.where(TimeLog.start_time <= end_datetime)
+
+            statement = statement.order_by(TimeLog.start_time)  # type: ignore[arg-type]
+            return list(sess.exec(statement).all())
+
+        if session is not None:
+            return _list(session)
+
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _list(sess)
 
     @staticmethod
     def start_timer(habit_instance_id: int, session: Session | None = None) -> TimeLog:
@@ -37,7 +105,7 @@ class TimerService:
                 raise ValueError(f"HabitInstance {habit_instance_id} not found")
 
             # BR-TIMER-001: Verificar se já existe qualquer timer ativo (global)
-            statement = select(TimeLog).where(TimeLog.end_time.is_(None))
+            statement = select(TimeLog).where(TimeLog.end_time.is_(None))  # type: ignore[union-attr]
             existing_timer = sess.exec(statement).first()
             if existing_timer:
                 raise ValueError("Timer already active")
@@ -303,7 +371,7 @@ class TimerService:
         """
 
         def _get(sess: Session) -> TimeLog | None:
-            statement = select(TimeLog).where(TimeLog.end_time.is_(None))
+            statement = select(TimeLog).where(TimeLog.end_time.is_(None))  # type: ignore[union-attr]
             return sess.exec(statement).first()
 
         if session is not None:

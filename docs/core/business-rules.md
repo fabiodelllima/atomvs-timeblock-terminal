@@ -911,6 +911,32 @@ habit edit INSTANCE_ID --start 08:00 --end 09:30
 - `test_br_habitinstance_005_edit_single`
 - `test_br_habitinstance_005_preserves_template`
 
+### BR-HABITINSTANCE-006: Listagem de Instâncias
+
+**Descrição:** Sistema permite listar instâncias com filtros opcionais.
+
+**Filtros Disponíveis:**
+
+- `habit_id`: Filtra por hábito específico
+- `date_start`: Data inicial do período
+- `date_end`: Data final do período
+
+**Comportamento:**
+
+- Sem filtros: retorna todas as instâncias
+- Com filtros: aplica AND entre filtros fornecidos
+- Nenhum resultado: retorna lista vazia (nunca None)
+- Ordenação: por data ascendente
+
+**Testes:**
+
+- `test_br_habitinstance_006_list_all`
+- `test_br_habitinstance_006_filter_by_habit`
+- `test_br_habitinstance_006_filter_by_date_range`
+- `test_br_habitinstance_006_returns_empty_list`
+
+---
+
 ---
 
 ## 6. Skip
@@ -1513,6 +1539,32 @@ habit log INSTANCE_ID --duration 90
 
 - `test_br_timer_007_manual_log_times`
 - `test_br_timer_007_manual_log_duration`
+
+---
+
+### BR-TIMER-008: Listagem de TimeLogs
+
+**Descrição:** Sistema permite listar timelogs com filtros opcionais.
+
+**Filtros Disponíveis:**
+
+- `habit_instance_id`: Filtra por instância específica
+- `date_start`: Data inicial do período
+- `date_end`: Data final do período
+
+**Comportamento:**
+
+- Sem filtros: retorna todos os timelogs
+- Com filtros: aplica AND entre filtros fornecidos
+- Nenhum resultado: retorna lista vazia (nunca None)
+- Ordenação: por start_time ascendente
+
+**Testes:**
+
+- `test_br_timer_008_list_all`
+- `test_br_timer_008_filter_by_instance`
+- `test_br_timer_008_filter_by_date_range`
+- `test_br_timer_008_returns_empty_list`
 - `test_br_timer_007_validates_times`
 
 ---
