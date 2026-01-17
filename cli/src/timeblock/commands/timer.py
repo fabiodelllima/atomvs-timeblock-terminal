@@ -37,12 +37,15 @@ def _get_selected_schedule():
 
 def _display_timer(timelog_id: int):
     """Mostra timer ativo com atualização em tempo real."""
+    timer_service = TimerService()
+    instance_service = HabitInstanceService()
+
     with Live(refresh_per_second=1, console=console) as live:
         while True:
             try:
-                timelog = TimerService.get_timelog(timelog_id)
+                timelog = timer_service.get_timelog(timelog_id)
 
-                if timelog.end_time:
+                if timelog is None or timelog.end_time:
                     break
 
                 # Calcular tempo decorrido
@@ -54,7 +57,7 @@ def _display_timer(timelog_id: int):
                 # Determinar atividade
                 activity = "Atividade"
                 if timelog.habit_instance_id:
-                    instance = HabitInstanceService.get_instance(timelog.habit_instance_id)
+                    instance = instance_service.get_instance(timelog.habit_instance_id)
                     if instance:
                         with get_engine_context() as engine, Session(engine) as session:
                             habit_service = HabitService(session)
@@ -117,8 +120,10 @@ def start_timer(
     mas os conflitos serão exibidos para o usuário.
     """
     try:
+        instance_service = HabitInstanceService()
+
         # Verificar se já existe timer ativo
-        active = TimerService.get_active_timer()
+        active = TimerService.get_any_active_timer()
         if active:
             console.print(
                 "[red]Já existe um timer ativo. Use 'timer stop' ou 'timer cancel' primeiro.[/red]"
@@ -126,19 +131,28 @@ def start_timer(
             raise typer.Exit(1)
 
         timelog = None
-        conflicts = None
+        conflicts: list = []
 
         # Workflow A: direto com flags
         if schedule or task:
             # Buscar detalhes
             if schedule:
-                instance = HabitInstanceService.get_instance(schedule)
+                instance = instance_service.get_instance(schedule)
+                if instance is None:
+                    console.print("[red]Instância não encontrada[/red]")
+                    raise typer.Exit(1)
                 with get_engine_context() as engine, Session(engine) as session:
                     habit_service = HabitService(session)
                     habit = habit_service.get_habit(instance.habit_id)
+                    if habit is None:
+                        console.print("[red]Hábito não encontrado[/red]")
+                        raise typer.Exit(1)
                     activity = f"{habit.title} ({instance.date.strftime('%d/%m/%Y')})"
             else:
                 task_obj = TaskService.get_task(task)
+                if task_obj is None:
+                    console.print("[red]Tarefa não encontrada[/red]")
+                    raise typer.Exit(1)
                 activity = task_obj.title
 
             # Confirmar
@@ -148,9 +162,10 @@ def start_timer(
 
             # Iniciar
             if schedule:
-                timelog, conflicts = TimerService.start_timer(habit_instance_id=schedule)
+                timelog = TimerService.start_timer(habit_instance_id=schedule)
             else:
-                timelog, conflicts = TimerService.start_timer(task_id=task)
+                console.print("[red]Timer para tasks não implementado[/red]")
+                raise typer.Exit(1)
 
         # Workflow B: via select
         else:
@@ -162,16 +177,24 @@ def start_timer(
                 )
                 raise typer.Exit(1)
 
-            instance = HabitInstanceService.get_instance(selected)
+            instance = instance_service.get_instance(selected)
+            if instance is None:
+                console.print("[red]Instância não encontrada[/red]")
+                raise typer.Exit(1)
+
             with get_engine_context() as engine, Session(engine) as session:
                 habit_service = HabitService(session)
                 habit = habit_service.get_habit(instance.habit_id)
+
+                if habit is None:
+                    console.print("[red]Hábito não encontrado[/red]")
+                    raise typer.Exit(1)
 
                 if not typer.confirm(f"Iniciar timer para {habit.title}?", default=True):
                     console.print("[yellow]Cancelado.[/yellow]")
                     return
 
-            timelog, conflicts = TimerService.start_timer(habit_instance_id=selected)
+            timelog = TimerService.start_timer(habit_instance_id=selected)
 
         console.print(
             f"\n[green]Timer iniciado às {timelog.start_time.strftime('%H:%M')}![/green]\n"
@@ -186,6 +209,7 @@ def start_timer(
             )
 
         # Display interativo
+        assert timelog.id is not None, "TimeLog must be persisted"
         _display_timer(timelog.id)
 
     except ValueError as e:
@@ -197,12 +221,12 @@ def start_timer(
 def pause_timer():
     """Pausa o timer ativo."""
     try:
-        active = TimerService.get_active_timer()
+        active = TimerService.get_any_active_timer()
         if not active:
             console.print("[red]Nenhum timer ativo[/red]")
             raise typer.Exit(1)
 
-        TimerService.pause_timer(active.id)
+        TimerService.pause_timer(active.id)  # type: ignore[arg-type]
         console.print("[yellow][||] Timer pausado[/yellow]")
 
     except ValueError as e:
@@ -214,16 +238,16 @@ def pause_timer():
 def resume_timer():
     """Retoma timer pausado."""
     try:
-        active = TimerService.get_active_timer()
+        active = TimerService.get_any_active_timer()
         if not active:
             console.print("[red]Nenhum timer ativo[/red]")
             raise typer.Exit(1)
 
-        TimerService.resume_timer(active.id)
+        TimerService.resume_timer(active.id)  # type: ignore[arg-type]
         console.print("[green][>] Timer retomado[/green]")
 
         # Mostrar display novamente
-        _display_timer(active.id)
+        _display_timer(active.id)  # type: ignore[arg-type]
 
     except ValueError as e:
         console.print(f"[red]Erro: {e}[/red]")
@@ -234,13 +258,17 @@ def resume_timer():
 def stop_timer():
     """Finaliza e salva o timer."""
     try:
-        active = TimerService.get_active_timer()
+        active = TimerService.get_any_active_timer()
         if not active:
             console.print("[red]Nenhum timer ativo[/red]")
             raise typer.Exit(1)
 
         # Parar timer
-        timelog = TimerService.stop_timer(active.id)
+        timelog = TimerService.stop_timer(active.id)  # type: ignore[arg-type]
+
+        if timelog.end_time is None:
+            console.print("[red]Erro ao finalizar timer[/red]")
+            raise typer.Exit(1)
 
         # Calcular duração
         duration = timelog.end_time - timelog.start_time
@@ -264,7 +292,7 @@ def stop_timer():
 def cancel_timer():
     """Cancela timer sem salvar."""
     try:
-        active = TimerService.get_active_timer()
+        active = TimerService.get_any_active_timer()
         if not active:
             console.print("[red]Nenhum timer ativo[/red]")
             raise typer.Exit(1)
@@ -273,7 +301,7 @@ def cancel_timer():
             console.print("[yellow]Operação cancelada.[/yellow]")
             return
 
-        TimerService.cancel_timer(active.id)
+        TimerService.cancel_timer(active.id)  # type: ignore[arg-type]
         console.print("[yellow]Timer cancelado (não salvo)[/yellow]")
 
     except ValueError as e:
@@ -285,7 +313,8 @@ def cancel_timer():
 def timer_status():
     """Mostra status do timer atual."""
     try:
-        active = TimerService.get_active_timer()
+        instance_service = HabitInstanceService()
+        active = TimerService.get_any_active_timer()
 
         if not active:
             console.print("[yellow]Nenhum timer ativo[/yellow]")
@@ -300,7 +329,7 @@ def timer_status():
         # Determinar atividade
         activity = "Atividade"
         if active.habit_instance_id:
-            instance = HabitInstanceService.get_instance(active.habit_instance_id)
+            instance = instance_service.get_instance(active.habit_instance_id)
             if instance:
                 with get_engine_context() as engine, Session(engine) as session:
                     habit_service = HabitService(session)

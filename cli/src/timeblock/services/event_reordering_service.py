@@ -62,7 +62,7 @@ class EventReorderingService:
                         Conflict(
                             triggered_event_id=triggered_event_id,
                             triggered_event_type=event_type,
-                            conflicting_event_id=conf_event.id,
+                            conflicting_event_id=conf_event.id,  # type: ignore[arg-type]
                             conflicting_event_type=conf_type,
                             conflict_type=ConflictType.OVERLAP,
                             triggered_start=start,
@@ -106,7 +106,7 @@ class EventReorderingService:
             day_end = datetime.combine(target_date, datetime.max.time())
 
             # Busca todas as tasks do dia
-            task_stmt = select(Task).where(Task.scheduled_datetime.between(day_start, day_end))
+            task_stmt = select(Task).where(Task.scheduled_datetime.between(day_start, day_end))  # type: ignore[attr-defined]
             tasks = list(sess.exec(task_stmt).all())
 
             # Busca todas as instâncias de hábitos do dia
@@ -116,8 +116,8 @@ class EventReorderingService:
             # Busca todos os eventos do dia
             event_stmt = select(Event).where(
                 or_(
-                    Event.scheduled_start.between(day_start, day_end),
-                    Event.scheduled_end.between(day_start, day_end),
+                    Event.scheduled_start.between(day_start, day_end),  # type: ignore[attr-defined]
+                    Event.scheduled_end.between(day_start, day_end),  # type: ignore[attr-defined]
                     (Event.scheduled_start <= day_start) & (Event.scheduled_end >= day_end),
                 )
             )
@@ -126,21 +126,27 @@ class EventReorderingService:
             # Verifica cada task contra os outros
             for task in tasks:
                 task_conflicts = EventReorderingService.detect_conflicts(
-                    task.id, "task", session=sess
+                    task.id,  # type: ignore[arg-type]
+                    "task",
+                    session=sess,
                 )
                 all_conflicts.extend(task_conflicts)
 
             # Verifica cada instância de hábito contra os outros
             for habit in habits:
                 habit_conflicts = EventReorderingService.detect_conflicts(
-                    habit.id, "habit_instance", session=sess
+                    habit.id,  # type: ignore[arg-type]
+                    "habit_instance",
+                    session=sess,
                 )
                 all_conflicts.extend(habit_conflicts)
 
             # Verifica cada evento contra os outros
             for event in events:
                 event_conflicts = EventReorderingService.detect_conflicts(
-                    event.id, "event", session=sess
+                    event.id,  # type: ignore[arg-type]
+                    "event",
+                    session=sess,
                 )
                 all_conflicts.extend(event_conflicts)
 
@@ -187,16 +193,15 @@ class EventReorderingService:
         event: Task | HabitInstance | Event, event_type: str
     ) -> tuple[datetime | None, datetime | None]:
         """Obtém horários de início e fim do evento."""
-        if event_type == "task":
+        if isinstance(event, Task):
             if event.scheduled_datetime:
-                # Assume duração de 1 hora para tasks
                 return event.scheduled_datetime, event.scheduled_datetime + timedelta(hours=1)
-        elif event_type == "habit_instance":
+        elif isinstance(event, HabitInstance):
             if event.scheduled_start and event.scheduled_end:
                 start = datetime.combine(event.date, event.scheduled_start)
                 end = datetime.combine(event.date, event.scheduled_end)
                 return start, end
-        elif event_type == "event":
+        elif isinstance(event, Event):
             if event.scheduled_start and event.scheduled_end:
                 return event.scheduled_start, event.scheduled_end
         return None, None
@@ -210,11 +215,11 @@ class EventReorderingService:
         exclude_type: str,
     ) -> list[tuple[Task | HabitInstance | Event, str]]:
         """Busca todos os eventos que podem conflitar no intervalo de tempo."""
-        events = []
+        events: list[tuple[Task | HabitInstance | Event, str]] = []
 
         # Busca tasks
         task_stmt = select(Task).where(
-            Task.scheduled_datetime.between(start - timedelta(hours=1), end + timedelta(hours=1))
+            Task.scheduled_datetime.between(start - timedelta(hours=1), end + timedelta(hours=1))  # type: ignore[attr-defined]
         )
         if exclude_type == "task":
             task_stmt = task_stmt.where(Task.id != exclude_id)
@@ -232,8 +237,8 @@ class EventReorderingService:
         # Busca eventos
         event_stmt = select(Event).where(
             or_(
-                Event.scheduled_start.between(start, end),
-                Event.scheduled_end.between(start, end),
+                Event.scheduled_start.between(start, end),  # type: ignore[attr-defined]
+                Event.scheduled_end.between(start, end),  # type: ignore[attr-defined]
                 (Event.scheduled_start <= start) & (Event.scheduled_end >= end),
             )
         )
