@@ -16,6 +16,30 @@ class TimerService:
     # Estado em memória para pause tracking (BR-TIMER-006 MVP)
     _active_pause_start: datetime | None = None
 
+    def get_timelog(
+        self,
+        timelog_id: int,
+        session: Session | None = None,
+    ) -> TimeLog | None:
+        """Recupera TimeLog por ID.
+
+        Args:
+            timelog_id: ID do timelog
+            session: Sessão opcional
+
+        Returns:
+            TimeLog se encontrado, None caso contrário.
+        """
+        def _get(sess: Session) -> TimeLog | None:
+            return sess.get(TimeLog, timelog_id)
+
+        if session is not None:
+            return _get(session)
+
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _get(sess)
+
+
     @staticmethod
     def start_timer(habit_instance_id: int, session: Session | None = None) -> TimeLog:
         """Inicia timer para HabitInstance.

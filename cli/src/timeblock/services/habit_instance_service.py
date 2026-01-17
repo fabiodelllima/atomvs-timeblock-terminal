@@ -19,6 +19,30 @@ logger = get_logger(__name__)
 class HabitInstanceService:
     """Serviço de gerenciamento de instâncias de hábitos."""
 
+    def get_instance(
+        self,
+        instance_id: int,
+        session: Session | None = None,
+    ) -> HabitInstance | None:
+        """Recupera HabitInstance por ID.
+
+        Args:
+            instance_id: ID da instância
+            session: Sessão opcional
+
+        Returns:
+            HabitInstance se encontrada, None caso contrário.
+        """
+
+        def _get(sess: Session) -> HabitInstance | None:
+            return sess.get(HabitInstance, instance_id)
+
+        if session is not None:
+            return _get(session)
+
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _get(sess)
+
     @staticmethod
     def generate_instances(
         habit_id: int,
