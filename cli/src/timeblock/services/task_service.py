@@ -106,7 +106,7 @@ class TaskService:
         """
 
         def _list(sess: Session) -> list[Task]:
-            statement = select(Task).where(Task.completed_datetime.is_(None))
+            statement = select(Task).where(Task.completed_datetime.is_(None))  # type: ignore[union-attr]
             return list(sess.exec(statement).all())
 
         if session is not None:

@@ -94,6 +94,7 @@ def create_habit(
                 start_date = date.today()
                 end_date = start_date + relativedelta(months=generate)
 
+                assert habit.id is not None, "Habit must be persisted before generating instances"
                 instances = HabitInstanceService.generate_instances(
                     habit_id=habit.id,
                     start_date=start_date,
