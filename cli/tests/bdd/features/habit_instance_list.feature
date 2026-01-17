@@ -1,29 +1,28 @@
-# language: pt
-Funcionalidade: Listagem de Instâncias de Hábitos (BR-HABITINSTANCE-006)
-  Como usuário do TimeBlock
-  Quero listar instâncias de hábitos com filtros
-  Para visualizar minha agenda de forma flexível
+Feature: Habit Instance Listing (BR-HABITINSTANCE-006)
+  As a TimeBlock user
+  I want to list habit instances with filters
+  To view my schedule flexibly
 
-  Contexto:
-    Dado que existe uma rotina ativa "Rotina Teste"
-    E que existe um hábito "Academia" na rotina com horário 07:00-08:00
-    E que existem instâncias geradas para o período de 7 dias
+  Background:
+    Given an active routine "Test Routine" exists
+    And a habit "Gym" exists in the routine with schedule 07:00-08:00
+    And instances are generated for 7 days
 
-  Cenário: Listar todas as instâncias sem filtros
-    Quando eu listo instâncias sem filtros
-    Então devo receber uma lista com 7 instâncias
+  Scenario: List all instances without filters
+    When I list instances without filters
+    Then I should receive a list with 7 instances
 
-  Cenário: Filtrar instâncias por hábito
-    Dado que existe outro hábito "Meditação" na rotina
-    E que existem instâncias de "Meditação" para 7 dias
-    Quando eu listo instâncias filtrando por hábito "Academia"
-    Então devo receber apenas instâncias de "Academia"
+  Scenario: Filter instances by habit
+    Given another habit "Meditation" exists in the routine
+    And instances of "Meditation" exist for 7 days
+    When I list instances filtering by habit "Gym"
+    Then I should receive only "Gym" instances
 
-  Cenário: Filtrar instâncias por período
-    Quando eu listo instâncias com data_start de hoje e data_end de hoje+2
-    Então devo receber uma lista com 3 instâncias
+  Scenario: Filter instances by date range
+    When I list instances with date_start today and date_end today+2
+    Then I should receive a list with 3 instances
 
-  Cenário: Retornar lista vazia quando não há resultados
-    Quando eu listo instâncias com data_start no futuro distante
-    Então devo receber uma lista vazia
-    E a lista não deve ser None
+  Scenario: Return empty list when no results
+    When I list instances with date_start in distant future
+    Then I should receive an empty list
+    And the list should not be None
