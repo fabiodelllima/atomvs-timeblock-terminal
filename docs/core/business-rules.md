@@ -911,6 +911,32 @@ habit edit INSTANCE_ID --start 08:00 --end 09:30
 - `test_br_habitinstance_005_edit_single`
 - `test_br_habitinstance_005_preserves_template`
 
+### BR-HABITINSTANCE-006: Listagem de Instâncias
+
+**Descrição:** Sistema permite listar instâncias com filtros opcionais.
+
+**Filtros Disponíveis:**
+
+- `habit_id`: Filtra por hábito específico
+- `date_start`: Data inicial do período
+- `date_end`: Data final do período
+
+**Comportamento:**
+
+- Sem filtros: retorna todas as instâncias
+- Com filtros: aplica AND entre filtros fornecidos
+- Nenhum resultado: retorna lista vazia (nunca None)
+- Ordenação: por data ascendente
+
+**Testes:**
+
+- `test_br_habitinstance_006_list_all`
+- `test_br_habitinstance_006_filter_by_habit`
+- `test_br_habitinstance_006_filter_by_date_range`
+- `test_br_habitinstance_006_returns_empty_list`
+
+---
+
 ---
 
 ## 6. Skip

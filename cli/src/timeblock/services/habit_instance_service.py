@@ -43,6 +43,48 @@ class HabitInstanceService:
         with get_engine_context() as engine, Session(engine) as sess:
             return _get(sess)
 
+    def list_instances(
+        self,
+        habit_id: int | None = None,
+        date_start: date | None = None,
+        date_end: date | None = None,
+        session: Session | None = None,
+    ) -> list[HabitInstance]:
+        """Lista instâncias com filtros opcionais.
+
+        BR-HABITINSTANCE-006: Listagem de Instâncias.
+
+        Args:
+            habit_id: Filtra por hábito específico
+            date_start: Data inicial do período
+            date_end: Data final do período
+            session: Sessão opcional
+
+        Returns:
+            Lista de instâncias (vazia se nenhum resultado).
+        """
+
+        def _list(sess: Session) -> list[HabitInstance]:
+            statement = select(HabitInstance)
+
+            if habit_id is not None:
+                statement = statement.where(HabitInstance.habit_id == habit_id)
+
+            if date_start is not None:
+                statement = statement.where(HabitInstance.date >= date_start)
+
+            if date_end is not None:
+                statement = statement.where(HabitInstance.date <= date_end)
+
+            statement = statement.order_by(HabitInstance.date)
+            return list(sess.exec(statement).all())
+
+        if session is not None:
+            return _list(session)
+
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _list(sess)
+
     @staticmethod
     def generate_instances(
         habit_id: int,
