@@ -280,22 +280,93 @@ Ver: `docs/testing/requirements-traceability-matrix.md`
 
 ---
 
-## 9. Referências
+## 9. Estratégia de Isolamento de Banco em Testes
+
+A estratégia de isolamento de banco de dados em testes segue ADR-026, garantindo testes reproduzíveis e independentes.
+
+### 9.1. Abordagem por Tipo de Teste
+
+| Tipo de Teste     | Estratégia            | Fixture       | Velocidade           | Isolamento |
+| ----------------- | --------------------- | ------------- | -------------------- | ---------- |
+| Unit (Service)    | Session injetada (DI) | `session`     | Máxima (in-memory)   | Total      |
+| Integration (CLI) | Environment variable  | `isolated_db` | Alta (tmp_path file) | Total      |
+| E2E               | Environment variable  | `isolated_db` | Alta (tmp_path file) | Total      |
+
+### 9.2. Fixtures Padronizadas
+
+**Testes Unitários de Service:**
+
+```python
+@pytest.fixture
+def session(test_engine: Engine) -> Generator[Session, None, None]:
+    """Session in-memory para testes unitários (ADR-007 + ADR-026)."""
+    with Session(test_engine) as session:
+        yield session
+        session.rollback()
+```
+
+**Testes de Integração CLI:**
+
+```python
+@pytest.fixture
+def isolated_db(tmp_path: Path, monkeypatch) -> Path:
+    """Banco isolado via TIMEBLOCK_DB_PATH (ADR-026)."""
+    db_path = tmp_path / "test_cli.db"
+    monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_path))
+    # ... setup tables
+    return db_path
+```
+
+### 9.3. Práticas Proibidas
+
+| Prática                                           | Status     | Motivo             |
+| ------------------------------------------------- | ---------- | ------------------ |
+| Monkeypatch de `get_engine_context` entre módulos | [PROIBIDO] | Frágil, não escala |
+| Fixtures locais duplicando conftest               | [PROIBIDO] | Viola DRY          |
+| Singleton global mutável                          | [PROIBIDO] | Race conditions    |
+| Banco de produção em testes                       | [PROIBIDO] | Corrupção de dados |
+
+### 9.4. Métricas de Conformidade
+
+| Métrica                                 | Atual | Meta | Status         |
+| --------------------------------------- | ----- | ---- | -------------- |
+| Testes usando `isolated_db` do conftest | ~80%  | 100% | [EM PROGRESSO] |
+| Testes com monkeypatch de módulos       | ~5    | 0    | [PENDENTE]     |
+| Fixtures locais duplicadas              | ~3    | 0    | [PENDENTE]     |
+
+**Comando de verificação:**
+
+```bash
+# Verificar monkeypatches problemáticos (deve retornar vazio)
+grep -rn "setattr.*get_engine_context" tests/ | grep -v conftest
+
+# Verificar fixtures locais (deve retornar apenas conftest.py)
+grep -rn "def isolated_db" tests/ --include="*.py"
+```
+
+**Referência:** ADR-026 (Test Database Isolation Strategy)
+
+---
+
+## 10. Referências
 
 - **ROADMAP:** `docs/core/roadmap.md` - Planejamento estratégico
 - **CHANGELOG:** `CHANGELOG.md` - Histórico de releases
 - **Testing Strategy:** `docs/testing/test-strategy.md` - Abordagem de testes
 - **Coverage Report:** `htmlcov/index.html` - Report detalhado (local)
+- **ADR-007:** Service Layer com Dependency Injection
+- **ADR-026:** Test Database Isolation Strategy
 
 ---
 
 ## Changelog do Documento
 
-| Data       | Versão | Mudanças                                           |
-| ---------- | ------ | -------------------------------------------------- |
-| 2026-01-16 | 1.0.0  | Criação inicial - métricas extraídas do roadmap.md |
+| Data       | Versão | Mudanças                                              |
+| ---------- | ------ | ----------------------------------------------------- |
+| 2026-01-19 | 1.1.0  | Adicionada seção 9: Estratégia de Isolamento de Banco |
+| 2026-01-16 | 1.0.0  | Criação inicial - métricas extraídas do roadmap.md    |
 
 ---
 
-**Atualização:** Por sprint ou quando métricas mudarem significativamente
-**Automação:** Planejada para v1.5.0
+- **Atualização:** Por sprint ou quando métricas mudarem significativamente
+- **Automação:** Planejada para v1.5.0
