@@ -1,13 +1,10 @@
-"""Configuration management."""
+"""Configuration management.
 
-import os
-from pathlib import Path
+Configurações globais da aplicação.
 
-# Database path
-_db_path_env = os.getenv("TIMEBLOCK_DB_PATH")
-if _db_path_env:
-    DATABASE_PATH = Path(_db_path_env)
-else:
-    data_dir = Path(__file__).parent.parent / "data"
-    data_dir.mkdir(exist_ok=True)
-    DATABASE_PATH = data_dir / "timeblock.db"
+Nota:
+    Database path é gerenciado exclusivamente por engine.get_db_path()
+    conforme ADR-026 (Single Source of Truth).
+
+    Não adicionar lógica de DATABASE_PATH aqui.
+"""
