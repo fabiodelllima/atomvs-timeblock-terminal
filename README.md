@@ -4,15 +4,15 @@
 
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║  TimeBlock Organizer v1.3.0                                   ║
+║  TimeBlock Organizer v1.3.1                                   ║
 ║  ───────────────────────────────────────────────────────────  ║
-║  [x] 454 testes  [x] 61% cobertura  [x] 25 ADRs  [x] 50 BRs   ║
+║  [x] 466 testes  [x] 65% cobertura  [x] 26 ADRs  [x] 52 BRs   ║
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-454%20passing-success.svg)](cli/tests/)
-[![Coverage](https://img.shields.io/badge/coverage-61%25-yellow.svg)](cli/tests/)
+[![Tests](https://img.shields.io/badge/tests-466%20passing-success.svg)](cli/tests/)
+[![Coverage](https://img.shields.io/badge/coverage-65%25-yellow.svg)](cli/tests/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Visão Geral
@@ -31,7 +31,7 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐              │
-│  │   ROUTINE   │───▶│    HABIT    │───▶│   HABIT     │              │
+│  │   ROUTINE   │───>│    HABIT    │───>│   HABIT     │              │
 │  │  (coleção)  │    │  (template) │    │  INSTANCE   │              │
 │  └─────────────┘    └─────────────┘    └─────────────┘              │
 │         │                  │                  │                     │
@@ -54,7 +54,7 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
 
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌────────────┐
-│   CLI    │────▶│ COMMANDS │────▶│ SERVICES │────▶│   MODELS   │
+│   CLI    │────>│ COMMANDS │────>│ SERVICES │────>│   MODELS   │
 │  (Typer) │     │          │     │          │     │ (SQLModel) │
 └──────────┘     └──────────┘     └──────────┘     └────────────┘
                                         │                │
@@ -127,7 +127,7 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
          │ start
          ▼
     ┌─────────┐
-    │ RUNNING │◀─────────┐
+    │ RUNNING │<─────────┐
     └────┬────┘          │
          │               │
     ┌────┴────┐     resume
@@ -182,7 +182,7 @@ timeblock-organizer/
 │   │   │
 │   │   └── utils/             # Helpers
 │   │
-│   └── tests/                 # 454 testes
+│   └── tests/                 # 466 testes
 │       ├── unit/              #   377 (85%)
 │       ├── integration/       #   64  (15%)
 │       ├── e2e/
@@ -195,7 +195,7 @@ timeblock-organizer/
 │   │   ├── cli-reference.md
 │   │   └── workflows.md
 │   │
-│   └── decisions/             # 25 ADRs
+│   └── decisions/             # 26 ADRs
 │
 └── scripts/                   # Automação
 ```
@@ -334,15 +334,15 @@ timeblock task complete 1
 
 ```
 ╔════════════════════════════════════════════════════════════════════╗
-║                         MÉTRICAS v1.3.0                            ║
+║                         MÉTRICAS v1.3.1                            ║
 ╠════════════════════════════════════════════════════════════════════╣
 ║                                                                    ║
-║   Testes          454        ████████████████████████████  100%    ║
-║   Cobertura       61%        ████████████████░░░░░░░░░░░░   61%    ║
+║   Testes          466        ████████████████████████████  100%    ║
+║   Cobertura       65%        ████████████████░░░░░░░░░░░░   61%    ║
 ║   Modelos         8          ████████░░░░░░░░░░░░░░░░░░░░   27%    ║
 ║   Services        9          █████████░░░░░░░░░░░░░░░░░░░   30%    ║
-║   ADRs            25         █████████████████████████░░░   83%    ║
-║   Business Rules  50         ██████████████████████████░░   87%    ║
+║   ADRs            26         █████████████████████████░░░   83%    ║
+║   Business Rules  52         ██████████████████████████░░   87%    ║
 ║                                                                    ║
 ╚════════════════════════════════════════════════════════════════════╝
 ```
@@ -355,11 +355,11 @@ timeblock task complete 1
 docs/
 ├── core/
 │   ├── architecture.md     # Design e princípios
-│   ├── business-rules.md   # 50 BRs formalizadas
+│   ├── business-rules.md   # 52 BRs formalizadas
 │   ├── cli-reference.md    # Referência completa CLI
 │   └── workflows.md        # Fluxos e estados
 │
-└── decisions/              # 25 ADRs documentadas
+└── decisions/              # 26 ADRs documentadas
 ```
 
 ---
@@ -408,7 +408,7 @@ Tipos: feat, fix, refactor, test, docs, chore
 │ v1.0.0 │ [DONE]    │ CLI básica, CRUD eventos                      │
 │ v1.1.0 │ [DONE]    │ Event reordering                              │
 │ v1.2.x │ [DONE]    │ Logging, docs consolidados                    │
-│ v1.3.0 │ [CURRENT] │ Business rules formalizadas                   │
+│ v1.3.1 │ [CURRENT] │ Business rules formalizadas                   │
 │ v1.4.0 │ [WIP]     │ MVP Event Reordering, E2E tests               │
 ├────────────────────────────────────────────────────────────────────┤
 │ v1.5.0 │ [PLANNED] │ Infra Foundation (Docker, CI/CD)              │
