@@ -1,33 +1,20 @@
-"""Testes para o modelo HabitInstance."""
+"""Testes para o modelo HabitInstance.
+
+BR validada: BR-HABITINSTANCE-001 (Status Principal)
+"""
 
 from datetime import date, time
 
 import pytest
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session
 
-from src.timeblock.models.habit import Habit, Recurrence
-from src.timeblock.models.habit_instance import HabitInstance, Status
-from src.timeblock.models.routine import Routine
-
-
-@pytest.fixture
-def engine():
-    """Engine SQLite em memória."""
-    engine = create_engine("sqlite:///:memory:")
-    SQLModel.metadata.create_all(engine)
-    yield engine
-    engine.dispose()
+from timeblock.models.habit import Habit, Recurrence
+from timeblock.models.habit_instance import HabitInstance, Status
+from timeblock.models.routine import Routine
 
 
 @pytest.fixture
-def session(engine):
-    """Sessão de banco de dados."""
-    with Session(engine) as session:
-        yield session
-
-
-@pytest.fixture
-def habit(session):
+def habit(session: Session) -> Habit:
     """Cria hábito de teste."""
     routine = Routine(name="Test")
     session.add(routine)
@@ -47,8 +34,8 @@ def habit(session):
     return habit
 
 
-def test_habit_instance_creation(session, habit):
-    """Testa criação de instância de hábito."""
+def test_habit_instance_creation(session: Session, habit: Habit) -> None:
+    """Testa criação de instância de hábito. Validates BR-HABITINSTANCE-001."""
     instance = HabitInstance(
         habit_id=habit.id,
         date=date(2025, 10, 16),

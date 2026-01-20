@@ -1,28 +1,21 @@
 # GitLab CI/CD Pipeline - TimeBlock Organizer
 # Código completo com docs/ e notas internas
-
 image: python:3.13
-
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-
 cache:
   paths:
     - .cache/pip
     - cli/venv/
-
 stages:
   - test
   - build
   - deploy
-
 before_script:
-  - cd cli
-  - python -m venv venv
-  - source venv/bin/activate
   - pip install --upgrade pip
-  - pip install -r requirements.txt --break-system-packages
-
+  - pip install -r requirements.txt
+  - cd cli
+  - python -c "from src.timeblock.database.engine import create_db_and_tables; create_db_and_tables()"
 test:unit:
   stage: test
   script:
@@ -37,7 +30,6 @@ test:unit:
   only:
     - branches
     - merge_requests
-
 test:integration:
   stage: test
   script:
@@ -45,7 +37,6 @@ test:integration:
   only:
     - branches
     - merge_requests
-
 test:lint:
   stage: test
   script:
@@ -53,7 +44,6 @@ test:lint:
   only:
     - branches
     - merge_requests
-
 test:typecheck:
   stage: test
   script:
@@ -62,13 +52,13 @@ test:typecheck:
   only:
     - branches
     - merge_requests
-
 build:docs:
   stage: build
+  before_script:
+    - pip install --upgrade pip
+    - pip install mkdocs mkdocs-material
   script:
-    - cd ..
-    - pip install mkdocs mkdocs-material --break-system-packages
-    - mkdocs build --strict
+    - mkdocs build
   artifacts:
     paths:
       - site/
@@ -76,13 +66,13 @@ build:docs:
   only:
     - develop
     - main
-
 pages:
   stage: deploy
+  before_script:
+    - pip install --upgrade pip
+    - pip install mkdocs mkdocs-material
   script:
-    - cd ..
-    - pip install mkdocs mkdocs-material --break-system-packages
-    - mkdocs build --strict
+    - mkdocs build
     - mv site public
   artifacts:
     paths:

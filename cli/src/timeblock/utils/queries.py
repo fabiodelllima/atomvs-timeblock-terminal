@@ -4,7 +4,7 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
-from ..models import Event
+from timeblock.models import Event
 
 
 def build_events_query(
@@ -51,7 +51,7 @@ def build_events_query(
     else:
         # Pylint false positive: SQLModel dynamic attributes
         statement = statement.order_by(
-            Event.scheduled_start.desc()  # pylint: disable=no-member
+            Event.scheduled_start.desc()  # type: ignore[attr-defined]
         )
 
     return statement

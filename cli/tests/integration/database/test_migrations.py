@@ -17,8 +17,8 @@ from pathlib import Path
 import pytest
 from sqlmodel import Session, create_engine, select
 
-# from src.timeblock.database.migrations import migrate_v2  # TODO: migrate_v2 not implemented yet
-from src.timeblock.models import (
+# from timeblock.database.migrations import migrate_v2  # TODO: migrate_v2 not implemented yet
+from timeblock.models import (
     Habit,
     HabitInstance,
     Recurrence,

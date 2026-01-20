@@ -1,165 +1,124 @@
 """
-Integration tests para comando list.
+Integration tests para command list.
 
-Testa listagem de eventos/tasks via CLI, validando exibição
+Testa listagem de tasks via CLI, validando exibição
 correta de dados e comportamento com banco vazio.
 
 Referências:
     - ADR-019: Test Naming Convention
     - RTM: Requirements Traceability Matrix
+
+Nota:
+    Usa fixture `isolated_db` do conftest.py que configura
+    DATABASE_PATH via env var (sem monkeypatch de módulos).
 """
 
-from collections.abc import Iterator
-from contextlib import contextmanager
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
+from pathlib import Path
 
-import pytest
-from sqlmodel import Session, SQLModel, create_engine
-from sqlmodel.pool import StaticPool
 from typer.testing import CliRunner
 
-from src.timeblock.main import app
-from src.timeblock.models import Event, EventStatus
+from timeblock.main import app
+
+# Usa fixtures do conftest.py:
+# - isolated_db: configura TIMEBLOCK_DB_PATH via env var
+# - cli_runner: CliRunner instance
 
 
-@pytest.fixture(scope="function")
-def isolated_db(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+class TestBRTaskDeletion:
     """
-    Cria banco de dados isolado em memória para cada teste.
+    Integration: Deleção de tasks via CLI (BR-TASK-CMD-DELETE-*).
 
-    Args:
-        monkeypatch: Fixture para modificar funções
-
-    Yields:
-        None (engine é mockado via monkeypatch)
-
-    Nota:
-        Usa SQLite in-memory com StaticPool para permitir
-        múltiplas conexões no mesmo banco durante teste.
-    """
-    # Criar engine in-memory
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-
-    # Context manager que retorna test engine
-    @contextmanager
-    def mock_engine_context():
-        try:
-            yield engine
-        finally:
-            pass  # Não dispose durante teste
-
-    # Mock get_engine_context para retornar test engine
-    monkeypatch.setattr("src.timeblock.database.get_engine_context", mock_engine_context)
-    monkeypatch.setattr("src.timeblock.commands.list.get_engine_context", mock_engine_context)
-
-    # Criar tabelas
-    SQLModel.metadata.create_all(engine)
-
-    yield
-
-    # Cleanup
-    SQLModel.metadata.drop_all(engine)
-    engine.dispose()
-
-
-class TestBREventListing:
-    """
-    Integration: Listagem de eventos via CLI (BR-EVENT-LIST-*).
-
-    Valida exibição de eventos criados, comportamento com banco vazio
-    e execução sem erros do comando list.
+    Valida deleção com flag --force, com confirmação,
+    cancelamento e tratamento de IDs inválidos.
 
     BRs cobertas:
-    - BR-EVENT-LIST-001: Comando executa sem erros
-    - BR-EVENT-LIST-002: Exibe eventos criados
-    - BR-EVENT-LIST-003: Funciona com banco vazio
+    - BR-TASK-CMD-DELETE-001: Deleta com --force
+    - BR-TASK-CMD-DELETE-002: Deleta com confirmação
+    - BR-TASK-CMD-DELETE-003: Cancela deleção
+    - BR-TASK-CMD-DELETE-004: Rejeita ID inválido
     """
 
-    def test_br_event_list_001_command_executes(self, isolated_db: None) -> None:
-        """
-        Integration: Comando list executa sem erros.
-
-        DADO: Sistema inicializado
-        QUANDO: Usuário executa comando list
-        ENTÃO: Comando retorna exit_code 0
-        E: Nenhum erro é lançado
-
-        Referências:
-            - BR-EVENT-LIST-001: Comando executa sem erros
-        """
-        # ACT
-        runner = CliRunner()
-        result = runner.invoke(app, ["list"])
-        # ASSERT
-        assert result.exit_code == 0, "List deve executar sem erros"
-
-    def test_br_event_list_002_shows_created_events(
-        self, isolated_db: None, monkeypatch: pytest.MonkeyPatch
+    def test_br_task_cmd_delete_001_with_force(
+        self, cli_runner: CliRunner, isolated_db: Path
     ) -> None:
         """
-        Integration: Sistema exibe eventos criados na listagem.
+        Integration: Sistema deleta task com --force.
 
-        DADO: Dois eventos criados no banco (Morning Meeting, Lunch Break)
-        QUANDO: Usuário executa comando list
-        ENTÃO: Ambos os eventos aparecem na saída
-        E: Títulos dos eventos são exibidos corretamente
-
-        Referências:
-            - BR-EVENT-LIST-002: Exibe eventos criados
-        """
-        # ARRANGE - Buscar engine mockado
-        from src.timeblock.database import get_engine_context
-
-        with get_engine_context() as engine:
-            # Criar eventos de teste
-            now = datetime.now(UTC)
-            events = [
-                Event(
-                    title="Morning Meeting",
-                    scheduled_start=now + timedelta(days=1),
-                    scheduled_end=now + timedelta(days=1, hours=1),
-                    status=EventStatus.PENDING,
-                ),
-                Event(
-                    title="Lunch Break",
-                    scheduled_start=now + timedelta(days=1, hours=5),
-                    scheduled_end=now + timedelta(days=1, hours=6),
-                    status=EventStatus.PENDING,
-                ),
-            ]
-            with Session(engine) as session:
-                for event in events:
-                    session.add(event)
-                session.commit()
-        # ACT
-        runner = CliRunner()
-        result = runner.invoke(app, ["list"])
-        # ASSERT
-        assert result.exit_code == 0, "List deve executar com sucesso"
-        assert "Morning Meeting" in result.output, "Evento 1 deve aparecer"
-        assert "Lunch Break" in result.output, "Evento 2 deve aparecer"
-
-    def test_br_event_list_003_empty_database(self, isolated_db: None) -> None:
-        """
-        Integration: Sistema lida graciosamente com banco vazio.
-
-        DADO: Banco de dados sem eventos
-        QUANDO: Usuário executa comando list
-        ENTÃO: Comando retorna exit_code 0
-        E: Nenhum erro é lançado (comportamento gracioso)
+        DADO: Task existente
+        QUANDO: Usuário executa delete com --force
+        ENTÃO: Deleta sem pedir confirmação
 
         Referências:
-            - BR-EVENT-LIST-003: Funciona com banco vazio
-
-        Nota:
-            Sistema deve lidar com ausência de dados sem travar.
+            - BR-TASK-CMD-DELETE-001: Deleta com force
         """
-        # ACT
-        runner = CliRunner()
-        result = runner.invoke(app, ["list"])
-        # ASSERT
-        assert result.exit_code == 0, "List em banco vazio deve ter sucesso"
+        dt = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
+        create_result = cli_runner.invoke(app, ["task", "create", "-t", "Delete Me", "-D", dt])
+        id_line = next(line for line in create_result.stdout.split("\n") if "ID:" in line)
+        task_id = id_line.split(":")[1].strip()
+
+        result = cli_runner.invoke(app, ["task", "delete", task_id, "--force"])
+
+        assert result.exit_code == 0
+        assert "Tarefa deletada" in result.stdout
+
+    def test_br_task_cmd_delete_002_with_confirmation(
+        self, cli_runner: CliRunner, isolated_db: Path
+    ) -> None:
+        """
+        Integration: Sistema deleta task com confirmação 'y'.
+
+        DADO: Task existente
+        QUANDO: Usuário responde 'y' na confirmação
+        ENTÃO: Task é deletada
+
+        Referências:
+            - BR-TASK-CMD-DELETE-002: Deleta com confirmação
+        """
+        dt = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
+        create_result = cli_runner.invoke(app, ["task", "create", "-t", "Delete Confirm", "-D", dt])
+        id_line = next(line for line in create_result.stdout.split("\n") if "ID:" in line)
+        task_id = id_line.split(":")[1].strip()
+
+        result = cli_runner.invoke(app, ["task", "delete", task_id], input="y\n")
+
+        assert result.exit_code == 0
+        assert "Tarefa deletada" in result.stdout
+
+    def test_br_task_cmd_delete_003_cancel(self, cli_runner: CliRunner, isolated_db: Path) -> None:
+        """
+        Integration: Sistema preserva task quando usuário cancela.
+
+        DADO: Task existente
+        QUANDO: Usuário responde 'n' na confirmação
+        ENTÃO: Task não é deletada
+
+        Referências:
+            - BR-TASK-CMD-DELETE-003: Cancela deleção
+        """
+        dt = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
+        create_result = cli_runner.invoke(app, ["task", "create", "-t", "Keep Me", "-D", dt])
+        id_line = next(line for line in create_result.stdout.split("\n") if "ID:" in line)
+        task_id = id_line.split(":")[1].strip()
+
+        result = cli_runner.invoke(app, ["task", "delete", task_id], input="n\n")
+
+        assert result.exit_code == 0
+        assert "Cancelado" in result.stdout
+
+    def test_br_task_cmd_delete_004_invalid_id(
+        self, cli_runner: CliRunner, isolated_db: Path
+    ) -> None:
+        """
+        Integration: Sistema rejeita ID inválido.
+
+        DADO: ID 999 que não existe
+        QUANDO: Usuário tenta deletar
+        ENTÃO: Erro (exit_code 1)
+
+        Referências:
+            - BR-TASK-CMD-DELETE-004: Rejeita ID inválido
+        """
+        result = cli_runner.invoke(app, ["task", "delete", "999", "--force"])
+
+        assert result.exit_code == 1

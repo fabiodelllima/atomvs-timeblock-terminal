@@ -4,9 +4,9 @@ import typer
 from rich.console import Console
 from sqlmodel import Session
 
-from src.timeblock.database import get_engine_context
-from src.timeblock.services.habit_service import HabitService
-from src.timeblock.services.routine_service import RoutineService
+from timeblock.database import get_engine_context
+from timeblock.services.habit_service import HabitService
+from timeblock.services.routine_service import RoutineService
 
 app = typer.Typer(help="Gerenciar rotinas")
 console = Console()

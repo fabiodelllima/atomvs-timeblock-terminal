@@ -9,12 +9,29 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ### Alterado (Documentação)
 
+- **(2026-01-15)** Padronização de Import Paths
+
+  - Corrigido imports de `src.timeblock.*` para `timeblock.*` em todo codebase
+  - Atualizado mock/monkeypatch paths em 45+ arquivos de teste
+  - Resolvido isolamento de sessão em testes (session injection)
+  - Corrigido conftest.py truncado da sessão anterior
+  - Métricas atualizadas: 454 testes passando, 61% cobertura
+
+- **(2025-01-11)** Housekeeping e correção de métricas
+
+  - Deletadas 15 branches obsoletas (feat/_, fix/ci-_, refactor/\*)
+  - README atualizado com métricas reais:
+    - Versão: v2.0.0 => v1.3.0
+    - Testes: 492 => 441 (377 unit + 64 integration)
+    - Cobertura: 99% => 39%
+  - Mantida estrutura visual e diagramas do README
+
 - **(2025-12-22)** Processo de Desenvolvimento e ADR-025
 
   - Nova seção 11 em architecture.md: Processo de Desenvolvimento
   - ADR-025: Development Methodology (Vertical Slicing + Strict TDD)
   - Documentado: Docs-First, BDD, Strict TDD, Sprints, WIP Limits
-  - Atualizado índice de ADRs: 24 → 25 (23 aceitas, 2 propostas)
+  - Atualizado índice de ADRs: 24 => 25 (23 aceitas, 2 propostas)
 
 - **(2025-12-21)** Deployment Options e ADR-024
 
@@ -22,7 +39,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - Documentado Raspberry Pi homelab como servidor recomendado
   - Comparativo: Pi vs VPS vs Desktop
   - ADR-024: Homelab Infrastructure Strategy
-  - Atualizado índice de ADRs: 23 → 24 (2 propostas)
+  - Atualizado índice de ADRs: 23 => 24 (2 propostas)
 
 - **(2025-12-21)** Roadmap v1.5-v4.0 e ADR-023
 
@@ -32,7 +49,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
     - v2.0.0: FastAPI REST API + Observabilidade (Prometheus, Grafana, Loki)
     - v3.0.0: Microservices Ecosystem (Apache Kafka)
     - v4.0.0: Android App (Kotlin)
-  - Atualizado índice de ADRs: 22 → 23
+  - Atualizado índice de ADRs: 22 => 23
 
 - **(2025-12-01)** Reorganização completa de docs/
   - Consolidado 4 documentos principais em `docs/core/`:
@@ -53,9 +70,9 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - Valores antigos: PLANNED, IN_PROGRESS, PAUSED, COMPLETED, SKIPPED
   - Valores novos: PENDING, DONE, NOT_DONE
   - Mapeamento automático na migração:
-    - PLANNED/IN_PROGRESS/PAUSED → PENDING
-    - COMPLETED → DONE + done_substatus=FULL
-    - SKIPPED → NOT_DONE + not_done_substatus=SKIPPED_UNJUSTIFIED
+    - PLANNED/IN_PROGRESS/PAUSED => PENDING
+    - COMPLETED => DONE + done_substatus=FULL
+    - SKIPPED => NOT_DONE + not_done_substatus=SKIPPED_UNJUSTIFIED
   - **Ação necessária:** Rodar migration_001_status_substatus.py
   - **Rollback disponível:** função downgrade() (perda de dados novos)
   - **Compatibilidade:** HabitInstanceStatus mantido como alias temporário (DEPRECATED)
@@ -139,7 +156,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - `event_reordering_service.py` - detect_conflicts com session
   - `habit_service.py` - CRUD completo com session opcional
   - `habit_instance_service.py` - Geração e marcação com session
-  - Padrão: if session → usar injetada, else → criar própria
+  - Padrão: if session => usar injetada, else => criar própria
 
 - **(2025-11-17)** Database engine com FK habilitado
 
@@ -147,7 +164,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 - **(2025-11-17)** Imports refatorados
   - `routine_service.py` - Importa de src.timeblock.models
-  - `conftest.py` - sqlalchemy.orm.Session → sqlmodel.Session
+  - `conftest.py` - sqlalchemy.orm.Session => sqlmodel.Session
 
 ### Corrigido
 
@@ -171,7 +188,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 - Consolidada estrutura em `05-testing/` (removido `07-testing/` duplicado)
 - Adicionados documentos navegáveis:
   - `testing-philosophy.md` - Filosofia de testes do projeto
-  - `requirements-traceability-matrix.md` - RTM completo com rastreabilidade BR → Test → Code
+  - `requirements-traceability-matrix.md` - RTM completo com rastreabilidade BR => Test => Code
   - `test-strategy.md` - Estratégia consolidada de testes
 - 5 scenarios de teste agora acessíveis:
   - event-creation

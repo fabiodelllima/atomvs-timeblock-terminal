@@ -9,12 +9,12 @@ from datetime import date, datetime, time
 import pytest
 from sqlmodel import Session
 
-from src.timeblock.models.enums import DoneSubstatus, NotDoneSubstatus, SkipReason, Status
-from src.timeblock.models.habit import Habit, Recurrence
-from src.timeblock.models.habit_instance import HabitInstance
-from src.timeblock.models.routine import Routine
-from src.timeblock.models.time_log import TimeLog
-from src.timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.models.enums import DoneSubstatus, NotDoneSubstatus, SkipReason, Status
+from timeblock.models.habit import Habit, Recurrence
+from timeblock.models.habit_instance import HabitInstance
+from timeblock.models.routine import Routine
+from timeblock.models.time_log import TimeLog
+from timeblock.services.habit_instance_service import HabitInstanceService
 
 
 @pytest.fixture

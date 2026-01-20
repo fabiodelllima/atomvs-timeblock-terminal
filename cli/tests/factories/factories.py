@@ -19,7 +19,7 @@ Referências:
 from datetime import date, datetime, time
 from typing import Any
 
-from src.timeblock.models import (
+from timeblock.models import (
     Habit,
     HabitInstance,
     Recurrence,

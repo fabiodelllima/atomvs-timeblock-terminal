@@ -1,30 +1,17 @@
-"""Tests for TimeLog model."""
+"""Tests for TimeLog model.
+
+BR validada: BR-TIMER-004 (Múltiplas Sessões)
+"""
 
 from datetime import datetime
 
-import pytest
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session
 
-from src.timeblock.models.time_log import TimeLog
-
-
-@pytest.fixture
-def engine():
-    """In-memory SQLite engine."""
-    engine = create_engine("sqlite:///:memory:")
-    SQLModel.metadata.create_all(engine)
-    return engine
+from timeblock.models.time_log import TimeLog
 
 
-@pytest.fixture
-def session(engine):
-    """Database session."""
-    with Session(engine) as session:
-        yield session
-
-
-def test_time_log_creation(session):
-    """Test creating a time log."""
+def test_time_log_creation(session: Session) -> None:
+    """Test creating a time log. Validates BR-TIMER-004."""
     log = TimeLog(
         start_time=datetime(2025, 10, 16, 7, 0),
         end_time=datetime(2025, 10, 16, 8, 0),
@@ -38,8 +25,8 @@ def test_time_log_creation(session):
     assert log.duration_seconds == 3600
 
 
-def test_time_log_with_notes(session):
-    """Test time log with notes."""
+def test_time_log_with_notes(session: Session) -> None:
+    """Test time log with notes. Validates BR-TIMER-004."""
     log = TimeLog(
         start_time=datetime(2025, 10, 16, 9, 0),
         notes="Productive session",
@@ -50,8 +37,8 @@ def test_time_log_with_notes(session):
     assert log.notes == "Productive session"
 
 
-def test_time_log_in_progress(session):
-    """Test time log without end time."""
+def test_time_log_in_progress(session: Session) -> None:
+    """Test time log without end time. Validates BR-TIMER-004."""
     log = TimeLog(start_time=datetime(2025, 10, 16, 10, 0))
     session.add(log)
     session.commit()

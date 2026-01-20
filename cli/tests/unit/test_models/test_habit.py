@@ -1,31 +1,21 @@
-"""Tests for Habit model."""
+"""Tests for Habit model.
+
+BRs validadas:
+- BR-HABIT-001: Estrutura de Habito
+- BR-HABIT-002: Padrões de Recorrência
+"""
 
 from datetime import time
 
 import pytest
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session
 
-from src.timeblock.models.habit import Habit, Recurrence
-from src.timeblock.models.routine import Routine
-
-
-@pytest.fixture
-def engine():
-    """In-memory SQLite engine."""
-    engine = create_engine("sqlite:///:memory:")
-    SQLModel.metadata.create_all(engine)
-    return engine
+from timeblock.models.habit import Habit, Recurrence
+from timeblock.models.routine import Routine
 
 
 @pytest.fixture
-def session(engine):
-    """Database session."""
-    with Session(engine) as session:
-        yield session
-
-
-@pytest.fixture
-def routine(session):
+def routine(session: Session) -> Routine:
     """Create test routine."""
     routine = Routine(name="Test Routine")
     session.add(routine)
@@ -34,8 +24,8 @@ def routine(session):
     return routine
 
 
-def test_habit_creation(session, routine):
-    """Test creating a habit."""
+def test_habit_creation(session: Session, routine: Routine) -> None:
+    """Test creating a habit. Validates BR-HABIT-001."""
     habit = Habit(
         routine_id=routine.id,
         title="Morning Exercise",
@@ -54,8 +44,8 @@ def test_habit_creation(session, routine):
     assert habit.recurrence == Recurrence.WEEKDAYS
 
 
-def test_habit_with_color(session, routine):
-    """Test habit with color."""
+def test_habit_with_color(session: Session, routine: Routine) -> None:
+    """Test habit with color. Validates BR-HABIT-001."""
     habit = Habit(
         routine_id=routine.id,
         title="Test",
@@ -70,8 +60,8 @@ def test_habit_with_color(session, routine):
     assert habit.color == "#FF5733"
 
 
-def test_recurrence_enum():
-    """Test all recurrence values."""
+def test_recurrence_enum() -> None:
+    """Test all recurrence values. Validates BR-HABIT-002."""
     assert Recurrence.MONDAY.value == "MONDAY"
     assert Recurrence.WEEKDAYS.value == "WEEKDAYS"
     assert Recurrence.EVERYDAY.value == "EVERYDAY"

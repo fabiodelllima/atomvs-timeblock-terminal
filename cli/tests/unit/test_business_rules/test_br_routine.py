@@ -12,7 +12,7 @@ from datetime import datetime, time
 import pytest
 from sqlmodel import Session, select
 
-from src.timeblock.models import Habit, Recurrence, Routine, Task
+from timeblock.models import Habit, Recurrence, Routine, Task
 
 
 # BR-ROUTINE-001: Single Active Constraint

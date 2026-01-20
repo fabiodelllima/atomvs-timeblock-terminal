@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from src.timeblock.utils.event_date_filters import DateFilterBuilder
+from timeblock.utils.event_date_filters import DateFilterBuilder
 
 
 class TestDateFilterBuilderInit:

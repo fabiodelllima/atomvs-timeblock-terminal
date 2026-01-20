@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, Mock
 import pytest
 from sqlmodel import Session
 
-from src.timeblock.models import Routine
-from src.timeblock.services.routine_service import RoutineService
+from timeblock.models import Routine
+from timeblock.services.routine_service import RoutineService
 
 
 @pytest.fixture

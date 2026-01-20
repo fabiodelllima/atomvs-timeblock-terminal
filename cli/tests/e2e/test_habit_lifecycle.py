@@ -4,15 +4,19 @@ E2E tests validando regras de negocio completas.
 Referencias:
     - ADR-019: Test Naming Convention
     - RTM: Requirements Traceability Matrix
+BRs cobertas:
+    - BR-HABIT-001: Criacao de habitos
+    - BR-HABIT-003: Geracao de instancias via --generate
 """
 
 from pathlib import Path
 
 import pytest
+from freezegun import freeze_time
 from pytest import MonkeyPatch
 from typer.testing import CliRunner
 
-from src.timeblock.main import app
+from timeblock.main import app
 
 
 @pytest.fixture
@@ -28,8 +32,7 @@ class TestBRHabitWorkflow:
 
     BRs cobertas:
     - BR-HABIT-001: Criacao de habitos
-    - BR-HABIT-002: Geracao de instancias via --generate
-    - BR-HABIT-003: Completar habito
+    - BR-HABIT-003: Geracao de instancias via --generate
     """
 
     def test_br_habit_complete_daily_workflow_with_confirmation(
@@ -52,7 +55,7 @@ class TestBRHabitWorkflow:
                 "habit",
                 "create",
                 "--title",
-                "Meditacao",
+                "Meditação",
                 "--start",
                 "06:00",
                 "--end",
@@ -66,14 +69,16 @@ class TestBRHabitWorkflow:
         assert result.exit_code == 0, f"Deve criar com sucesso. Output: {result.output}"
         assert "criado" in result.output.lower(), "Deve confirmar criacao"
 
+    @freeze_time("2025-10-01")
     def test_br_habit_complete_daily_workflow_explicit_routine(
         self, isolated_db: Path, monkeypatch: MonkeyPatch
     ) -> None:
         """
         E2E: Usuario cria habito com --routine e --generate.
-        
-        Valida geracao de instancias. Listagem de instancias tem bug conhecido
-        no filtro --day (TODO: investigar).
+
+        DADO: Data fixa em 2025-10-01
+        QUANDO: Usuario cria habito EVERYDAY com --generate 1
+        ENTAO: Sistema gera 32 instancias (01/10 a 01/11 inclusive)
         """
         monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(isolated_db))
         runner = CliRunner()
@@ -89,7 +94,7 @@ class TestBRHabitWorkflow:
                 "habit",
                 "create",
                 "--title",
-                "Meditacao",
+                "Meditação",
                 "--start",
                 "06:00",
                 "--end",
@@ -103,8 +108,8 @@ class TestBRHabitWorkflow:
             ],
         )
         assert result.exit_code == 0, f"Criacao deve ter sucesso. Output: {result.output}"
-        # Valida que instancias foram geradas (31 dias = 1 mes)
-        assert "31" in result.output or "instancia" in result.output.lower()
+        # De 01/10 a 01/11 = 32 dias
+        assert "32" in result.output or "instância" in result.output.lower()
 
     def test_br_habit_creation_rejection_aborts(
         self, isolated_db: Path, monkeypatch: MonkeyPatch
@@ -126,7 +131,7 @@ class TestBRHabitWorkflow:
                 "habit",
                 "create",
                 "--title",
-                "Meditacao",
+                "Meditação",
                 "--start",
                 "06:00",
                 "--end",
@@ -138,7 +143,9 @@ class TestBRHabitWorkflow:
         )
 
         assert (
-            result.exit_code != 0 or "Aborted" in result.output or "ID da rotina" in result.output
+            result.exit_code != 0
+            or "Aborted" in result.output
+            or "ID da rotina" in result.output
         ), f"Deve abortar ou pedir alternativa. Output: {result.output}"
 
 
@@ -147,11 +154,13 @@ class TestBREventConflictWorkflow:
     E2E: Workflow de deteccao e resolucao de conflitos.
 
     BRs cobertas:
-    - BR-EVENT-001: Deteccao de conflitos de horario
-    - BR-EVENT-002: Proposta de reorganizacao
+    - BR-REORDER-001: Deteccao de conflitos de horario
+    - BR-REORDER-002: Proposta de reorganizacao
     """
 
-    @pytest.mark.skip(reason="Deteccao de conflitos em habit edit nao implementada ainda")
+    @pytest.mark.skip(
+        reason="Deteccao de conflitos em habit edit nao implementada ainda"
+    )
     def test_br_event_conflict_detection_and_resolution(
         self, isolated_db: Path, monkeypatch: MonkeyPatch
     ) -> None:

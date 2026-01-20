@@ -350,6 +350,80 @@ class HabitInstanceService:
 - Concorrência (sem race conditions)
 - Simplicidade (fácil entender fluxo)
 
+#### 4.2.1. Service API Contract
+
+Todo service implementa métodos CRUD seguindo padrões consistentes.
+
+**Pattern: get_by_id**
+
+```python
+def get_{entity}(
+    self,
+    entity_id: int,
+    session: Session | None = None
+) -> Entity | None:
+    """Recupera entidade por ID.
+
+    Returns:
+        Entity se encontrada, None caso contrário.
+    """
+```
+
+**Pattern: list**
+
+```python
+def list_{entities}(
+    self,
+    filters: dict | None = None,
+    session: Session | None = None
+) -> list[Entity]:
+    """Lista entidades com filtros opcionais.
+
+    Returns:
+        Lista de entidades (vazia se nenhuma corresponder).
+    """
+```
+
+**TimerService**
+
+```python
+class TimerService:
+    # CRUD
+    def get_timelog(self, timelog_id: int, session: Session | None = None) -> TimeLog | None
+    def get_active_timer(self, session: Session | None = None) -> TimeLog | None
+    def list_timelogs(self, filters: dict | None = None, session: Session | None = None) -> list[TimeLog]
+
+    # Operations
+    def start_timer(self, habit_instance_id: int | None = None, task_id: int | None = None, session: Session | None = None) -> tuple[TimeLog, list[Conflict] | None]
+    def stop_timer(self, timelog_id: int, session: Session | None = None) -> TimeLog
+    def pause_timer(self, timelog_id: int, session: Session | None = None) -> TimeLog
+    def resume_timer(self, timelog_id: int, session: Session | None = None) -> TimeLog
+    def cancel_timer(self, timelog_id: int, session: Session | None = None) -> None
+```
+
+**HabitInstanceService**
+
+```python
+class HabitInstanceService:
+    # CRUD
+    def get_instance(self, instance_id: int, session: Session | None = None) -> HabitInstance | None
+    def list_instances(self, habit_id: int | None = None, date_start: date | None = None, date_end: date | None = None, session: Session | None = None) -> list[HabitInstance]
+
+    # Operations
+    def generate_instances(self, habit_id: int, start_date: date, end_date: date, session: Session | None = None) -> list[HabitInstance]
+    def adjust_instance_time(self, instance_id: int, new_start: time | None = None, new_end: time | None = None, session: Session | None = None) -> tuple[HabitInstance, list[Conflict] | None]
+    def skip_habit_instance(self, instance_id: int, reason: SkipReason, note: str | None = None, session: Session | None = None) -> HabitInstance
+    def mark_completed(self, instance_id: int, session: Session | None = None) -> HabitInstance
+```
+
+**Regras de Retorno**
+
+| Tipo       | Comportamento                                                    |
+| ---------- | ---------------------------------------------------------------- |
+| get\_\*    | Retorna `None` para ID inexistente, nunca lança exception        |
+| list\_\*   | Retorna `[]` se nenhum resultado, nunca retorna `None`           |
+| operations | Lança `ValueError` para inputs inválidos ou estado inconsistente |
+
 ### 4.3. Models Layer
 
 **Localização:** `cli/src/timeblock/models/`
@@ -412,44 +486,161 @@ class HabitInstance(SQLModel, table=True):
 
 **Localização:** `cli/src/timeblock/database/`
 
-**Responsabilidade:** Gerenciamento de conexões, migrations.
+**Responsabilidade:** Gerenciamento de conexões, configuração e migrations.
 
 **Estrutura:**
 
 ```
 database/
-├── __init__.py     # Exports
-├── engine.py       # Engine management
+├── __init__.py     # Exports (get_engine_context)
+├── engine.py       # Engine management e configuração
 └── migrations/     # Schema migrations
 ```
 
-**Engine Management:**
+#### 4.4.1. Configuração via Environment Variable
+
+O path do banco de dados é configurado via environment variable `TIMEBLOCK_DB_PATH`, seguindo princípios do 12-Factor App. Isso permite:
+
+- Configuração diferente por ambiente (dev, test, prod)
+- Isolamento de testes sem monkeypatch de módulos
+- Flexibilidade em CI/CD pipelines
+
+**Hierarquia de resolução:**
+
+```
+1. TIMEBLOCK_DB_PATH (environment variable) - se definida
+2. cli/data/timeblock.db (default relativo ao código)
+```
+
+**Implementação (Single Source of Truth):**
 
 ```python
-from contextlib import contextmanager
-from sqlmodel import create_engine, Session
+# cli/src/timeblock/database/engine.py
 
-DB_PATH = Path.home() / ".timeblock" / "timeblock.db"
+import os
+from pathlib import Path
+from contextlib import contextmanager
+from sqlalchemy import event
+from sqlmodel import SQLModel, create_engine
+
+def get_db_path() -> str:
+    """
+    Retorna caminho do banco de dados.
+
+    Ordem de precedência:
+    1. Environment variable TIMEBLOCK_DB_PATH
+    2. Default: cli/data/timeblock.db
+
+    Returns:
+        Caminho absoluto do arquivo SQLite
+
+    Referências:
+        - ADR-026: Test Database Isolation Strategy
+        - 12-Factor App: Config via environment
+    """
+    db_path = os.getenv("TIMEBLOCK_DB_PATH")
+    if db_path is None:
+        data_dir = Path(__file__).parent.parent.parent / "data"
+        data_dir.mkdir(exist_ok=True)
+        db_path = str(data_dir / "timeblock.db")
+    return db_path
+
+
+def get_engine():
+    """
+    Retorna engine SQLite com foreign keys habilitadas.
+
+    Configurações:
+        - Foreign keys ON (integridade referencial)
+        - Echo OFF (sem logging SQL em produção)
+    """
+    db_path = get_db_path()
+    engine = create_engine(f"sqlite:///{db_path}", echo=False)
+
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_conn, connection_record):
+        """Habilita foreign keys no SQLite."""
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+    return engine
+
 
 @contextmanager
-def get_session():
-    """Context manager para sessão SQLite.
+def get_engine_context():
+    """
+    Context manager para engine SQLite com cleanup automático.
 
     Garante:
-    - Conexão única por operação
-    - Cleanup automático
-    - Thread-safety
+        - Conexão única por operação
+        - Dispose automático do engine
+        - Thread-safety via SQLite config
+
+    Uso:
+        with get_engine_context() as engine:
+            with Session(engine) as session:
+                # operações de banco
     """
-    engine = create_engine(
-        f"sqlite:///{DB_PATH}",
-        connect_args={"check_same_thread": False}
-    )
-    with Session(engine) as session:
-        try:
-            yield session
-        finally:
-            session.close()
+    engine = get_engine()
+    try:
+        yield engine
+    finally:
+        engine.dispose()
 ```
+
+#### 4.4.2. Uso em Testes
+
+A estratégia de isolamento de banco em testes é documentada em ADR-026. Resumo:
+
+**Testes Unitários (Service Layer):**
+
+```python
+# Fixture injeta session in-memory diretamente
+@pytest.fixture
+def session(test_engine: Engine) -> Generator[Session, None, None]:
+    with Session(test_engine) as session:
+        yield session
+        session.rollback()
+
+# Service recebe session via DI (ADR-007)
+def test_create_task(session: Session):
+    task = TaskService.create_task("Test", datetime.now(), session=session)
+    assert task.id is not None
+```
+
+**Testes de Integração CLI:**
+
+```python
+# Fixture configura env var para banco temporário
+@pytest.fixture
+def isolated_db(tmp_path: Path, monkeypatch) -> Path:
+    db_path = tmp_path / "test_cli.db"
+    monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_path))
+
+    engine = create_engine(f"sqlite:///{db_path}")
+    SQLModel.metadata.create_all(engine)
+    engine.dispose()
+
+    return db_path
+
+# CLI usa banco temporário automaticamente
+def test_task_create_cli(cli_runner: CliRunner, isolated_db: Path):
+    result = cli_runner.invoke(app, ["task", "create", "-t", "Test", ...])
+    assert result.exit_code == 0
+```
+
+#### 4.4.3. Princípios de Design
+
+1. **SSOT (Single Source of Truth):** Toda lógica de path em `get_db_path()`
+2. **12-Factor App:** Configuração via environment, não hardcoded
+3. **Zero Monkeypatch de Módulos:** Testes CLI usam env var, não patches
+4. **Dependency Injection:** Services recebem session como parâmetro (ADR-007)
+
+**Referências:**
+
+- ADR-007: Service Layer Pattern
+- ADR-026: Test Database Isolation Strategy
 
 ### 4.5. Utils Layer
 
@@ -493,7 +684,7 @@ utils/
        │ 1:N
        v
 ┌─────────────┐      1:N     ┌──────────────────┐
-│    Habit    │─────────────→│  HabitInstance   │
+│    Habit    │─────────────>│  HabitInstance   │
 │─────────────│              │──────────────────│
 │ id          │              │ id               │
 │ routine_id  │              │ habit_id         │
@@ -706,7 +897,7 @@ Usuário ajusta horário
        /      \
     Sim       Não
      │         │
-     v         └──→ [OK] Atualizado
+     v         └──> [OK] Atualizado
 ┌──────────────────────┐
 │ Apresenta conflitos  │  4. Mostra ao usuário
 └──────────┬───────────┘  5. Pede confirmação
@@ -716,7 +907,7 @@ Usuário ajusta horário
        /      \
     Sim       Não
      │         │
-     v         └──→ Cancelado
+     v         └──> Cancelado
    Salva
 ```
 
@@ -724,7 +915,7 @@ Usuário ajusta horário
 
 ```
 ┌──────────┐     start     ┌─────────┐
-│ NO TIMER │──────────────→│ RUNNING │
+│ NO TIMER │──────────────>│ RUNNING │
 └──────────┘               └────┬────┘
      ^                          │
      │                     ┌────┴────┐
@@ -1137,16 +1328,16 @@ Microservices
 O TimeBlock suporta múltiplas estratégias de deployment, desde desenvolvimento local até servidor dedicado 24/7.
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                    DEPLOYMENT PROGRESSION                        │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  v1.x          v2.0-alpha       v2.0-stable         v3.0+        │
-│  ─────         ──────────       ───────────         ─────        │
-│  CLI Local  →  Desktop Server → Raspberry Pi    →   Cloud/Hybrid │
-│  SQLite        FastAPI+SQLite   Docker+PostgreSQL   Kafka+K8s    │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                    DEPLOYMENT PROGRESSION                           │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  v1.x           v2.0-alpha        v2.0-stable          v3.0+        │
+│  ─────          ──────────        ───────────          ─────        │
+│  CLI Local  =>  Desktop Server => Raspberry Pi     =>  Cloud/Hybrid │
+│  SQLite         FastAPI+SQLite    Docker+PostgreSQL    Kafka+K8s    │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 10.2. Opções de Servidor
@@ -1331,4 +1522,4 @@ Ver também: [ADR-025: Processo de Desenvolvimento](../decisions/ADR-025-develop
 
 ---
 
-**Última atualização:** 21 de Dezembro de 2025
+**Última atualização:** 17 de Janeiro de 2026

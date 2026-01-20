@@ -1,9 +1,10 @@
 # ADR-007: Service Layer Pattern
 
-- **Status:** Accepted
-- **Data:** 2025-09-18
+**Status:** Accepted
 
-## Contextoo
+**Atualização:** 2026-01-17 (Referência para API Contract)
+
+## Contexto
 
 Commands acessando models diretamente cria acoplamento e dificulta:
 
@@ -13,50 +14,44 @@ Commands acessando models diretamente cria acoplamento e dificulta:
 
 ## Decisão
 
-Camada de Services entre Commands e Models.
+Implementar camada de Services entre Commands e Models.
 
-**Estrutura:**
-
-```terminal
-Commands (CLI) → Services → Models (DB)
+```
+Commands (CLI) => Services => Models (DB)
 ```
 
-## Alternativas
+## Alternativas Consideradas
 
-### Repository Pattern
+**Repository Pattern**
 
-**Prós:** Abstrai DB completamente
-**Contras:** Overhead para SQLite simples
+- Prós: Abstrai DB completamente
+- Contras: Overhead para SQLite simples
 
-### Commands diretos em Models
+**Commands diretos em Models**
 
-**Prós:** Menos código
-**Contras:** Lógica dispersa, difícil testar
+- Prós: Menos código
+- Contras: Lógica dispersa, difícil testar
 
-### Domain Services (DDD)
+**Domain Services (DDD)**
 
-**Prós:** Separação clara
-**Contras:** Over-engineering para o escopo
+- Prós: Separação clara
+- Contras: Over-engineering para o escopo
 
 ## Consequências
 
-### Positivas
+**Positivas:**
 
 - Business logic centralizada
 - Commands enxutos
 - Testes unitários isolados
 - Transações controladas
 
-### Negativas
+**Negativas:**
 
 - Camada adicional
 - Boilerplate moderado
 
-### Neutras
-
-- Pattern estabelecido
-
-## Validação
+## Critérios de Validação
 
 - 100% cobertura em services
 - Commands < 30 linhas
@@ -64,12 +59,15 @@ Commands (CLI) → Services → Models (DB)
 
 ## Implementação
 
+Services usam dependency injection com session:
+
 ```python
 class HabitService:
     def __init__(self, session: Session):
         self.session = session
 
-    def create_instances(self, habit: Habit) -> List[HabitInstance]:
-        # Business logic aqui
+    def create_instances(self, habit: Habit) -> list[HabitInstance]:
         ...
 ```
+
+**API Contract completo:** Ver `docs/core/architecture.md` seção 4.2.1

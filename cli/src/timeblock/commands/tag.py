@@ -4,7 +4,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from src.timeblock.services.tag_service import TagService
+from timeblock.services.tag_service import TagService
 
 app = typer.Typer(help="Gerenciar tags")
 console = Console()

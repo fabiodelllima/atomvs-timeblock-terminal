@@ -9,12 +9,12 @@ from datetime import date, datetime, time, timedelta
 import pytest
 from sqlmodel import Session
 
-from src.timeblock.models.enums import DoneSubstatus, Status
-from src.timeblock.models.habit import Habit, Recurrence
-from src.timeblock.models.habit_instance import HabitInstance
-from src.timeblock.models.routine import Routine
-from src.timeblock.models.time_log import TimeLog
-from src.timeblock.services.timer_service import TimerService
+from timeblock.models.enums import DoneSubstatus, Status
+from timeblock.models.habit import Habit, Recurrence
+from timeblock.models.habit_instance import HabitInstance
+from timeblock.models.routine import Routine
+from timeblock.models.time_log import TimeLog
+from timeblock.services.timer_service import TimerService
 
 
 @pytest.fixture
@@ -87,7 +87,7 @@ class TestBRTimer006CalculateSubstatus:
 
         stop_time = start_time + timedelta(minutes=45)
 
-        with patch("src.timeblock.services.timer_service.datetime") as mock_dt:
+        with patch("timeblock.services.timer_service.datetime") as mock_dt:
             mock_dt.now.return_value = stop_time
             mock_dt.combine = datetime.combine
 
@@ -138,7 +138,7 @@ class TestBRTimer006CalculateSubstatus:
 
         stop_time = start_time + timedelta(minutes=54)
 
-        with patch("src.timeblock.services.timer_service.datetime") as mock_dt:
+        with patch("timeblock.services.timer_service.datetime") as mock_dt:
             mock_dt.now.return_value = stop_time
             mock_dt.combine = datetime.combine
 
@@ -187,7 +187,7 @@ class TestBRTimer006CalculateSubstatus:
 
         stop_time = start_time + timedelta(minutes=60)
 
-        with patch("src.timeblock.services.timer_service.datetime") as mock_dt:
+        with patch("timeblock.services.timer_service.datetime") as mock_dt:
             mock_dt.now.return_value = stop_time
             mock_dt.combine = datetime.combine
 
@@ -237,7 +237,7 @@ class TestBRTimer006CalculateSubstatus:
 
         stop_time = start_time + timedelta(minutes=78)
 
-        with patch("src.timeblock.services.timer_service.datetime") as mock_dt:
+        with patch("timeblock.services.timer_service.datetime") as mock_dt:
             mock_dt.now.return_value = stop_time
             mock_dt.combine = datetime.combine
 
@@ -287,7 +287,7 @@ class TestBRTimer006CalculateSubstatus:
 
         stop_time = start_time + timedelta(minutes=120)
 
-        with patch("src.timeblock.services.timer_service.datetime") as mock_dt:
+        with patch("timeblock.services.timer_service.datetime") as mock_dt:
             mock_dt.now.return_value = stop_time
             mock_dt.combine = datetime.combine
 
@@ -339,7 +339,7 @@ class TestBRTimer006Validation:
 
         stop_time = start_time + timedelta(minutes=55)
 
-        with patch("src.timeblock.services.timer_service.datetime") as mock_dt:
+        with patch("timeblock.services.timer_service.datetime") as mock_dt:
             mock_dt.now.return_value = stop_time
             mock_dt.combine = datetime.combine
 

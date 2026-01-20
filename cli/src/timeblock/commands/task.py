@@ -6,8 +6,8 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from src.timeblock.services.task_service import TaskService
-from src.timeblock.utils.conflict_display import display_conflicts
+from timeblock.services.task_service import TaskService
+from timeblock.utils.conflict_display import display_conflicts
 
 app = typer.Typer(help="Gerenciar tarefas")
 console = Console()
@@ -97,8 +97,12 @@ def check_task(task_id: int = typer.Argument(..., help="ID da tarefa")):
     try:
         task = TaskService.complete_task(task_id)
 
+        if task is None:
+            console.print("[red]Tarefa não encontrada[/red]")
+            raise typer.Exit(1)
         scheduled = task.scheduled_datetime
         completed = task.completed_datetime
+        assert completed is not None, "Task must have completed_datetime after complete_task"
         diff = completed - scheduled
         diff_minutes = int(diff.total_seconds() / 60)
 
@@ -141,6 +145,9 @@ def update_task(
             scheduled_datetime=scheduled_dt,
             description=description,
         )
+        if task is None:
+            console.print("[red]Tarefa não encontrada[/red]")
+            raise typer.Exit(1)
 
         # Display updated task info
         console.print("\n[green]✓ Tarefa atualizada com sucesso![/green]\n")
@@ -171,6 +178,9 @@ def delete_task(
     """Deleta uma tarefa."""
     try:
         task = TaskService.get_task(task_id)
+        if task is None:
+            console.print("[red]Tarefa não encontrada[/red]")
+            raise typer.Exit(1)
 
         if not force:
             console.print(f"\nDeletar tarefa: [bold]{task.title}[/bold] (ID: {task_id})?")

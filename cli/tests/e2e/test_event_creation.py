@@ -4,15 +4,20 @@ E2E tests validando workflow completo de criacao de eventos.
 Referencias:
     - ADR-019: Test Naming Convention
     - RTM: Requirements Traceability Matrix
+BRs cobertas:
+    - BR-ROUTINE-001: Criacao de rotinas
+    - BR-HABIT-001: Criacao de habitos em rotinas
+    - BR-HABIT-003: Geracao de instancias via --generate
 """
 
 from pathlib import Path
 
 import pytest
+from freezegun import freeze_time
 from pytest import MonkeyPatch
 from typer.testing import CliRunner
 
-from src.timeblock.main import app
+from timeblock.main import app
 
 
 @pytest.fixture
@@ -29,22 +34,24 @@ class TestBREventCreationWorkflow:
     BRs cobertas:
     - BR-ROUTINE-001: Criacao de rotinas
     - BR-HABIT-001: Criacao de habitos em rotinas
-    - BR-HABIT-002: Geracao de instancias via --generate
+    - BR-HABIT-003: Geracao de instancias via --generate
     """
 
+    @freeze_time("2025-10-01")
     def test_br_routine_habit_schedule_complete_flow(
         self, isolated_db: Path, monkeypatch: MonkeyPatch
     ) -> None:
         """
         E2E: Usuario cria rotina completa com multiplos habitos.
 
-        DADO: Sistema inicializado
+        DADO: Sistema inicializado (data fixa: 2025-10-01)
         QUANDO: Usuario cria rotina "Manha Produtiva"
         E: Adiciona 3 habitos com --generate 1
         ENTAO: Sistema cria todos eventos corretamente
-        
-        Nota: Listagem via --week tem bug conhecido (TODO: investigar).
-        Este teste valida apenas a criacao de instancias.
+
+        Nota: Data fixa em 1 de outubro para garantir contagem previsivel.
+        - EVERYDAY de 01/10 a 01/11 = 32 dias
+        - WEEKDAYS de 01/10 a 01/11 = 23 dias uteis
         """
         monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(isolated_db))
         runner = CliRunner()
@@ -58,10 +65,13 @@ class TestBREventCreationWorkflow:
         assert result.exit_code == 0, f"Criacao de rotina deve ter sucesso. Output: {result.output}"
 
         # 3. Adicionar 3 habitos com --generate 1
+        # De 01/10/2025 a 01/11/2025:
+        # - EVERYDAY: 32 dias (incluindo ambos endpoints)
+        # - WEEKDAYS: 23 dias uteis
         habits = [
-            ("Meditacao", "06:00", "06:20", "EVERYDAY", "31"),
-            ("Exercicio", "06:30", "07:30", "WEEKDAYS", "22"),
-            ("Cafe da Manha", "08:00", "08:30", "EVERYDAY", "31"),
+            ("Despertar", "06:00", "06:20", "EVERYDAY", "32"),
+            ("Academia", "06:30", "07:30", "WEEKDAYS", "23"),
+            ("Café da Manhã", "08:00", "08:30", "EVERYDAY", "32"),
         ]
 
         for title, start, end, repeat, expected_count in habits:
@@ -88,7 +98,7 @@ class TestBREventCreationWorkflow:
                 f"Criacao de habito '{title}' deve ter sucesso. Output: {result.output}"
             )
             # Valida que instancias foram geradas
-            assert expected_count in result.output or "instancia" in result.output.lower(), (
+            assert expected_count in result.output or "instância" in result.output.lower(), (
                 f"Habito '{title}' deve gerar {expected_count} instancias. Output: {result.output}"
             )
 

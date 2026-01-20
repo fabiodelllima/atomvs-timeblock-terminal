@@ -12,12 +12,12 @@ from pytest_bdd import given, parsers, scenarios, then, when
 from sqlmodel import Session
 from typer.testing import CliRunner
 
-from src.timeblock.commands import habit
-from src.timeblock.main import app
-from src.timeblock.models.enums import Status
-from src.timeblock.models.habit import Habit, Recurrence
-from src.timeblock.models.habit_instance import HabitInstance
-from src.timeblock.models.routine import Routine
+from timeblock.commands import habit
+from timeblock.main import app
+from timeblock.models.enums import Status
+from timeblock.models.habit import Habit, Recurrence
+from timeblock.models.habit_instance import HabitInstance
+from timeblock.models.routine import Routine
 
 if TYPE_CHECKING:
     from _pytest.monkeypatch import MonkeyPatch
