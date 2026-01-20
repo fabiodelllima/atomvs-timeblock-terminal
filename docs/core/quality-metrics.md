@@ -85,7 +85,7 @@
 
 **Tendência Preocupante:**
 
-- v1.2.0 → v1.3.0: -9pp cobertura, +118 erros mypy
+- v1.2.0 => v1.3.0: -9pp cobertura, +118 erros mypy
 - Causa: Código não testado adicionado (EventReorderingService)
 
 ---
@@ -204,19 +204,63 @@ Nenhum gargalo crítico identificado.
 
 ### 6.1. Business Rules → Tests
 
-**Cobertura de BRs:**
+**Última Análise:** 2026-01-19
 
-- BRs documentadas: 50
-- BRs com testes: ~40 (80%)
-- BRs sem testes: ~10 (20%)
+**Resumo:**
 
-**BRs Não Testadas (Críticas):**
+| Métrica              | Valor    |
+| -------------------- | -------- |
+| BRs Documentadas     | 52       |
+| BRs com Testes       | 35 (67%) |
+| BRs sem Testes       | 17 (33%) |
+| Testes Stub (vazios) | 11       |
 
-- BR-REORDER-003 a 005 (apply_proposal não implementado)
-- BR-TIMER-004 (pause tracking em memória, não persistido)
-- BR-STREAK-003 (edge cases não cobertos)
+**Status por Domínio:**
 
-**Ação:** Adicionar testes para BRs pendentes em v1.4.0 Sprint 4
+| Domínio       | Total | OK  | Parcial | Stub | Sem Teste |
+| ------------- | ----- | --- | ------- | ---- | --------- |
+| Routine       | 6     | 5   | 0       | 0    | 1         |
+| Habit         | 5     | 5   | 0       | 0    | 0         |
+| HabitInstance | 6     | 2   | 2       | 0    | 2         |
+| Skip          | 4     | 1   | 0       | 0    | 3         |
+| Streak        | 4     | 4   | 0       | 0    | 0         |
+| Task          | 6     | 3   | 0       | 0    | 2         |
+| Timer         | 8     | 6   | 1       | 0    | 1         |
+| Reorder       | 6     | 2   | 1       | 3    | 0         |
+| Validation    | 3     | 0   | 0       | 0    | 3         |
+| CLI           | 2     | 0   | 0       | 0    | 2         |
+| Tag           | 2     | 0   | 0       | 0    | 2         |
+
+**BRs Sem Cobertura (17):**
+
+| BR                   | Descrição                      | Prioridade |
+| -------------------- | ------------------------------ | ---------- |
+| BR-HABITINSTANCE-002 | Substatus Obrigatório          | Alta       |
+| BR-HABITINSTANCE-003 | Completion Thresholds          | Alta       |
+| BR-VAL-001           | Validação de Horários          | Alta       |
+| BR-VAL-002           | Validação de Datas             | Alta       |
+| BR-VAL-003           | Validação de Strings           | Alta       |
+| BR-SKIP-002          | Campos de Skip                 | Média      |
+| BR-SKIP-003          | Prazo para Justificar          | Média      |
+| BR-SKIP-004          | CLI Prompt Interativo          | Média      |
+| BR-TASK-004          | Visualização e Listagem        | Média      |
+| BR-TASK-005          | Atualização de Task            | Média      |
+| BR-TAG-001           | Estrutura de Tag               | Média      |
+| BR-TAG-002           | Associação com Eventos         | Média      |
+| BR-ROUTINE-006       | Soft Delete e Purge            | Baixa      |
+| BR-TIMER-007         | Log Manual                     | Baixa      |
+| BR-CLI-001           | Validação de Flags Dependentes | Baixa      |
+| BR-CLI-002           | Formatos de Datetime Aceitos   | Baixa      |
+| BR-TASK-006          | Simplicidade Mantida           | N/A        |
+
+**Testes Stub (corpo vazio):**
+
+| Arquivo                            | Quantidade | BRs Referenciadas    |
+| ---------------------------------- | ---------- | -------------------- |
+| test_habit_instance_integration.py | 5          | BR-REORDER-001 a 005 |
+| test_task_integration.py           | 6          | BR-REORDER-001 a 006 |
+
+**Ação:** Implementar testes de alta prioridade em v1.4.0
 
 ### 6.2. Requirements Traceability Matrix
 
