@@ -12,8 +12,8 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada e
 
 **Estado Atual (16/01/2026):**
 
-- Versão: v1.3.0 (produção) / v1.4.0 (desenvolvimento)
-- Qualidade: 61% cobertura, 156 erros mypy, 26 testes skipped
+- Versão: v1.3.1 (produção) / v1.4.0 (desenvolvimento)
+- Qualidade: 65% cobertura, 0 erros mypy, 26 testes skipped
 - Funcionalidade: 40% comandos CLI operacionais
 
 ---
@@ -52,7 +52,7 @@ Detalhes em: `architecture.md` seção 9 (Evolução Futura)
 
 ## 3. Estado Atual
 
-**Versão:** v1.3.0 (produção), v1.4.0 (desenvolvimento)
+**Versão:** v1.3.1 (produção), v1.4.0 (desenvolvimento)
 **Branch:** `refactor/service-dependency-injection`
 **Data:** 16 de Janeiro de 2026
 
@@ -60,7 +60,7 @@ Detalhes em: `architecture.md` seção 9 (Evolução Futura)
 
 | Métrica        | Atual | Meta v1.4 | Status      |
 | -------------- | ----- | --------- | ----------- |
-| Cobertura      | 61%   | 80%       | [BLOQUEADO] |
+| Cobertura      | 65%   | 80%       | [BLOQUEADO] |
 | Erros mypy     | 156   | 0         | [BLOQUEADO] |
 | Testes skipped | 26    | 0         | [BLOQUEADO] |
 | CLI funcional  | 40%   | 100%      | [BLOQUEADO] |
@@ -232,7 +232,7 @@ Ver: `architecture.md` seção 9.4
 | ------ | ----------------------- | ---------- | ------- | ------------ |
 | DT-001 | 156 erros mypy          | CRÍTICA    | 16h     | v1.4.0       |
 | DT-002 | 26 testes skipped       | ALTA       | 8h      | v1.4.0 S4    |
-| DT-003 | Cobertura 61%           | ALTA       | 8h      | v1.4.0 S3-S4 |
+| DT-003 | Cobertura 65%           | ALTA       | 8h      | v1.4.0 S3-S4 |
 | DT-004 | EventReordering parcial | MÉDIA      | 12h     | v1.5.0       |
 | DT-005 | Código morto            | BAIXA      | 2h      | v1.5.0       |
 

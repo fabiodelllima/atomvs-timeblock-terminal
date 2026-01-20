@@ -10,17 +10,17 @@
 ## 1. Métricas Atuais
 
 **Data de Referência:** 16 de Janeiro de 2026
-**Versão:** v1.3.0 (produção), v1.4.0 (desenvolvimento)
+**Versão:** v1.3.1 (produção), v1.4.0 (desenvolvimento)
 **Branch:** `refactor/service-dependency-injection`
 
 ### 1.1. Visão Geral
 
 | Categoria           | Valor Atual | Meta v1.4.0 | Delta | Status         |
 | ------------------- | ----------- | ----------- | ----- | -------------- |
-| Testes Passando     | 454         | 480         | +26   | [EM PROGRESSO] |
+| Testes Passando     | 466         | 480         | +26   | [EM PROGRESSO] |
 | Testes Skipped      | 26          | 0           | -26   | [BLOQUEADO]    |
-| Cobertura Global    | 61%         | 80%         | +19pp | [BLOQUEADO]    |
-| Erros Mypy          | 156         | 0           | -156  | [BLOQUEADO]    |
+| Cobertura Global    | 65%         | 80%         | +19pp | [BLOQUEADO]    |
+| Erros Mypy          | 0         | 0           | -156  | [BLOQUEADO]    |
 | Commands Funcionais | 40%         | 100%        | +60pp | [BLOQUEADO]    |
 
 ### 1.2. Distribuição de Testes

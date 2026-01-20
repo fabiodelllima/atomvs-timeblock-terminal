@@ -10,7 +10,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 ### Alterado (Documentação)
 
 - **(2026-01-15)** Padronização de Import Paths
-
   - Corrigido imports de `src.timeblock.*` para `timeblock.*` em todo codebase
   - Atualizado mock/monkeypatch paths em 45+ arquivos de teste
   - Resolvido isolamento de sessão em testes (session injection)
@@ -18,7 +17,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - Métricas atualizadas: 454 testes passando, 61% cobertura
 
 - **(2025-01-11)** Housekeeping e correção de métricas
-
   - Deletadas 15 branches obsoletas (feat/_, fix/ci-_, refactor/\*)
   - README atualizado com métricas reais:
     - Versão: v2.0.0 => v1.3.0
@@ -27,14 +25,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - Mantida estrutura visual e diagramas do README
 
 - **(2025-12-22)** Processo de Desenvolvimento e ADR-025
-
   - Nova seção 11 em architecture.md: Processo de Desenvolvimento
   - ADR-025: Development Methodology (Vertical Slicing + Strict TDD)
   - Documentado: Docs-First, BDD, Strict TDD, Sprints, WIP Limits
   - Atualizado índice de ADRs: 24 => 25 (23 aceitas, 2 propostas)
 
 - **(2025-12-21)** Deployment Options e ADR-024
-
   - Nova seção 10 em architecture.md: Deployment Options
   - Documentado Raspberry Pi homelab como servidor recomendado
   - Comparativo: Pi vs VPS vs Desktop
@@ -42,7 +38,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - Atualizado índice de ADRs: 23 => 24 (2 propostas)
 
 - **(2025-12-21)** Roadmap v1.5-v4.0 e ADR-023
-
   - Adicionada ADR-023: Microservices Ecosystem (Kafka, CloudEvents)
   - Documentado roadmap completo em architecture.md:
     - v1.5.0: Infra Foundation (Docker, CI/CD)
@@ -80,14 +75,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 ### Adicionado
 
 - **(2025-11-19)** Enums para rastreamento detalhado (BR-HABIT-INSTANCE-STATUS-001)
-
   - `Status`: PENDING, DONE, NOT_DONE
   - `DoneSubstatus`: FULL (90-110%), PARTIAL (<90%), OVERDONE (110-150%), EXCESSIVE (>150%)
   - `NotDoneSubstatus`: SKIPPED_JUSTIFIED, SKIPPED_UNJUSTIFIED, IGNORED
   - `SkipReason`: HEALTH, WORK, FAMILY, TRAVEL, WEATHER, LACK_RESOURCES, EMERGENCY, OTHER
 
 - **(2025-11-19)** Novos campos em HabitInstance
-
   - `done_substatus`: DoneSubstatus (calculado baseado em completion %)
   - `not_done_substatus`: NotDoneSubstatus (categorização de skip/ignore)
   - `skip_reason`: SkipReason (categoria do skip justificado)
@@ -95,7 +88,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - `completion_percentage`: int (% de completion persistido)
 
 - **(2025-11-19)** Validações de consistência Status+Substatus
-
   - DONE requer done_substatus obrigatório
   - NOT_DONE requer not_done_substatus obrigatório
   - PENDING não pode ter substatus
@@ -105,14 +97,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - Método `validate_status_consistency()` implementado
 
 - **(2025-11-19)** Migração SQL (migration_001_status_substatus.py)
-
   - Adiciona 5 colunas: done_substatus, not_done_substatus, skip_reason, skip_note, completion_percentage
   - Migra dados automaticamente preservando informação
   - Função upgrade() e downgrade() para rollback
   - Metadata: version=001, name=status_substatus_refactoring
 
 - **(2025-11-19)** Documentação completa (BR-HABIT-INSTANCE-STATUS-001)
-
   - BR-HABIT-INSTANCE-STATUS-001: Especificação detalhada
   - 18 cenários BDD (Gherkin DADO/QUANDO/ENTÃO)
   - ADR-021: Decisão arquitetural documentada
@@ -120,7 +110,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - Cobertura: 84% (habit_instance.py)
 
 - **(2025-11-17)** Fixtures de integração para testes
-
   - `test_db` - Session com FK habilitado
   - `sample_routine` - Routine pré-criada
   - `sample_habits` - 3 Habits com recorrências diferentes
@@ -128,7 +117,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - PRAGMA foreign_keys=ON no integration_engine
 
 - **(2025-11-17)** Validação BR-HABIT-004: Recurrence Pattern
-
   - Model `habit.py` valida recurrence via **init** override
   - 10 padrões suportados (MONDAY-SUNDAY, WEEKDAYS, WEEKENDS, EVERYDAY)
   - Mensagens de erro claras listando valores válidos
@@ -143,14 +131,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 ### Modificado
 
 - **(2025-11-19)** HabitInstance model refatorado
-
   - Status simplificado: 3 valores ao invés de 5
   - Sistema Status+Substatus para granularidade
   - Property `is_overdue` preservada (compatível)
   - Exports atualizados em `models/__init__.py`
 
 - **(2025-11-17)** Services refatorados com Dependency Injection
-
   - `task_service.py` - Todos métodos aceitam session opcional
   - `timer_service.py` - start_timer, stop_timer, etc. com session
   - `event_reordering_service.py` - detect_conflicts com session
@@ -159,7 +145,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - Padrão: if session => usar injetada, else => criar própria
 
 - **(2025-11-17)** Database engine com FK habilitado
-
   - `engine.py` - PRAGMA foreign_keys=ON no SQLite
 
 - **(2025-11-17)** Imports refatorados
@@ -174,6 +159,46 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - Services agora aceitam session opcional: `session: Session | None = None`
   - Testes isolados com transações compartilhadas
   - Código produção mantém compatibilidade (backward compatible)
+
+---
+
+## [1.3.1] - 2026-01-19
+
+### Adicionado
+
+- **ADR-026: Test Database Isolation Strategy**
+  - Estratégia híbrida: DI para unit, env var para integration
+  - Fixtures padronizadas em conftest.py
+  - Documentação em architecture.md seção 4.4
+
+- **Análise de Cobertura BR → Testes**
+  - Matriz completa em quality-metrics.md seção 6.1
+  - 52 BRs documentadas, 35 com testes (67%)
+  - 17 BRs identificadas sem cobertura
+  - Roadmap atualizado com plano de implementação
+
+### Alterado
+
+- **SSOT para database path**
+  - Centralizado em `engine.get_db_path()`
+  - Removido `DATABASE_PATH` de config.py
+  - Eliminados hacks de `sys.modules` em testes
+
+- **Fixtures de integração simplificadas**
+  - `isolated_db` usa apenas env var (ADR-026)
+  - Removidas fixtures locais duplicadas
+  - `test_init.py` usa `empty_db_path` específica
+
+### Corrigido
+
+- **BR-SKIP-003:** IGNORED pode receber justificativa retroativa (recuperação)
+
+### Métricas
+
+- 466 testes passando
+- 65% cobertura global
+- 0 erros mypy
+- 26 testes skipped (análise documentada)
 
 ---
 
