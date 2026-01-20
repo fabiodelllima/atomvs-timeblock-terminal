@@ -1016,7 +1016,7 @@ else:
 
 - Dentro de 48h: pode adicionar/editar justificativa
 - Apos 48h: instância marcada como IGNORED automaticamente
-- IGNORED não pode receber justificativa retroativa
+- IGNORED pode receber justificativa retroativa (recuperação)
 
 **Nota:** Timeout automático documentado, implementação pendente.
 

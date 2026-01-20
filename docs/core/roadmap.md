@@ -1,7 +1,6 @@
 # Roadmap - TimeBlock Organizer
 
 **Versão:** 2.1.0
-**Última atualização:** 16 de Janeiro de 2026
 **Status:** Single Source of Truth (SSOT)
 **Documentos Relacionados:** architecture.md, business-rules.md, quality-metrics.md
 
@@ -24,7 +23,7 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada e
 ### 1.1. Evolução Arquitetural
 
 ```
-v1.x CLI → v2.x API → v3.x Sync → v4.x Mobile
+v1.x CLI => v2.x API => v3.x Sync => v4.x Mobile
 ```
 
 Detalhes em: `architecture.md` seção 9 (Evolução Futura)
@@ -34,7 +33,7 @@ Detalhes em: `architecture.md` seção 9 (Evolução Futura)
 1. **Offline-First:** Funcionalidade completa sem rede
 2. **User Control:** Sistema propõe, usuário decide
 3. **Quality First:** 80% cobertura, zero erros mypy em produção
-4. **DOCS → CODE:** Documentação precede implementação
+4. **DOCS => CODE:** Documentação precede implementação
 
 ---
 
@@ -147,13 +146,13 @@ Ver: `architecture.md` seção 9.4
 
 ### Sprint 1: Infraestrutura Mypy (2h)
 
-| Task                | Descrição                 | Tempo |
-| ------------------- | ------------------------- | ----- |
-| Instalar stubs      | types-python-dateutil     | 15min |
-| Corrigir migrations | Session.exec → execute    | 45min |
-| Corrigir SQLAlchemy | datetime.is\_() → == None | 1h    |
+| Task                | Descrição                  | Tempo |
+| ------------------- | -------------------------- | ----- |
+| Instalar stubs      | types-python-dateutil      | 15min |
+| Corrigir migrations | Session.exec => execute    | 45min |
+| Corrigir SQLAlchemy | datetime.is\_() => == None | 1h    |
 
-**Entregável:** -40 erros (156 → 116)
+**Entregável:** -40 erros (156 => 116)
 
 ---
 
@@ -177,11 +176,11 @@ Ver: `architecture.md` seção 9.4
 
 - +7 métodos em services
 - Timer funcional (start/stop/pause/resume/status)
-- -31 erros mypy (116 → 85)
+- -31 erros mypy (116 => 85)
 
 **Detalhamento Técnico:**
 
-- Análise completa: Seção 5 (Débito Técnico → Service Layer Gap)
+- Análise completa: Seção 5 (Débito Técnico => Service Layer Gap)
 - Signatures: ADR-007 (será atualizado)
 - Implementação: GitHub Issue #TBD
 
@@ -202,17 +201,26 @@ Ver: `architecture.md` seção 9.4
 
 ---
 
-### Sprint 4: Testes Skipped (4h)
+### Sprint 4: Cobertura de BRs (6h)
 
-| Categoria              | Testes | Tempo |
-| ---------------------- | ------ | ----- |
-| Integration reordering | 17     | 2h    |
-| Database migrations    | 6      | 1h    |
-| Fixtures complexas     | 1      | 30min |
-| E2E conflict           | 1      | 30min |
-| Edge cases             | 1      | 30min |
+**Análise (2026-01-19):** 17 BRs sem cobertura de testes
 
-**Entregável:** 480+ testes, zero skipped
+| Prioridade | BRs                                                  | Testes Estimados | Tempo |
+| ---------- | ---------------------------------------------------- | ---------------- | ----- |
+| Alta       | BR-HABITINSTANCE-002/003, BR-VAL-001/002/003         | 15               | 2h    |
+| Média      | BR-SKIP-002/003/004, BR-TASK-004/005, BR-TAG-001/002 | 20               | 3h    |
+| Baixa      | BR-ROUTINE-006, BR-TIMER-007, BR-CLI-001/002         | 10               | 1h    |
+
+**Testes Skipped (26):**
+
+| Categoria                  | Quantidade | Ação                    |
+| -------------------------- | ---------- | ----------------------- |
+| Stubs vazios (integration) | 11         | Implementar ou deletar  |
+| Timer API v1               | 6          | Atualizar para v2       |
+| Migrations                 | 6          | Aguarda migrate_v2()    |
+| Outros                     | 3          | Avaliar individualmente |
+
+**Entregável:** 80% BRs cobertas, <10 skipped
 
 ---
 
@@ -286,17 +294,17 @@ Commands referenciam métodos inexistentes:
 
 ```
 SSOT Documents:
-├── roadmap.md           → Estado e planejamento
-├── business-rules.md    → Regras de negócio
-├── architecture.md      → Decisões técnicas
-├── quality-metrics.md   → Métricas operacionais
-└── CHANGELOG.md         → Histórico de releases
+├── roadmap.md           => Estado e planejamento
+├── business-rules.md    => Regras de negócio
+├── architecture.md      => Decisões técnicas
+├── quality-metrics.md   => Métricas operacionais
+└── CHANGELOG.md         => Histórico de releases
 
 ADRs (Imutáveis):
-└── docs/decisions/      → Decisões arquiteturais
+└── docs/decisions/      => Decisões arquiteturais
 
 Working Documents:
-└── docs/testing/        → Estratégias de teste
+└── docs/testing/        => Estratégias de teste
 ```
 
 ---
@@ -311,5 +319,6 @@ Working Documents:
 
 ---
 
-**Mantido por:** Tech Lead
 **Próxima Revisão:** Fim v1.4.0 Sprint 4
+
+**Última atualização:** 20 de Janeiro de 2026
