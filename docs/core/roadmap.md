@@ -12,7 +12,7 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada e
 
 **Estado Atual (16/01/2026):**
 
-- Versão: v1.3.1 (produção) / v1.4.0 (desenvolvimento)
+- Versão: v1.3.3 (produção) / v1.4.0 (desenvolvimento)
 - Qualidade: 65% cobertura, 0 erros mypy, 26 testes skipped
 - Funcionalidade: 40% comandos CLI operacionais
 
@@ -52,16 +52,16 @@ Detalhes em: `architecture.md` seção 9 (Evolução Futura)
 
 ## 3. Estado Atual
 
-**Versão:** v1.3.1 (produção), v1.4.0 (desenvolvimento)
+**Versão:** v1.3.3 (produção), v1.4.0 (desenvolvimento)
 **Branch:** `refactor/service-dependency-injection`
-**Data:** 16 de Janeiro de 2026
+**Data:** 22 de Janeiro de 2026
 
 ### 3.1. Métricas Principais
 
 | Métrica        | Atual | Meta v1.4 | Status      |
 | -------------- | ----- | --------- | ----------- |
-| Cobertura      | 65%   | 80%       | [BLOQUEADO] |
-| Erros mypy     | 156   | 0         | [BLOQUEADO] |
+| Cobertura      | 67%   | 80%       | [BLOQUEADO] |
+| Erros mypy     | 0     | 0         | [DONE]      |
 | Testes skipped | 26    | 0         | [BLOQUEADO] |
 | CLI funcional  | 40%   | 100%      | [BLOQUEADO] |
 
@@ -321,4 +321,4 @@ Working Documents:
 
 **Próxima Revisão:** Fim v1.4.0 Sprint 4
 
-**Última atualização:** 20 de Janeiro de 2026
+**Última atualização:** 22 de Janeiro de 2026
