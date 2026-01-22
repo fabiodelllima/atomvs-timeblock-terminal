@@ -15,8 +15,8 @@
 
 | Categoria           | Valor Atual | Meta v1.4.0 | Delta | Status         |
 | ------------------- | ----------- | ----------- | ----- | -------------- |
-| Testes Passando     | 558         | 480         | +26   | [EM PROGRESSO] |
-| Testes Skipped      | 26          | 0           | -26   | [BLOQUEADO]    |
+| Testes Passando     | 569         | 480         | +26   | [EM PROGRESSO] |
+| Testes Skipped      | 15          | 0           | -26   | [BLOQUEADO]    |
 | Cobertura Global    | 67%         | 80%         | +19pp | [BLOQUEADO]    |
 | Erros Mypy          | 0           | 0           | -156  | [BLOQUEADO]    |
 | Commands Funcionais | 40%         | 100%        | +60pp | [BLOQUEADO]    |
@@ -29,7 +29,7 @@
 | Integration | 64         | 13%        | 20-25%      | [ABAIXO]    |
 | E2E         | 5          | 1%         | 5-10%       | [ABAIXO]    |
 | BDD         | 7          | 1%         | Manter      | [OK]        |
-| Skipped     | 26         | 5%         | 0%          | [CRÍTICO]   |
+| Skipped     | 15         | 5%         | 0%          | [CRÍTICO]   |
 
 **Análise:** Pirâmide de testes desbalanceada. Excesso de unit tests, déficit de integration/E2E.
 

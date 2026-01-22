@@ -13,7 +13,7 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada e
 **Estado Atual (16/01/2026):**
 
 - Versão: v1.3.3 (produção) / v1.4.0 (desenvolvimento)
-- Qualidade: 65% cobertura, 0 erros mypy, 26 testes skipped
+- Qualidade: 68% cobertura, 0 erros mypy, 15 testes skipped
 - Funcionalidade: 40% comandos CLI operacionais
 
 ---
@@ -60,9 +60,9 @@ Detalhes em: `architecture.md` seção 9 (Evolução Futura)
 
 | Métrica        | Atual | Meta v1.4 | Status      |
 | -------------- | ----- | --------- | ----------- |
-| Cobertura      | 67%   | 80%       | [BLOQUEADO] |
+| Cobertura      | 68%   | 80%       | [BLOQUEADO] |
 | Erros mypy     | 0     | 0         | [DONE]      |
-| Testes skipped | 26    | 0         | [BLOQUEADO] |
+| Testes skipped | 15    | 0         | [BLOQUEADO] |
 | CLI funcional  | 40%   | 100%      | [BLOQUEADO] |
 
 **Detalhamento:** Ver `docs/core/quality-metrics.md`
@@ -211,7 +211,7 @@ Ver: `architecture.md` seção 9.4
 | Média      | BR-SKIP-002/003/004, BR-TASK-004/005, BR-TAG-001/002 | 20               | 3h    |
 | Baixa      | BR-ROUTINE-006, BR-TIMER-007, BR-CLI-001/002         | 10               | 1h    |
 
-**Testes Skipped (26):**
+**Testes Skipped (15):**
 
 | Categoria                  | Quantidade | Ação                    |
 | -------------------------- | ---------- | ----------------------- |
@@ -231,7 +231,7 @@ Ver: `architecture.md` seção 9.4
 | ID     | Descrição               | Severidade | Esforço | Sprint       |
 | ------ | ----------------------- | ---------- | ------- | ------------ |
 | DT-001 | 156 erros mypy          | CRÍTICA    | 16h     | v1.4.0       |
-| DT-002 | 26 testes skipped       | ALTA       | 8h      | v1.4.0 S4    |
+| DT-002 | 15 testes skipped       | ALTA       | 8h      | v1.4.0 S4    |
 | DT-003 | Cobertura 65%           | ALTA       | 8h      | v1.4.0 S3-S4 |
 | DT-004 | EventReordering parcial | MÉDIA      | 12h     | v1.5.0       |
 | DT-005 | Código morto            | BAIXA      | 2h      | v1.5.0       |
