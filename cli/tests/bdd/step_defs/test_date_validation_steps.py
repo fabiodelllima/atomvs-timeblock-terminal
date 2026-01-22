@@ -1,3 +1,4 @@
+# pyright: reportAttributeAccessIssue=false
 """Step definitions para date_validation.feature (BR-VAL-002).
 
 Implementa os passos BDD para validação de datas conforme especificado
@@ -10,8 +11,7 @@ from pytest_bdd import given, parsers, scenarios, then, when
 from sqlmodel import Session
 
 # Importação será adicionada quando a função existir
-# from timeblock.utils.validators import validate_date
-
+from timeblock.utils.validators import validate_date
 
 # Carrega todos os cenários do arquivo date_validation.feature
 scenarios("../features/date_validation.feature")
@@ -85,10 +85,10 @@ def validate_date_action(session: Session):
 
     try:
         # Validar data (object ou string)
-        # result = validate_date(input_data)
-        # session.info["result"] = result  # type: ignore
-        # session.info["error"] = None  # type: ignore
-        raise NotImplementedError("validate_date() não implementada ainda")
+        assert input_data is not None, "input_data não pode ser None"
+        result = validate_date(input_data)
+        session.info["result"] = result  # type: ignore
+        session.info["error"] = None  # type: ignore
     except (ValueError, NotImplementedError) as e:
         session.info["result"] = None  # type: ignore
         session.info["error"] = str(e)  # type: ignore
