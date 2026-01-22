@@ -4,15 +4,15 @@
 
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║  TimeBlock Organizer v1.3.1                                   ║
+║  TimeBlock Organizer v1.3.3                                   ║
 ║  ───────────────────────────────────────────────────────────  ║
-║  [x] 466 testes  [x] 65% cobertura  [x] 26 ADRs  [x] 52 BRs   ║
+║  [x] 558 testes  [x] 67% cobertura  [x] 26 ADRs  [x] 52 BRs   ║
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-466%20passing-success.svg)](cli/tests/)
-[![Coverage](https://img.shields.io/badge/coverage-65%25-yellow.svg)](cli/tests/)
+[![Tests](https://img.shields.io/badge/tests-558%20passing-success.svg)](cli/tests/)
+[![Coverage](https://img.shields.io/badge/coverage-67%25-yellow.svg)](cli/tests/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Visão Geral
@@ -334,7 +334,7 @@ timeblock task complete 1
 
 ```
 ╔════════════════════════════════════════════════════════════════════╗
-║                         MÉTRICAS v1.3.1                            ║
+║                         MÉTRICAS v1.3.3                            ║
 ╠════════════════════════════════════════════════════════════════════╣
 ║                                                                    ║
 ║   Testes          466        ████████████████████████████  100%    ║
@@ -370,7 +370,7 @@ docs/
 
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│   DOCS   │────▶│   BDD    │────▶│   TDD    │────▶│   CODE   │
+│   DOCS   │────>│   BDD    │────>│   TDD    │────>│   CODE   │
 │          │     │          │     │          │     │          │
 │ BR-XXX   │     │ Gherkin  │     │ test_*   │     │ impl     │
 └──────────┘     └──────────┘     └──────────┘     └──────────┘
@@ -408,7 +408,7 @@ Tipos: feat, fix, refactor, test, docs, chore
 │ v1.0.0 │ [DONE]    │ CLI básica, CRUD eventos                      │
 │ v1.1.0 │ [DONE]    │ Event reordering                              │
 │ v1.2.x │ [DONE]    │ Logging, docs consolidados                    │
-│ v1.3.1 │ [CURRENT] │ Business rules formalizadas                   │
+│ v1.3.3 │ [CURRENT] │ Business rules formalizadas                   │
 │ v1.4.0 │ [WIP]     │ MVP Event Reordering, E2E tests               │
 ├────────────────────────────────────────────────────────────────────┤
 │ v1.5.0 │ [PLANNED] │ Infra Foundation (Docker, CI/CD)              │
