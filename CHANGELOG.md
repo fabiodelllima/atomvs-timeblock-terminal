@@ -7,6 +7,25 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ## [Não Lançado]
 
+## [1.3.3] - 2026-01-22
+
+### Adicionado
+
+- BR-CLI-002: Date parser multi-formato (ISO 8601, DD-MM-YYYY, DD/MM/YYYY)
+- 25 novos testes para date parser (8 BDD + 17 unit)
+- Configuração pyright no pyproject.toml
+
+### Corrigido
+
+- Ativados BDD steps de date_validation (BR-VAL-002)
+- Import de validate_date nos step definitions
+
+### Métricas
+
+- Testes: 466 → 558 (+92)
+- Cobertura: 65% → 67% (+2pp)
+- Mypy: 0 erros mantido
+
 ### Alterado (Documentação)
 
 - **(2026-01-15)** Padronização de Import Paths
