@@ -78,3 +78,8 @@ mypy_path = "src"
 [[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_defs = false
+
+[tool.pyright]
+pythonVersion = "3.13"
+typeCheckingMode = "standard"
+reportAttributeAccessIssue = false

@@ -1,49 +1,65 @@
-"""Parse date shortcuts like 'today', 'this-week', etc."""
+"""Parser de datas com suporte a múltiplos formatos."""
 
-from datetime import date, timedelta
+import re
+from datetime import date, datetime
+
+from timeblock.utils.validators import validate_date
+
+# Patterns para detectar formato aparente (estrutura correta, valores podem ser inválidos)
+ISO_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+DAY_FIRST_DASH_PATTERN = re.compile(r"^\d{2}-\d{2}-\d{4}$")
+DAY_FIRST_SLASH_PATTERN = re.compile(r"^\d{2}/\d{2}/\d{4}$")
 
 
-def parse_date_shortcut(shortcut: str) -> date | tuple[date, date] | None:
-    """Parse date shortcuts.
+def parse_date_input(date_input: str | date) -> date:
+    """Parse date from multiple formats (BR-CLI-002).
+
+    Formatos aceitos:
+    - YYYY-MM-DD (ISO 8601)
+    - DD-MM-YYYY (day-first com traço)
+    - DD/MM/YYYY (day-first com barra)
+    - date object (passthrough)
+
+    Args:
+        date_input: String em um dos formatos suportados ou objeto date
 
     Returns:
-        - date for single days
-        - tuple (start, end) for ranges
-        - None if not a recognized shortcut
+        Objeto date validado
+
+    Raises:
+        ValueError: Formato inválido ou data fora do range
     """
-    today = date.today()
+    # Se já é objeto date, validar e retornar
+    if isinstance(date_input, date):
+        return validate_date(date_input)
 
-    # Single days
-    if shortcut == "today":
-        return today
-    elif shortcut == "tomorrow":
-        return today + timedelta(days=1)
-    elif shortcut == "yesterday":
-        return today - timedelta(days=1)
+    # Se não é string, rejeitar com erro de formato
+    if not isinstance(date_input, str):
+        raise ValueError("Date must be in ISO 8601 format (YYYY-MM-DD)")
 
-    # Weeks (return tuple)
-    elif shortcut == "this-week":
-        start = today - timedelta(days=today.weekday())
-        end = start + timedelta(days=6)
-        return (start, end)
-    elif shortcut == "next-week":
-        start = today + timedelta(days=(7 - today.weekday()))
-        end = start + timedelta(days=6)
-        return (start, end)
-    elif shortcut == "last-week":
-        start = today - timedelta(days=(today.weekday() + 7))
-        end = start + timedelta(days=6)
-        return (start, end)
+    # Verificar string vazia/whitespace
+    if not date_input.strip():
+        raise ValueError("Date cannot be empty")
 
-    # Months
-    elif shortcut == "this-month":
-        start = today.replace(day=1)
-        next_month = (start + timedelta(days=32)).replace(day=1)
-        end = next_month - timedelta(days=1)
-        return (start, end)
-    elif shortcut == "next-month":
-        next_m = (today.replace(day=1) + timedelta(days=32)).replace(day=1)
-        end = (next_m + timedelta(days=32)).replace(day=1) - timedelta(days=1)
-        return (next_m, end)
+    date_str = date_input.strip()
 
-    return None
+    # Detectar formato aparente e tentar parsear
+    format_map = [
+        (ISO_PATTERN, "%Y-%m-%d"),
+        (DAY_FIRST_DASH_PATTERN, "%d-%m-%Y"),
+        (DAY_FIRST_SLASH_PATTERN, "%d/%m/%Y"),
+    ]
+
+    for pattern, fmt in format_map:
+        if pattern.match(date_str):
+            # String tem estrutura correta para este formato
+            try:
+                parsed_date = datetime.strptime(date_str, fmt).date()
+            except ValueError:
+                # Estrutura correta mas valores inválidos (ex: mês 13)
+                raise ValueError("Invalid date: day is out of range for month")
+            # Parsing OK - validar range (pode levantar ValueError próprio)
+            return validate_date(parsed_date)
+
+    # Nenhum pattern casou - formato desconhecido
+    raise ValueError("Date must be in ISO 8601 format (YYYY-MM-DD)")
