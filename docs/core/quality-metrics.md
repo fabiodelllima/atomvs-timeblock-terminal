@@ -1,26 +1,24 @@
 # Quality Metrics - TimeBlock Organizer
 
 **Versão:** 1.0.0
-**Última atualização:** 16 de Janeiro de 2026
-**Status:** Documento Operacional (atualizado automaticamente)
 **Relacionado:** roadmap.md, CHANGELOG.md
 
 ---
 
 ## 1. Métricas Atuais
 
-**Data de Referência:** 16 de Janeiro de 2026
-**Versão:** v1.3.1 (produção), v1.4.0 (desenvolvimento)
+**Data de Referência:** 22 de Janeiro de 2026
+**Versão:** v1.3.3 (produção), v1.4.0 (desenvolvimento)
 **Branch:** `refactor/service-dependency-injection`
 
 ### 1.1. Visão Geral
 
 | Categoria           | Valor Atual | Meta v1.4.0 | Delta | Status         |
 | ------------------- | ----------- | ----------- | ----- | -------------- |
-| Testes Passando     | 466         | 480         | +26   | [EM PROGRESSO] |
+| Testes Passando     | 558         | 480         | +26   | [EM PROGRESSO] |
 | Testes Skipped      | 26          | 0           | -26   | [BLOQUEADO]    |
-| Cobertura Global    | 65%         | 80%         | +19pp | [BLOQUEADO]    |
-| Erros Mypy          | 0         | 0           | -156  | [BLOQUEADO]    |
+| Cobertura Global    | 67%         | 80%         | +19pp | [BLOQUEADO]    |
+| Erros Mypy          | 0           | 0           | -156  | [BLOQUEADO]    |
 | Commands Funcionais | 40%         | 100%        | +60pp | [BLOQUEADO]    |
 
 ### 1.2. Distribuição de Testes
@@ -412,5 +410,5 @@ grep -rn "def isolated_db" tests/ --include="*.py"
 
 ---
 
-- **Atualização:** Por sprint ou quando métricas mudarem significativamente
 - **Automação:** Planejada para v1.5.0
+- **Última atualização:** 22 de Janeiro de 2026
