@@ -170,7 +170,7 @@ class TaskService:
         # Detecta conflitos se horário mudou, mas não propõe resolução
         conflicts = None
         if datetime_changed and task:
-            conflicts = EventReorderingService.detect_conflicts(task_id, "task")
+            conflicts = EventReorderingService.detect_conflicts(task_id, "task", session=session)
         return task, conflicts
 
     @staticmethod
