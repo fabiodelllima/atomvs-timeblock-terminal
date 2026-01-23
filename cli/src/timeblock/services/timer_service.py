@@ -1,6 +1,6 @@
 """Service para gerenciar timers de HabitInstance."""
 
-from datetime import date, datetime
+from datetime import date, datetime, time, timedelta
 
 from sqlmodel import Session, select
 
@@ -379,3 +379,123 @@ class TimerService:
 
         with get_engine_context() as engine, Session(engine) as sess:
             return _get(sess)
+
+    def log_manual(
+        self,
+        habit_instance_id: int,
+        start_time: time | None = None,
+        end_time: time | None = None,
+        duration_minutes: int | None = None,
+        session: Session | None = None,
+    ) -> TimeLog:
+        """Registra tempo manualmente sem usar timer (BR-TIMER-007).
+
+        Dois modos mutuamente exclusivos:
+            - Intervalo: start_time + end_time
+            - Duração: duration_minutes
+
+        Args:
+            habit_instance_id: ID da instância
+            start_time: Hora início (modo intervalo)
+            end_time: Hora fim (modo intervalo)
+            duration_minutes: Duração em minutos (modo duração)
+            session: Sessão opcional
+
+        Returns:
+            TimeLog criado
+
+        Raises:
+            ValueError: Se validação falhar
+        """
+
+        def _log(sess: Session) -> TimeLog:
+            # 1. Validar modos mutuamente exclusivos
+            has_interval = start_time is not None or end_time is not None
+            has_duration = duration_minutes is not None
+
+            if has_interval and has_duration:
+                raise ValueError("cannot mix interval and duration modes")
+
+            if not has_interval and not has_duration:
+                raise ValueError("must provide interval (start/end) or duration")
+
+            # 2. Validar modo intervalo
+            if has_interval:
+                if start_time is None or end_time is None:
+                    raise ValueError("start requires end")
+                if start_time >= end_time:
+                    raise ValueError("start must be before end")
+
+            # 3. Validar modo duração
+            if has_duration:
+                if duration_minutes is not None and duration_minutes <= 0:
+                    raise ValueError("duration must be positive")
+
+            # 4. Buscar HabitInstance
+            instance = sess.get(HabitInstance, habit_instance_id)
+            if not instance:
+                raise ValueError(f"HabitInstance {habit_instance_id} not found")
+
+            # 5. Calcular duração em segundos
+            if has_interval and start_time and end_time:
+                # Converter time para datetime para cálculo
+                start_dt = datetime.combine(instance.date, start_time)
+                end_dt = datetime.combine(instance.date, end_time)
+                duration_seconds = int((end_dt - start_dt).total_seconds())
+            else:
+                # Modo duração
+                duration_seconds = (duration_minutes or 0) * 60
+                # Criar timestamps baseados na duração
+                start_dt = datetime.combine(instance.date, instance.scheduled_start)
+                end_dt = start_dt + timedelta(seconds=duration_seconds)
+
+            # 6. Criar TimeLog
+            timelog = TimeLog(
+                habit_instance_id=habit_instance_id,
+                start_time=start_dt,
+                end_time=end_dt,
+                duration_seconds=duration_seconds,
+            )
+            sess.add(timelog)
+
+            # 7. Calcular completion percentage
+            target_start = datetime.combine(instance.date, instance.scheduled_start)
+            target_end = datetime.combine(instance.date, instance.scheduled_end)
+            target_seconds = (target_end - target_start).total_seconds()
+
+            if target_seconds <= 0:
+                raise ValueError("Target duration must be positive")
+
+            completion_percentage = int((duration_seconds / target_seconds) * 100)
+
+            # 8. Determinar substatus baseado em completion
+            if completion_percentage < 90:
+                done_substatus = DoneSubstatus.PARTIAL
+            elif completion_percentage <= 110:
+                done_substatus = DoneSubstatus.FULL
+            elif completion_percentage <= 150:
+                done_substatus = DoneSubstatus.OVERDONE
+            else:
+                done_substatus = DoneSubstatus.EXCESSIVE
+
+            # 9. Atualizar HabitInstance
+            instance.status = Status.DONE
+            instance.done_substatus = done_substatus
+            instance.completion_percentage = completion_percentage
+            instance.not_done_substatus = None
+
+            # 10. Validar consistência
+            instance.validate_status_consistency()
+
+            # 11. Persistir
+            sess.add(instance)
+            sess.commit()
+            sess.refresh(timelog)
+
+            return timelog
+
+        if session is not None:
+            return _log(session)
+
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _log(sess)
