@@ -35,13 +35,13 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
 │  │  (coleção)  │    │  (template) │    │  INSTANCE   │              │
 │  └─────────────┘    └─────────────┘    └─────────────┘              │
 │         │                  │                  │                     │
-│         │                  │                  ▼                     │
+│         │                  │                  v                     │
 │         │                  │           ┌─────────────┐              │
 │         │                  │           │    TIMER    │              │
 │         │                  │           │  (tracking) │              │
 │         │                  │           └─────────────┘              │
 │         │                  │                                        │
-│         ▼                  ▼                                        │
+│         v                  v                                        │
 │  ┌─────────────────────────────────────────────────────┐            │
 │  │                      TASK                           │            │
 │  │               (evento pontual)                      │            │
@@ -58,7 +58,7 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
 │  (Typer) │     │          │     │          │     │ (SQLModel) │
 └──────────┘     └──────────┘     └──────────┘     └────────────┘
                                         │                │
-                                        ▼                ▼
+                                        v                v
                                   ┌──────────┐     ┌──────────┐
                                   │  UTILS   │     │  SQLite  │
                                   │          │     │    DB    │
@@ -101,13 +101,13 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
                            │
            ┌───────────────┼───────────────┐
            │               │               │
-           ▼               ▼               ▼
+           v               v               v
     ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
     │    DONE     │ │  NOT_DONE   │ │   OVERDUE   │
     │ (completo)  │ │  (pulado)   │ │  (atrasado) │
     └─────────────┘ └─────────────┘ └─────────────┘
            │               │
-           ▼               ▼
+           v               v
     ┌─────────────┐ ┌─────────────────────┐
     │  Substatus  │ │  Substatus          │
     ├─────────────┤ ├─────────────────────┤
@@ -125,19 +125,19 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
     │  IDLE   │
     └────┬────┘
          │ start
-         ▼
+         v
     ┌─────────┐
     │ RUNNING │<─────────┐
     └────┬────┘          │
          │               │
     ┌────┴────┐     resume
     │         │          │
-    ▼         ▼          │
+    v         v          │
 ┌───────┐ ┌───────┐      │
 │ stop  │ │ pause │──────┘
 └───┬───┘ └───────┘
     │
-    ▼
+    v
 ┌─────────┐
 │  DONE   │
 └─────────┘
