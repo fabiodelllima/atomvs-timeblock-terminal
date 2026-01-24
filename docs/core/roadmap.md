@@ -1,7 +1,9 @@
 # Roadmap - TimeBlock Organizer
 
 **Versão:** 2.1.0
+
 **Status:** Single Source of Truth (SSOT)
+
 **Documentos Relacionados:** architecture.md, business-rules.md, quality-metrics.md
 
 ---
@@ -52,9 +54,9 @@ Detalhes em: `architecture.md` seção 9 (Evolução Futura)
 
 ## 3. Estado Atual
 
-**Versão:** v1.3.3 (produção), v1.4.0 (desenvolvimento)
-**Branch:** `refactor/service-dependency-injection`
-**Data:** 22 de Janeiro de 2026
+- **Versão:** v1.3.3 (produção), v1.4.0 (desenvolvimento)
+- **Branch:** `refactor/service-dependency-injection`
+- **Data:** 22 de Janeiro de 2026
 
 ### 3.1. Métricas Principais
 
@@ -228,19 +230,20 @@ Ver: `architecture.md` seção 9.4
 
 ### 5.1. Inventário
 
-| ID     | Descrição               | Severidade | Esforço | Sprint       |
-| ------ | ----------------------- | ---------- | ------- | ------------ |
-| DT-001 | 156 erros mypy          | CRÍTICA    | 16h     | v1.4.0       |
-| DT-002 | 15 testes skipped       | ALTA       | 8h      | v1.4.0 S4    |
-| DT-003 | Cobertura 65%           | ALTA       | 8h      | v1.4.0 S3-S4 |
-| DT-004 | EventReordering parcial | MÉDIA      | 12h     | v1.5.0       |
-| DT-005 | Código morto            | BAIXA      | 2h      | v1.5.0       |
+| ID     | Descrição                | Severidade | Esforço | Sprint       |
+| ------ | ------------------------ | ---------- | ------- | ------------ |
+| DT-001 | 156 erros mypy           | CRÍTICA    | 16h     | v1.4.0       |
+| DT-002 | 15 testes skipped        | ALTA       | 8h      | v1.4.0 S4    |
+| DT-003 | Cobertura 65%            | ALTA       | 8h      | v1.4.0 S3-S4 |
+| DT-004 | EventReordering parcial  | MÉDIA      | 12h     | v1.5.0       |
+| DT-005 | Código morto             | BAIXA      | 2h      | v1.5.0       |
+| DT-006 | Inconsistência de idioma | MÉDIA      | 4h      | v1.5.0       |
 
 ### 5.2. Service Layer Gap (DT-001 Parcial)
 
-**Descoberto:** 16/01/2026
-**Severidade:** CRÍTICA
-**Impacto:** 31 erros mypy (20% do total), timer não funcional
+- **Descoberto:** 16/01/2026
+- **Severidade:** CRÍTICA
+- **Impacto:** 31 erros mypy (20% do total), timer não funcional
 
 #### Problema
 
@@ -264,9 +267,9 @@ Commands referenciam métodos inexistentes:
 
 #### Resolução Planejada
 
-**Sprint:** v1.4.0 Sprint 2
-**Duração:** 4 horas
-**Responsável:** Service Layer Team
+- **Sprint:** v1.4.0 Sprint 2
+- **Duração:** 4 horas
+- **Responsável:** Service Layer Team
 
 **Fases:**
 
@@ -285,6 +288,61 @@ Commands referenciam métodos inexistentes:
 
 - **Signatures Obrigatórias:** ADR-007 (atualização pendente)
 - **Testes:** test_timer_service.py, test_habit_instance_service.py
+
+### 5.3. Inconsistência de Idioma (DT-006)
+
+- **Descoberto:** 24/01/2026
+- **Severidade:** MÉDIA
+- **Impacto:** UX inconsistente, confusão para usuário
+
+#### Problema
+
+Arquivos CLI com idioma misto (inglês/português) violando ADR-018:
+
+| Arquivo  | Problema                          | ADR-018 diz |
+| -------- | --------------------------------- | ----------- |
+| add.py   | Mensagens, helps, docstrings (EN) | PT-BR       |
+| list.py  | Mensagens de erro (EN)            | PT-BR       |
+| init.py  | Docstrings (EN)                   | PT-BR       |
+| timer.py | Helps parcialmente (EN)           | PT-BR       |
+
+**Exemplos:**
+
+```python
+# INCORRETO (atual)
+console.print(f"[red]Error creating event: {e}")
+help="Event title"
+
+# CORRETO (ADR-018)
+console.print(f"[red]Erro ao criar evento: {e}")
+help="Título do evento"
+```
+
+#### Impacto UX
+
+- Usuário vê "Error" em alguns comandos e "Erro" em outros
+- Helps misturados dificultam compreensão
+- Experiência fragmentada
+
+#### Resolução Planejada
+
+- **Sprint:** v1.5.0
+- **Duração:** 4 horas
+- **Referência:** ADR-018-language-standards.md
+
+**Arquivos a Corrigir:**
+
+1. `commands/add.py` - Traduzir mensagens, helps, docstrings
+2. `commands/list.py` - Traduzir mensagens de erro
+3. `commands/init.py` - Traduzir docstrings
+4. `commands/timer.py` - Revisar helps
+
+**Critérios de Sucesso:**
+
+- [ ] 100% mensagens CLI em português
+- [ ] 100% helps em português
+- [ ] 100% docstrings de commands em português
+- [ ] Zero inconsistências detectadas por grep
 
 ---
 
