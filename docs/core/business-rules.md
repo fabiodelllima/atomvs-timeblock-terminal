@@ -1811,6 +1811,40 @@ $ habit create --title "Academia" --start 07:00
 - `test_br_cli_002_datetime_brazilian_format`
 - `test_br_cli_002_date_multiple_formats`
 
+### BR-CLI-003: Padronização de Idioma
+
+**Descrição:** Todas as mensagens, helps e textos exibidos ao usuário devem estar em Português Brasileiro (PT-BR).
+
+**Referência:** ADR-018-language-standards.md
+
+**Escopo:**
+
+| Elemento             | Idioma Obrigatório | Exemplo                     |
+| -------------------- | ------------------ | --------------------------- |
+| Mensagens de erro    | PT-BR              | "Erro ao criar evento"      |
+| Mensagens de sucesso | PT-BR              | "Hábito criado com sucesso" |
+| Help de comandos     | PT-BR              | help="Título do hábito"     |
+| Help de flags        | PT-BR              | help="Hora início (HH:MM)"  |
+| Prompts interativos  | PT-BR              | "Confirmar? [S/n]"          |
+| Docstrings CLI       | PT-BR              | """Cria um novo hábito."""  |
+
+**Exceções (permitido inglês):**
+
+| Elemento                     | Motivo                |
+| ---------------------------- | --------------------- |
+| Nomes de variáveis           | Padrão de código      |
+| Nomes de funções/classes     | Padrão de código      |
+| Tipos em commits             | Conventional commits  |
+| Termos técnicos sem tradução | Ex: "timer", "status" |
+
+**Estado Atual:** PARCIALMENTE IMPLEMENTADO (ver DT-006 em roadmap.md)
+
+**Testes:**
+
+- `test_br_cli_003_error_messages_ptbr`
+- `test_br_cli_003_success_messages_ptbr`
+- `test_br_cli_003_help_texts_ptbr`
+
 ---
 
 ## 13. Tag

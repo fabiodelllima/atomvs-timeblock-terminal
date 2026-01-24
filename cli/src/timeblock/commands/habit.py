@@ -1,6 +1,6 @@
 """Comandos para gerenciar hábitos."""
 
-from datetime import date
+from datetime import date, timedelta
 from datetime import time as dt_time
 
 import typer
@@ -10,7 +10,7 @@ from sqlmodel import Session
 
 from timeblock.database import get_engine_context
 from timeblock.models import Recurrence
-from timeblock.models.enums import SkipReason
+from timeblock.models.enums import SkipReason, Status
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.services.routine_service import RoutineService
@@ -359,6 +359,134 @@ def skip_instance(
 # ============================================================
 # Comandos atom (instâncias)
 # ============================================================
+
+
+@atom_app.command("list")
+def atom_list(
+    habit_id: int = typer.Argument(None, help="Filtrar por ID do hábito"),
+    today: bool = typer.Option(False, "--today", "-T", help="Apenas hoje"),
+    week: bool = typer.Option(False, "--week", "-w", help="Semana atual"),
+    pending: bool = typer.Option(False, "--pending", "-P", help="Apenas PENDING"),
+    done: bool = typer.Option(False, "--done", "-C", help="Apenas DONE"),
+    all_status: bool = typer.Option(False, "--all", "-a", help="Todos status"),
+):
+    """
+    Lista instâncias de hábitos (BR-HABITINSTANCE-006).
+
+    Defaults:
+        Sem flags: semana atual, apenas pendentes
+        Com HABIT_ID: todas datas, todos status
+
+    Exemplos:
+        timeblock habit atom list              # Semana, pendentes
+        timeblock habit atom list 1            # Todas do hábito 1
+        timeblock habit atom list -T           # Hoje, todos status
+        timeblock habit atom list -T -C        # Hoje, completadas
+    """
+    try:
+        with get_engine_context() as engine, Session(engine) as session:
+            service = HabitInstanceService()
+
+            # Determinar período
+            date_start = None
+            date_end = None
+
+            if today and week:
+                console.print("[red]Erro: --today e --week são mutuamente exclusivos[/red]")
+                raise typer.Exit(1)
+
+            if today:
+                date_start = date.today()
+                date_end = date.today()
+            elif week or (habit_id is None and not today):
+                # Default: semana atual quando sem HABIT_ID
+                date_start = date.today()
+                date_end = date.today() + timedelta(days=6)
+
+            # Determinar filtro de status
+            status_filter = None
+            if pending and done:
+                console.print("[red]Erro: --pending e --done são mutuamente exclusivos[/red]")
+                raise typer.Exit(1)
+
+            if pending:
+                status_filter = Status.PENDING
+            elif done:
+                status_filter = Status.DONE
+            elif not all_status and habit_id is None:
+                # Default: apenas pendentes quando sem HABIT_ID
+                status_filter = Status.PENDING
+
+            # Buscar instâncias
+            instances = service.list_instances(
+                habit_id=habit_id,
+                date_start=date_start,
+                date_end=date_end,
+                session=session,
+            )
+
+            # Filtrar por status se necessário
+            if status_filter is not None:
+                instances = [i for i in instances if i.status == status_filter]
+
+            if not instances:
+                if habit_id:
+                    console.print(f"Nenhuma instância encontrada para hábito {habit_id}.")
+                else:
+                    console.print("Nenhuma instância encontrada.")
+                return
+
+            # Agrupar por data
+            instances_by_date: dict[date, list] = {}
+            for inst in instances:
+                if inst.date not in instances_by_date:
+                    instances_by_date[inst.date] = []
+                instances_by_date[inst.date].append(inst)
+
+            # Exibir
+            period_desc = (
+                "hoje" if today else "semana atual" if week or habit_id is None else "todas"
+            )
+            status_desc = (
+                "pendentes"
+                if status_filter == Status.PENDING
+                else "concluídas"
+                if status_filter == Status.DONE
+                else "todos status"
+            )
+            console.print(f"\n[bold]Instâncias ({period_desc}, {status_desc}):[/bold]\n")
+
+            for dt in sorted(instances_by_date.keys()):
+                weekday = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"][
+                    dt.weekday()
+                ]
+                console.print(f"[cyan]{weekday}, {dt.strftime('%d/%m')}:[/cyan]")
+
+                for inst in sorted(instances_by_date[dt], key=lambda x: x.scheduled_start):
+                    # Determinar marcador de status
+                    if inst.status == Status.DONE:
+                        marker = "[green][x][/green]"
+                        status_text = "concluída"
+                    elif inst.status == Status.NOT_DONE:
+                        marker = "[red][-][/red]"
+                        status_text = "não concluída"
+                    else:
+                        marker = "[ ]"
+                        status_text = "pendente"
+
+                    start = inst.scheduled_start.strftime("%H:%M")
+                    end = inst.scheduled_end.strftime("%H:%M")
+                    title = inst.habit.title if inst.habit else f"Hábito #{inst.habit_id}"
+
+                    console.print(
+                        f"  {marker} {start}-{end} {title} [dim](ID: {inst.id}, {status_text})[/dim]"
+                    )
+
+                console.print()
+
+    except Exception as e:
+        console.print(f"[red]Erro: {e}[/red]")
+        raise typer.Exit(1)
 
 
 @atom_app.command("log")
