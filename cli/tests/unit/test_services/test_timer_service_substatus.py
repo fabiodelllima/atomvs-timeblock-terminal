@@ -1,7 +1,16 @@
-"""Testes unitários para BR-TIMER-006.
+"""Testes unitários para cálculo de substatus via timer.
 
-Cálculo automático de substatus ao parar timer de HabitInstance.
-Valida completion percentage e mapeamento para substatus correto.
+BRs Cobertas:
+    - BR-TIMER-005: Cálculo de Completion (formula completion_percentage)
+    - BR-TIMER-006: Pause Tracking (substatus calculado ao parar)
+    - BR-HABITINSTANCE-002: Substatus Obrigatório (status DONE requer done_substatus)
+    - BR-HABITINSTANCE-003: Completion Thresholds (mapeamento % -> substatus)
+
+Thresholds (BR-HABITINSTANCE-003):
+    - < 80%: PARTIAL
+    - 80-120%: FULL
+    - 120-150%: OVERDONE
+    - > 150%: EXCESSIVE
 """
 
 from datetime import date, datetime, time, timedelta
@@ -47,11 +56,24 @@ def habit(session: Session, routine: Routine) -> Habit:
     return habit
 
 
-class TestBRTimer006CalculateSubstatus:
-    """Cenários 1-6: Timer stop calcula substatus baseado em completion."""
+class TestBRTimerSubstatusCalculation:
+    """Testes de cálculo de substatus ao parar timer.
 
-    def test_scenario_001_stop_calculates_partial_75_percent(self, session: Session, habit: Habit):
-        """CENÁRIO 1: Timer stop com 75% completion -> PARTIAL."""
+    Valida integração entre:
+        - BR-TIMER-005: completion_percentage = (actual / expected) * 100
+        - BR-TIMER-006: substatus calculado automaticamente ao stop
+        - BR-HABITINSTANCE-002: status DONE requer done_substatus preenchido
+        - BR-HABITINSTANCE-003: thresholds definem qual substatus
+    """
+
+    def test_br_habitinstance_003_partial_75_percent(self, session: Session, habit: Habit):
+        """BR-HABITINSTANCE-003: 75% completion -> PARTIAL.
+
+        Referências:
+            - BR-TIMER-005: Cálculo completion = 45/60 = 75%
+            - BR-HABITINSTANCE-003: < 80% -> PARTIAL
+            - BR-HABITINSTANCE-002: DONE requer done_substatus
+        """
         assert habit.id is not None
 
         # DADO: HabitInstance com meta 60 minutos
@@ -103,8 +125,13 @@ class TestBRTimer006CalculateSubstatus:
         assert instance.not_done_substatus is None
         assert result_timelog.duration_seconds == 2700  # 45min
 
-    def test_scenario_002_stop_calculates_full_90_percent(self, session: Session, habit: Habit):
-        """CENÁRIO 2: Timer stop com 90% completion -> FULL."""
+    def test_br_habitinstance_003_full_90_percent(self, session: Session, habit: Habit):
+        """BR-HABITINSTANCE-003: 90% completion -> FULL.
+
+        Referências:
+            - BR-TIMER-005: Cálculo completion = 54/60 = 90%
+            - BR-HABITINSTANCE-003: 80-120% -> FULL
+        """
         assert habit.id is not None
 
         # DADO
@@ -152,8 +179,13 @@ class TestBRTimer006CalculateSubstatus:
         assert instance.completion_percentage == 90
         assert instance.not_done_substatus is None
 
-    def test_scenario_003_stop_calculates_full_100_percent(self, session: Session, habit: Habit):
-        """CENÁRIO 3: Timer stop com 100% completion -> FULL."""
+    def test_br_habitinstance_003_full_100_percent(self, session: Session, habit: Habit):
+        """BR-HABITINSTANCE-003: 100% completion -> FULL.
+
+        Referências:
+            - BR-TIMER-005: Cálculo completion = 60/60 = 100%
+            - BR-HABITINSTANCE-003: 80-120% -> FULL
+        """
         assert habit.id is not None
 
         # DADO
@@ -200,10 +232,13 @@ class TestBRTimer006CalculateSubstatus:
         assert instance.done_substatus == DoneSubstatus.FULL
         assert instance.completion_percentage == 100
 
-    def test_scenario_005_stop_calculates_overdone_130_percent(
-        self, session: Session, habit: Habit
-    ):
-        """CENÁRIO 5: Timer stop com 130% completion -> OVERDONE."""
+    def test_br_habitinstance_003_overdone_130_percent(self, session: Session, habit: Habit):
+        """BR-HABITINSTANCE-003: 130% completion -> OVERDONE.
+
+        Referências:
+            - BR-TIMER-005: Cálculo completion = 78/60 = 130%
+            - BR-HABITINSTANCE-003: 120-150% -> OVERDONE
+        """
         assert habit.id is not None
 
         # DADO
@@ -250,10 +285,13 @@ class TestBRTimer006CalculateSubstatus:
         assert instance.done_substatus == DoneSubstatus.OVERDONE
         assert instance.completion_percentage == 130
 
-    def test_scenario_006_stop_calculates_excessive_200_percent(
-        self, session: Session, habit: Habit
-    ):
-        """CENÁRIO 6: Timer stop com 200% completion -> EXCESSIVE."""
+    def test_br_habitinstance_003_excessive_200_percent(self, session: Session, habit: Habit):
+        """BR-HABITINSTANCE-003: 200% completion -> EXCESSIVE.
+
+        Referências:
+            - BR-TIMER-005: Cálculo completion = 120/60 = 200%
+            - BR-HABITINSTANCE-003: > 150% -> EXCESSIVE
+        """
         assert habit.id is not None
 
         # DADO
@@ -301,11 +339,16 @@ class TestBRTimer006CalculateSubstatus:
         assert instance.completion_percentage == 200
 
 
-class TestBRTimer006Validation:
-    """Cenário 7-8: Validações e erros."""
+class TestBRHabitInstance002StatusConsistency:
+    """BR-HABITINSTANCE-002: Status DONE requer substatus obrigatório."""
 
-    def test_scenario_007_validates_consistency_after_stop(self, session: Session, habit: Habit):
-        """CENÁRIO 7: Validação de consistência após stop."""
+    def test_br_habitinstance_002_done_requires_substatus(self, session: Session, habit: Habit):
+        """BR-HABITINSTANCE-002: Validação de consistência status/substatus.
+
+        DADO: Timer parado com completion válido
+        QUANDO: Validação de consistência executada
+        ENTÃO: Não lança exceção (substatus preenchido corretamente)
+        """
         assert habit.id is not None
 
         # DADO
@@ -356,8 +399,16 @@ class TestBRTimer006Validation:
         assert instance.not_done_substatus is None
         assert instance.skip_reason is None
 
-    def test_scenario_008_error_no_active_timer(self, session: Session, habit: Habit):
-        """CENÁRIO 8: Timer stop sem timer ativo -> ValueError."""
+
+class TestBRTimerValidation:
+    """Validações de erro do TimerService."""
+
+    def test_br_timer_stop_nonexistent_raises_error(self, session: Session, habit: Habit):
+        """Timer stop com ID inexistente -> ValueError.
+
+        Referências:
+            - BR-TIMER-002: Estados e Transições (validação)
+        """
         assert habit.id is not None
 
         # DADO: HabitInstance sem timer ativo
