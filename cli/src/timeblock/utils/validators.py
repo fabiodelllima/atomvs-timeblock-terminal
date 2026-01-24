@@ -200,3 +200,134 @@ def validate_date(date_input: str | date) -> date:
         raise ValueError(f"Date cannot be before {minimum_date.isoformat()}")
 
     return parsed_date
+
+
+# =============================================================================
+# BR-VAL-003: Validação de Strings
+# =============================================================================
+
+
+class StringValidationError(ValueError):
+    """Erro de validação de string."""
+
+    pass
+
+
+def validate_title(title: str | None) -> str:
+    """Valida campo title conforme BR-VAL-003.
+
+    Requisitos:
+    - 1-200 caracteres após trim
+    - Não pode ser None ou vazio
+
+    Args:
+        title: String a validar
+
+    Returns:
+        String com trim aplicado
+
+    Raises:
+        StringValidationError: Se validação falhar
+    """
+    if title is None:
+        raise StringValidationError("Title cannot be empty")
+
+    trimmed = title.strip()
+
+    if len(trimmed) == 0:
+        raise StringValidationError("Title cannot be empty")
+
+    if len(trimmed) > 200:
+        raise StringValidationError("Title cannot exceed 200 characters")
+
+    return trimmed
+
+
+def validate_name(name: str | None) -> str:
+    """Valida campo name conforme BR-VAL-003.
+
+    Requisitos:
+    - 1-200 caracteres após trim
+    - Não pode ser None ou vazio
+
+    Args:
+        name: String a validar
+
+    Returns:
+        String com trim aplicado
+
+    Raises:
+        StringValidationError: Se validação falhar
+    """
+    if name is None:
+        raise StringValidationError("Name cannot be empty")
+
+    trimmed = name.strip()
+
+    if len(trimmed) == 0:
+        raise StringValidationError("Name cannot be empty")
+
+    if len(trimmed) > 200:
+        raise StringValidationError("Name cannot exceed 200 characters")
+
+    return trimmed
+
+
+def validate_description(description: str | None) -> str | None:
+    """Valida campo description conforme BR-VAL-003.
+
+    Requisitos:
+    - 0-2000 caracteres após trim
+    - Pode ser None (opcional)
+
+    Args:
+        description: String a validar ou None
+
+    Returns:
+        String com trim aplicado ou None
+
+    Raises:
+        StringValidationError: Se validação falhar
+    """
+    if description is None:
+        return None
+
+    trimmed = description.strip()
+
+    if len(trimmed) == 0:
+        return None
+
+    if len(trimmed) > 2000:
+        raise StringValidationError("Description cannot exceed 2000 characters")
+
+    return trimmed
+
+
+def validate_note(note: str | None) -> str | None:
+    """Valida campo note conforme BR-VAL-003.
+
+    Requisitos:
+    - 0-500 caracteres após trim
+    - Pode ser None (opcional)
+
+    Args:
+        note: String a validar ou None
+
+    Returns:
+        String com trim aplicado ou None
+
+    Raises:
+        StringValidationError: Se validação falhar
+    """
+    if note is None:
+        return None
+
+    trimmed = note.strip()
+
+    if len(trimmed) == 0:
+        return None
+
+    if len(trimmed) > 500:
+        raise StringValidationError("Note cannot exceed 500 characters")
+
+    return trimmed
