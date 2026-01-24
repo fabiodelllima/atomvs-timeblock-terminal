@@ -39,3 +39,19 @@ class SkipReason(str, Enum):
     LACK_RESOURCES = "falta_recursos"
     EMERGENCY = "emergencia"
     OTHER = "outro"
+
+
+class TimerStatus(str, Enum):
+    """Status do timer (BR-TIMER-002).
+
+    Estados:
+        - RUNNING: Timer contando tempo
+        - PAUSED: Timer pausado temporariamente
+        - DONE: Timer finalizado com stop (sessão salva)
+        - CANCELLED: Timer resetado (zera o timer)
+    """
+
+    RUNNING = "running"
+    PAUSED = "paused"
+    DONE = "done"
+    CANCELLED = "cancelled"

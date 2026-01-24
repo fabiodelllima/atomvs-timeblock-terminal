@@ -1387,9 +1387,18 @@ Opções:
 
 ### BR-TIMER-002: Estados e Transições
 
-**Descrição:** Timer possui estados RUNNING e PAUSED.
+**Descrição:** Timer possui 4 estados persistidos no banco (campo `status` em TimeLog).
 
-**Maquina de Estados:**
+**Estados:**
+
+| Estado    | Descrição                              | Campos Afetados       |
+| --------- | -------------------------------------- | --------------------- |
+| RUNNING   | Timer contando tempo                   | status, start_time    |
+| PAUSED    | Timer pausado temporariamente          | status, pause_start   |
+| DONE      | Timer finalizado com stop (salva)      | status, end_time      |
+| CANCELLED | Timer resetado (como se nunca iniciou) | status, cancel_reason |
+
+**Máquina de Estados:**
 
 ```
 [NO TIMER]
@@ -1397,27 +1406,32 @@ Opções:
   └─> start → RUNNING
               ├─> pause → PAUSED
               │            └─> resume → RUNNING
-              ├─> stop → [SALVA] → [NO TIMER]
-              └─> reset → [CANCELA] → [NO TIMER]
+              ├─> stop → DONE
+              └─> reset → CANCELLED
 ```
+
+**Timer Ativo:** `status IN (RUNNING, PAUSED) AND end_time IS NULL`
 
 **Comandos:**
 
-| Comando | De             | Para     | Efeito             |
-| ------- | -------------- | -------- | ------------------ |
-| start   | NO TIMER       | RUNNING  | Cria timer         |
-| pause   | RUNNING        | PAUSED   | Pausa contagem     |
-| resume  | PAUSED         | RUNNING  | Retoma contagem    |
-| stop    | RUNNING/PAUSED | NO TIMER | Salva e marca DONE |
-| reset   | RUNNING/PAUSED | NO TIMER | Cancela sem salvar |
+| Comando | De             | Para      | Efeito                                   |
+| ------- | -------------- | --------- | ---------------------------------------- |
+| start   | NO TIMER       | RUNNING   | Cria timer, inicia contagem              |
+| pause   | RUNNING        | PAUSED    | Pausa contagem, salva pause_start        |
+| resume  | PAUSED         | RUNNING   | Retoma contagem, acumula paused_duration |
+| stop    | RUNNING/PAUSED | DONE      | Salva sessão, atualiza instance          |
+| reset   | RUNNING/PAUSED | CANCELLED | Cancela sessão, instance fica PENDING    |
+
+**CLI Non-blocking:** Após `timer start`, terminal é liberado imediatamente. Usuário controla via comandos separados.
 
 **Testes:**
 
 - `test_br_timer_002_start_creates_running`
 - `test_br_timer_002_pause_from_running`
 - `test_br_timer_002_resume_from_paused`
-- `test_br_timer_002_stop_saves`
-- `test_br_timer_002_reset_cancels`
+- `test_br_timer_002_stop_creates_done`
+- `test_br_timer_002_reset_creates_cancelled`
+- `test_br_timer_002_status_persists_in_db`
 
 ---
 
@@ -1427,22 +1441,55 @@ Opções:
 
 **stop:**
 
-- Fecha sessão atual e SALVA no banco
-- Marca instance como DONE
-- Calcula completion percentage
+- Muda status para DONE
+- Preenche end_time e duration_seconds
+- Atualiza HabitInstance (status=DONE, calcula substatus)
 - Permite start novamente (nova sessão)
 
 **reset:**
 
-- Cancela timer atual SEM salvar
-- Instance continua PENDING
-- Usado quando iniciou habit errado
+- Muda status para CANCELLED
+- Preenche cancel_reason (opcional via --reason)
+- HabitInstance permanece PENDING
+- Sessão não conta nos relatórios
+
+**Reset de sessão específica:**
+
+```bash
+# Reset timer ativo (RUNNING ou PAUSED)
+timer reset
+timer reset --reason "Iniciei habit errado"
+
+# Reset sessão já finalizada (DONE)
+timer reset --session <TIMELOG_ID>
+timer reset --session <TIMELOG_ID> --reason "Contabilizei no habit errado"
+```
+
+**Validações reset --session:**
+
+| Cenário             | Comportamento                 |
+| ------------------- | ----------------------------- |
+| Sessão não existe   | Erro: "Sessão não encontrada" |
+| Sessão já CANCELLED | Erro: "Sessão já cancelada"   |
+| Sessão DONE         | Permite cancelar              |
+
+**Modelo TimeLog - campos relacionados:**
+
+| Campo         | Tipo | Descrição                         |
+| ------------- | ---- | --------------------------------- |
+| status        | enum | RUNNING/PAUSED/DONE/CANCELLED     |
+| notes         | str  | Anotações do usuário sobre sessão |
+| cancel_reason | str  | Motivo do reset (só se CANCELLED) |
 
 **Testes:**
 
 - `test_br_timer_003_stop_saves_session`
-- `test_br_timer_003_reset_no_save`
+- `test_br_timer_003_stop_updates_instance`
+- `test_br_timer_003_reset_cancels_active`
 - `test_br_timer_003_reset_keeps_pending`
+- `test_br_timer_003_reset_with_reason`
+- `test_br_timer_003_reset_specific_session`
+- `test_br_timer_003_reset_already_cancelled_error`
 
 ---
 
