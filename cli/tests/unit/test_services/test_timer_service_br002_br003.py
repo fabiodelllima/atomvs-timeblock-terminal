@@ -225,7 +225,7 @@ class TestBRTimer002:
         """BR-TIMER-002: não pode retomar timer não pausado."""
         timelog = TimerService.start_timer(habit_instance.id, session)
 
-        with pytest.raises(ValueError, match="not paused"):
+        with pytest.raises(ValueError, match="already running"):
             TimerService.resume_timer(timelog.id, session)
 
 

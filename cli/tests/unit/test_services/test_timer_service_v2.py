@@ -201,10 +201,10 @@ class TestBRTimer006Resume:
     def test_resume_timer_requires_paused_state(
         self, session: Session, test_habit_instance: HabitInstance
     ):
-        """Cannot resume a timer that is not paused."""
+        """Cannot resume a timer that is already running."""
         timelog = TimerService.start_timer(test_habit_instance.id, session)
 
-        with pytest.raises(ValueError, match="not paused"):
+        with pytest.raises(ValueError, match="already running"):
             TimerService.resume_timer(timelog.id, session)
 
 
