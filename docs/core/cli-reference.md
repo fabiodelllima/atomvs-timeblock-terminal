@@ -1613,24 +1613,25 @@ timeblock task edit 1 --status pending
 
 Controla cronômetro para rastrear tempo.
 
-**Referência:** BR-TIMER-001 a BR-TIMER-006
+**Referência:** BR-TIMER-001 a BR-TIMER-008
 
 **Comandos disponíveis:**
 
-| Comando      | Descrição           |
-| ------------ | ------------------- |
-| timer start  | Inicia cronômetro   |
-| timer pause  | Pausa cronômetro    |
-| timer resume | Retoma cronômetro   |
-| timer stop   | Para e salva        |
-| timer reset  | Cancela sem salvar  |
-| timer status | Mostra status atual |
+| Comando      | Descrição              |
+| ------------ | ---------------------- |
+| timer start  | Inicia cronômetro      |
+| timer pause  | Pausa cronômetro       |
+| timer resume | Retoma cronômetro      |
+| timer stop   | Para e salva           |
+| timer reset  | Cancela sem salvar     |
+| timer status | Mostra status atual    |
+| timer list   | Lista sessões de timer |
 
 ---
 
 ### 6.1. timer start
 
-Inicia cronômetro.
+Inicia cronômetro para uma instância de hábito.
 
 **Sintaxe:**
 
@@ -1649,29 +1650,28 @@ timeblock timer start <INSTANCE_ID>
 | Regra             | Descrição                              |
 | ----------------- | -------------------------------------- |
 | Um timer por vez  | Apenas um timer ativo simultaneamente  |
-| Timer ativo       | Se já houver, exibe menu de opções     |
+| Timer ativo       | Se já houver, exibe erro e instrução   |
 | Múltiplas sessões | Instância DONE pode iniciar novo timer |
+| Non-blocking      | Terminal é liberado após iniciar       |
+
+**Saída:**
+
+```
+$ timeblock timer start 42
+
+[OK] Timer iniciado: Academia (27/01/2026)
+Inicio: 14:30
+
+Use 'timeblock timer status' para ver progresso.
+```
 
 **Fluxo com timer ativo:**
 
 ```
 $ timeblock timer start 43
 
-[ERROR] Timer já ativo: Academia (15min decorridos)
-
-Opções:
-  [1] Pausar Academia e iniciar Meditação
-  [2] Cancelar Academia (reset) e iniciar Meditação
-  [3] Continuar com Academia
-
-Escolha [1-3]: _
-```
-
-**Exemplo:**
-
-```bash
-timeblock timer start 42
-# Saída: [OK] Timer iniciado: Academia (07:00-08:30)
+Ja existe timer ativo: Academia (27/01/2026) (00:15:30)
+Use 'timeblock timer stop' ou 'timeblock timer reset' primeiro.
 ```
 
 ---
@@ -1692,13 +1692,14 @@ timeblock timer pause
 | ------------ | ------------------------------ |
 | Transição    | RUNNING => PAUSED              |
 | Rastreamento | Tempo de pausa é contabilizado |
+| Persistência | Estado salvo no banco          |
 
 **Saída:**
 
 ```
 $ timeblock timer pause
 
-[OK] Timer pausado: Academia
+[||] Timer pausado
 Tempo decorrido: 00:15:30
 ```
 
@@ -1726,8 +1727,8 @@ timeblock timer resume
 ```
 $ timeblock timer resume
 
-[OK] Timer retomado: Academia
-Tempo pausado total: 00:05:00
+[>] Timer retomado: Academia (27/01/2026)
+Use 'timeblock timer status' para ver progresso.
 ```
 
 ---
@@ -1747,7 +1748,7 @@ timeblock timer stop
 | Ação                | Descrição                                   |
 | ------------------- | ------------------------------------------- |
 | Fecha sessão        | Encerra timer atual                         |
-| Salva               | Cria registro TimeLog no banco              |
+| Salva               | Cria registro TimeLog com status DONE       |
 | Calcula substatus   | FULL/PARTIAL/OVERDONE/EXCESSIVE             |
 | Marca DONE          | Instância vira DONE                         |
 | Permite nova sessão | Pode iniciar outro timer na mesma instância |
@@ -1757,14 +1758,11 @@ timeblock timer stop
 ```
 $ timeblock timer stop
 
-[OK] Timer finalizado: Academia
-
-Tempo planejado: 1h30min
-Tempo trabalhado: 1h25min
-Tempo pausado: 5min
-Substatus: FULL (94%)
-
-Instância marcada como concluída.
+[OK] Timer finalizado: Academia (27/01/2026)
+Duracao total: 01:25:00
+Tempo pausado: 00:05:00
+Inicio: 14:30
+Fim: 16:00
 ```
 
 ---
@@ -1776,32 +1774,72 @@ Cancela cronômetro sem salvar.
 **Sintaxe:**
 
 ```bash
-timeblock timer reset
+timeblock timer reset [--session <ID>] [--reason <TEXT>] [--force]
 ```
 
-**Alias:** `timer cancel`
+**Opções:**
+
+| Longa     | Curta | Tipo   | Default  | Descrição                |
+| --------- | ----- | ------ | -------- | ------------------------ |
+| --session | -s    | int    | (ativo)  | ID do TimeLog específico |
+| --reason  | -r    | string | (nenhum) | Motivo do cancelamento   |
+| --force   | -f    | flag   | false    | Pular confirmação        |
 
 **Comportamento (BR-TIMER-003):**
 
-| Ação      | Descrição                    |
-| --------- | ---------------------------- |
-| Descarta  | Sessão atual NÃO é salva     |
-| Instância | Permanece PENDING            |
-| Uso       | Quando iniciou hábito errado |
+| Ação      | Descrição                          |
+| --------- | ---------------------------------- |
+| Descarta  | Sessão atual NÃO é salva           |
+| Status    | TimeLog marcado como CANCELLED     |
+| Instância | Permanece PENDING (se era ativo)   |
+| Uso       | Quando iniciou hábito errado       |
+| --session | Permite cancelar sessão específica |
 
-**Fluxo interativo:**
+**Fluxo interativo (sem --force):**
 
 ```
 $ timeblock timer reset
 
-Timer ativo: Academia (25min decorridos)
+Timer: Academia (27/01/2026)
+Tempo decorrido: 00:25:00
+Status: running
 
-Tem certeza que deseja cancelar? O tempo NÃO será salvo. [s/N]: _
+Cancelar timer? (tempo NÃO será salvo) [s/N]: _
+```
+
+**Exemplos:**
+
+```bash
+# Cancelar timer ativo
+timeblock timer reset
+
+# Cancelar com motivo
+timeblock timer reset --reason "Iniciado errado"
+
+# Cancelar sessão específica (mesmo DONE)
+timeblock timer reset --session 15 --reason "Duplicado"
+
+# Cancelar sem confirmação
+timeblock timer reset --force
 ```
 
 ---
 
-### 6.6. timer status
+### 6.6. timer cancel
+
+**DEPRECATED:** Use `timer reset` ao invés.
+
+**Sintaxe:**
+
+```bash
+timeblock timer cancel [--force]
+```
+
+Alias mantido para compatibilidade. Exibe aviso de depreciação.
+
+---
+
+### 6.7. timer status
 
 Mostra status do cronômetro atual.
 
@@ -1816,13 +1854,23 @@ timeblock timer status
 ```
 $ timeblock timer status
 
-Timer ativo: Academia
-========================================
-Status: RUNNING
-Tempo decorrido: 00:45:30
-Tempo planejado: 01:30:00
+Timer Ativo: Academia (27/01/2026)
+Status: [>] RUNNING
+Tempo trabalhado: 00:45:30
 Tempo pausado: 00:05:00
-Progresso: 50%
+Iniciado: 14:30
+```
+
+**Saída (timer pausado):**
+
+```
+$ timeblock timer status
+
+Timer Ativo: Academia (27/01/2026)
+Status: [||] PAUSED
+Tempo trabalhado: 00:45:30
+Tempo pausado: 00:10:00
+Iniciado: 14:30
 ```
 
 **Saída (sem timer):**
@@ -1830,7 +1878,69 @@ Progresso: 50%
 ```
 $ timeblock timer status
 
-Nenhum timer ativo.
+Nenhum timer ativo
+```
+
+---
+
+### 6.8. timer list
+
+Lista sessões de timer (BR-TIMER-008).
+
+**Sintaxe:**
+
+```bash
+timeblock timer list [--instance <ID>] [--today] [--all]
+```
+
+**Opções:**
+
+| Longa      | Curta | Tipo | Default | Descrição                   |
+| ---------- | ----- | ---- | ------- | --------------------------- |
+| --instance | -i    | int  | (todos) | Filtrar por ID da instância |
+| --today    | -T    | flag | false   | Apenas sessões de hoje      |
+| --all      | -a    | flag | false   | Incluir sessões canceladas  |
+
+**Comportamento:**
+
+| Regra            | Descrição                    |
+| ---------------- | ---------------------------- |
+| Default          | Exclui sessões CANCELLED     |
+| Ordenação        | Por start_time ascendente    |
+| Filtros combinam | AND entre filtros fornecidos |
+
+**Saída:**
+
+```
+$ timeblock timer list --today
+
+                    Sessoes de Timer
+┏━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓
+┃ ID  ┃ Atividade               ┃ Inicio      ┃ Fim   ┃ Duracao  ┃ Status   ┃
+┡━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━┩
+│ 15  │ Academia (27/01/2026)   │ 27/01 07:00 │ 08:30 │ 01:25:00 │ DONE     │
+│ 16  │ Meditação (27/01/2026)  │ 27/01 09:00 │ 09:20 │ 00:20:00 │ DONE     │
+│ 17  │ Leitura (27/01/2026)    │ 27/01 14:30 │ -     │ -        │ RUNNING  │
+└─────┴─────────────────────────┴─────────────┴───────┴──────────┴──────────┘
+```
+
+**Exemplos:**
+
+```bash
+# Listar todas as sessões (exceto canceladas)
+timeblock timer list
+
+# Listar sessões de hoje
+timeblock timer list --today
+
+# Listar sessões de uma instância específica
+timeblock timer list --instance 42
+
+# Incluir sessões canceladas
+timeblock timer list --all
+
+# Combinação de filtros
+timeblock timer list --today --instance 42 --all
 ```
 
 ---
@@ -2019,10 +2129,10 @@ timeblock report [view] \
 
 **Validação:**
 
-| Regra       | Descrição                         |
-| ----------- | --------------------------------- |
-| --from/--to | Par obrigatório (ambos ou nenhum) |
-| Períodos    | Mutuamente exclusivos             |
+| Regra         | Descrição                         |
+| ------------- | --------------------------------- |
+| --from / --to | Par obrigatório (ambos ou nenhum) |
+| Períodos      | Mutuamente exclusivos             |
 
 **Default:** --month (mês atual)
 
@@ -2088,12 +2198,12 @@ Flags que devem ser usadas juntas:
 
 Flags que não podem ser usadas juntas:
 
-| Grupo                      | Contexto                   | Mensagem de erro                             |
-| -------------------------- | -------------------------- | -------------------------------------------- |
-| --color / --tag            | habit, task                | "Use --color OU --tag, não ambos"            |
-| --start+--end / --duration | habit atom log             | "Use --start/--end OU --duration, não ambos" |
-| --today / --week           | habit atom list, task list | "Especifique apenas um período"              |
-| Flags de período           | report                     | "Especifique apenas um período"              |
+| Grupo                        | Contexto                   | Mensagem de erro                               |
+| ---------------------------- | -------------------------- | ---------------------------------------------- |
+| --color / --tag              | habit, task                | "Use --color OU --tag, não ambos"              |
+| --start + --end / --duration | habit atom log             | "Use --start / --end OU --duration, não ambos" |
+| --today / --week             | habit atom list, task list | "Especifique apenas um período"                |
+| Flags de período             | report                     | "Especifique apenas um período"                |
 
 ### 9.3. Combinações Válidas
 
@@ -2152,31 +2262,34 @@ Referência rápida de todas as flags.
 
 ### 10.1. Flags com Short
 
-| Long       | Short | Tipo       | Contextos                                |
-| ---------- | ----- | ---------- | ---------------------------------------- |
-| --all      | -a    | flag       | routine list, habit atom list, task list |
-| --color    | -c    | string     | habit, task, tag                         |
-| --date     | -d    | date       | habit atom                               |
-| --datetime | -D    | datetime   | task                                     |
-| --done     | -C    | flag       | habit atom list, task list               |
-| --duration | -d    | int        | habit atom log                           |
-| --end      | -e    | time       | habit, habit atom                        |
-| --from     | -f    | date       | report                                   |
-| --habit    | -h    | int        | report                                   |
-| --month    | -m    | flag       | report                                   |
-| --pending  | -P    | flag       | habit atom list, task list               |
-| --quarter  | -q    | flag       | report                                   |
-| --reason   | -r    | enum       | habit atom skip                          |
-| --renew    | -n    | period+int | habit create                             |
-| --routine  | -R    | string/int | habit create, habit list                 |
-| --start    | -s    | time       | habit, habit atom                        |
-| --tag      | -g    | int        | habit, task                              |
-| --title    | -l    | string     | habit, task, tag, routine                |
-| --to       | -t    | date       | report                                   |
-| --today    | -T    | flag       | habit atom list, task list               |
-| --verbose  | -v    | flag       | routine list, habit list, report         |
-| --week     | -w    | flag       | habit atom list, task list, report       |
-| --year     | -y    | flag       | report                                   |
+| Long       | Short | Tipo       | Contextos                                            |
+| ---------- | ----- | ---------- | ---------------------------------------------------- |
+| --all      | -a    | flag       | routine list, habit atom list, task list, timer list |
+| --color    | -c    | string     | habit, task, tag                                     |
+| --date     | -d    | date       | habit atom                                           |
+| --datetime | -D    | datetime   | task                                                 |
+| --done     | -C    | flag       | habit atom list, task list                           |
+| --duration | -d    | int        | habit atom log                                       |
+| --end      | -e    | time       | habit, habit atom                                    |
+| --from     | -f    | date       | report                                               |
+| --habit    | -h    | int        | report                                               |
+| --month    | -m    | flag       | report                                               |
+| --pending  | -P    | flag       | habit atom list, task list                           |
+| --quarter  | -q    | flag       | report                                               |
+| --reason   | -r    | string     | habit atom skip, timer reset                         |
+| --renew    | -n    | period+int | habit create                                         |
+| --routine  | -R    | string/int | habit create, habit list                             |
+| --start    | -s    | time       | habit, habit atom                                    |
+| --tag      | -g    | int        | habit, task                                          |
+| --title    | -l    | string     | habit, task, tag, routine                            |
+| --to       | -t    | date       | report                                               |
+| --today    | -T    | flag       | habit atom list, task list, timer list               |
+| --verbose  | -v    | flag       | routine list, habit list, report                     |
+| --week     | -w    | flag       | habit atom list, task list, report                   |
+| --year     | -y    | flag       | report                                               |
+| --force    | -f    | flag       | timer reset                                          |
+| --instance | -i    | int        | timer list                                           |
+| --session  | -s    | int        | timer reset                                          |
 
 ### 10.2. Flags sem Short
 
@@ -2215,6 +2328,9 @@ Referência rápida de todas as flags.
 | -v    | Verbose         |                              |
 | -w    | Week            |                              |
 | -y    | Year            |                              |
+| -f    | Force / From    | Contexto define              |
+| -i    | Instance        |                              |
+| -s    | Start / Session | Contexto define              |
 
 ---
 
@@ -2226,14 +2342,17 @@ Esta seção documenta os conflitos de letras entre flags e as decisões tomadas
 
 Durante o design da CLI, algumas letras foram disputadas por múltiplas flags:
 
-| Letra | Candidatos                         | Decisão                          |
-| ----- | ---------------------------------- | -------------------------------- |
-| -d    | --date, --done, --duration, --desc | --date e --duration por contexto |
-| -n    | --name, --note, --renew            | --renew (-n = "new")             |
-| -p    | --pending, --purge                 | Nenhum (usam maiúsculas)         |
-| -r    | --reason, --repeat, --renew        | --reason                         |
-| -s    | --start, --semester                | --start                          |
-| -t    | --title, --tag, --to, --today      | --to (par com --from)            |
+| Letra | Candidatos                         | Decisão                            |
+| ----- | ---------------------------------- | ---------------------------------- |
+| -d    | --date, --done, --duration, --desc | --date e --duration por contexto   |
+| -n    | --name, --note, --renew            | --renew (-n = "new")               |
+| -p    | --pending, --purge                 | Nenhum (usam maiúsculas)           |
+| -r    | --reason, --repeat, --renew        | --reason                           |
+| -s    | --start, --semester                | --start                            |
+| -t    | --title, --tag, --to, --today      | --to (par com --from)              |
+| -f    | --from, --force                    | --from (report), --force (timer)   |
+| -i    | --instance                         | --instance (timer list)            |
+| -s    | --start, --session                 | --start (habit), --session (timer) |
 
 ### 11.2. Resolução por Maiúsculas
 
@@ -2300,6 +2419,7 @@ Os seguintes comandos foram descontinuados:
 | list (global)       | habit atom list, task list | v2.0.0            |
 | add (global)        | task create                | v2.0.0            |
 | routine edit --name | routine edit --title       | v2.0.0            |
+| timer cancel        | timer reset                | v2.0.0            |
 
 ## 13. Roadmap: Comandos Futuros
 
