@@ -291,7 +291,7 @@ class TimerService:
                 raise ValueError(f"TimeLog {timelog_id} not found")
 
             if timelog.status != TimerStatus.PAUSED:
-                raise ValueError("Timer not paused")
+                raise ValueError("Timer already running")
 
             # Calcular e acumular duração da pausa
             if timelog.pause_start:

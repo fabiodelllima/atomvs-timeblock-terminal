@@ -1424,6 +1424,15 @@ Opções:
 
 **CLI Non-blocking:** Após `timer start`, terminal é liberado imediatamente. Usuário controla via comandos separados.
 
+**Transições Inválidas:**
+
+| Comando | Estado Atual | Erro                    |
+| ------- | ------------ | ----------------------- |
+| pause   | PAUSED       | "Timer already paused"  |
+| resume  | RUNNING      | "Timer already running" |
+
+**Comportamento:** Transições inválidas retornam `ValueError` com mensagem descritiva.
+
 **Testes:**
 
 - `test_br_timer_002_start_creates_running`
@@ -1432,6 +1441,8 @@ Opções:
 - `test_br_timer_002_stop_creates_done`
 - `test_br_timer_002_reset_creates_cancelled`
 - `test_br_timer_002_status_persists_in_db`
+- `test_br_timer_002_cannot_pause_when_paused`
+- `test_br_timer_002_cannot_resume_when_running`
 
 ---
 
