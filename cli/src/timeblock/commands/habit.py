@@ -1,6 +1,6 @@
 """Comandos para gerenciar hábitos."""
 
-from datetime import date
+from datetime import date, timedelta
 from datetime import time as dt_time
 
 import typer
@@ -10,14 +10,20 @@ from sqlmodel import Session
 
 from timeblock.database import get_engine_context
 from timeblock.models import Recurrence
-from timeblock.models.enums import SkipReason
+from timeblock.models.enums import SkipReason, Status
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.services.routine_service import RoutineService
+from timeblock.services.timer_service import TimerService
 from timeblock.utils.conflict_display import display_conflicts
 
 app = typer.Typer(help="Gerenciar hábitos")
 console = Console()
+
+
+# Sub-app para comandos de instância (atom)
+atom_app = typer.Typer(help="Gerenciar instâncias de hábitos")
+app.add_typer(atom_app, name="atom")
 
 
 @app.command("create")
@@ -344,6 +350,259 @@ def skip_instance(
             raise typer.Exit(1)
         elif "completed" in error_msg.lower():
             console.print("[red]Não é possível skip de instância completada[/red]")
+            raise typer.Exit(1)
+        else:
+            console.print(f"[red]Erro: {e}[/red]")
+            raise typer.Exit(1)
+
+
+# ============================================================
+# Comandos atom (instâncias)
+# ============================================================
+
+
+@atom_app.command("list")
+def atom_list(
+    habit_id: int = typer.Argument(None, help="Filtrar por ID do hábito"),
+    today: bool = typer.Option(False, "--today", "-T", help="Apenas hoje"),
+    week: bool = typer.Option(False, "--week", "-w", help="Semana atual"),
+    pending: bool = typer.Option(False, "--pending", "-P", help="Apenas PENDING"),
+    done: bool = typer.Option(False, "--done", "-C", help="Apenas DONE"),
+    all_status: bool = typer.Option(False, "--all", "-a", help="Todos status"),
+):
+    """
+    Lista instâncias de hábitos (BR-HABITINSTANCE-006).
+
+    Defaults:
+        Sem flags: semana atual, apenas pendentes
+        Com HABIT_ID: todas datas, todos status
+
+    Exemplos:
+        timeblock habit atom list              # Semana, pendentes
+        timeblock habit atom list 1            # Todas do hábito 1
+        timeblock habit atom list -T           # Hoje, todos status
+        timeblock habit atom list -T -C        # Hoje, completadas
+    """
+    try:
+        with get_engine_context() as engine, Session(engine) as session:
+            service = HabitInstanceService()
+
+            # Determinar período
+            date_start = None
+            date_end = None
+
+            if today and week:
+                console.print("[red]Erro: --today e --week são mutuamente exclusivos[/red]")
+                raise typer.Exit(1)
+
+            if today:
+                date_start = date.today()
+                date_end = date.today()
+            elif week or (habit_id is None and not today):
+                # Default: semana atual quando sem HABIT_ID
+                date_start = date.today()
+                date_end = date.today() + timedelta(days=6)
+
+            # Determinar filtro de status
+            status_filter = None
+            if pending and done:
+                console.print("[red]Erro: --pending e --done são mutuamente exclusivos[/red]")
+                raise typer.Exit(1)
+
+            if pending:
+                status_filter = Status.PENDING
+            elif done:
+                status_filter = Status.DONE
+            elif not all_status and habit_id is None:
+                # Default: apenas pendentes quando sem HABIT_ID
+                status_filter = Status.PENDING
+
+            # Buscar instâncias
+            instances = service.list_instances(
+                habit_id=habit_id,
+                date_start=date_start,
+                date_end=date_end,
+                session=session,
+            )
+
+            # Filtrar por status se necessário
+            if status_filter is not None:
+                instances = [i for i in instances if i.status == status_filter]
+
+            if not instances:
+                if habit_id:
+                    console.print(f"Nenhuma instância encontrada para hábito {habit_id}.")
+                else:
+                    console.print("Nenhuma instância encontrada.")
+                return
+
+            # Agrupar por data
+            instances_by_date: dict[date, list] = {}
+            for inst in instances:
+                if inst.date not in instances_by_date:
+                    instances_by_date[inst.date] = []
+                instances_by_date[inst.date].append(inst)
+
+            # Exibir
+            period_desc = (
+                "hoje" if today else "semana atual" if week or habit_id is None else "todas"
+            )
+            status_desc = (
+                "pendentes"
+                if status_filter == Status.PENDING
+                else "concluídas"
+                if status_filter == Status.DONE
+                else "todos status"
+            )
+            console.print(f"\n[bold]Instâncias ({period_desc}, {status_desc}):[/bold]\n")
+
+            for dt in sorted(instances_by_date.keys()):
+                weekday = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"][
+                    dt.weekday()
+                ]
+                console.print(f"[cyan]{weekday}, {dt.strftime('%d/%m')}:[/cyan]")
+
+                for inst in sorted(instances_by_date[dt], key=lambda x: x.scheduled_start):
+                    # Determinar marcador de status
+                    if inst.status == Status.DONE:
+                        marker = "[green][x][/green]"
+                        status_text = "concluída"
+                    elif inst.status == Status.NOT_DONE:
+                        marker = "[red][-][/red]"
+                        status_text = "não concluída"
+                    else:
+                        marker = "[ ]"
+                        status_text = "pendente"
+
+                    start = inst.scheduled_start.strftime("%H:%M")
+                    end = inst.scheduled_end.strftime("%H:%M")
+                    title = inst.habit.title if inst.habit else f"Hábito #{inst.habit_id}"
+
+                    console.print(
+                        f"  {marker} {start}-{end} {title} [dim](ID: {inst.id}, {status_text})[/dim]"
+                    )
+
+                console.print()
+
+    except Exception as e:
+        console.print(f"[red]Erro: {e}[/red]")
+        raise typer.Exit(1)
+
+
+@atom_app.command("log")
+def atom_log(
+    instance_id: int = typer.Argument(..., help="ID da instância"),
+    start: str = typer.Option(None, "--start", "-s", help="Hora início (HH:MM)"),
+    end: str = typer.Option(None, "--end", "-e", help="Hora fim (HH:MM)"),
+    duration: int = typer.Option(None, "--duration", "-d", help="Duração em minutos"),
+):
+    """
+    Registra tempo manualmente sem usar timer (BR-TIMER-007).
+
+    Dois modos mutuamente exclusivos:
+        - Intervalo: --start HH:MM --end HH:MM
+        - Duração: --duration MINUTOS
+
+    Exemplos:
+        timeblock habit atom log 42 --start 07:00 --end 08:00
+        timeblock habit atom log 42 --duration 60
+    """
+    try:
+        # Validar modos mutuamente exclusivos (BR-CLI-001)
+        has_interval = start is not None or end is not None
+        has_duration = duration is not None
+
+        if has_interval and has_duration:
+            console.print("[red]Erro: não pode combinar --start/--end com --duration[/red]")
+            console.print("\nUse um dos modos:")
+            console.print("  Intervalo: --start HH:MM --end HH:MM")
+            console.print("  Duração:   --duration MINUTOS")
+            raise typer.Exit(1)
+
+        if not has_interval and not has_duration:
+            console.print(
+                "[red]Erro: forneça intervalo (--start/--end) ou duração (--duration)[/red]"
+            )
+            console.print("\nExemplos:")
+            console.print("  timeblock habit atom log 42 --start 07:00 --end 08:00")
+            console.print("  timeblock habit atom log 42 --duration 60")
+            raise typer.Exit(1)
+
+        # Validar par start/end
+        if has_interval:
+            if start is None or end is None:
+                console.print("[red]Erro: --start requer --end (e vice-versa)[/red]")
+                raise typer.Exit(1)
+
+        # Converter horários
+        start_time = None
+        end_time = None
+        if start:
+            try:
+                parts = start.split(":")
+                start_time = dt_time(int(parts[0]), int(parts[1]))
+            except (ValueError, IndexError):
+                console.print(f"[red]Formato inválido para --start: {start}[/red]")
+                console.print("Use formato HH:MM (ex: 07:00, 14:30)")
+                raise typer.Exit(1)
+
+        if end:
+            try:
+                parts = end.split(":")
+                end_time = dt_time(int(parts[0]), int(parts[1]))
+            except (ValueError, IndexError):
+                console.print(f"[red]Formato inválido para --end: {end}[/red]")
+                console.print("Use formato HH:MM (ex: 08:00, 15:30)")
+                raise typer.Exit(1)
+
+        # Executar log manual
+        with get_engine_context() as engine, Session(engine) as session:
+            service = TimerService()
+            timelog = service.log_manual(
+                habit_instance_id=instance_id,
+                start_time=start_time,
+                end_time=end_time,
+                duration_minutes=duration,
+                session=session,
+            )
+
+            # Buscar instância para feedback
+            instance_service = HabitInstanceService()
+            instance = instance_service.get_instance(instance_id, session=session)
+
+            # Formatar duração
+            duration_secs = timelog.duration_seconds or 0
+            hours, remainder = divmod(duration_secs, 3600)
+            minutes = remainder // 60
+
+            # Mapear substatus para português
+            substatus_pt = {
+                "full": "Completo",
+                "partial": "Parcial",
+                "overdone": "Acima da meta",
+                "excessive": "Excessivo",
+            }
+
+            console.print("[green]Tempo registrado com sucesso[/green]")
+            console.print(f"  Duração: {hours:02d}h{minutes:02d}min")
+            if instance:
+                console.print(f"  Completion: {instance.completion_percentage}%")
+                if instance.done_substatus:
+                    substatus_str = substatus_pt.get(
+                        instance.done_substatus.value, instance.done_substatus.value
+                    )
+                    console.print(f"  Status: DONE ({substatus_str})")
+
+    except ValueError as e:
+        error_msg = str(e)
+        if "not found" in error_msg.lower():
+            console.print(f"[red]HabitInstance {instance_id} não encontrada[/red]")
+            raise typer.Exit(2)
+        elif "start must be before end" in error_msg:
+            console.print("[red]Erro: hora início deve ser anterior à hora fim[/red]")
+            raise typer.Exit(1)
+        elif "duration must be positive" in error_msg:
+            console.print("[red]Erro: duração deve ser maior que zero[/red]")
             raise typer.Exit(1)
         else:
             console.print(f"[red]Erro: {e}[/red]")

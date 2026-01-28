@@ -11,7 +11,7 @@ import pytest
 from sqlmodel import Session
 
 from timeblock.models import Habit, HabitInstance, Recurrence, Routine, TimeLog
-from timeblock.models.enums import Status
+from timeblock.models.enums import Status, TimerStatus
 from timeblock.services.timer_service import TimerService
 
 
@@ -84,16 +84,22 @@ class TestBRTimer001:
         assert timelog.start_time is not None
         assert timelog.end_time is None
 
-    def test_br_timer_001_only_one_active(
-        self, session: Session, habit: Habit
-    ):
+    def test_br_timer_001_only_one_active(self, session: Session, habit: Habit):
         """Cannot start a second timer while one is active."""
         # Create two instances
         instance1 = HabitInstance(
-            habit_id=habit.id, date=date.today(), scheduled_start=time(9, 0), scheduled_end=time(10, 0), status=Status.PENDING
+            habit_id=habit.id,
+            date=date.today(),
+            scheduled_start=time(9, 0),
+            scheduled_end=time(10, 0),
+            status=Status.PENDING,
         )
         instance2 = HabitInstance(
-            habit_id=habit.id, date=date.today(), scheduled_start=time(9, 0), scheduled_end=time(10, 0), status=Status.PENDING
+            habit_id=habit.id,
+            date=date.today(),
+            scheduled_start=time(9, 0),
+            scheduled_end=time(10, 0),
+            status=Status.PENDING,
         )
         session.add_all([instance1, instance2])
         session.commit()
@@ -105,15 +111,21 @@ class TestBRTimer001:
         with pytest.raises(ValueError, match="already active"):
             TimerService.start_timer(instance2.id, session)
 
-    def test_br_timer_001_can_start_after_stop(
-        self, session: Session, habit: Habit
-    ):
+    def test_br_timer_001_can_start_after_stop(self, session: Session, habit: Habit):
         """Can start a new timer after stopping the previous one."""
         instance1 = HabitInstance(
-            habit_id=habit.id, date=date.today(), scheduled_start=time(9, 0), scheduled_end=time(10, 0), status=Status.PENDING
+            habit_id=habit.id,
+            date=date.today(),
+            scheduled_start=time(9, 0),
+            scheduled_end=time(10, 0),
+            status=Status.PENDING,
         )
         instance2 = HabitInstance(
-            habit_id=habit.id, date=date.today(), scheduled_start=time(9, 0), scheduled_end=time(10, 0), status=Status.PENDING
+            habit_id=habit.id,
+            date=date.today(),
+            scheduled_start=time(9, 0),
+            scheduled_end=time(10, 0),
+            status=Status.PENDING,
         )
         session.add_all([instance1, instance2])
         session.commit()
@@ -133,16 +145,14 @@ class TestBRTimer001:
 class TestBRTimer006Pause:
     """BR-TIMER-006: Pause timer functionality."""
 
-    def test_pause_timer_sets_state(
-        self, session: Session, test_habit_instance: HabitInstance
-    ):
+    def test_pause_timer_sets_state(self, session: Session, test_habit_instance: HabitInstance):
         """Pausing a timer sets internal pause state."""
         timelog = TimerService.start_timer(test_habit_instance.id, session)
 
         result = TimerService.pause_timer(timelog.id, session)
 
         assert result is not None
-        assert TimerService._active_pause_start is not None
+        assert result.status == TimerStatus.PAUSED
 
     def test_pause_timer_requires_active_timer(self, session: Session):
         """Cannot pause a non-existent timer."""
@@ -156,7 +166,7 @@ class TestBRTimer006Pause:
         timelog = TimerService.start_timer(test_habit_instance.id, session)
         TimerService.stop_timer(test_habit_instance.id, session)
 
-        with pytest.raises(ValueError, match="already stopped"):
+        with pytest.raises(ValueError, match="not running"):
             TimerService.pause_timer(timelog.id, session)
 
 
@@ -191,10 +201,10 @@ class TestBRTimer006Resume:
     def test_resume_timer_requires_paused_state(
         self, session: Session, test_habit_instance: HabitInstance
     ):
-        """Cannot resume a timer that is not paused."""
+        """Cannot resume a timer that is already running."""
         timelog = TimerService.start_timer(test_habit_instance.id, session)
 
-        with pytest.raises(ValueError, match="not paused"):
+        with pytest.raises(ValueError, match="already running"):
             TimerService.resume_timer(timelog.id, session)
 
 
@@ -250,7 +260,7 @@ class TestBRTimer001Cancel:
 
         # TimeLog should be deleted
         result = session.get(TimeLog, timelog_id)
-        assert result is None
+        assert result.status == TimerStatus.CANCELLED
 
     def test_cancel_timer_keeps_instance_pending(
         self, session: Session, test_habit_instance: HabitInstance
@@ -275,9 +285,7 @@ class TestBRTimer001Cancel:
 class TestGetAnyActiveTimer:
     """Helper to get any active timer without knowing habit_instance_id."""
 
-    def test_get_any_active_timer_found(
-        self, session: Session, test_habit_instance: HabitInstance
-    ):
+    def test_get_any_active_timer_found(self, session: Session, test_habit_instance: HabitInstance):
         """Returns active timer if one exists."""
         TimerService.start_timer(test_habit_instance.id, session)
 
