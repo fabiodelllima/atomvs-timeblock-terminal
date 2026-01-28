@@ -729,7 +729,10 @@ utils/
 **Routine (Agrupamento):**
 
 ```python
+# models/routine.py
 class Routine(SQLModel, table=True):
+    __tablename__ = "routines"
+
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(max_length=200)
     is_active: bool = Field(default=False)
@@ -740,89 +743,203 @@ class Routine(SQLModel, table=True):
 **Habit (Template):**
 
 ```python
+# models/habit.py
 class Habit(SQLModel, table=True):
+    __tablename__ = "habits"
+
     id: int | None = Field(default=None, primary_key=True)
-    routine_id: int = Field(foreign_key="routines.id")
+    routine_id: int = Field(foreign_key="routines.id", ondelete="RESTRICT")
     title: str = Field(max_length=200)
     scheduled_start: time
     scheduled_end: time
-    recurrence: Recurrence
-    color: str | None = None
-    tag_id: int | None = Field(foreign_key="tags.id")
+    recurrence: Recurrence  # Enum definido em habit.py
+    color: str | None = Field(default=None, max_length=7)
+    tag_id: int | None = Field(default=None, foreign_key="tags.id")
 
-    routine: "Routine" = Relationship(back_populates="habits")
-    instances: list["HabitInstance"] = Relationship(back_populates="habit")
-
+    routine: Routine | None = Relationship(back_populates="habits")
+    instances: list[HabitInstance] = Relationship(back_populates="habit", cascade_delete=True)
+    tag: Tag | None = Relationship(back_populates="habits")
 ```
 
 **HabitInstance (Ocorrência):**
 
 ```python
+# models/habit_instance.py
 class HabitInstance(SQLModel, table=True):
+    __tablename__ = "habitinstance"
+
     id: int | None = Field(default=None, primary_key=True)
     habit_id: int = Field(foreign_key="habits.id")
-    date: date
+    date: date = Field(index=True)
     scheduled_start: time
     scheduled_end: time
     status: Status = Field(default=Status.PENDING)
-    done_substatus: DoneSubstatus | None = None
-    not_done_substatus: NotDoneSubstatus | None = None
-    skip_reason: SkipReason | None = None
-    skip_note: str | None = None
-    completion_percentage: int | None = None
+    done_substatus: DoneSubstatus | None = Field(default=None)
+    not_done_substatus: NotDoneSubstatus | None = Field(default=None)
+    skip_reason: SkipReason | None = Field(default=None)
+    skip_note: str | None = Field(default=None)
+    completion_percentage: int | None = Field(default=None)
 
-    habit: "Habit" = Relationship(back_populates="instances")
+    habit: Habit | None = Relationship(back_populates="instances")
 ```
 
 **Task (Evento Único):**
 
 ```python
+# models/task.py
 class Task(SQLModel, table=True):
+    __tablename__ = "tasks"
+
     id: int | None = Field(default=None, primary_key=True)
     title: str = Field(max_length=200)
     scheduled_datetime: datetime
     completed_datetime: datetime | None = None
     description: str | None = None
     color: str | None = None
-    tag_id: int | None = Field(foreign_key="tags.id")
+    tag_id: int | None = Field(default=None, foreign_key="tags.id")
+```
+
+**Event (Evento Genérico):**
+
+```python
+# models/event.py
+class Event(SQLModel, table=True):
+    __tablename__ = "event"
+
+    id: int | None = Field(default=None, primary_key=True)
+    title: str = Field(max_length=200, index=True)
+    description: str | None = Field(default=None, max_length=1000)
+    color: str | None = Field(default=None, max_length=7)
+    status: EventStatus = Field(default=EventStatus.PLANNED)
+    scheduled_start: datetime = Field(index=True)
+    scheduled_end: datetime
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+```
+
+**Tag (Categorização):**
+
+```python
+# models/tag.py
+class Tag(SQLModel, table=True):
+    __tablename__ = "tags"
+
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(max_length=50, unique=True)
+    color: str | None = Field(default=None, max_length=7)
+
+    habits: list["Habit"] = Relationship(back_populates="tag")
 ```
 
 **TimeLog (Rastreamento de Tempo):**
 
 ```python
+# models/time_log.py
 class TimeLog(SQLModel, table=True):
+    __tablename__ = "time_log"
+
     id: int | None = Field(default=None, primary_key=True)
-    event_id: int | None = Field(foreign_key="event.id")
-    task_id: int | None = Field(foreign_key="tasks.id")
-    habit_instance_id: int | None = Field(foreign_key="habitinstance.id")
+
+    # Foreign keys (apenas um preenchido por registro)
+    event_id: int | None = Field(foreign_key="event.id", default=None, index=True)
+    task_id: int | None = Field(foreign_key="tasks.id", default=None, index=True)
+    habit_instance_id: int | None = Field(foreign_key="habitinstance.id", default=None, index=True)
+
+    # Estado do timer (BR-TIMER-002)
+    status: TimerStatus | None = Field(default=TimerStatus.RUNNING, index=True)
+    pause_start: datetime | None = Field(default=None)
+
+    # Timestamps
     start_time: datetime
     end_time: datetime | None = None
+
+    # Durações
     duration_seconds: int | None = None
     paused_duration: int | None = Field(default=0)
-    notes: str | None = Field(max_length=500)
 
+    # Anotações
+    notes: str | None = Field(default=None, max_length=500)
+    cancel_reason: str | None = Field(default=None, max_length=500)
+```
+
+**PauseLog (Intervalos de Pausa):**
+
+```python
+# models/event.py
+class PauseLog(SQLModel, table=True):
+    __tablename__ = "pauselog"
+
+    id: int | None = Field(default=None, primary_key=True)
+    timelog_id: int = Field(foreign_key="time_log.id", index=True)
+    pause_start: datetime
+    pause_end: datetime | None = Field(default=None)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+```
+
+**ChangeLog (Auditoria):**
+
+```python
+# models/event.py
+class ChangeLog(SQLModel, table=True):
+    __tablename__ = "changelog"
+
+    id: int | None = Field(default=None, primary_key=True)
+    event_id: int = Field(foreign_key="event.id", index=True)
+    change_type: ChangeType
+    field_name: str | None = Field(default=None, max_length=50)
+    old_value: str | None = Field(default=None, max_length=500)
+    new_value: str | None = Field(default=None, max_length=500)
+    changed_at: datetime = Field(default_factory=lambda: datetime.now(UTC), index=True)
 ```
 
 ### 5.3. Enums
 
+**Status e Substatus (models/enums.py):**
+
 ```python
 class Status(str, Enum):
+    """Status principal de HabitInstance."""
     PENDING = "pending"
     DONE = "done"
     NOT_DONE = "not_done"
 
 class DoneSubstatus(str, Enum):
+    """Substatus para eventos DONE."""
     FULL = "full"           # 90-110%
     PARTIAL = "partial"     # <90%
     OVERDONE = "overdone"   # 110-150%
     EXCESSIVE = "excessive" # >150%
 
 class NotDoneSubstatus(str, Enum):
+    """Substatus para eventos NOT_DONE."""
     SKIPPED_JUSTIFIED = "skipped_justified"
     SKIPPED_UNJUSTIFIED = "skipped_unjustified"
     IGNORED = "ignored"
 
-class Recurrence(str, Enum):
+class SkipReason(str, Enum):
+    """Categorias de justificativa para skip."""
+    HEALTH = "saude"
+    WORK = "trabalho"
+    FAMILY = "familia"
+    TRAVEL = "viagem"
+    WEATHER = "clima"
+    LACK_RESOURCES = "falta_recursos"
+    EMERGENCY = "emergencia"
+    OTHER = "outro"
+
+class TimerStatus(str, Enum):
+    """Status do timer (BR-TIMER-002)."""
+    RUNNING = "running"
+    PAUSED = "paused"
+    DONE = "done"
+    CANCELLED = "cancelled"
+```
+
+**Recurrence (models/habit.py):**
+
+```python
+class Recurrence(Enum):
+    """Padrões de recorrência para Habit."""
     MONDAY = "MONDAY"
     TUESDAY = "TUESDAY"
     WEDNESDAY = "WEDNESDAY"
@@ -833,16 +950,27 @@ class Recurrence(str, Enum):
     WEEKDAYS = "WEEKDAYS"
     WEEKENDS = "WEEKENDS"
     EVERYDAY = "EVERYDAY"
+```
 
-class SkipReason(str, Enum):
-    HEALTH = "saude"
-    WORK = "trabalho"
-    FAMILY = "familia"
-    TRAVEL = "viagem"
-    WEATHER = "clima"
-    LACK_RESOURCES = "falta_recursos"
-    EMERGENCY = "emergencia"
-    OTHER = "outro"
+**EventStatus e ChangeType (models/event.py):**
+
+```python
+class EventStatus(str, Enum):
+    """Status do ciclo de vida de Event."""
+    PLANNED = "planned"
+    IN_PROGRESS = "in_progress"
+    PAUSED = "paused"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    RESCHEDULED = "rescheduled"
+
+class ChangeType(str, Enum):
+    """Tipos de alteração para auditoria."""
+    CREATED = "created"
+    UPDATED = "updated"
+    STATUS_CHANGED = "status_changed"
+    RESCHEDULED = "rescheduled"
+    DELETED = "deleted"
 ```
 
 ---

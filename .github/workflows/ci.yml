@@ -1,6 +1,4 @@
 # GitHub Actions CI - TimeBlock Organizer
-# Código sem docs/ e notaas internas
-
 name: CI
 permissions:
   contents: read
@@ -37,7 +35,10 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          cd cli
+          pip install -e .
       - name: Run mypy
         run: |
           cd cli
@@ -55,11 +56,14 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          cd cli
+          pip install -e .
       - name: Initialize database
         run: |
           cd cli
-          python -c "from src.timeblock.database.engine import create_db_and_tables; create_db_and_tables()"
+          python -c "from timeblock.database.engine import create_db_and_tables; create_db_and_tables()"
       - name: Run tests
         run: |
           cd cli
