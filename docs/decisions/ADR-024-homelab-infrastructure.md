@@ -81,8 +81,8 @@ $ timeblock connect
 
 ## Referências
 
-- [ADR-005: Offline-First](ADR-005-offline-first.md)
-- [ADR-006: User Control Philosophy](ADR-006-user-control.md)
+- [ADR-005: Offline-First](../core/architecture.md#7-decisões-arquiteturais)
+- [ADR-006: User Control](../core/architecture.md#7-decisões-arquiteturais)
 - [ADR-012: Sync Strategy](ADR-012-sync-strategy.md)
 - [Architecture: Deployment Options](../core/architecture.md#10-deployment-options)
 
