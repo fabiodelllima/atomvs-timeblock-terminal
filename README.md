@@ -4,15 +4,15 @@
 
 ```
 ╔═══════════════════════════════════════════════════════════════╗
-║  TimeBlock Organizer v1.3.3                                   ║
+║  TimeBlock Organizer v1.4.0                                   ║
 ║  ───────────────────────────────────────────────────────────  ║
-║  [x] 558 testes  [x] 67% cobertura  [x] 26 ADRs  [x] 52 BRs   ║
+║  [x] 513 testes  [x] 44% cobertura  [x] 27 ADRs  [x] 67 BRs   ║
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-558%20passing-success.svg)](cli/tests/)
-[![Coverage](https://img.shields.io/badge/coverage-67%25-yellow.svg)](cli/tests/)
+[![Tests](https://img.shields.io/badge/tests-513%20passing-success.svg)](cli/tests/)
+[![Coverage](https://img.shields.io/badge/coverage-44%25-yellow.svg)](cli/tests/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Visão Geral
@@ -195,7 +195,7 @@ timeblock-organizer/
 │   │   ├── cli-reference.md
 │   │   └── workflows.md
 │   │
-│   └── decisions/             # 26 ADRs
+│   └── decisions/             # 27 ADRs
 │
 └── scripts/                   # Automação
 ```
@@ -334,15 +334,15 @@ timeblock task complete 1
 
 ```
 ╔════════════════════════════════════════════════════════════════════╗
-║                         MÉTRICAS v1.3.3                            ║
+║                         MÉTRICAS v1.4.0                            ║
 ╠════════════════════════════════════════════════════════════════════╣
 ║                                                                    ║
-║   Testes          466        ████████████████████████████  100%    ║
-║   Cobertura       65%        ████████████████░░░░░░░░░░░░   61%    ║
-║   Modelos         8          ████████░░░░░░░░░░░░░░░░░░░░   27%    ║
+║   Testes          513        ████████████████████████████  100%    ║
+║   Cobertura       44%        ████████████░░░░░░░░░░░░░░░░   44%    ║
+║   Modelos         9          █████████░░░░░░░░░░░░░░░░░░░   30%    ║
 ║   Services        9          █████████░░░░░░░░░░░░░░░░░░░   30%    ║
-║   ADRs            26         █████████████████████████░░░   83%    ║
-║   Business Rules  52         ██████████████████████████░░   87%    ║
+║   ADRs            27         ██████████████████████████░░   90%    ║
+║   Business Rules  67         ████████████████████████████  100%    ║
 ║                                                                    ║
 ╚════════════════════════════════════════════════════════════════════╝
 ```
@@ -355,11 +355,11 @@ timeblock task complete 1
 docs/
 ├── core/
 │   ├── architecture.md     # Design e princípios
-│   ├── business-rules.md   # 52 BRs formalizadas
+│   ├── business-rules.md   # 67 BRs formalizadas
 │   ├── cli-reference.md    # Referência completa CLI
 │   └── workflows.md        # Fluxos e estados
 │
-└── decisions/              # 26 ADRs documentadas
+└── decisions/              # 27 ADRs documentadas
 ```
 
 ---
@@ -408,7 +408,7 @@ Tipos: feat, fix, refactor, test, docs, chore
 │ v1.0.0 │ [DONE]    │ CLI básica, CRUD eventos                      │
 │ v1.1.0 │ [DONE]    │ Event reordering                              │
 │ v1.2.x │ [DONE]    │ Logging, docs consolidados                    │
-│ v1.3.3 │ [CURRENT] │ Business rules formalizadas                   │
+│ v1.4.0 │ [CURRENT] │ Business rules formalizadas                   │
 │ v1.4.0 │ [WIP]     │ MVP Event Reordering, E2E tests               │
 ├────────────────────────────────────────────────────────────────────┤
 │ v1.5.0 │ [PLANNED] │ Infra Foundation (Docker, CI/CD)              │
