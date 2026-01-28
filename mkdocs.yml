@@ -1,5 +1,9 @@
-site_name: TimeBlock Organizer Docs
-site_description: CLI para gerenciar hábitos recorrentes e resolver conflitos de agenda.
+# MkDocs Configuration - TimeBlock Organizer
+# Atualizado: 2026-01-28 (alinhado com estrutura consolidada)
+# Referência: ADR-027 (Documentation Tooling)
+
+site_name: TimeBlock Organizer
+site_description: CLI para gerenciamento de tempo baseada em Time Blocking e Atomic Habits
 site_author: Fábio de Lima
 site_url: https://github.com/fabiodelllima/timeblock-organizer
 
@@ -7,6 +11,9 @@ repo_name: timeblock-organizer
 repo_url: https://github.com/fabiodelllima/timeblock-organizer
 edit_uri: edit/main/docs/
 
+# ==============================================================================
+# THEME
+# ==============================================================================
 theme:
   name: material
   language: pt-BR
@@ -38,174 +45,125 @@ theme:
     text: Roboto
     code: Roboto Mono
 
+# ==============================================================================
+# NAVIGATION - Alinhado com estrutura real em docs/
+# ==============================================================================
 nav:
   - Home: README.md
 
-  - Project Status:
-      - Overview: 10-meta/project-status.md
-      - Master Document: 10-meta/master-integration-document.md
-      - Technical Debt: 10-meta/technical-debt.md
-      - Detailed Roadmap: 10-meta/detailed-roadmap.md
-      - Pending Decisions: 10-meta/pending-decisions.md
-      - Success Metrics: 10-meta/success-metrics.md
-      - Problems Solved: 10-meta/problemas-e-solucoes.md
-
-  - Arquitetura:
-      - Visão Geral: 01-architecture/README.md
-      - Overview Arquitetural: 01-architecture/00-architecture-overview.md
-      - 1. Introdução: 01-architecture/01-introduction-goals.md
-      - 2. Restrições: 01-architecture/02-constraints.md
-      - 3. Contexto: 01-architecture/03-context-scope.md
-      - 4. Estratégia: 01-architecture/04-solution-strategy.md
-      - 5. Building Blocks: 01-architecture/05-building-blocks.md
-      - 6. Runtime View: 01-architecture/06-runtime-view.md
-      - 7. Deployment: 01-architecture/07-deployment.md
-      - 8. Crosscutting: 01-architecture/08-crosscutting.md
-      - 9. Decisions Index: 01-architecture/09-decisions-index.md
-      - 10. Quality: 01-architecture/10-quality.md
-      - 11. Risks and Debt: 01-architecture/11-risks-debt.md
-      - 12. Glossary: 01-architecture/12-glossary.md
-      - 13. Análise Arquitetural: 01-architecture/13-architectural-analysis.md
-      - 14. Problemas Identificados: 01-architecture/14-architectural-problems.md
-      - 15. Recomendações: 01-architecture/15-recommendations.md
-      - 16. Sync Architecture v2: 01-architecture/16-sync-architecture-v2.md
-      - 17. User Control Philosophy: 01-architecture/17-user-control-philosophy.md
-      - 18. Project Philosophy: 01-architecture/18-project-philosophy.md
-
-  - Diagramas:
-      - Visão Geral: 02-diagrams/README.md
-      - C4 Model:
-          - L1 Context: 02-diagrams/c4-model/L1-system-context.md
-          - L2 Containers: 02-diagrams/c4-model/L2-containers.md
-          - L3 Components: 02-diagrams/c4-model/L3-components-core.md
-      - Sequências:
-          - Event Reordering: 02-diagrams/sequences/event-reordering.md
-          - Habit Generation: 02-diagrams/sequences/habit-generation.md
-          - Timer Flow: 02-diagrams/sequences/timer-flow.md
-          - Habit Instantiation: 02-diagrams/sequences/habit-instantiation.md
-      - Estados:
-          - Event States: 02-diagrams/states/event-states.md
-          - Timer States: 02-diagrams/states/timer-states.md
-          - Habit Lifecycle: 02-diagrams/states/habit-lifecycle.md
-          - Task Lifecycle: 02-diagrams/states/task-lifecycle.md
-      - Data:
-          - ER Diagram: 02-diagrams/data/er-diagram.md
-          - Class Diagram: 02-diagrams/data/class-diagram.md
-      - Infrastructure:
-          - Deployment: 02-diagrams/infrastructure/deployment.md
-      - Activity:
-          - Habit Execution: 02-diagrams/activity/habit-execution.md
-          - User Daily Flow: 02-diagrams/activity/user-daily-flow.md
+  - Core (SSOT):
+      - Arquitetura: core/architecture.md
+      - Regras de Negócio: core/business-rules.md
+      - Referência CLI: core/cli-reference.md
+      - Métricas de Qualidade: core/quality-metrics.md
+      - Roadmap: core/roadmap.md
+      - Workflows: core/workflows.md
 
   - Decisões (ADRs):
-      - Índice: 03-decisions/README.md
-      - Template: 03-decisions/template.md
-      - "ADR-001: SQLModel ORM": 03-decisions/001-sqlmodel-orm.md
-      - "ADR-002: Typer CLI": 03-decisions/002-typer-cli.md
-      - "ADR-003: Event Reordering": 03-decisions/003-event-reordering.md
-      - "ADR-004: Habit vs Instance": 03-decisions/004-habit-vs-instance.md
-      - "ADR-005: Resource-First CLI": 03-decisions/005-resource-first-cli.md
-      - "ADR-006: Textual TUI": 03-decisions/006-textual-tui.md
-      - "ADR-007: Service Layer": 03-decisions/007-service-layer.md
-      - "ADR-008: Tuple Returns": 03-decisions/008-tuple-returns.md
-      - "ADR-009: Flags Consolidation": 03-decisions/009-flags-consolidation.md
-      - "ADR-010: Recurrence Model": 03-decisions/010-recurrence-model.md
-      - "ADR-011: Conflict Philosophy": 03-decisions/011-conflict-philosophy.md
-      - "ADR-012: Sync Strategy": 03-decisions/012-sync-strategy.md
-      - "ADR-013: Offline-First Schema": 03-decisions/013-offline-first-schema.md
-      - "ADR-014: Sync UX Flow": 03-decisions/014-sync-ux-flow.md
-      - "ADR-015: HabitInstance Naming": 03-decisions/015-habitinstance-naming.md
-      - "ADR-016: Alembic Timing": 03-decisions/016-alembic-timing.md
-      - "ADR-017: Environment Strategy": 03-decisions/017-environment-strategy.md
-      - "ADR-018: Language Standards": 03-decisions/018-language-standards.md
-      - "ADR-019: Test Naming Convention": 03-decisions/ADR-019-test-naming-convention.md
-      - "ADR-020: Business Rules Nomenclature": 03-decisions/ADR-020-business-rules-nomenclature.md
+      - Índice: decisions/README.md
+      - Template: decisions/template.md
+      - Fundacionais:
+          - "ADR-001: SQLModel ORM": decisions/ADR-001-sqlmodel-orm.md
+          - "ADR-002: Typer CLI": decisions/ADR-002-typer-cli.md
+          - "ADR-003: Event Reordering": decisions/ADR-003-event-reordering.md
+          - "ADR-004: Habit vs Instance": decisions/ADR-004-habit-vs-instance.md
+          - "ADR-005: Resource-First CLI": decisions/ADR-005-resource-first-cli.md
+          - "ADR-006: Textual TUI": decisions/ADR-006-textual-tui.md
+          - "ADR-007: Service Layer": decisions/ADR-007-service-layer.md
+          - "ADR-008: Tuple Returns": decisions/ADR-008-tuple-returns.md
+      - Modelos e Dados:
+          - "ADR-009: Flags Consolidation": decisions/ADR-009-flags-consolidation.md
+          - "ADR-010: Recurrence Model": decisions/ADR-010-recurrence-model.md
+          - "ADR-015: HabitInstance Naming": decisions/ADR-015-habitinstance-naming.md
+          - "ADR-021: Status/Substatus": decisions/ADR-021-status-substatus-refactoring.md
+          - "ADR-022: Pause Tracking": decisions/ADR-022-pause-tracking-simplification.md
+      - Sincronização:
+          - "ADR-011: Conflict Philosophy": decisions/ADR-011-conflict-philosophy.md
+          - "ADR-012: Sync Strategy": decisions/ADR-012-sync-strategy.md
+          - "ADR-013: Offline-First Schema": decisions/ADR-013-offline-first-schema.md
+          - "ADR-014: Sync UX Flow": decisions/ADR-014-sync-ux-flow.md
+      - Infraestrutura:
+          - "ADR-016: Alembic Timing": decisions/ADR-016-alembic-timing.md
+          - "ADR-017: Environment Strategy": decisions/ADR-017-environment-strategy.md
+          - "ADR-023: Microservices Ecosystem": decisions/ADR-023-microservices-ecosystem.md
+          - "ADR-024: Homelab Infrastructure": decisions/ADR-024-homelab-infrastructure.md
+      - Padrões e Qualidade:
+          - "ADR-018: Language Standards": decisions/ADR-018-language-standards.md
+          - "ADR-019: Test Naming Convention": decisions/ADR-019-test-naming-convention.md
+          - "ADR-020: Business Rules Nomenclature": decisions/ADR-020-business-rules-nomenclature.md
+          - "ADR-025: Development Methodology": decisions/ADR-025-development-methodology.md
+          - "ADR-026: Test Database Isolation": decisions/ADR-026-test-database-isolation.md
+          - "ADR-027: Documentation Tooling": decisions/ADR-027-documentation-tooling.md
 
-  - Especificações:
-      - Visão Geral: 04-specifications/README.md
-      - Business Rules:
-          - "BR001: Habit Scheduling": 04-specifications/business-rules/BR001-habit-scheduling.md
-          - "BR002: Event Conflicts": 04-specifications/business-rules/BR002-event-conflicts.md
-          - "BR003: Reordering Logic": 04-specifications/business-rules/BR003-reordering-logic.md
-          - "BR004: Timer Behavior": 04-specifications/business-rules/BR004-timer-behavior.md
-          - "Regras Completas": 04-specifications/business-rules/COMPLETE-BUSINESS-RULES.md
-      - Algorithms:
-          - Event Reordering: 04-specifications/algorithms/event-reordering.md
-          - Conflict Detection: 04-specifications/algorithms/conflict-detection.md
-      - Protocols:
-          - Validation: 04-specifications/protocols/validation.md
-          - Error Handling: 04-specifications/protocols/error-handling.md
-      - Philosophy:
-          - Conflict Philosophy: 04-specifications/philosophy/conflict-philosophy.md
-
-  - APIs Internas:
-      - Visão Geral: 05-api/README.md
-      - Services:
-          - Event Reordering: 05-api/services/event-reordering.md
-          - Habit Service: 05-api/services/habit-service.md
-          - Timer Service: 05-api/services/timer-service.md
-          - Task Service: 05-api/services/task-service.md
-      - Models:
-          - Event Models: 05-api/models/event-models.md
-          - Habit Models: 05-api/models/habit-models.md
-          - Habit: 05-api/models/habit.md
-          - Habit Instance: 05-api/models/habit-instance.md
-          - Routine: 05-api/models/routine.md
-          - Task: 05-api/models/task.md
-      - CLI:
-          - Commands: 05-api/cli/commands.md
-          - Parsers: 05-api/cli/parsers.md
-      - Database Schema: 05-api/database-schema.md
-
-  - Desenvolvimento:
-      - Guia do Dev: 06-development/README.md
-      - Setup: 06-development/setup.md
-      - Workflow: 06-development/workflow.md
-      - Testing: 06-development/testing.md
+  - Diagramas:
+      - Visão Geral: diagrams/README.md
+      - C4 Model:
+          - "L1: System Context": diagrams/c4-model/L1-system-context.md
+          - "L2: Containers": diagrams/c4-model/L2-containers.md
+          - "L3: Components": diagrams/c4-model/L3-components-core.md
+      - Sequências:
+          - Event Reordering: diagrams/sequences/event-reordering.md
+          - Habit Generation: diagrams/sequences/habit-generation.md
+          - Habit Instantiation: diagrams/sequences/habit-instantiation.md
+          - Timer Flow: diagrams/sequences/timer-flow.md
+      - Estados:
+          - Event States: diagrams/states/event-states.md
+          - Habit Lifecycle: diagrams/states/habit-lifecycle.md
+          - Task Lifecycle: diagrams/states/task-lifecycle.md
+          - Timer States: diagrams/states/timer-states.md
+      - Dados:
+          - ER Diagram: diagrams/data/er-diagram.md
+          - Class Diagram: diagrams/data/class-diagram.md
+      - Atividade:
+          - Habit Execution: diagrams/activity/habit-execution.md
+          - User Daily Flow: diagrams/activity/user-daily-flow.md
+      - Infraestrutura:
+          - Deployment: diagrams/infrastructure/deployment.md
 
   - Testes:
-      - Visão Geral: 05-testing/README.md
-      - Testing Philosophy: 05-testing/testing-philosophy.md
-      - Requirements Traceability Matrix: 05-testing/requirements-traceability-matrix.md
-      - Estratégia de Testes: 05-testing/test-strategy.md
+      - Visão Geral: testing/README.md
+      - Filosofia: testing/testing-philosophy.md
+      - Estratégia: testing/test-strategy.md
+      - Matriz de Rastreabilidade: testing/requirements-traceability-matrix.md
+      - Cenários E2E: testing/e2e-scenarios.md
+      - Cenários:
+          - Conflict Detection: testing/scenarios/conflict-detection.md
+          - Event Creation: testing/scenarios/event-creation.md
+          - Event Reordering: testing/scenarios/event-reordering.md
+          - Habit Generation: testing/scenarios/habit-generation.md
+          - Timer Lifecycle: testing/scenarios/timer-lifecycle.md
       - Fixtures:
-          - Database: 05-testing/fixtures/database.md
-          - Time: 05-testing/fixtures/time.md
-      - Scenarios:
-          - Event Creation: 05-testing/scenarios/event-creation.md
-          - Conflict Detection: 05-testing/scenarios/conflict-detection.md
-          - Event Reordering: 05-testing/scenarios/event-reordering.md
-          - Habit Generation: 05-testing/scenarios/habit-generation.md
-          - Timer Lifecycle: 05-testing/scenarios/timer-lifecycle.md
+          - Visão Geral: testing/fixtures/README.md
+          - Database: testing/fixtures/database.md
+          - Time: testing/fixtures/time.md
 
-  - Guias do Usuário:
-      - Portal: 08-user-guides/README.md
-      - Getting Started: 08-user-guides/getting-started.md
-      - Workflows:
-          - Overview: 08-user-guides/workflows/README.md
-          - v1.0 Baseline: 08-user-guides/workflows/v1.0-baseline.md
-      - CLI Reference: 08-user-guides/cli-reference.md
-      - FAQ: 08-user-guides/faq.md
-      - Reference:
-          - RRule Examples: 08-user-guides/reference/rrule-examples.md
-          - Priority Guide: 08-user-guides/reference/priority-guide.md
+  # API Reference - Preparado para mkdocstrings (v1.5.0)
+  # - API Reference:
+  #     - Services: api/services.md
+  #     - Models: api/models.md
 
-  - Pesquisa:
-      - Índice: 09-research/README.md
-      - Documentation Methodologies: 09-research/documentation-methodologies.md
-      - Topics:
-          - Scheduling Algorithms: 09-research/topics/scheduling-algorithms.md
-          - Time Management: 09-research/topics/time-management.md
-          - Habit Formation: 09-research/topics/habit-formation.md
+# ==============================================================================
+# PLUGINS
+# ==============================================================================
+plugins:
+  - search:
+      lang:
+        - pt
+        - en
+  # mkdocstrings - Descomentar quando implementar API Reference (v1.5.0)
+  # - mkdocstrings:
+  #     handlers:
+  #       python:
+  #         options:
+  #           docstring_style: google
+  #           show_source: true
+  #           show_root_heading: true
+  #           members_order: source
+  #           heading_level: 2
 
-  - Meta:
-      - About: 10-meta/README.md
-      - Changelog: 10-meta/changelog.md
-      - Next Chat Prompt: 10-meta/prompt-proximo-chat.md
-      - Templates:
-          - ADR Template: 10-meta/templates/adr-template.md
-          - Issue Template: 10-meta/templates/issue-template.md
-
+# ==============================================================================
+# MARKDOWN EXTENSIONS
+# ==============================================================================
 markdown_extensions:
   - admonition
   - codehilite
@@ -237,12 +195,9 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde
 
-plugins:
-  - search:
-      lang:
-        - pt
-        - en
-
+# ==============================================================================
+# EXTRA
+# ==============================================================================
 extra:
   social:
     - icon: fontawesome/brands/github

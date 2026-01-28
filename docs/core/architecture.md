@@ -939,75 +939,61 @@ Usuário ajusta horário
 
 ## 7. Decisões Arquiteturais
 
-### ADR-001: SQLModel como ORM
+As decisões arquiteturais são documentadas como ADRs (Architecture Decision Records) em `docs/decisions/`. Esta seção apresenta um resumo categorizado; os detalhes completos estão nos arquivos individuais.
 
-**Decisão:** Usar SQLModel ao invés de SQLAlchemy puro.
+**Índice completo:** [docs/decisions/README.md](../decisions/README.md) (27 ADRs)
 
-**Razão:**
+### 7.1. ADRs Fundacionais
 
-- Pydantic integrado (validação grátis)
-- Type hints nativos
-- API mais simples
-- Serialização JSON automática
+| ADR                                                    | Título              | Decisão                              |
+| ------------------------------------------------------ | ------------------- | ------------------------------------ |
+| [ADR-001](../decisions/ADR-001-sqlmodel-orm.md)        | SQLModel ORM        | SQLModel ao invés de SQLAlchemy puro |
+| [ADR-002](../decisions/ADR-002-typer-cli.md)           | Typer CLI           | Typer ao invés de Click puro         |
+| [ADR-005](../decisions/ADR-005-resource-first-cli.md)  | Resource-First CLI  | Padrão `resource action` na CLI      |
+| [ADR-006](../decisions/ADR-006-textual-tui.md)         | Textual TUI         | Textual para interface TUI futura    |
+| [ADR-011](../decisions/ADR-011-conflict-philosophy.md) | Conflict Philosophy | Sistema informa, usuário decide      |
 
-**Trade-offs:**
+### 7.2. ADRs de Arquitetura e Dados
 
-- [-] Comunidade menor
-- [-] Alguns features avançados não disponíveis
+| ADR                                                              | Título               | Decisão                          |
+| ---------------------------------------------------------------- | -------------------- | -------------------------------- |
+| [ADR-003](../decisions/ADR-003-event-reordering.md)              | Event Reordering     | Algoritmo de detecção e proposta |
+| [ADR-004](../decisions/ADR-004-habit-vs-instance.md)             | Habit vs Instance    | Separação template/ocorrência    |
+| [ADR-007](../decisions/ADR-007-service-layer.md)                 | Service Layer        | Stateless services com DI        |
+| [ADR-008](../decisions/ADR-008-tuple-returns.md)                 | Tuple Returns        | Retorno (entity, conflicts)      |
+| [ADR-010](../decisions/ADR-010-recurrence-model.md)              | Recurrence Model     | Enum simples para recorrência    |
+| [ADR-015](../decisions/ADR-015-habitinstance-naming.md)          | HabitInstance Naming | Nomenclatura padronizada         |
+| [ADR-021](../decisions/ADR-021-status-substatus-refactoring.md)  | Status/Substatus     | Refatoração de estados           |
+| [ADR-022](../decisions/ADR-022-pause-tracking-simplification.md) | Pause Tracking       | Simplificação de pausas          |
 
-### ADR-002: Stateless Services
+### 7.3. ADRs de Sincronização (v2.0+)
 
-**Decisão:** Services sem estado interno, métodos estáticos.
+| ADR                                                     | Título               | Decisão                  |
+| ------------------------------------------------------- | -------------------- | ------------------------ |
+| [ADR-012](../decisions/ADR-012-sync-strategy.md)        | Sync Strategy        | Queue-based com Kafka    |
+| [ADR-013](../decisions/ADR-013-offline-first-schema.md) | Offline-First Schema | Schema para sync offline |
+| [ADR-014](../decisions/ADR-014-sync-ux-flow.md)         | Sync UX Flow         | Fluxo de UX para sync    |
 
-**Razão:**
+### 7.4. ADRs de Infraestrutura
 
-- Testabilidade superior
-- Sem race conditions
-- Fluxo fácil de entender
+| ADR                                                        | Título                  | Decisão                      |
+| ---------------------------------------------------------- | ----------------------- | ---------------------------- |
+| [ADR-016](../decisions/ADR-016-alembic-timing.md)          | Alembic Timing          | Quando introduzir migrations |
+| [ADR-017](../decisions/ADR-017-environment-strategy.md)    | Environment Strategy    | Estratégia de ambientes      |
+| [ADR-023](../decisions/ADR-023-microservices-ecosystem.md) | Microservices Ecosystem | Arquitetura de microserviços |
+| [ADR-024](../decisions/ADR-024-homelab-infrastructure.md)  | Homelab Infrastructure  | Raspberry Pi como servidor   |
 
-### ADR-003: SQLite Embedded
+### 7.5. ADRs de Padrões e Qualidade
 
-**Decisão:** SQLite local sem servidor.
-
-**Razão:**
-
-- Zero configuração
-- Portabilidade total
-- Suficiente para single-user
-
-**Trade-offs:**
-
-- [-] Sem concorrência multi-processo
-
-### ADR-004: Typer para CLI
-
-**Decisão:** Usar Typer ao invés de Click puro.
-
-**Razão:**
-
-- Type hints nativos
-- Auto-complete automático
-- Baseado em Click (compatível)
-
-### ADR-005: Offline-First
-
-**Decisão:** Sistema funciona 100% offline.
-
-**Razão:**
-
-- Independência de conexão
-- Performance garantida
-- Privacidade total
-
-### ADR-006: User Control Philosophy
-
-**Decisão:** Sistema informa mas NAO decide.
-
-**Razão:**
-
-- Usuário conhece contexto completo
-- Evita automações indesejadas
-- Preserva intenção original
+| ADR                                                            | Título                  | Decisão                       |
+| -------------------------------------------------------------- | ----------------------- | ----------------------------- |
+| [ADR-009](../decisions/ADR-009-flags-consolidation.md)         | Flags Consolidation     | Consolidação de flags CLI     |
+| [ADR-018](../decisions/ADR-018-language-standards.md)          | Language Standards      | Português agora, inglês v2.0+ |
+| [ADR-019](../decisions/ADR-019-test-naming-convention.md)      | Test Naming             | Padrão test*br*\*             |
+| [ADR-020](../decisions/ADR-020-business-rules-nomenclature.md) | BR Nomenclature         | Formato BR-DOMAIN-XXX         |
+| [ADR-025](../decisions/ADR-025-development-methodology.md)     | Development Methodology | Docs > BDD > TDD > Code       |
+| [ADR-026](../decisions/ADR-026-test-database-isolation.md)     | Test DB Isolation       | Isolamento via env var        |
+| [ADR-027](../decisions/ADR-027-documentation-tooling.md)       | Documentation Tooling   | MkDocs + mkdocstrings         |
 
 ---
 
