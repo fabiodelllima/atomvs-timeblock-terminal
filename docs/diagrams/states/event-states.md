@@ -393,8 +393,8 @@ cli/tests/unit/test_services/test_habit_instance_service.py
 
 **Documentação Relacionada:**
 
-- [BR002: Event Conflicts](../../04-specifications/business-rules/BR002-event-conflicts.md)
-- [Habit Instance Service](../../05-api/services/habit-service.md)
+- [BR002: Event Conflicts](../../core/business-rules.md)
+- [Habit Instance Service](../../core/architecture.md#52-entidades-core)
 - [Timer States](./timer-states.md)
 
 **Código-Fonte:**

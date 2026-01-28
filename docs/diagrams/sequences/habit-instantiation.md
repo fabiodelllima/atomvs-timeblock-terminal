@@ -259,16 +259,16 @@ def test_idempotent_generation():
 
 **Models:**
 
-- [Habit](../../05-api/models/habit.md)
-- [HabitInstance](../../05-api/models/habit-instance.md)
+- [Habit](../../core/architecture.md#52-entidades-core)
+- [HabitInstance](../../core/architecture.md#52-entidades-core)
 
 **Services:**
 
-- [HabitInstanceService](../../05-api/services/habit-service.md)
+- [HabitInstanceService](../../core/architecture.md#52-entidades-core)
 
 **Business Rules:**
 
-- [BR001: Habit Scheduling](../../04-specifications/business-rules/BR001-habit-scheduling.md)
+- [BR001: Habit Scheduling](../../core/business-rules.md)
 
 ---
 

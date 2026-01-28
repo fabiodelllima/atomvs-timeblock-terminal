@@ -7,6 +7,35 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ## [Não Lançado]
 
+## [1.4.0] - 2026-01-28
+
+### Adicionado
+
+- ADR-027: Documentation Tooling (MkDocs + mkdocstrings)
+- Seção 5 do architecture.md com models reais (Event, PauseLog, ChangeLog)
+- Documentação de enums: TimerStatus, EventStatus, ChangeType
+- Seção 7 do architecture.md com 27 ADRs categorizados
+- glab CLI para monitoramento de pipelines GitLab
+
+### Corrigido
+
+- CI GitLab/GitHub: adicionado `pip install -e .` para resolver ModuleNotFoundError
+- mkdocs.yml alinhado com estrutura consolidada de docs/
+- Links quebrados em ADRs e diagramas (DT-009)
+
+### Atualizado
+
+- Dependências: sqlmodel 0.0.31, typer 0.21.1, SQLAlchemy 2.0.46, ruff 0.14.14
+- pytest 9.0.2, mypy 1.19.1, rich 14.3.1, coverage 7.13.2
+
+### Métricas
+
+- Testes: 513 passando
+- Cobertura: 44% (unit)
+- ADRs: 27 documentados
+- BRs: 67 formalizadas
+- Mypy: 0 erros
+
 ## [1.3.3] - 2026-01-22
 
 ### Adicionado
