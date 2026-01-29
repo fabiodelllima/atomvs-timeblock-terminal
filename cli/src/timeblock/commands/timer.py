@@ -110,6 +110,9 @@ def _display_timer(timelog_id: int):
 
 @app.command("start")
 def start_timer(
+    background: bool = typer.Option(
+        False, "--background", "-b", help="Não mostrar display interativo"
+    ),
     schedule: int = typer.Option(None, "--schedule", "-s", help="ID da instância agendada"),
     task: int = typer.Option(None, "--task", "-t", help="ID da tarefa"),
 ):
@@ -210,7 +213,8 @@ def start_timer(
 
         # Display interativo
         assert timelog.id is not None, "TimeLog must be persisted"
-        _display_timer(timelog.id)
+        if not background:
+            _display_timer(timelog.id)
 
     except ValueError as e:
         console.print(f"[red]Erro: {e}[/red]")
@@ -235,7 +239,11 @@ def pause_timer():
 
 
 @app.command("resume")
-def resume_timer():
+def resume_timer(
+    background: bool = typer.Option(
+        False, "--background", "-b", help="Não mostrar display interativo"
+    ),
+):
     """Retoma timer pausado."""
     try:
         active = TimerService.get_any_active_timer()
@@ -247,7 +255,8 @@ def resume_timer():
         console.print("[green][>] Timer retomado[/green]")
 
         # Mostrar display novamente
-        _display_timer(active.id)  # type: ignore[arg-type]
+        if not background:
+            _display_timer(active.id)  # type: ignore[arg-type]
 
     except ValueError as e:
         console.print(f"[red]Erro: {e}[/red]")
