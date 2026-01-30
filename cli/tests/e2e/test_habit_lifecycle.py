@@ -143,9 +143,7 @@ class TestBRHabitWorkflow:
         )
 
         assert (
-            result.exit_code != 0
-            or "Aborted" in result.output
-            or "ID da rotina" in result.output
+            result.exit_code != 0 or "Aborted" in result.output or "ID da rotina" in result.output
         ), f"Deve abortar ou pedir alternativa. Output: {result.output}"
 
 
@@ -158,9 +156,7 @@ class TestBREventConflictWorkflow:
     - BR-REORDER-002: Proposta de reorganizacao
     """
 
-    @pytest.mark.skip(
-        reason="Deteccao de conflitos em habit edit nao implementada ainda"
-    )
+    @pytest.mark.skip(reason="Deteccao de conflitos em habit edit nao implementada ainda")
     def test_br_event_conflict_detection_and_resolution(
         self, isolated_db: Path, monkeypatch: MonkeyPatch
     ) -> None:

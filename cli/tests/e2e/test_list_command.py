@@ -87,7 +87,7 @@ class TestListFilterDay:
 
         assert result.exit_code == 0, f"List deve ter sucesso: {result.output}"
         assert result.exit_code == 0  # Eventos podem nao existir na data congelada
-            # freeze_time usa data diferente da geracao de eventos
+        # freeze_time usa data diferente da geracao de eventos
 
     @freeze_time("2025-10-15 09:00:00")
     def test_list_day_positive_shows_future(
@@ -145,8 +145,9 @@ class TestListFilterWeek:
         result = runner.invoke(app, ["list", "--week", "0"])
 
         assert result.exit_code == 0, f"List deve ter sucesso: {result.output}"
-        assert "daily habit" in result.output.lower() or "events" in result.output.lower(), \
+        assert "daily habit" in result.output.lower() or "events" in result.output.lower(), (
             f"Deve mostrar eventos: {result.output}"
+        )
 
     @freeze_time("2025-10-15 09:00:00")
     def test_list_week_positive_shows_next_weeks(
@@ -245,7 +246,7 @@ class TestListFilterAll:
 
         assert result.exit_code == 0, f"List deve ter sucesso: {result.output}"
         assert result.exit_code == 0  # Comando executa sem erro
-            # Valida que comando executa, eventos podem estar em outra data
+        # Valida que comando executa, eventos podem estar em outra data
 
 
 class TestListFilterLimit:
@@ -269,8 +270,9 @@ class TestListFilterLimit:
         result = runner.invoke(app, ["list", "--limit", "5"])
 
         assert result.exit_code == 0, f"List deve ter sucesso: {result.output}"
-        assert "latest 5" in result.output.lower() or "daily habit" in result.output.lower(), \
+        assert "latest 5" in result.output.lower() or "daily habit" in result.output.lower(), (
             f"Deve mostrar limite: {result.output}"
+        )
 
 
 class TestListDefault:
@@ -296,9 +298,7 @@ class TestListDefault:
         assert result.exit_code == 0, f"List deve ter sucesso: {result.output}"
 
     @freeze_time("2025-10-15 09:00:00")
-    def test_list_empty_database(
-        self, isolated_db: Path, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_list_empty_database(self, isolated_db: Path, monkeypatch: MonkeyPatch) -> None:
         """
         E2E: list em banco vazio mostra mensagem apropriada.
 

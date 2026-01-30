@@ -76,7 +76,9 @@ class TestBRHabitCreation:
             ],
         )
         # ASSERT
-        assert result.exit_code == 0, f"Criação de hábito MONDAY deve ter sucesso. Output: {result.output}"
+        assert result.exit_code == 0, (
+            f"Criação de hábito MONDAY deve ter sucesso. Output: {result.output}"
+        )
 
     def test_br_habit_create_002_weekdays_recurrence(
         self, runner: CliRunner, isolated_db: None, active_routine_id: str
@@ -112,7 +114,9 @@ class TestBRHabitCreation:
             ],
         )
         # ASSERT
-        assert result.exit_code == 0, f"Criação de hábito WEEKDAYS deve ter sucesso. Output: {result.output}"
+        assert result.exit_code == 0, (
+            f"Criação de hábito WEEKDAYS deve ter sucesso. Output: {result.output}"
+        )
 
     def test_br_habit_create_003_with_color(
         self, runner: CliRunner, isolated_db: None, active_routine_id: str
@@ -218,7 +222,9 @@ class TestBRHabitListing:
         # ACT
         result = runner.invoke(app, ["habit", "list", "--routine", active_routine_id])
         # ASSERT
-        assert result.exit_code == 0, f"Listagem de rotina vazia deve ter sucesso. Output: {result.output}"
+        assert result.exit_code == 0, (
+            f"Listagem de rotina vazia deve ter sucesso. Output: {result.output}"
+        )
 
     def test_br_habit_list_002_with_habits(
         self, runner: CliRunner, isolated_db: None, active_routine_id: str
@@ -334,7 +340,9 @@ class TestBRHabitDeletion:
         # ACT
         result = runner.invoke(app, ["habit", "delete", habit_id, "--force"])
         # ASSERT
-        assert result.exit_code == 0, f"Deleção com --force deve ter sucesso. Output: {result.output}"
+        assert result.exit_code == 0, (
+            f"Deleção com --force deve ter sucesso. Output: {result.output}"
+        )
 
     def test_br_habit_delete_002_cancel(
         self, runner: CliRunner, isolated_db: None, active_routine_id: str

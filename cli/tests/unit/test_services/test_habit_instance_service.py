@@ -90,9 +90,7 @@ class TestAdjustInstanceTimeBasic:
     def test_adjust_time_invalid(self, sample_instance: HabitInstance) -> None:
         """Rejects invalid time range."""
         with pytest.raises(ValueError):
-            HabitInstanceService.adjust_instance_time(
-                sample_instance.id, time(10, 0), time(9, 0)
-            )
+            HabitInstanceService.adjust_instance_time(sample_instance.id, time(10, 0), time(9, 0))
 
     def test_adjust_time_nonexistent(self) -> None:
         """Raises error for nonexistent instance."""
@@ -111,9 +109,7 @@ class TestAdjustInstanceTimeBasic:
 class TestConflictDetection:
     """Tests for conflict detection. Validates BR-REORDER-001."""
 
-    def test_detect_conflict_with_task(
-        self, sample_instance: HabitInstance
-    ) -> None:
+    def test_detect_conflict_with_task(self, sample_instance: HabitInstance) -> None:
         """Detects conflict with overlapping task."""
         now = datetime.combine(date.today(), time(9, 30))
         TaskService.create_task("Reunião", now, 60)
