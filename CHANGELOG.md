@@ -7,6 +7,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
 
 ## [Não Lançado]
 
+### Adicionado
+
+- test(e2e): 16 testes E2E para task lifecycle (BR-TASK-001 a 005)
+- test(e2e): 12 testes E2E para filtros do comando list
+- docs: Logo ATOMVS e sumário expandido no README
+- docs: Atualização do quality-metrics.md com métricas v2.0.0
+- docs: Referências atualizadas (SWEBOK v4.0, ISO/IEC/IEEE 29148:2018)
+
+### Métricas
+
+- Total de testes: 685 (+172 desde v1.4.0)
+- Cobertura global: 71% (+27pp desde v1.4.0)
+- Testes E2E: 42 (+28)
+- Distribuição: Unit 513 (75%), Integration 83 (12%), E2E 42 (6%), BDD 7 (1%)
+
 ## [1.4.0] - 2026-01-28
 
 ### Adicionado
