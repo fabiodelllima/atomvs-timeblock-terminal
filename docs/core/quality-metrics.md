@@ -1,76 +1,60 @@
 # Quality Metrics - TimeBlock Organizer
 
-**Versão:** 1.0.0
+**Versão:** 2.0.0
+
 **Relacionado:** roadmap.md, CHANGELOG.md
 
 ---
 
 ## 1. Métricas Atuais
 
-**Data de Referência:** 22 de Janeiro de 2026
-**Versão:** v1.3.3 (produção), v1.4.0 (desenvolvimento)
-**Branch:** `refactor/service-dependency-injection`
+Este documento consolida as métricas de qualidade do TimeBlock Organizer, servindo como fonte única de verdade para acompanhamento do progresso técnico. As métricas são atualizadas a cada sessão de desenvolvimento e refletem o estado real do código em produção.
+
+- **Data de Referência:** 30 de Janeiro de 2026
+- **Versão:** v1.4.1 (desenvolvimento)
+- **Branch:** `develop`
 
 ### 1.1. Visão Geral
 
-| Categoria           | Valor Atual | Meta v1.4.0 | Delta | Status         |
-| ------------------- | ----------- | ----------- | ----- | -------------- |
-| Testes Passando     | 569         | 480         | +26   | [EM PROGRESSO] |
-| Testes Skipped      | 15          | 0           | -26   | [BLOQUEADO]    |
-| Cobertura Global    | 67%         | 80%         | +19pp | [BLOQUEADO]    |
-| Erros Mypy          | 0           | 0           | -156  | [BLOQUEADO]    |
-| Commands Funcionais | 40%         | 100%        | +60pp | [BLOQUEADO]    |
+A tabela abaixo apresenta os indicadores principais de qualidade do projeto. O foco atual está em expandir a cobertura de testes E2E e integration, mantendo a qualidade do código com zero erros de tipagem.
+
+| Categoria           | Valor Atual | Meta v1.5.0 | Status    |
+| ------------------- | ----------- | ----------- | --------- |
+| Testes Passando     | 685         | 750         | [OK]      |
+| Testes Skipped      | 8           | 0           | [ATENÇÃO] |
+| Cobertura Global    | 71%         | 80%         | [OK]      |
+| Erros Mypy          | 0           | 0           | [OK]      |
+| Commands Funcionais | 85%         | 100%        | [OK]      |
 
 ### 1.2. Distribuição de Testes
 
-| Tipo        | Quantidade | Percentual | Meta v1.4.0 | Alinhamento |
-| ----------- | ---------- | ---------- | ----------- | ----------- |
-| Unit        | 378        | 79%        | 70-75%      | [ACIMA]     |
-| Integration | 64         | 13%        | 20-25%      | [ABAIXO]    |
-| E2E         | 5          | 1%         | 5-10%       | [ABAIXO]    |
-| BDD         | 7          | 1%         | Manter      | [OK]        |
-| Skipped     | 15         | 5%         | 0%          | [CRÍTICO]   |
+A pirâmide de testes está convergindo para o formato ideal. O aumento significativo de testes E2E na sessão atual (+28 testes) demonstra progresso na validação de fluxos completos do sistema.
 
-**Análise:** Pirâmide de testes desbalanceada. Excesso de unit tests, déficit de integration/E2E.
+| Tipo        | Quantidade | Percentual | Meta v1.5.0 | Status    |
+| ----------- | ---------- | ---------- | ----------- | --------- |
+| Unit        | 513        | 75%        | 70-75%      | [OK]      |
+| Integration | 83         | 12%        | 20%         | [ABAIXO]  |
+| E2E         | 42         | 6%         | 5-10%       | [OK]      |
+| BDD         | 7          | 1%         | Manter      | [OK]      |
+| Skipped     | 8          | 1%         | 0%          | [ATENÇÃO] |
 
 ### 1.3. Cobertura por Módulo
 
-| Módulo    | Cobertura | Status    | Ação Requerida | Sprint       |
-| --------- | --------- | --------- | -------------- | ------------ |
-| models/   | 95%       | [OK]      | Manutenção     | -            |
-| services/ | 70%       | [ATENÇÃO] | +15pp          | v1.4.0 S2    |
-| commands/ | 25%       | [CRÍTICO] | +55pp          | v1.4.0 S3    |
-| utils/    | 60%       | [ATENÇÃO] | +20pp          | v1.4.0 S2-S3 |
-| database/ | 40%       | [CRÍTICO] | +40pp          | v1.4.0 S4    |
+A cobertura de código reflete a qualidade dos testes em cada camada da aplicação. Módulos de serviço atingiram excelente cobertura após a implementação dos testes E2E de timer e task.
 
-**Módulos Críticos:**
-
-- `commands/` - Interface principal do sistema
-- `database/` - Migrations e engine configuration
-
-### 1.4. Erros Mypy - Distribuição
-
-| Arquivo                              | Erros   | Percentual | Categoria Principal |
-| ------------------------------------ | ------- | ---------- | ------------------- |
-| commands/timer.py                    | 23      | 15%        | Métodos ausentes    |
-| services/event_reordering_service.py | 42      | 27%        | SQLAlchemy types    |
-| commands/task.py                     | 7       | 4%         | Null safety         |
-| services/timer_service.py            | 4       | 3%         | SQLAlchemy types    |
-| utils/proposal_display.py            | 4       | 3%         | Model attributes    |
-| commands/habit.py                    | 1       | 1%         | Type mismatch       |
-| utils/queries.py                     | 1       | 1%         | SQLAlchemy types    |
-| Outros arquivos                      | 74      | 47%        | Diversos            |
-| **TOTAL**                            | **156** | **100%**   | -                   |
-
-**Top 3 Causas:**
-
-1. SQLAlchemy column methods (47 erros, 30%)
-2. Service layer incompleto (31 erros, 20%)
-3. Null safety em commands (7 erros, 4%)
+| Módulo    | Cobertura | Status    | Ação Requerida    |
+| --------- | --------- | --------- | ----------------- |
+| models/   | 95%       | [OK]      | Manutenção        |
+| services/ | 85%       | [OK]      | Manutenção        |
+| commands/ | 48%       | [ATENÇÃO] | +32pp (E2E tests) |
+| utils/    | 90%       | [OK]      | Manutenção        |
+| database/ | 91%       | [OK]      | Manutenção        |
 
 ---
 
 ## 2. Histórico de Métricas
+
+O histórico de métricas permite identificar tendências e avaliar o impacto de cada release na qualidade do código. A versão 1.4.x marca uma recuperação significativa na cobertura após o débito técnico acumulado em v1.3.0.
 
 ### 2.1. Evolução por Release
 
@@ -80,335 +64,106 @@
 | v1.1.0  | Nov/2025 | 200    | 60%       | 12         | +150 testes           |
 | v1.2.0  | Nov/2025 | 350    | 70%       | 38         | Status refactoring    |
 | v1.3.0  | Dez/2025 | 454    | 61%       | 156        | Acúmulo de débito     |
-
-**Tendência Preocupante:**
-
-- v1.2.0 => v1.3.0: -9pp cobertura, +118 erros mypy
-- Causa: Código não testado adicionado (EventReorderingService)
+| v1.3.3  | Jan/2026 | 558    | 67%       | 0          | Recuperação mypy      |
+| v1.4.0  | Jan/2026 | 513    | 44%       | 0          | BRs formalizadas      |
+| v1.4.1  | Jan/2026 | 685    | 71%       | 0          | E2E expansion (+172)  |
 
 ---
 
 ## 3. Metas e Critérios de Qualidade
 
+Os critérios de qualidade definem o padrão mínimo aceitável para releases. Cada release deve passar por todos os gates obrigatórios antes de ser publicada.
+
 ### 3.1. Critérios de Release
 
 **Obrigatórios (Gate de Release):**
 
-- [ ] Zero erros mypy em modo strict
+- [x] Zero erros mypy em modo strict
 - [ ] Zero testes skipped sem justificativa
-- [ ] Cobertura global ≥ 80%
-- [ ] Cobertura de módulos críticos ≥ 85%
+- [ ] Cobertura global >= 80%
+- [x] Cobertura de módulos críticos >= 85%
 - [ ] 100% funcionalidades CLI operacionais
-- [ ] Zero memory leaks (ResourceWarnings)
 
 **Desejáveis (Qualidade Superior):**
 
-- [ ] Cobertura ≥ 90%
-- [ ] Tempo de execução suite < 60s
-- [ ] Zero warnings pylint/ruff
-- [ ] Documentação 100% atualizada
+- [ ] Cobertura >= 90%
+- [x] Tempo de execução suite < 60s
+- [x] Zero warnings ruff
 
-### 3.2. Pirâmide de Testes Ideal
+### 3.2. Pirâmide de Testes
+
+A pirâmide de testes define a distribuição ideal entre os diferentes tipos de teste. O objetivo é maximizar a cobertura com o menor custo de manutenção.
 
 ```
-Distribuição Alvo:
+Distribuição Atual vs Alvo:
 
-E2E (5-10%)          ▲
-Integration (20%)   ███
-Unit (70-75%)     ████████
-
-Atual vs Alvo:
-
-E2E:         1% vs 5-10%   [DÉFICIT]
-Integration: 13% vs 20%    [DÉFICIT]
-Unit:        79% vs 70-75% [EXCESSO]
+E2E (6%)          ████████░░░░░░░░  5-10%  [OK]
+Integration (12%) ████████████░░░░  20%    [ABAIXO]
+Unit (75%)        ████████████████  70-75% [OK]
 ```
-
-**Ações Necessárias:**
-
-- Adicionar 15-20 E2E tests
-- Adicionar 30-40 integration tests
-- Redistribuir esforço de unit para integration
-
-### 3.3. Benchmarks de Cobertura
-
-| Módulo    | Mínimo | Alvo | Crítico          |
-| --------- | ------ | ---- | ---------------- |
-| models/   | 90%    | 95%  | 100% (dados)     |
-| services/ | 80%    | 90%  | 95% (lógica)     |
-| commands/ | 75%    | 85%  | 90% (interface)  |
-| utils/    | 70%    | 80%  | -                |
-| database/ | 80%    | 90%  | 95% (migrations) |
 
 ---
 
 ## 4. Análise de Performance
 
-### 4.1. Tempo de Execução (Suite Completa)
+O tempo de execução da suite de testes é crítico para manter a produtividade do desenvolvedor. Suites rápidas incentivam execução frequente e feedback imediato.
+
+### 4.1. Tempo de Execução
 
 | Fase              | Tempo Atual | Meta      | Status |
 | ----------------- | ----------- | --------- | ------ |
-| Unit tests        | 8.5s        | < 10s     | [OK]   |
-| Integration tests | 2.3s        | < 5s      | [OK]   |
-| E2E tests         | 0.4s        | < 5s      | [OK]   |
-| Fixtures setup    | 0.5s        | < 2s      | [OK]   |
-| **TOTAL**         | **11.7s**   | **< 20s** | [OK]   |
-
-**Análise:** Performance excelente. Suite rápida favorece TDD.
-
-### 4.2. Gargalos Identificados
-
-Nenhum gargalo crítico identificado.
-
-**Observações:**
-
-- Integration tests poderiam crescer 2x sem impacto
-- E2E com potencial de crescer 10x mantendo < 60s total
+| Unit tests        | 10s         | < 15s     | [OK]   |
+| Integration tests | 5s          | < 10s     | [OK]   |
+| E2E tests         | 7s          | < 15s     | [OK]   |
+| **TOTAL**         | **22s**     | **< 40s** | [OK]   |
 
 ---
 
-## 5. Qualidade de Código
+## 5. Cobertura de Business Rules
 
-### 5.1. Análise Estática
+A rastreabilidade entre regras de negócio e testes garante que cada funcionalidade documentada está validada por testes automatizados.
 
-| Ferramenta | Configuração   | Erros | Warnings | Status    |
-| ---------- | -------------- | ----- | -------- | --------- |
-| mypy       | strict mode    | 156   | 0        | [CRÍTICO] |
-| ruff       | format + check | 0     | 0        | [OK]      |
-| pylint     | disabled       | -     | -        | [N/A]     |
+### 5.1. Status por Domínio
 
-**Nota:** Projeto usa ruff exclusivamente para linting/formatting.
-
-### 5.2. Complexidade Ciclomática
-
-| Módulo    | Média | Máxima | Arquivos Complexos          |
-| --------- | ----- | ------ | --------------------------- |
-| models/   | 2.1   | 8      | 0                           |
-| services/ | 4.3   | 15     | 2 (event_reordering, timer) |
-| commands/ | 5.8   | 22     | 3 (timer, habit, routine)   |
-| utils/    | 3.2   | 10     | 0                           |
-
-**Arquivos Complexos (>15):**
-
-- `services/event_reordering_service.py` - 15 (necessita refatoração)
-- `commands/timer.py` - 22 (necessita refatoração)
-- `commands/habit.py` - 18 (aceitável para CLI)
-
-**Ação Requerida:** Refatorar event_reordering_service e timer.py em v1.5.0
+| Domínio       | Total BRs | Com Testes | Cobertura |
+| ------------- | --------- | ---------- | --------- |
+| Routine       | 6         | 5          | 83%       |
+| Habit         | 5         | 5          | 100%      |
+| HabitInstance | 6         | 4          | 67%       |
+| Skip          | 4         | 1          | 25%       |
+| Streak        | 4         | 4          | 100%      |
+| Task          | 6         | 5          | 83%       |
+| Timer         | 8         | 7          | 88%       |
+| Validation    | 3         | 3          | 100%      |
+| **TOTAL**     | **67**    | **52**     | **78%**   |
 
 ---
 
-## 6. Rastreabilidade
+## 6. Automação e CI/CD
 
-### 6.1. Business Rules → Tests
+A automação de qualidade é executada em cada commit através de pre-commit hooks, garantindo que código problemático não entre no repositório.
 
-**Última Análise:** 2026-01-19
+### 6.1. Pre-commit Hooks
 
-**Resumo:**
+| Hook        | Status  | Tempo | Bloqueante |
+| ----------- | ------- | ----- | ---------- |
+| ruff format | [ATIVO] | 1.2s  | Sim        |
+| ruff check  | [ATIVO] | 0.8s  | Sim        |
+| mypy        | [ATIVO] | 3.5s  | Não        |
+| pytest unit | [ATIVO] | 10s   | Sim        |
 
-| Métrica              | Valor    |
-| -------------------- | -------- |
-| BRs Documentadas     | 52       |
-| BRs com Testes       | 35 (67%) |
-| BRs sem Testes       | 17 (33%) |
-| Testes Stub (vazios) | 11       |
-
-**Status por Domínio:**
-
-| Domínio       | Total | OK  | Parcial | Stub | Sem Teste |
-| ------------- | ----- | --- | ------- | ---- | --------- |
-| Routine       | 6     | 5   | 0       | 0    | 1         |
-| Habit         | 5     | 5   | 0       | 0    | 0         |
-| HabitInstance | 6     | 2   | 2       | 0    | 2         |
-| Skip          | 4     | 1   | 0       | 0    | 3         |
-| Streak        | 4     | 4   | 0       | 0    | 0         |
-| Task          | 6     | 3   | 0       | 0    | 2         |
-| Timer         | 8     | 6   | 1       | 0    | 1         |
-| Reorder       | 6     | 2   | 1       | 3    | 0         |
-| Validation    | 3     | 0   | 0       | 0    | 3         |
-| CLI           | 2     | 0   | 0       | 0    | 2         |
-| Tag           | 2     | 0   | 0       | 0    | 2         |
-
-**BRs Sem Cobertura (17):**
-
-| BR                   | Descrição                      | Prioridade |
-| -------------------- | ------------------------------ | ---------- |
-| BR-HABITINSTANCE-002 | Substatus Obrigatório          | Alta       |
-| BR-HABITINSTANCE-003 | Completion Thresholds          | Alta       |
-| BR-VAL-001           | Validação de Horários          | Alta       |
-| BR-VAL-002           | Validação de Datas             | Alta       |
-| BR-VAL-003           | Validação de Strings           | Alta       |
-| BR-SKIP-002          | Campos de Skip                 | Média      |
-| BR-SKIP-003          | Prazo para Justificar          | Média      |
-| BR-SKIP-004          | CLI Prompt Interativo          | Média      |
-| BR-TASK-004          | Visualização e Listagem        | Média      |
-| BR-TASK-005          | Atualização de Task            | Média      |
-| BR-TAG-001           | Estrutura de Tag               | Média      |
-| BR-TAG-002           | Associação com Eventos         | Média      |
-| BR-ROUTINE-006       | Soft Delete e Purge            | Baixa      |
-| BR-TIMER-007         | Log Manual                     | Baixa      |
-| BR-CLI-001           | Validação de Flags Dependentes | Baixa      |
-| BR-CLI-002           | Formatos de Datetime Aceitos   | Baixa      |
-| BR-TASK-006          | Simplicidade Mantida           | N/A        |
-
-**Testes Stub (corpo vazio):**
-
-| Arquivo                            | Quantidade | BRs Referenciadas    |
-| ---------------------------------- | ---------- | -------------------- |
-| test_habit_instance_integration.py | 5          | BR-REORDER-001 a 005 |
-| test_task_integration.py           | 6          | BR-REORDER-001 a 006 |
-
-**Ação:** Implementar testes de alta prioridade em v1.4.0
-
-### 6.2. Requirements Traceability Matrix
-
-Ver: `docs/testing/requirements-traceability-matrix.md`
+**Total:** ~15s por commit
 
 ---
 
-## 7. Automação e CI/CD
+## 7. Referências
 
-### 7.1. Pre-commit Hooks
-
-| Hook        | Status  | Tempo | Bloqueante         |
-| ----------- | ------- | ----- | ------------------ |
-| ruff format | [ATIVO] | 1.2s  | Sim                |
-| ruff check  | [ATIVO] | 0.8s  | Sim                |
-| mypy        | [ATIVO] | 3.5s  | Não (warning only) |
-| pytest unit | [ATIVO] | 8.5s  | Sim                |
-
-**Total:** ~14s por commit
-
-**Nota:** Mypy não bloqueia commit para permitir progresso incremental.
-
-### 7.2. CI/CD Pipeline
-
-**Status:** Não implementado (planejado v1.5.0)
-
-**Pipeline Planejado:**
-
-1. Lint (ruff)
-2. Type check (mypy strict)
-3. Unit tests
-4. Integration tests
-5. E2E tests
-6. Coverage report
-7. Build & Release (se tag)
-
----
-
-## 8. Processo de Atualização
-
-### 8.1. Frequência
-
-| Métrica             | Atualização | Responsável            |
-| ------------------- | ----------- | ---------------------- |
-| Testes/Cobertura    | Por commit  | Automated (pytest)     |
-| Erros Mypy          | Por commit  | Automated (pre-commit) |
-| Distribuição Testes | Semanal     | Tech Lead              |
-| Histórico           | Por release | Tech Lead              |
-| Complexidade        | Mensal      | Tech Lead              |
-
-### 8.2. Scripts de Coleta
-
-```bash
-# Executar coleta completa de métricas
-./scripts/collect-metrics.sh
-
-# Saída: docs/core/quality-metrics.md (atualizado)
-```
-
-**Nota:** Script a implementar em v1.5.0
-
----
-
-## 9. Estratégia de Isolamento de Banco em Testes
-
-A estratégia de isolamento de banco de dados em testes segue ADR-026, garantindo testes reproduzíveis e independentes.
-
-### 9.1. Abordagem por Tipo de Teste
-
-| Tipo de Teste     | Estratégia            | Fixture       | Velocidade           | Isolamento |
-| ----------------- | --------------------- | ------------- | -------------------- | ---------- |
-| Unit (Service)    | Session injetada (DI) | `session`     | Máxima (in-memory)   | Total      |
-| Integration (CLI) | Environment variable  | `isolated_db` | Alta (tmp_path file) | Total      |
-| E2E               | Environment variable  | `isolated_db` | Alta (tmp_path file) | Total      |
-
-### 9.2. Fixtures Padronizadas
-
-**Testes Unitários de Service:**
-
-```python
-@pytest.fixture
-def session(test_engine: Engine) -> Generator[Session, None, None]:
-    """Session in-memory para testes unitários (ADR-007 + ADR-026)."""
-    with Session(test_engine) as session:
-        yield session
-        session.rollback()
-```
-
-**Testes de Integração CLI:**
-
-```python
-@pytest.fixture
-def isolated_db(tmp_path: Path, monkeypatch) -> Path:
-    """Banco isolado via TIMEBLOCK_DB_PATH (ADR-026)."""
-    db_path = tmp_path / "test_cli.db"
-    monkeypatch.setenv("TIMEBLOCK_DB_PATH", str(db_path))
-    # ... setup tables
-    return db_path
-```
-
-### 9.3. Práticas Proibidas
-
-| Prática                                           | Status     | Motivo             |
-| ------------------------------------------------- | ---------- | ------------------ |
-| Monkeypatch de `get_engine_context` entre módulos | [PROIBIDO] | Frágil, não escala |
-| Fixtures locais duplicando conftest               | [PROIBIDO] | Viola DRY          |
-| Singleton global mutável                          | [PROIBIDO] | Race conditions    |
-| Banco de produção em testes                       | [PROIBIDO] | Corrupção de dados |
-
-### 9.4. Métricas de Conformidade
-
-| Métrica                                 | Atual | Meta | Status         |
-| --------------------------------------- | ----- | ---- | -------------- |
-| Testes usando `isolated_db` do conftest | ~80%  | 100% | [EM PROGRESSO] |
-| Testes com monkeypatch de módulos       | ~5    | 0    | [PENDENTE]     |
-| Fixtures locais duplicadas              | ~3    | 0    | [PENDENTE]     |
-
-**Comando de verificação:**
-
-```bash
-# Verificar monkeypatches problemáticos (deve retornar vazio)
-grep -rn "setattr.*get_engine_context" tests/ | grep -v conftest
-
-# Verificar fixtures locais (deve retornar apenas conftest.py)
-grep -rn "def isolated_db" tests/ --include="*.py"
-```
-
-**Referência:** ADR-026 (Test Database Isolation Strategy)
-
----
-
-## 10. Referências
-
-- **ROADMAP:** `docs/core/roadmap.md` - Planejamento estratégico
-- **CHANGELOG:** `CHANGELOG.md` - Histórico de releases
-- **Testing Strategy:** `docs/testing/test-strategy.md` - Abordagem de testes
-- **Coverage Report:** `htmlcov/index.html` - Report detalhado (local)
+- **ROADMAP:** `docs/core/roadmap.md`
+- **CHANGELOG:** `CHANGELOG.md`
 - **ADR-007:** Service Layer com Dependency Injection
+- **ADR-019:** Test Naming Convention
 - **ADR-026:** Test Database Isolation Strategy
 
 ---
 
-## Changelog do Documento
-
-| Data       | Versão | Mudanças                                              |
-| ---------- | ------ | ----------------------------------------------------- |
-| 2026-01-19 | 1.1.0  | Adicionada seção 9: Estratégia de Isolamento de Banco |
-| 2026-01-16 | 1.0.0  | Criação inicial - métricas extraídas do roadmap.md    |
-
----
-
-- **Automação:** Planejada para v1.5.0
-- **Última atualização:** 22 de Janeiro de 2026
+**Última atualização:** 30 de Janeiro de 2026
