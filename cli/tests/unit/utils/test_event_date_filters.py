@@ -59,28 +59,28 @@ class TestBuildFromArgsPriority:
 
     def test_week_overrides_day_weeks(self, builder):
         """week should take precedence over day/weeks."""
-        start, end, limit = builder.build_from_args(week="0", day="0", weeks=2)
+        start, _end, limit = builder.build_from_args(week="0", day="0", weeks=2)
         assert start is not None
         assert start.weekday() == 0
         assert limit is None
 
     def test_day_overrides_weeks(self, builder):
         """day should take precedence over weeks."""
-        start, end, limit = builder.build_from_args(day="0", weeks=2)
+        start, end, _limit = builder.build_from_args(day="0", weeks=2)
         assert start is not None
         assert start.hour == 0
         assert (end - start).days == 1
 
     def test_weeks_default(self, builder):
         """Should default to weeks filter."""
-        start, end, limit = builder.build_from_args(weeks=3)
+        start, end, _limit = builder.build_from_args(weeks=3)
         assert start is not None
         assert end is not None
         assert (end - start).days == 21
 
     def test_no_args_defaults_to_two_weeks(self, builder):
         """No arguments should default to 2 weeks."""
-        start, end, limit = builder.build_from_args()
+        start, end, _limit = builder.build_from_args()
         assert start is not None
         assert end is not None
         assert (end - start).days == 14
@@ -106,14 +106,14 @@ class TestMonthFilter:
 
     def test_relative_month_negative(self, builder):
         """Should handle -1 (last month)."""
-        start, end, limit = builder.build_from_args(month="-1")
+        start, end, _limit = builder.build_from_args(month="-1")
         assert start.day == 1
         assert end.day == 1
         assert 28 <= (end - start).days <= 31
 
     def test_absolute_month(self, builder):
         """Should handle absolute month."""
-        start, end, limit = builder.build_from_args(month="12")
+        start, end, _limit = builder.build_from_args(month="12")
         assert start.day == 1
         assert end.day == 1
         assert 28 <= (end - start).days <= 31
@@ -197,10 +197,10 @@ class TestWeeksFilter:
 
     def test_four_weeks(self, builder):
         """Should return 4 weeks range."""
-        start, end, limit = builder.build_from_args(weeks=4)
+        start, end, _limit = builder.build_from_args(weeks=4)
         assert (end - start).days == 28
 
     def test_starts_from_now(self, builder):
         """Should start from current time."""
-        start, end, limit = builder.build_from_args(weeks=2)
+        start, _end, _limit = builder.build_from_args(weeks=2)
         assert start == builder.now

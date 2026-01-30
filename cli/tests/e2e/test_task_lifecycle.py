@@ -50,9 +50,7 @@ class TestBRTaskCreate:
     """
 
     @freeze_time("2025-10-01 09:00:00")
-    def test_br_task_001_create_basic(
-        self, setup_db: CliRunner, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_br_task_001_create_basic(self, setup_db: CliRunner, monkeypatch: MonkeyPatch) -> None:
         """
         E2E: Usuario cria task basica.
 
@@ -142,9 +140,7 @@ class TestBRTaskComplete:
     """
 
     @freeze_time("2025-10-01 09:00:00")
-    def test_br_task_002_check_task(
-        self, setup_db: CliRunner, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_br_task_002_check_task(self, setup_db: CliRunner, monkeypatch: MonkeyPatch) -> None:
         """
         E2E: Usuario marca task como concluida.
 
@@ -269,9 +265,7 @@ class TestBRTaskList:
         assert "pendente" in result.output.lower(), f"Deve mostrar Pendente: {result.output}"
 
     @freeze_time("2025-10-01 09:00:00")
-    def test_br_task_004_list_empty(
-        self, setup_db: CliRunner, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_br_task_004_list_empty(self, setup_db: CliRunner, monkeypatch: MonkeyPatch) -> None:
         """
         E2E: Listar sem tasks mostra mensagem apropriada.
 
@@ -285,8 +279,7 @@ class TestBRTaskList:
 
         assert result.exit_code == 0, f"List deve ter sucesso: {result.output}"
         assert any(
-            word in result.output.lower()
-            for word in ["nenhuma", "no tasks", "vazio", "empty"]
+            word in result.output.lower() for word in ["nenhuma", "no tasks", "vazio", "empty"]
         ), f"Deve informar lista vazia: {result.output}"
 
     @freeze_time("2025-10-01 09:00:00")
@@ -331,9 +324,7 @@ class TestBRTaskUpdate:
     """
 
     @freeze_time("2025-10-01 09:00:00")
-    def test_br_task_005_update_title(
-        self, setup_db: CliRunner, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_br_task_005_update_title(self, setup_db: CliRunner, monkeypatch: MonkeyPatch) -> None:
         """
         E2E: Usuario atualiza titulo da task.
 
@@ -353,8 +344,9 @@ class TestBRTaskUpdate:
         result = runner.invoke(app, ["task", "update", "1", "--title", "Titulo novo"])
 
         assert result.exit_code == 0, f"Update deve ter sucesso: {result.output}"
-        assert "atualizada" in result.output.lower() or "titulo novo" in result.output.lower(), \
+        assert "atualizada" in result.output.lower() or "titulo novo" in result.output.lower(), (
             f"Deve confirmar atualizacao: {result.output}"
+        )
 
     @freeze_time("2025-10-01 09:00:00")
     def test_br_task_005_update_datetime(
@@ -376,9 +368,7 @@ class TestBRTaskUpdate:
         )
 
         # Atualizar datetime
-        result = runner.invoke(
-            app, ["task", "update", "1", "--datetime", "2025-10-02 15:00"]
-        )
+        result = runner.invoke(app, ["task", "update", "1", "--datetime", "2025-10-02 15:00"])
 
         assert result.exit_code == 0, f"Update deve ter sucesso: {result.output}"
         assert "atualizada" in result.output.lower(), f"Deve confirmar atualizacao: {result.output}"
@@ -410,9 +400,7 @@ class TestBRTaskDelete:
     """
 
     @freeze_time("2025-10-01 09:00:00")
-    def test_br_task_delete_with_force(
-        self, setup_db: CliRunner, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_br_task_delete_with_force(self, setup_db: CliRunner, monkeypatch: MonkeyPatch) -> None:
         """
         E2E: Usuario deleta task com --force.
 
@@ -432,10 +420,9 @@ class TestBRTaskDelete:
         result = runner.invoke(app, ["task", "delete", "1", "--force"])
 
         assert result.exit_code == 0, f"Delete deve ter sucesso: {result.output}"
-        assert any(
-            word in result.output.lower()
-            for word in ["deletada", "deleted", "removida"]
-        ), f"Deve confirmar delecao: {result.output}"
+        assert any(word in result.output.lower() for word in ["deletada", "deleted", "removida"]), (
+            f"Deve confirmar delecao: {result.output}"
+        )
 
     @freeze_time("2025-10-01 09:00:00")
     def test_br_task_delete_with_confirmation(
@@ -460,15 +447,12 @@ class TestBRTaskDelete:
         result = runner.invoke(app, ["task", "delete", "1"], input="y\n")
 
         assert result.exit_code == 0, f"Delete deve ter sucesso: {result.output}"
-        assert any(
-            word in result.output.lower()
-            for word in ["deletada", "deleted", "removida"]
-        ), f"Deve confirmar delecao: {result.output}"
+        assert any(word in result.output.lower() for word in ["deletada", "deleted", "removida"]), (
+            f"Deve confirmar delecao: {result.output}"
+        )
 
     @freeze_time("2025-10-01 09:00:00")
-    def test_br_task_delete_cancelled(
-        self, setup_db: CliRunner, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_br_task_delete_cancelled(self, setup_db: CliRunner, monkeypatch: MonkeyPatch) -> None:
         """
         E2E: Usuario cancela delecao.
 
@@ -487,8 +471,9 @@ class TestBRTaskDelete:
         # Cancelar delecao
         result = runner.invoke(app, ["task", "delete", "1"], input="n\n")
 
-        assert "cancelado" in result.output.lower() or result.exit_code == 0, \
+        assert "cancelado" in result.output.lower() or result.exit_code == 0, (
             f"Deve cancelar: {result.output}"
+        )
 
     @freeze_time("2025-10-01 09:00:00")
     def test_br_task_delete_nonexistent_fails(

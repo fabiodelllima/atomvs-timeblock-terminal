@@ -81,7 +81,7 @@ class TestServiceLogging:
             # Ação: Gera instâncias
             start = date.today()
             end = start + timedelta(days=6)
-            instances = HabitInstanceService.generate_instances(habit.id, start, end)
+            _instances = HabitInstanceService.generate_instances(habit.id, start, end)
 
             # Verificação: Logs contêm informações esperadas
             content = log_file.read_text()

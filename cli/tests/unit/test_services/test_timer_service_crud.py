@@ -2,10 +2,9 @@
 
 from datetime import datetime
 
-import pytest
 from sqlmodel import Session
 
-from timeblock.models import HabitInstance, TimeLog
+from timeblock.models import TimeLog
 from timeblock.services.timer_service import TimerService
 
 

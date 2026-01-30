@@ -159,9 +159,7 @@ class TestBRHabit001Creation:
                 recurrence=Recurrence.EVERYDAY,
             )
 
-    def test_br_habit_001_rejects_long_title(
-        self, session: Session, test_routine: Routine
-    ) -> None:
+    def test_br_habit_001_rejects_long_title(self, session: Session, test_routine: Routine) -> None:
         """
         BR-HABIT-001: Sistema rejeita título que excede 200 caracteres.
 

@@ -97,9 +97,7 @@ def list_timelogs_by_instance(session: Session, context):
     """Lista timelogs filtrando por instância."""
     service = TimerService()
     instance_id = context["instances"][0].id
-    context["result"] = service.list_timelogs(
-        habit_instance_id=instance_id, session=session
-    )
+    context["result"] = service.list_timelogs(habit_instance_id=instance_id, session=session)
 
 
 @when("I list timelogs with date_start today and date_end today")

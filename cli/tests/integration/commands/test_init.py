@@ -19,14 +19,14 @@ from timeblock.main import app
 @pytest.fixture
 def empty_db_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Banco de dados vazio (sem tabelas) para testar comando init.
-    
+
     Diferente de isolated_db, esta fixture NÃO cria as tabelas,
     permitindo testar o comando init que faz exatamente isso.
-    
+
     Args:
         tmp_path: Diretório temporário do pytest
         monkeypatch: Fixture para modificar environment
-    
+
     Returns:
         Path onde o banco será criado (arquivo não existe ainda)
     """
@@ -131,6 +131,7 @@ class TestBRSystemInitialization:
         Referências:
             - BR-SYSTEM-INIT-004: Tratamento de erros de criação
         """
+
         # ARRANGE - Mock para simular erro
         def mock_create_error() -> None:
             raise Exception("Simulated database error")

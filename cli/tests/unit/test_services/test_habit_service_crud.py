@@ -93,9 +93,7 @@ class TestCreateHabit:
                 recurrence=Recurrence.EVERYDAY,
             )
 
-    def test_create_habit_with_invalid_times(
-        self, session: Session, test_routine: Routine
-    ) -> None:
+    def test_create_habit_with_invalid_times(self, session: Session, test_routine: Routine) -> None:
         """Rejeita start >= end."""
         habit_service = HabitService(session)
         with pytest.raises(ValueError, match="Start time must be before end time"):

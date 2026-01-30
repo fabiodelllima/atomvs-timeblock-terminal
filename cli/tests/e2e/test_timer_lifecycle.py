@@ -93,12 +93,13 @@ class TestBRTimerLifecycle:
         """
         runner = setup_habit_instance
 
-        result = runner.invoke(app, ["timer", "start", "--schedule", "1", "--background"], input="y\n")
+        result = runner.invoke(
+            app, ["timer", "start", "--schedule", "1", "--background"], input="y\n"
+        )
 
         assert result.exit_code == 0, f"Start deve ter sucesso: {result.output}"
         assert any(
-            word in result.output.lower()
-            for word in ["iniciado", "running", "started", "timer"]
+            word in result.output.lower() for word in ["iniciado", "running", "started", "timer"]
         ), f"Deve confirmar inicio: {result.output}"
 
     @freeze_time("2025-10-01 09:00:00")
@@ -122,8 +123,7 @@ class TestBRTimerLifecycle:
 
         assert result.exit_code == 0, f"Status deve ter sucesso: {result.output}"
         assert any(
-            word in result.output.lower()
-            for word in ["running", "ativo", "em andamento"]
+            word in result.output.lower() for word in ["running", "ativo", "em andamento"]
         ), f"Deve mostrar running: {result.output}"
 
     @freeze_time("2025-10-01 09:00:00")
@@ -147,16 +147,16 @@ class TestBRTimerLifecycle:
         # Pause
         result = runner.invoke(app, ["timer", "pause"])
         assert result.exit_code == 0, f"Pause deve ter sucesso: {result.output}"
-        assert any(
-            word in result.output.lower() for word in ["pausado", "paused"]
-        ), f"Deve confirmar pausa: {result.output}"
+        assert any(word in result.output.lower() for word in ["pausado", "paused"]), (
+            f"Deve confirmar pausa: {result.output}"
+        )
 
         # Resume
         result = runner.invoke(app, ["timer", "resume", "--background"])
         assert result.exit_code == 0, f"Resume deve ter sucesso: {result.output}"
-        assert any(
-            word in result.output.lower() for word in ["retomado", "resumed", "running"]
-        ), f"Deve confirmar retomada: {result.output}"
+        assert any(word in result.output.lower() for word in ["retomado", "resumed", "running"]), (
+            f"Deve confirmar retomada: {result.output}"
+        )
 
     @freeze_time("2025-10-01 09:00:00")
     def test_br_timer_004_stop_saves_timelog(
@@ -204,8 +204,7 @@ class TestBRTimerLifecycle:
 
         assert result.exit_code == 0, f"Cancel deve ter sucesso: {result.output}"
         assert any(
-            word in result.output.lower()
-            for word in ["cancelado", "cancelled", "descartado"]
+            word in result.output.lower() for word in ["cancelado", "cancelled", "descartado"]
         ), f"Deve confirmar cancelamento: {result.output}"
 
 
@@ -256,7 +255,9 @@ class TestBRTimerEdgeCases:
         runner.invoke(app, ["timer", "start", "--schedule", "1", "--background"], input="y\n")
 
         # Try to start another
-        result = runner.invoke(app, ["timer", "start", "--schedule", "1", "--background"], input="y\n")
+        result = runner.invoke(
+            app, ["timer", "start", "--schedule", "1", "--background"], input="y\n"
+        )
 
         # Deve falhar ou mostrar mensagem de erro
         assert result.exit_code != 0 or any(

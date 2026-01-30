@@ -11,7 +11,7 @@ from datetime import date, time
 import pytest
 from sqlmodel import Session
 
-from timeblock.models import Habit, HabitInstance, Recurrence, Routine, TimeLog
+from timeblock.models import Habit, HabitInstance, Recurrence, Routine
 from timeblock.models.enums import DoneSubstatus, Status
 from timeblock.services.timer_service import TimerService
 
@@ -69,9 +69,7 @@ class TestBRTimer007LogManual:
                 session=session,
             )
 
-    def test_br_timer_007_rejects_nonexistent_instance(
-        self, session: Session
-    ) -> None:
+    def test_br_timer_007_rejects_nonexistent_instance(self, session: Session) -> None:
         """Rejeita quando HabitInstance não existe."""
         service = TimerService()
 

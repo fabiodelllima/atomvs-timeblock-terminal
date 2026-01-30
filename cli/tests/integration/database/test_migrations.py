@@ -74,7 +74,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-001: Criação de todas tabelas v2.0
         """
         # ACT
-        migrate_v2(temp_db)
+        migrate_v2(temp_db)  # noqa: F821
         # ASSERT - Mensagem de sucesso
         captured = capsys.readouterr()
         assert "✓ Tabelas v2.0 criadas" in captured.out
@@ -101,7 +101,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-002: Criação de tabela Routine
         """
         # ACT
-        migrate_v2(temp_db)
+        migrate_v2(temp_db)  # noqa: F821
         # ASSERT
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
@@ -123,7 +123,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-003: Criação de tabela Habit
         """
         # ACT
-        migrate_v2(temp_db)
+        migrate_v2(temp_db)  # noqa: F821
         # ASSERT
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
@@ -158,7 +158,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-004: Criação de tabela HabitInstance
         """
         # ACT
-        migrate_v2(temp_db)
+        migrate_v2(temp_db)  # noqa: F821
         # ASSERT
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
@@ -203,7 +203,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-005: Criação de tabela Task
         """
         # ACT
-        migrate_v2(temp_db)
+        migrate_v2(temp_db)  # noqa: F821
         # ASSERT
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
@@ -228,7 +228,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-006: Criação de tabela TimeLog
         """
         # ACT
-        migrate_v2(temp_db)
+        migrate_v2(temp_db)  # noqa: F821
         # ASSERT
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
