@@ -35,3 +35,4 @@ cli/src/data/
 site/
 *.tar.gz
 .fuse_hidden*
+demo.cast

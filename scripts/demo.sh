@@ -18,13 +18,13 @@ section() {
     echo -e "${YELLOW}  $1${NC}"
     echo -e "${YELLOW}════════════════════════════════════════${NC}"
     echo ""
-    sleep 1
+    sleep 3
 }
 
 cmd() {
     echo -e "${CYAN}\$ $1${NC}"
     eval "$1"
-    sleep 0.5
+    sleep 1.5
 }
 
 echo -e "${GREEN}"
@@ -33,7 +33,7 @@ echo "║       TimeBlock Organizer - Demo Completa                 ║"
 echo "║       Sistema de Gerenciamento de Tempo via CLI           ║"
 echo "╚═══════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
-sleep 2
+sleep 3
 
 # ══════════════════════════════════════
 section "1. INICIALIZACAO"
@@ -98,12 +98,12 @@ section "7. TIMER - Tracking de Tempo"
 echo -e "${CYAN}# Iniciando timer para primeira instância de hábito${NC}"
 cmd "timeblock timer start --schedule 1 -b"
 cmd "timeblock timer status"
-sleep 2
+sleep 3
 cmd "timeblock timer pause"
 cmd "timeblock timer status"
-sleep 1
+sleep 3
 cmd "timeblock timer resume -b"
-sleep 1
+sleep 3
 cmd "timeblock timer stop"
 
 # ══════════════════════════════════════
