@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class Tag(SQLModel, table=True):
     """Tag for categorization."""
 
-    __tablename__ = "tags"
+    __tablename__ = "tags"  # pyright: ignore[reportAssignmentType]
 
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(unique=True, index=True, min_length=1, max_length=50)

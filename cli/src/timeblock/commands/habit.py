@@ -60,6 +60,10 @@ def create_habit(
             else:
                 routine_id = routine
 
+            # Guard clause - routine_id deve estar definido
+            if routine_id is None:
+                console.print("[red]Erro: ID da rotina não definido[/red]")
+                raise typer.Exit(1)
             # Validar rotina existe
             routine_obj = routine_service.get_routine(routine_id)
             if routine_obj is None:
@@ -78,6 +82,10 @@ def create_habit(
             start_time = dt_time.fromisoformat(start)
             end_time = dt_time.fromisoformat(end)
 
+            # Guard clause - routine_id validado
+            if routine_id is None:
+                console.print("[red]Erro interno: routine_id inválido[/red]")
+                raise typer.Exit(1)
             # Criar hábito
             habit = habit_service.create_habit(
                 routine_id=routine_id,

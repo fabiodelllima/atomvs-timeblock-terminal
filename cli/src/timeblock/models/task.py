@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class Task(SQLModel, table=True):
     """Tarefa pontual agendada."""
 
-    __tablename__ = "tasks"
+    __tablename__ = "tasks"  # pyright: ignore[reportAssignmentType]
 
     id: int | None = Field(default=None, primary_key=True)
     title: str = Field(index=True, min_length=1, max_length=200)
