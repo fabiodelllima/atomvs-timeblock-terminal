@@ -88,8 +88,8 @@ cmd "timeblock task list"
 section "6. LIST - Visualização Geral"
 # ══════════════════════════════════════
 
-cmd "timeblock list --day 0"
-cmd "timeblock list --week 0"
+cmd "timeblock habit atom list --today"
+cmd "timeblock task list"
 
 # ══════════════════════════════════════
 section "7. TIMER - Tracking de Tempo"
