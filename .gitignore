@@ -36,3 +36,20 @@ site/
 *.tar.gz
 .fuse_hidden*
 demo.cast
+
+# Backup files
+*.bak
+
+# Test changelogs
+CHANGELOG_test_*.md
+
+# Local databases
+*.db
+*.db.old
+
+# Coverage artifacts
+.coverage
+htmlcov/
+
+# Migration scripts (one-time use)
+migrate_*.py
