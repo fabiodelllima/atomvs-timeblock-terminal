@@ -3,7 +3,6 @@
 import typer
 
 from timeblock.commands import (
-    add,
     habit,
     init,
     reschedule,
@@ -12,7 +11,6 @@ from timeblock.commands import (
     task,
     timer,
 )
-from timeblock.commands import list as list_cmd
 
 app = typer.Typer(
     name="timeblock",
@@ -20,12 +18,10 @@ app = typer.Typer(
     add_completion=False,
 )
 
-# Comandos v1.0
+# Comandos base
 app.command("init")(init.init)
-app.command("add")(add.add)
-app.command("list")(list_cmd.list_events)
 
-# Comandos v2.0
+# Comandos por recurso
 app.add_typer(routine.app, name="routine")
 app.add_typer(habit.app, name="habit")
 app.add_typer(task.app, name="task")

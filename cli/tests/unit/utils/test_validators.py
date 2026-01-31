@@ -228,7 +228,7 @@ class TestValidateTimeRange:
         end = time.replace(hour=2)
         result = validate_time_range(start, end)
         assert result.hour == 2
-        assert result.day == end.day + 1
+        assert result.day == (start + timedelta(days=1)).day
 
     def test_end_one_second_before_valid(self):
         """Should handle end 1 second before start as midnight crossing."""
