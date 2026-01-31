@@ -5,8 +5,8 @@ Testa criação de tabelas durante migração v2.0,
 validando que todas as entidades são criadas corretamente.
 
 Referências:
-    - ADR-019: Test Naming Convention
-    - RTM: Requirements Traceability Matrix
+    - ADR-019: Convenção de Nomenclatura de Testes
+    - RTM: Matriz de Rastreabilidade de Requisitos
 """
 
 import tempfile
@@ -17,7 +17,7 @@ from pathlib import Path
 import pytest
 from sqlmodel import Session, create_engine, select
 
-# from timeblock.database.migrations import migrate_v2  # TODO: migrate_v2 not implemented yet
+from timeblock.database.migrations import migrate_v2
 from timeblock.models import (
     Habit,
     HabitInstance,
@@ -42,7 +42,6 @@ def temp_db() -> Iterator[Path]:
     db_path.unlink(missing_ok=True)
 
 
-@pytest.mark.skip(reason="TODO: Implementar migrate_v2() - ADR pendente")
 class TestBRDatabaseMigrations:
     """
     Integration: Migrações de banco de dados (BR-DB-MIGRATE-*).
@@ -51,12 +50,12 @@ class TestBRDatabaseMigrations:
     e permite operações básicas de CRUD.
 
     BRs cobertas:
-    - BR-DB-MIGRATE-001: Cria todas as tabelas v2.0
-    - BR-DB-MIGRATE-002: Cria tabela Routine
-    - BR-DB-MIGRATE-003: Cria tabela Habit
-    - BR-DB-MIGRATE-004: Cria tabela HabitInstance
-    - BR-DB-MIGRATE-005: Cria tabela Task
-    - BR-DB-MIGRATE-006: Cria tabela TimeLog
+        - BR-DB-MIGRATE-001: Cria todas as tabelas v2.0
+        - BR-DB-MIGRATE-002: Cria tabela Routine
+        - BR-DB-MIGRATE-003: Cria tabela Habit
+        - BR-DB-MIGRATE-004: Cria tabela HabitInstance
+        - BR-DB-MIGRATE-005: Cria tabela Task
+        - BR-DB-MIGRATE-006: Cria tabela TimeLog
     """
 
     def test_br_db_migrate_001_creates_all_tables(
@@ -74,10 +73,10 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-001: Criação de todas tabelas v2.0
         """
         # ACT
-        migrate_v2(temp_db)  # noqa: F821
+        migrate_v2(temp_db)
         # ASSERT - Mensagem de sucesso
         captured = capsys.readouterr()
-        assert "✓ Tabelas v2.0 criadas" in captured.out
+        assert "[OK] Tabelas v2.0 criadas" in captured.out
         # ASSERT - Tabela funcional
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
@@ -101,7 +100,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-002: Criação de tabela Routine
         """
         # ACT
-        migrate_v2(temp_db)  # noqa: F821
+        migrate_v2(temp_db)
         # ASSERT
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
@@ -123,7 +122,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-003: Criação de tabela Habit
         """
         # ACT
-        migrate_v2(temp_db)  # noqa: F821
+        migrate_v2(temp_db)
         # ASSERT
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
@@ -158,7 +157,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-004: Criação de tabela HabitInstance
         """
         # ACT
-        migrate_v2(temp_db)  # noqa: F821
+        migrate_v2(temp_db)
         # ASSERT
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
@@ -203,7 +202,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-005: Criação de tabela Task
         """
         # ACT
-        migrate_v2(temp_db)  # noqa: F821
+        migrate_v2(temp_db)
         # ASSERT
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
@@ -228,7 +227,7 @@ class TestBRDatabaseMigrations:
             - BR-DB-MIGRATE-006: Criação de tabela TimeLog
         """
         # ACT
-        migrate_v2(temp_db)  # noqa: F821
+        migrate_v2(temp_db)
         # ASSERT
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
