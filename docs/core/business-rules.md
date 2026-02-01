@@ -8,7 +8,7 @@
 
 ---
 
-## Índice
+## Sumário
 
 1. [Introdução e Fundamentos](#1-introdução-e-fundamentos)
 2. [Conceitos do Domínio](#2-conceitos-do-domínio)
