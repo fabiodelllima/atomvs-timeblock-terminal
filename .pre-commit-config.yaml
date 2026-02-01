@@ -17,9 +17,9 @@ repos:
         pass_filenames: false
         files: ^cli/src/timeblock/
 
-      - id: pytest-unit
-        name: pytest unit tests
-        entry: bash -c 'cd cli && python -m pytest tests/unit/ -q --tb=no'
+      - id: pytest-all
+        name: pytest full suite (unit + integration + e2e)
+        entry: bash -c 'cd cli && python -m pytest tests/ -q --tb=short'
         language: system
         pass_filenames: false
         always_run: true
