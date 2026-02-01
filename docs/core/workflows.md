@@ -10,7 +10,7 @@
 
 ---
 
-## Índice
+## Sumário
 
 1. [Visão Geral e Filosofia](#1-visão-geral-e-filosofia)
 2. [Entidades e Relacionamentos](#2-entidades-e-relacionamentos)

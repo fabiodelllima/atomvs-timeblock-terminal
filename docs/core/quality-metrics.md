@@ -1,6 +1,6 @@
 # Quality Metrics - TimeBlock Organizer
 
-**Versão:** 2.0.0
+**Versão:** 2.1.0
 
 **Relacionado:** roadmap.md, CHANGELOG.md
 
@@ -141,18 +141,54 @@ A rastreabilidade entre regras de negócio e testes garante que cada funcionalid
 
 ## 6. Automação e CI/CD
 
-A automação de qualidade é executada em cada commit através de pre-commit hooks, garantindo que código problemático não entre no repositório.
+A automação de qualidade opera em dois níveis: pre-commit hooks para feedback local imediato e pipeline GitLab CI/CD para validação completa no servidor.
 
 ### 6.1. Pre-commit Hooks
+
+Executados localmente em cada `git commit`, garantindo que código problemático não entre no repositório.
 
 | Hook        | Status  | Tempo | Bloqueante |
 | ----------- | ------- | ----- | ---------- |
 | ruff format | [ATIVO] | 1.2s  | Sim        |
 | ruff check  | [ATIVO] | 0.8s  | Sim        |
 | mypy        | [ATIVO] | 3.5s  | Não        |
-| pytest unit | [ATIVO] | 10s   | Sim        |
+| pytest-all  | [ATIVO] | ~30s  | Sim        |
 
-**Total:** ~15s por commit
+**Total:** ~35s por commit
+
+**Nota:** `pytest-all` executa a suite completa (unit + integration + BDD + e2e), substituindo o antigo `pytest-unit` que rodava apenas testes unitários.
+
+### 6.2. GitLab CI/CD Pipeline
+
+Pipeline executado em cada push e merge request, com jobs paralelos no stage `test`.
+
+```
+stages: test -> build -> deploy
+
+test:unit          pytest tests/unit/ -v --cov        [branches, MRs]
+test:integration   pytest tests/integration/ -v       [branches, MRs]
+test:bdd           pytest tests/bdd/ -v               [branches, MRs]
+test:e2e           pytest tests/e2e/ -v               [branches, MRs]
+test:lint          ruff check src/timeblock           [branches, MRs]
+test:typecheck     mypy (allow_failure: true)         [branches, MRs]
+build:docs         mkdocs build                       [develop, main]
+pages              mkdocs build + deploy              [main]
+```
+
+| Job              | Bloqueante | Artefatos    |
+| ---------------- | ---------- | ------------ |
+| test:unit        | Sim        | coverage.xml |
+| test:integration | Sim        | -            |
+| test:bdd         | Sim        | -            |
+| test:e2e         | Sim        | -            |
+| test:lint        | Sim        | -            |
+| test:typecheck   | Não        | -            |
+| build:docs       | Sim        | site/        |
+| pages            | Sim        | public/      |
+
+**Imagem base:** `python:3.13`
+
+**Referência:** `.gitlab-ci.yml`
 
 ---
 
@@ -166,4 +202,6 @@ A automação de qualidade é executada em cada commit através de pre-commit ho
 
 ---
 
-**Última atualização:** 30 de Janeiro de 2026
+**Versão do documento:** 2.1.0
+
+**Última atualização:** 01 de Fevereiro de 2026

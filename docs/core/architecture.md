@@ -1,6 +1,6 @@
 # Arquitetura TimeBlock Organizer
 
-**Versão:** 2.1.0
+**Versão:** 2.2.0
 
 **Data:** 28 de Novembro de 2025
 
@@ -8,7 +8,7 @@
 
 ---
 
-## Índice
+## Sumário
 
 1. [Visão Geral](#1-visão-geral)
 2. [Filosofia de Controle do Usuário](#2-filosofia-de-controle-do-usuário)
@@ -21,7 +21,8 @@
 9. [Evolução Futura](#9-evolução-futura)
 10. [Deployment Options](#10-deployment-options)
 11. [Processo de Desenvolvimento](#11-processo-de-desenvolvimento)
-12. [Arquitetura Multi-Plataforma](#12-arquitetura-multi-plataforma-v20)
+12. [CI/CD e Branch Protection](#12-cicd-e-branch-protection)
+13. [Arquitetura Multi-Plataforma](#13-arquitetura-multi-plataforma-v20)
 
 ---
 
@@ -1633,11 +1634,134 @@ Ver também: [ADR-025: Processo de Desenvolvimento](../decisions/ADR-025-develop
 
 ---
 
-## 12. Arquitetura Multi-Plataforma (v2.0+)
+## 12. CI/CD e Branch Protection
+
+### 12.1. Visão Geral
+
+A automação de qualidade opera em três camadas complementares, garantindo que código problemático não entre no repositório nem nas branches protegidas.
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│                    CAMADAS DE PROTEÇÃO                        │
+├───────────────────────────────────────────────────────────────┤
+│  1. Pre-commit Hooks (LOCAL)                                  │
+│     git commit ──> ruff + mypy + pytest-all                   │
+│     Bloqueia: commit local se falhar                          │
+│                                                               │
+│  2. CI/CD Pipeline (SERVIDOR)                                 │
+│     git push ──> GitLab CI / GitHub Actions                   │
+│     Marca: commit como passed/failed                          │
+│                                                               │
+│  3. Branch Protection (SERVIDOR)                              │
+│     merge request ──> status checks obrigatórios              │
+│     Bloqueia: merge em develop/main se CI falhar              │
+└───────────────────────────────────────────────────────────────┘
+```
+
+### 12.2. Pre-commit Hooks
+
+Executados localmente em cada `git commit` via `pre-commit` framework.
+
+| Hook        | Ferramenta | Tempo | Bloqueante |
+| ----------- | ---------- | ----- | ---------- |
+| ruff format | ruff       | 1.2s  | Sim        |
+| ruff check  | ruff       | 0.8s  | Sim        |
+| mypy        | mypy       | 3.5s  | Não        |
+| pytest-all  | pytest     | ~30s  | Sim        |
+
+**Total:** ~35s por commit.
+
+**Referência:** `.pre-commit-config.yaml`
+
+`pytest-all` executa a suite completa (unit + integration + BDD + e2e), garantindo que cada commit é funcional.
+
+### 12.3. GitLab CI/CD Pipeline
+
+Pipeline declarado em `.gitlab-ci.yml`, executado em cada push e merge request.
+
+**Imagem base:** `python:3.13`
+
+**Jobs paralelos no stage `test`:**
+
+| Job              | Comando                    | Bloqueante | Artefatos    |
+| ---------------- | -------------------------- | ---------- | ------------ |
+| test:unit        | pytest tests/unit/ --cov   | Sim        | coverage.xml |
+| test:integration | pytest tests/integration/  | Sim        | -            |
+| test:bdd         | pytest tests/bdd/          | Sim        | -            |
+| test:e2e         | pytest tests/e2e/          | Sim        | -            |
+| test:lint        | ruff check src/timeblock   | Sim        | -            |
+| test:typecheck   | mypy (allow_failure: true) | Não        | -            |
+
+**Stages:**
+
+```
+test ──> build ──> deploy
+
+test:     6 jobs paralelos (acima)
+build:    mkdocs build [develop, main]
+deploy:   GitLab Pages [main]
+```
+
+### 12.4. GitHub Actions
+
+Pipeline declarado em `.github/workflows/ci.yml`, executado em push e pull requests.
+
+**Matrix strategy para testes:**
+
+| Job       | Matrix                      | Bloqueante |
+| --------- | --------------------------- | ---------- |
+| lint      | ruff check                  | Sim        |
+| typecheck | mypy (continue-on-error)    | Não        |
+| test      | unit, integration, bdd, e2e | Sim        |
+
+### 12.5. Branch Protection Rules
+
+Configuradas via CLI (`gh api` e `glab api`) para garantir que merges em branches protegidas exigem CI verde.
+
+**GitHub:**
+
+| Branch  | Status Checks Obrigatórios                                    | Enforce Admins |
+| ------- | ------------------------------------------------------------- | -------------- |
+| develop | test (unit), test (integration), test (bdd), test (e2e), lint | Sim            |
+| main    | test (unit), test (integration), test (bdd), test (e2e), lint | Sim            |
+
+**GitLab:**
+
+| Branch  | Push Access | Merge Access | Pipeline Must Succeed |
+| ------- | ----------- | ------------ | --------------------- |
+| develop | Maintainers | Maintainers  | Sim                   |
+| main    | Maintainers | Maintainers  | Sim                   |
+
+**Configuração `only_allow_merge_if_pipeline_succeeds: true`** ativada a nível de projeto.
+
+### 12.6. Fluxo Completo
+
+```
+developer
+    │
+    ├── git commit
+    │   └── pre-commit hooks (ruff, mypy, pytest-all)
+    │       ├── [FAIL] ──> commit bloqueado
+    │       └── [PASS] ──> commit local criado
+    │
+    ├── git push origin develop
+    │   └── CI/CD pipeline (GitLab CI + GitHub Actions)
+    │       ├── [FAIL] ──> commit marcado como failed
+    │       └── [PASS] ──> commit marcado como passed
+    │
+    └── merge request (develop ──> main)
+        └── branch protection rules
+            ├── [CI FAIL] ──> merge bloqueado
+            └── [CI PASS] ──> merge permitido
+```
+
+---
+
+## 13. Arquitetura Multi-Plataforma (v2.0+)
 
 A partir da v2.0, o TimeBlock evolui de CLI local para ecossistema multi-plataforma com Terminal (Python), Web (Angular), Mobile (Kotlin) e Desktop (Tauri/Rust). Cada plataforma tem requisitos específicos de UX, performance e stack tecnológica, exigindo backends especializados.
 
-### 12.1. Organização de Repositórios
+### 13.1. Organização de Repositórios
 
 O projeto adota GitHub Organization com um repositório por serviço, seguindo padrões de microsserviços. Essa estrutura permite ciclos de deploy independentes e evolução paralela de componentes.
 
@@ -1666,7 +1790,7 @@ timeblock-org/
     └── timeblock-infra       # Docker, K8s, Terraform, Ansible
 ```
 
-### 12.2. Padrão BFF (Backend For Frontend)
+### 13.2. Padrão BFF (Backend For Frontend)
 
 O padrão BFF cria backends dedicados por plataforma, otimizando payloads e comportamentos para cada tipo de cliente. Netflix, Uber e Spotify utilizam essa arquitetura.
 
@@ -1698,7 +1822,7 @@ O padrão BFF cria backends dedicados por plataforma, otimizando payloads e comp
 └──────────┘       └──────────┘        └──────────┘
 ```
 
-### 12.3. Stacks por Componente
+### 13.3. Stacks por Componente
 
 | Componente        | Stack                    | Justificativa                                   |
 | ----------------- | ------------------------ | ----------------------------------------------- |
@@ -1713,7 +1837,7 @@ O padrão BFF cria backends dedicados por plataforma, otimizando payloads e comp
 | **Mobile**        | Kotlin Full-Stack        | Kotlin Multiplatform (app + backend)            |
 | **Desktop**       | Tauri + Rust             | Binário nativo, baixo consumo de recursos       |
 
-### 12.4. Infrastructure as Code
+### 13.4. Infrastructure as Code
 
 O repositório `timeblock-infra` centraliza configuração de infraestrutura como código, garantindo ambientes reproduzíveis e versionados.
 
@@ -1740,7 +1864,7 @@ timeblock-infra/
 | v2.0.0 | Docker Compose + Ansible | Raspberry Pi homelab           |
 | v3.0.0 | Kubernetes + Helm        | Orquestração de microsserviços |
 
-### 12.5. Contratos Compartilhados
+### 13.5. Contratos Compartilhados
 
 O repositório `timeblock-contracts` define interfaces entre serviços usando OpenAPI (REST), Protobuf (gRPC), AsyncAPI (Kafka) e JSON Schema (validação). Essa abordagem contract-first garante compatibilidade antes do deploy.
 
@@ -1757,4 +1881,4 @@ Ver também: [ADR-030: Arquitetura Multi-Plataforma](../decisions/ADR-030-multip
 
 ---
 
-**Última atualização:** 31 de Janeiro de 2026
+**Última atualização:** 01 de Fevereiro de 2026
