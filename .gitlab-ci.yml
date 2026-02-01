@@ -72,7 +72,6 @@ test:typecheck:
   stage: test
   script:
     - mypy src/timeblock --check-untyped-defs
-  allow_failure: true
   only:
     - branches
     - merge_requests
