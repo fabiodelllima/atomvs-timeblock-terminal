@@ -10,8 +10,8 @@ class TagService:
     """Gerencia operações de tags."""
 
     @staticmethod
-    def create_tag(name: str | None = None, color: str = "#fbd75b") -> Tag:
-        """Cria tag. Nome opcional, cor padrão amarelo."""
+    def create_tag(name: str, color: str = "#fbd75b") -> Tag:
+        """Cria tag com nome obrigatório e cor padrão amarelo."""
         tag = Tag(name=name, color=color)
 
         with get_engine_context() as engine:
