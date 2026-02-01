@@ -1,6 +1,6 @@
 # Arquitetura TimeBlock Organizer
 
-**Versão:** 2.0.0
+**Versão:** 2.1.0
 
 **Data:** 28 de Novembro de 2025
 
@@ -19,6 +19,9 @@
 7. [Decisões Arquiteturais](#7-decisões-arquiteturais)
 8. [Padrões e Convenções](#8-padrões-e-convenções)
 9. [Evolução Futura](#9-evolução-futura)
+10. [Deployment Options](#10-deployment-options)
+11. [Processo de Desenvolvimento](#11-processo-de-desenvolvimento)
+12. [Arquitetura Multi-Plataforma](#12-arquitetura-multi-plataforma-v20)
 
 ---
 
@@ -1122,6 +1125,9 @@ As decisões arquiteturais são documentadas como ADRs (Architecture Decision Re
 | [ADR-025](../decisions/ADR-025-development-methodology.md)     | Development Methodology | Docs > BDD > TDD > Code       |
 | [ADR-026](../decisions/ADR-026-test-database-isolation.md)     | Test DB Isolation       | Isolamento via env var        |
 | [ADR-027](../decisions/ADR-027-documentation-tooling.md)       | Documentation Tooling   | MkDocs + mkdocstrings         |
+| [ADR-028](../decisions/ADR-028-remove-legacy-commands.md)      | Remove Legacy Commands  | Remoção de add/list legados   |
+| [ADR-029](../decisions/ADR-029-package-by-feature.md)          | Package by Feature      | Organização por domínio       |
+| [ADR-030](../decisions/ADR-030-multiplatform-architecture.md)  | Multiplatform Arch      | BFF, multi-repo, IaC          |
 
 ---
 
@@ -1625,6 +1631,121 @@ cli/tests/
 
 Ver também: [ADR-025: Processo de Desenvolvimento](../decisions/ADR-025-development-methodology.md)
 
+---
+
+## 12. Arquitetura Multi-Plataforma (v2.0+)
+
+A partir da v2.0, o TimeBlock evolui de CLI local para ecossistema multi-plataforma com Terminal (Python), Web (Angular), Mobile (Kotlin) e Desktop (Tauri/Rust). Cada plataforma tem requisitos específicos de UX, performance e stack tecnológica, exigindo backends especializados.
+
+### 12.1. Organização de Repositórios
+
+O projeto adota GitHub Organization com um repositório por serviço, seguindo padrões de microsserviços. Essa estrutura permite ciclos de deploy independentes e evolução paralela de componentes.
+
+```
+timeblock-org/
+│
+├── timeblock-contracts       # OpenAPI, Protobuf, AsyncAPI
+│
+├── # ─── BACKEND CORE ────────────────────────────
+├── timeblock-api             # Spring Boot (BRs, auth, CRUD)
+├── timeblock-gateway         # Spring Cloud Gateway
+├── timeblock-sync            # Go + Kafka
+├── timeblock-notifications   # Spring Boot (email, push)
+│
+├── # ─── BFFs ────────────────────────────────────
+├── timeblock-bff-web         # Spring Boot
+├── timeblock-bff-terminal    # Go ou Python
+│
+├── # ─── CLIENTS ─────────────────────────────────
+├── timeblock-terminal        # Python (CLI + TUI)
+├── timeblock-web             # Angular + TypeScript
+├── timeblock-mobile          # Kotlin Full-Stack
+├── timeblock-desktop         # Tauri (Rust + Svelte/Angular)
+│
+└── # ─── INFRA ───────────────────────────────────
+    └── timeblock-infra       # Docker, K8s, Terraform, Ansible
+```
+
+### 12.2. Padrão BFF (Backend For Frontend)
+
+O padrão BFF cria backends dedicados por plataforma, otimizando payloads e comportamentos para cada tipo de cliente. Netflix, Uber e Spotify utilizam essa arquitetura.
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                         CLIENTS                                │
+├──────────┬──────────┬──────────┬──────────┬────────────────────┤
+│   Web    │  Mobile  │   CLI    │   TUI    │      Desktop       │
+└────┬─────┴────┬─────┴────┬─────┴──────┬───┴──────────┬─────────┘
+     │          │          └──────┬─────┘              │
+     ↓          ↓                 ↓                    ↓
+┌──────────┐ ┌────────────┐ ┌──────────────┐     ┌─────────────┐
+│ BFF Web  │ │ BFF Mobile │ │ BFF Terminal │     │ BFF Desktop │
+│ Spring   │ │   Kotlin   │ │   Go/Python  │     │    Go       │
+└────┬─────┘ └────┬───────┘ └─────┬────────┘     └─────┬───────┘
+     └────────────┴───────────────┴────────────────────┘
+                            │
+                            ↓
+              ┌─────────────────────────┐
+              │      API GATEWAY        │
+              │  Spring Cloud Gateway   │
+              └───────────┬─────────────┘
+                          │
+     ┌────────────────────┼────────────────────┐
+     ↓                    ↓                    ↓
+┌──────────┐       ┌──────────┐        ┌──────────┐
+│ API Core │       │   Sync   │        │  Notif   │
+│  Spring  │       │   Go     │        │  Spring  │
+└──────────┘       └──────────┘        └──────────┘
+```
+
+### 12.3. Stacks por Componente
+
+| Componente        | Stack                    | Justificativa                                   |
+| ----------------- | ------------------------ | ----------------------------------------------- |
+| **API Core**      | Java/Spring Boot         | Regras complexas, ecossistema enterprise maduro |
+| **Gateway**       | Spring Cloud Gateway     | Consistência com API, features enterprise       |
+| **Sync**          | Go + Kafka               | Performance, concorrência, padrão cloud-native  |
+| **Notifications** | Spring Boot              | Compartilha libs com API                        |
+| **BFF Web**       | Spring Boot              | Alinha com backend Java                         |
+| **BFF Terminal**  | Go ou Python             | Leve, alinha com clients                        |
+| **Terminal**      | Python (Typer + Textual) | Projeto atual                                   |
+| **Web**           | Angular + TypeScript     | Framework enterprise                            |
+| **Mobile**        | Kotlin Full-Stack        | Kotlin Multiplatform (app + backend)            |
+| **Desktop**       | Tauri + Rust             | Binário nativo, baixo consumo de recursos       |
+
+### 12.4. Infrastructure as Code
+
+O repositório `timeblock-infra` centraliza configuração de infraestrutura como código, garantindo ambientes reproduzíveis e versionados.
+
+```
+timeblock-infra/
+├── terraform/                # Provisioning cloud
+│   ├── modules/
+│   └── environments/
+├── ansible/                  # Configuration management
+│   ├── playbooks/
+│   └── roles/
+├── kubernetes/               # Orquestração (v3.0+)
+│   ├── base/
+│   └── overlays/
+├── docker/                   # Compose para dev/homelab
+└── scripts/                  # Automação
+```
+
+**Progressão IaC:**
+
+| Versão | Ferramenta               | Uso                            |
+| ------ | ------------------------ | ------------------------------ |
+| v1.5.0 | Docker Compose           | Dev local, CI/CD               |
+| v2.0.0 | Docker Compose + Ansible | Raspberry Pi homelab           |
+| v3.0.0 | Kubernetes + Helm        | Orquestração de microsserviços |
+
+### 12.5. Contratos Compartilhados
+
+O repositório `timeblock-contracts` define interfaces entre serviços usando OpenAPI (REST), Protobuf (gRPC), AsyncAPI (Kafka) e JSON Schema (validação). Essa abordagem contract-first garante compatibilidade antes do deploy.
+
+Ver também: [ADR-030: Arquitetura Multi-Plataforma](../decisions/ADR-030-multiplatform-architecture.md)
+
 ## Referências
 
 - **SQLModel:** <https://sqlmodel.tiangolo.com/>
@@ -1636,4 +1757,4 @@ Ver também: [ADR-025: Processo de Desenvolvimento](../decisions/ADR-025-develop
 
 ---
 
-**Última atualização:** 17 de Janeiro de 2026
+**Última atualização:** 31 de Janeiro de 2026
