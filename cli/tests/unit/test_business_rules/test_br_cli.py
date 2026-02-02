@@ -34,7 +34,7 @@ class TestBRCli001:
 
     def test_br_cli_001_no_flags_raises(self):
         """BR-CLI-001: Nenhuma flag de tempo lança erro."""
-        with pytest.raises(ValueError, match="--start/--end.*--duration"):
+        with pytest.raises(ValueError, match=r"--start/--end.*--duration"):
             _validate_log_mode(start=None, end=None, duration=None)
 
     def test_br_cli_001_duration_only_valid(self):
