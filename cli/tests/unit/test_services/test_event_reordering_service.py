@@ -111,3 +111,107 @@ class TestHasOverlap:
         start2 = datetime(2025, 10, 24, 10, 30)
         end2 = datetime(2025, 10, 24, 11, 30)
         assert EventReorderingService._has_overlap(start1, end1, start2, end2)
+
+
+class TestGetConflictsForDay:
+    """Tests for get_conflicts_for_day."""
+
+    def test_get_conflicts_empty_day(self, session: Session) -> None:
+        """Returns empty list when day has no events."""
+        from datetime import date
+
+        conflicts = EventReorderingService.get_conflicts_for_day(
+            date(2025, 10, 24), session=session
+        )
+        assert conflicts == []
+
+    def test_get_conflicts_no_overlaps(self, session: Session) -> None:
+        """Returns empty list when events don't overlap."""
+        from datetime import date
+
+        # Criar eventos sem overlap
+        task1 = Task(title="Task 1", scheduled_datetime=datetime(2025, 10, 24, 10, 0))
+        task2 = Task(title="Task 2", scheduled_datetime=datetime(2025, 10, 24, 12, 0))
+        session.add(task1)
+        session.add(task2)
+        session.commit()
+
+        conflicts = EventReorderingService.get_conflicts_for_day(
+            date(2025, 10, 24), session=session
+        )
+        assert len(conflicts) == 0
+
+    def test_get_conflicts_task_overlap(self, session: Session) -> None:
+        """Detects conflicts between overlapping tasks."""
+        from datetime import date
+
+        # Criar tasks que se sobrepõem
+        task1 = Task(title="Task 1", scheduled_datetime=datetime(2025, 10, 24, 10, 0))
+        task2 = Task(title="Task 2", scheduled_datetime=datetime(2025, 10, 24, 10, 30))
+        session.add(task1)
+        session.add(task2)
+        session.commit()
+
+        conflicts = EventReorderingService.get_conflicts_for_day(
+            date(2025, 10, 24), session=session
+        )
+        assert len(conflicts) == 1
+
+    def test_get_conflicts_removes_duplicates(self, session: Session) -> None:
+        """Removes duplicate conflicts (A vs B and B vs A)."""
+        from datetime import date
+
+        # Criar 2 tasks sobrepostas
+        task1 = Task(title="Task 1", scheduled_datetime=datetime(2025, 10, 24, 10, 0))
+        task2 = Task(title="Task 2", scheduled_datetime=datetime(2025, 10, 24, 10, 30))
+        session.add(task1)
+        session.add(task2)
+        session.commit()
+
+        conflicts = EventReorderingService.get_conflicts_for_day(
+            date(2025, 10, 24), session=session
+        )
+
+        # Deve retornar apenas 1 conflito (não duplicado)
+        assert len(conflicts) == 1
+
+    def test_get_conflicts_habit_and_task_overlap(self, session: Session) -> None:
+        """Detects conflicts between habit instance and task."""
+        from datetime import date
+
+        from timeblock.models import Habit, Recurrence, Routine
+
+        # Criar rotina e hábito
+        routine = Routine(name="Test Routine", is_active=True)
+        session.add(routine)
+        session.commit()
+
+        habit = Habit(
+            routine_id=routine.id,
+            title="Morning Routine",
+            scheduled_start=time(10, 0),
+            scheduled_end=time(11, 0),
+            recurrence=Recurrence.EVERYDAY,
+        )
+        session.add(habit)
+        session.commit()
+
+        # Criar instância do hábito
+        habit_instance = HabitInstance(
+            habit_id=habit.id,
+            date=date(2025, 10, 24),
+            scheduled_start=time(10, 0),
+            scheduled_end=time(11, 0),
+        )
+        session.add(habit_instance)
+        session.commit()
+
+        # Criar task sobreposta
+        task = Task(title="Task", scheduled_datetime=datetime(2025, 10, 24, 10, 30))
+        session.add(task)
+        session.commit()
+
+        conflicts = EventReorderingService.get_conflicts_for_day(
+            date(2025, 10, 24), session=session
+        )
+        assert len(conflicts) == 1

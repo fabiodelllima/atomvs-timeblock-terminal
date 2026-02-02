@@ -1,0 +1,25 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^cli/
+      - id: ruff-format
+        files: ^cli/
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy type check
+        entry: bash -c 'cd cli && ./venv/bin/python -m mypy src/timeblock --check-untyped-defs'
+        language: system
+        pass_filenames: false
+        files: ^cli/src/timeblock/
+
+      - id: pytest-all
+        name: pytest full suite (unit + integration + e2e)
+        entry: bash -c 'cd cli && ./venv/bin/python -m pytest tests/ -q --tb=short'
+        language: system
+        pass_filenames: false
+        always_run: true

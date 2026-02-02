@@ -32,7 +32,7 @@ class TestBRStatus001TimerStopCalculatesSubstatus:
         )
 
         # QUANDO: usuário completa com 55 minutos (92%)
-        actual_duration_minutes = 55
+        _actual_duration_minutes = 55
         completion_percentage = 92
 
         instance.status = Status.DONE
@@ -276,7 +276,7 @@ class TestBRStatus001PropertyIsOverdue:
     def test_scenario_013_pending_overdue_returns_true(self):
         """CENÁRIO 13: PENDING 1h atrasado -> is_overdue = True."""
         # DADO: evento PENDING 1h atrasado
-        instance = HabitInstance(
+        _instance = HabitInstance(
             habit_id=1,
             date=date.today(),
             scheduled_start=time(8, 0),
@@ -295,7 +295,7 @@ class TestBRStatus001PropertyIsOverdue:
     def test_scenario_014_pending_on_time_returns_false(self):
         """CENÁRIO 14: PENDING no prazo -> is_overdue = False."""
         # DADO: evento PENDING no prazo
-        instance = HabitInstance(
+        _instance = HabitInstance(
             habit_id=1,
             date=date.today(),
             scheduled_start=time(10, 0),

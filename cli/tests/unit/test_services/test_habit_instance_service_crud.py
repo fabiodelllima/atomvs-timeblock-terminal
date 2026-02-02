@@ -2,7 +2,6 @@
 
 from datetime import date, time
 
-import pytest
 from sqlmodel import Session
 
 from timeblock.models import Habit, HabitInstance, Recurrence, Routine

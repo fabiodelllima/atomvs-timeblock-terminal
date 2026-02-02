@@ -1,0 +1,47 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv/
+ENV/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+
+# Docs
+docs/
+site/
+*.md
+!README.md
+
+# Data
+*.db
+*.db-journal
+data/
+
+# Misc
+.fuse_hidden*
+*.cast
+*.tar.gz
+demo.cast

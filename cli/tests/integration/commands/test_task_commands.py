@@ -262,7 +262,7 @@ class TestBRTaskCheck:
         # ARRANGE
         dt = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
         create_result = runner.invoke(app, ["task", "create", "-t", "Complete Me", "-D", dt])
-        id_line = [line for line in create_result.stdout.split("\n") if "ID:" in line][0]
+        id_line = next(line for line in create_result.stdout.split("\n") if "ID:" in line)
         task_id = id_line.split(":")[1].strip()
         # ACT
         result = runner.invoke(app, ["task", "check", task_id])
@@ -284,7 +284,7 @@ class TestBRTaskCheck:
         # ARRANGE
         dt = (datetime.now() - timedelta(minutes=30)).strftime("%Y-%m-%d %H:%M")
         create_result = runner.invoke(app, ["task", "create", "-t", "Late Task", "-D", dt])
-        id_line = [line for line in create_result.stdout.split("\n") if "ID:" in line][0]
+        id_line = next(line for line in create_result.stdout.split("\n") if "ID:" in line)
         task_id = id_line.split(":")[1].strip()
         # ACT
         result = runner.invoke(app, ["task", "check", task_id])
@@ -341,7 +341,7 @@ class TestBRTaskDeletion:
         # ARRANGE
         dt = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
         create_result = runner.invoke(app, ["task", "create", "-t", "Delete Me", "-D", dt])
-        id_line = [line for line in create_result.stdout.split("\n") if "ID:" in line][0]
+        id_line = next(line for line in create_result.stdout.split("\n") if "ID:" in line)
         task_id = id_line.split(":")[1].strip()
         # ACT
         result = runner.invoke(app, ["task", "delete", task_id, "--force"])
@@ -365,7 +365,7 @@ class TestBRTaskDeletion:
         # ARRANGE
         dt = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
         create_result = runner.invoke(app, ["task", "create", "-t", "Delete Confirm", "-D", dt])
-        id_line = [line for line in create_result.stdout.split("\n") if "ID:" in line][0]
+        id_line = next(line for line in create_result.stdout.split("\n") if "ID:" in line)
         task_id = id_line.split(":")[1].strip()
         # ACT
         result = runner.invoke(app, ["task", "delete", task_id], input="y\n")
@@ -387,7 +387,7 @@ class TestBRTaskDeletion:
         # ARRANGE
         dt = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
         create_result = runner.invoke(app, ["task", "create", "-t", "Keep Me", "-D", dt])
-        id_line = [line for line in create_result.stdout.split("\n") if "ID:" in line][0]
+        id_line = next(line for line in create_result.stdout.split("\n") if "ID:" in line)
         task_id = id_line.split(":")[1].strip()
         # ACT
         result = runner.invoke(app, ["task", "delete", task_id], input="n\n")

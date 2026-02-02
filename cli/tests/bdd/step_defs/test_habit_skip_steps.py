@@ -5,15 +5,13 @@ Conecta cenários Gherkin do arquivo habit_skip.feature com código Python.
 
 from datetime import date, time
 
-import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 from sqlmodel import Session
 
-from timeblock.models.enums import NotDoneSubstatus, SkipReason, Status
+from timeblock.models.enums import SkipReason, Status
 from timeblock.models.habit import Habit, Recurrence
 from timeblock.models.habit_instance import HabitInstance
 from timeblock.models.routine import Routine
-from timeblock.models.time_log import TimeLog
 from timeblock.services.habit_instance_service import HabitInstanceService
 
 # Carregar todos os cenários do arquivo

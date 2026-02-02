@@ -22,7 +22,10 @@ def complete_routine_setup(integration_session, sample_routine, sample_habits):
     instances = []
     for habit in sample_habits:
         habit_instances = HabitInstanceService.generate_instances(
-            habit_id=habit.id, start_date=today, end_date=end_date
+            habit_id=habit.id,
+            start_date=today,
+            end_date=end_date,
+            session=integration_session,
         )
         instances.extend(habit_instances)
 

@@ -27,7 +27,6 @@ jobs:
 
   typecheck:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -48,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test-suite: [unit, integration]
+        test-suite: [unit, integration, bdd, e2e]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python

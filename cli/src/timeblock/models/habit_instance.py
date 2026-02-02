@@ -21,7 +21,7 @@ class HabitInstance(SQLModel, table=True):
     - Validações de consistência entre campos
     """
 
-    __tablename__ = "habitinstance"
+    __tablename__ = "habitinstance"  # pyright: ignore[reportAssignmentType]
 
     id: int | None = Field(default=None, primary_key=True)
     habit_id: int = Field(foreign_key="habits.id")

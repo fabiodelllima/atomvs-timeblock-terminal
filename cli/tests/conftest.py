@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator
-from datetime import UTC, datetime, time, timedelta
+from datetime import UTC, datetime, time
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def test_engine() -> Generator[Engine, None, None]:
+def test_engine() -> Generator[Engine]:
     """Engine SQLite em memória para testes isolados."""
     engine = create_engine("sqlite:///:memory:")
 
@@ -46,7 +46,7 @@ def test_engine() -> Generator[Engine, None, None]:
 
 
 @pytest.fixture
-def session(test_engine: Engine) -> Generator[Session, None, None]:
+def session(test_engine: Engine) -> Generator[Session]:
     """Sessão de banco de dados para testes."""
     with Session(test_engine) as session:
         yield session

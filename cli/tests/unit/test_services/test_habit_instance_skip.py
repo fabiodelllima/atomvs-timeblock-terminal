@@ -85,9 +85,7 @@ class TestBRHabitSkip001BasicSkip:
         assert result.done_substatus is None
         assert result.completion_percentage is None
 
-    def test_br_skip_001_scenario_002_skip_work_without_note(
-        self, session: Session, habit: Habit
-    ):
+    def test_br_skip_001_scenario_002_skip_work_without_note(self, session: Session, habit: Habit):
         """CENÁRIO 2: Skip com categoria WORK sem nota."""
         assert habit.id is not None
 
@@ -187,9 +185,7 @@ class TestBRHabitSkip001BasicSkip:
 class TestBRHabitSkip001ReskipAndValidation:
     """Cenários 5-6: Re-skip e validação."""
 
-    def test_br_skip_001_scenario_005_reskip_changes_category(
-        self, session: Session, habit: Habit
-    ):
+    def test_br_skip_001_scenario_005_reskip_changes_category(self, session: Session, habit: Habit):
         """CENÁRIO 5: Re-skip muda categoria."""
         assert habit.id is not None
 
@@ -224,9 +220,7 @@ class TestBRHabitSkip001ReskipAndValidation:
         assert result.status == Status.NOT_DONE
         assert result.not_done_substatus == NotDoneSubstatus.SKIPPED_JUSTIFIED
 
-    def test_br_skip_001_scenario_006_validates_consistency(
-        self, session: Session, habit: Habit
-    ):
+    def test_br_skip_001_scenario_006_validates_consistency(self, session: Session, habit: Habit):
         """CENÁRIO 6: Validação de consistência após skip."""
         assert habit.id is not None
 
@@ -277,9 +271,7 @@ class TestBRHabitSkip001Errors:
                 session=session,
             )
 
-    def test_br_skip_001_scenario_008_error_note_too_long(
-        self, session: Session, habit: Habit
-    ):
+    def test_br_skip_001_scenario_008_error_note_too_long(self, session: Session, habit: Habit):
         """CENÁRIO 8: Erro - Nota muito longa (>500 chars)."""
         assert habit.id is not None
 
@@ -309,9 +301,7 @@ class TestBRHabitSkip001Errors:
                 session=session,
             )
 
-    def test_br_skip_001_scenario_009_error_timer_active(
-        self, session: Session, habit: Habit
-    ):
+    def test_br_skip_001_scenario_009_error_timer_active(self, session: Session, habit: Habit):
         """CENÁRIO 9: Erro - Timer ativo."""
         assert habit.id is not None
 
@@ -349,9 +339,7 @@ class TestBRHabitSkip001Errors:
                 session=session,
             )
 
-    def test_br_skip_001_scenario_010_error_already_completed(
-        self, session: Session, habit: Habit
-    ):
+    def test_br_skip_001_scenario_010_error_already_completed(self, session: Session, habit: Habit):
         """CENÁRIO 10: Erro - Instância já completada."""
         assert habit.id is not None
 

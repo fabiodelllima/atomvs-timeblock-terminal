@@ -1,12 +1,11 @@
-"""Tests for workflow fixtures."""
-
-import pytest
+"""Testes para fixtures de workflow."""
 
 
-@pytest.mark.skip(reason="Requer migration de tag_id em Habit - Opção 3: Features Pendentes")
 def test_complete_routine_setup(complete_routine_setup):
-    """Test complete routine workflow setup."""
-    routine, habits, instances = complete_routine_setup
+    """Testa setup completo de rotina com hábitos e instâncias."""
+    routine = complete_routine_setup["routine"]
+    habits = complete_routine_setup["habits"]
+    instances = complete_routine_setup["instances"]
 
     assert routine.id is not None
     assert len(habits) == 2

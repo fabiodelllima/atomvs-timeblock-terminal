@@ -52,7 +52,7 @@ class TestBRVal001TimeValidation:
 
         # Resultado deve ser ajustado para o próximo dia
         assert result.hour == 2
-        assert result.day == end.day + 1
+        assert result.day == (start + timedelta(days=1)).day
         assert result > start
 
     def test_br_val_001_rejects_same_time_as_24h_duration(self):
@@ -208,7 +208,7 @@ class TestBRVal001TimeValidation:
         # 2. duration > 0 (2 horas) ✓
         # 3. horários em range válido (23:00, 01:00) ✓
         assert result.hour == 1
-        assert result.day == end.day + 1
+        assert result.day == (start + timedelta(days=1)).day
         duration_hours = (result - start).total_seconds() / 3600
         assert duration_hours == 2
 

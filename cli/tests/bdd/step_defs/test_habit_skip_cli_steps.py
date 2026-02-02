@@ -12,7 +12,7 @@ from pytest_bdd import given, parsers, scenarios, then, when
 from sqlmodel import Session
 from typer.testing import CliRunner
 
-from timeblock.commands import habit
+from timeblock.commands.habit import actions
 from timeblock.main import app
 from timeblock.models.enums import Status
 from timeblock.models.habit import Habit, Recurrence
@@ -37,7 +37,7 @@ def mock_engine_context(test_engine: Engine, monkeypatch: MonkeyPatch) -> None:
     def mock_get_engine_context():  # type: ignore[no-untyped-def]
         yield test_engine
 
-    monkeypatch.setattr(habit, "get_engine_context", mock_get_engine_context)
+    monkeypatch.setattr(actions, "get_engine_context", mock_get_engine_context)
 
 
 @given('que existe uma rotina ativa "Rotina Matinal"', target_fixture="test_routine_cli")

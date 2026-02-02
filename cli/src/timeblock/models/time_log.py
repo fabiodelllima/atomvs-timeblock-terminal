@@ -14,7 +14,7 @@ class TimeLog(SQLModel, table=True):
     Uma HabitInstance pode ter múltiplas sessões (BR-TIMER-004).
     """
 
-    __tablename__ = "time_log"
+    __tablename__ = "time_log"  # pyright: ignore[reportAssignmentType]
 
     id: int | None = Field(default=None, primary_key=True)
 

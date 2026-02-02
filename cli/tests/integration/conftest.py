@@ -21,7 +21,7 @@ def integration_engine():
     @event.listens_for(engine, "connect")
     def set_sqlite_pragma(
         dbapi_conn: Any,
-        connection_record: Any,  # noqa: ARG001
+        connection_record: Any,
     ) -> None:
         """Habilita foreign keys no SQLite."""
         cursor = dbapi_conn.cursor()

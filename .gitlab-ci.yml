@@ -44,6 +44,22 @@ test:integration:
     - branches
     - merge_requests
 
+test:bdd:
+  stage: test
+  script:
+    - python -m pytest tests/bdd/ -v
+  only:
+    - branches
+    - merge_requests
+
+test:e2e:
+  stage: test
+  script:
+    - python -m pytest tests/e2e/ -v
+  only:
+    - branches
+    - merge_requests
+
 test:lint:
   stage: test
   script:
@@ -56,7 +72,6 @@ test:typecheck:
   stage: test
   script:
     - mypy src/timeblock --check-untyped-defs
-  allow_failure: true
   only:
     - branches
     - merge_requests
