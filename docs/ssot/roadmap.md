@@ -57,7 +57,7 @@ O histórico de releases mostra uma progressão consistente: cada versão expand
 | v1.2.0 | Nov/2025 | Status Refactoring         | CHANGELOG.md |
 | v1.3.0 | Dez/2025 | Event Reordering (Parcial) | CHANGELOG.md |
 
-O detalhamento de métricas por release está disponível em `docs/core/quality-metrics.md`, seção 2 (Histórico de Métricas).
+O detalhamento de métricas por release está disponível em `docs/ssot/quality-metrics.md`, seção 2 (Histórico de Métricas).
 
 ---
 
@@ -81,7 +81,7 @@ As métricas atuais refletem medições reais executadas em 01/02/2026, não est
 | CLI funcional  | 85%   | 100%        | [OK]   |
 | BRs cobertas   | 83%   | 95%         | [OK]   |
 
-O detalhamento completo por módulo e por domínio de BRs está em `docs/core/quality-metrics.md`.
+O detalhamento completo por módulo e por domínio de BRs está em `docs/ssot/quality-metrics.md`.
 
 ### 3.2. Sprints v1.4.0 (Retrospectiva)
 
@@ -245,7 +245,7 @@ O DT-006 documenta que mensagens user-facing na CLI alternam entre inglês e por
 
 ## 5. Débito Técnico
 
-O inventário completo de débito técnico foi extraído para um documento dedicado em `docs/core/technical-debt.md`. Esta separação reflete a maturidade do projeto: o roadmap define "para onde vamos", enquanto o technical-debt.md registra "o que devemos antes de ir".
+O inventário completo de débito técnico foi extraído para um documento dedicado em `docs/ssot/technical-debt.md`. Esta separação reflete a maturidade do projeto: o roadmap define "para onde vamos", enquanto o technical-debt.md registra "o que devemos antes de ir".
 
 **Resumo:**
 
