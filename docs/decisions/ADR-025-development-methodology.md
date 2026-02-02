@@ -42,7 +42,7 @@ Cada etapa é pré-requisito da próxima. Não se avança sem completar a anteri
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  1. DOCUMENTAR BR                                               │
-│     Arquivo: docs/core/business-rules.md                        │
+│     Arquivo: docs/ssot/business-rules.md                        │
 │     Formato: BR-DOMAIN-XXX                                      │
 │     Conteúdo: Regra, exemplos, casos de borda                   │
 │                                                                 │
