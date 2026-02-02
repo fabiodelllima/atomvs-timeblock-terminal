@@ -1580,7 +1580,7 @@ DOCS ──> BDD ──> TDD ──> CODE
 ┌─────────────────────────────────────────────────────────────┐
 │                  VERTICAL SLICE (1 BR)                      │
 ├─────────────────────────────────────────────────────────────┤
-│  1. Documentar BR (docs/core/business-rules.md)             │
+│  1. Documentar BR (docs/ssot/business-rules.md)             │
 │  2. Escrever cenário BDD (.feature)                         │
 │  3. Implementar steps (step_defs/)                          │
 │  4. Criar teste unitário (RED)                              │
@@ -1877,7 +1877,7 @@ Ver também: [ADR-030: Arquitetura Multi-Plataforma](../decisions/ADR-030-multip
 - **Rich:** <https://rich.readthedocs.io/>
 - **FastAPI:** <https://fastapi.tiangolo.com/>
 - **Apache Kafka:** <https://kafka.apache.org/>
-- **Business Rules:** `docs/core/business-rules.md`
+- **Business Rules:** `docs/ssot/business-rules.md`
 
 ---
 
