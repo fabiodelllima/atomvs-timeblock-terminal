@@ -8,7 +8,7 @@
 
 ---
 
-## Índice
+## Sumário
 
 1. [Visão Geral](#1-visão-geral)
 2. [routine](#2-routine)
