@@ -1,4 +1,4 @@
-# TimeBlock Organizer - Workflows Completos
+# Workflows Completos
 
 **Versão:** 2.1.0
 
@@ -1914,12 +1914,9 @@ git push origin develop
 
 ```bash
 # Push limpo para repositório público
-./scripts/push-github.sh
 ```
 
 ### Script de Automação
-
-**Localização:** `scripts/push-github.sh`
 
 **Processo:**
 
@@ -1977,7 +1974,6 @@ git remote -v
 **Atualizando GitHub:**
 
 - Frequência: Após features significativas ou milestones
-- Gatilho: Execução manual de `./scripts/push-github.sh`
 - Timing: Antes de compartilhar portfolio com recrutadores
 
 **Resolução de Conflitos:**
