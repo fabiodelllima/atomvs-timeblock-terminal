@@ -3,7 +3,9 @@
 import typer
 from rich.console import Console
 from rich.table import Table
+from sqlmodel import Session
 
+from timeblock.database import get_engine_context
 from timeblock.services.tag_service import TagService
 
 app = typer.Typer(help="Gerenciar tags")
@@ -17,13 +19,16 @@ def create_tag(
 ):
     """Cria tag para categorização."""
     try:
-        tag = TagService.create_tag(name=name, color=color)
+        with get_engine_context() as engine, Session(engine) as session:
+            service = TagService(session)
+            tag = service.create_tag(name=name, color=color)
+            session.commit()
 
-        console.print("\n✓ Tag criada!\n", style="bold green")
-        console.print(f"ID: {tag.id}")
-        if tag.name:
-            console.print(f"Nome: [bold]{tag.name}[/bold]")
-        console.print(f"Cor: {tag.color}\n")
+            console.print("\n✓ Tag criada!\n", style="bold green")
+            console.print(f"ID: {tag.id}")
+            if tag.name:
+                console.print(f"Nome: [bold]{tag.name}[/bold]")
+            console.print(f"Cor: {tag.color}\n")
 
     except ValueError as e:
         console.print(f"✗ Erro: {e}", style="red")
@@ -33,7 +38,9 @@ def create_tag(
 @app.command("list")
 def list_tags():
     """Lista todas as tags."""
-    tags = TagService.list_tags()
+    with get_engine_context() as engine, Session(engine) as session:
+        service = TagService(session)
+        tags = service.list_tags()
 
     if not tags:
         console.print("Nenhuma tag encontrada.", style="yellow")
@@ -70,8 +77,11 @@ def update_tag(
             console.print("Nenhuma atualização especificada.", style="yellow")
             return
 
-        tag = TagService.update_tag(tag_id, **updates)
-        console.print(f"✓ Tag {tag.id} atualizada", style="green")
+        with get_engine_context() as engine, Session(engine) as session:
+            service = TagService(session)
+            tag = service.update_tag(tag_id, **updates)
+            session.commit()
+            console.print(f"✓ Tag {tag.id} atualizada", style="green")
 
     except ValueError as e:
         console.print(f"✗ Erro: {e}", style="red")
@@ -85,17 +95,20 @@ def delete_tag(
 ):
     """Deleta tag."""
     try:
-        tag = TagService.get_tag(tag_id)
+        with get_engine_context() as engine, Session(engine) as session:
+            service = TagService(session)
+            tag = service.get_tag(tag_id)
 
-        if not force:
-            name_display = f"[bold]{tag.name}[/bold]" if tag.name else f"ID {tag_id}"
-            console.print(f"\nDeletar tag {name_display}?")
-            if not typer.confirm("Confirma?", default=False):
-                console.print("Cancelado.", style="yellow")
-                return
+            if not force:
+                name_display = f"[bold]{tag.name}[/bold]" if tag.name else f"ID {tag_id}"
+                console.print(f"\nDeletar tag {name_display}?")
+                if not typer.confirm("Confirma?", default=False):
+                    console.print("Cancelado.", style="yellow")
+                    return
 
-        TagService.delete_tag(tag_id)
-        console.print("✓ Tag deletada", style="green")
+            service.delete_tag(tag_id)
+            session.commit()
+            console.print("✓ Tag deletada", style="green")
 
     except ValueError as e:
         console.print(f"✗ Erro: {e}", style="red")
