@@ -70,4 +70,4 @@ class HabitService:
         ...
 ```
 
-**API Contract completo:** Ver `docs/core/architecture.md` seção 4.2.1
+**API Contract completo:** Ver `docs/ssot/architecture.md` seção 4.2.1
