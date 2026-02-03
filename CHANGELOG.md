@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-02-03
+
+### Added
+
+- CI/CD: Sincronizacao automatica GitLab => GitHub via job sync:github
+- CI/CD: Suporte a GitHub Merge Queue (evento merge_group)
+- CI/CD: Stage sync no pipeline GitLab
+- docs: cicd-flow.md v2.0 com arquitetura dual-repo completa
+
+### Changed
+
+- CI/CD: GitLab definido como fonte de verdade (source of truth)
+- CI/CD: GitHub configurado como showcase publico
+- CI/CD: Branch protection ajustada para permitir sync automatico
+
+### Fixed
+
+- CI/CD: Historicos divergentes entre GitLab e GitHub
+- CI/CD: Token scope workflow para atualizacao de GitHub Actions
+
+### Metrics
+
+- Total tests: 873 (+188 since v1.4.1)
+- Global coverage: 76% (+5pp since v1.4.1)
+- Distribution: Unit 696 (79.7%), Integration 83 (9.5%), BDD 52 (6.0%), E2E 42 (4.8%)
+- GitLab CI: 8 jobs (6 test + 1 build + 1 sync)
+- Pipeline time: ~3min (local => GitHub sync)
+
 ## [1.4.1] - 2026-01-30
 
 ### Added
@@ -297,7 +325,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.3.2...v1.4.0
 [1.3.2]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.3.1...v1.3.2
