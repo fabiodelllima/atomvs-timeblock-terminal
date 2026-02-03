@@ -68,7 +68,7 @@ class TestBRSystemInitialization:
         result = cli_runner.invoke(app, ["init"])
         # ASSERT
         assert result.exit_code == 0, f"Inicialização deve ter sucesso: {result.output}"
-        assert "initialized" in result.output.lower(), "Mensagem deve confirmar inicialização"
+        assert "inicializado" in result.output.lower(), "Mensagem deve confirmar inicialização"
         assert empty_db_path.exists(), "Arquivo do banco deve existir"
 
     def test_br_system_init_002_recreate_with_confirmation(
@@ -91,7 +91,7 @@ class TestBRSystemInitialization:
         result = cli_runner.invoke(app, ["init"], input="y\n")
         # ASSERT
         assert result.exit_code == 0, "Recriação deve ter sucesso"
-        assert "initialized" in result.output.lower(), "Mensagem deve confirmar reinicialização"
+        assert "inicializado" in result.output.lower(), "Mensagem deve confirmar reinicialização"
 
     def test_br_system_init_003_cancel_recreation(
         self, cli_runner: CliRunner, empty_db_path: Path
@@ -113,9 +113,7 @@ class TestBRSystemInitialization:
         result = cli_runner.invoke(app, ["init"], input="n\n")
         # ASSERT
         assert result.exit_code == 0 or result.exit_code == 1, "Cancelamento retorna 0 ou 1"
-        assert "aborted" in result.output.lower() or "cancelled" in result.output.lower(), (
-            "Mensagem deve indicar cancelamento"
-        )
+        assert "cancelada" in result.output.lower(), "Mensagem deve indicar cancelamento"
 
     def test_br_system_init_004_handles_database_error(
         self, cli_runner: CliRunner, empty_db_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -141,4 +139,4 @@ class TestBRSystemInitialization:
         result = cli_runner.invoke(app, ["init"])
         # ASSERT
         assert result.exit_code == 1, f"Erro deve retornar exit_code 1: {result.output}"
-        assert "error" in result.output.lower(), f"Mensagem deve indicar erro: {result.output}"
+        assert "erro" in result.output.lower(), f"Mensagem deve indicar erro: {result.output}"

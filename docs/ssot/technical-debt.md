@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 1.0.0
+**Versão:** 1.1.0
 
 **Status:** SSOT
 
@@ -14,10 +14,10 @@
 | ------ | ----------------------------- | ---------- | --------- | ------------ | ---------------- |
 | DT-001 | 156 erros mypy                | CRÍTICA    | RESOLVIDO | Jan/2026     | v1.4.0 S1-S3     |
 | DT-002 | 15 testes skipped             | ALTA       | RESOLVIDO | Jan/2026     | v1.4.0 S4        |
-| DT-003 | Cobertura abaixo de 80%       | ALTA       | PENDENTE  | -            | v1.5.0 S2-S3     |
-| DT-004 | EventReordering parcial (61%) | MÉDIA      | PENDENTE  | -            | v1.5.0 S2        |
-| DT-005 | Código morto                  | BAIXA      | PENDENTE  | -            | v1.5.0           |
-| DT-006 | Idioma misto EN/PT em CLI     | MÉDIA      | PENDENTE  | -            | v1.5.0 S4        |
+| DT-003 | Cobertura abaixo de 80%       | ALTA       | PENDENTE  | -            | v1.6.0           |
+| DT-004 | EventReordering parcial (61%) | MÉDIA      | RESOLVIDO | Fev/2026     | -                |
+| DT-005 | Código morto                  | BAIXA      | RESOLVIDO | Fev/2026     | -                |
+| DT-006 | Idioma misto EN/PT em CLI     | MÉDIA      | RESOLVIDO | Fev/2026     | v1.5.0           |
 | DT-007 | migration_001 sem cobertura   | BAIXA      | ACEITO    | -            | -                |
 
 ---
@@ -40,39 +40,40 @@
 - **Resolução:** Implementação dos stubs, atualização para API v2, remoção de testes obsoletos
 - **Estado final:** 0 testes skipped, 618 passando
 
+### DT-004: EventReordering Parcial (RESOLVIDO)
+
+- **Descoberto:** Jan/2026
+- **Resolvido:** Fev/2026
+- **Cobertura original:** 61%
+- **Cobertura atual:** 86%
+- **Resolução:** Testes de integração cobrindo cenários de reorganização
+
+### DT-005: Código Morto (RESOLVIDO)
+
+- **Descoberto:** Jan/2026
+- **Resolvido:** Fev/2026
+- **Verificação:** `ruff check src/timeblock --select F401,F841` retorna 0 issues
+- **Resolução:** Limpeza gradual durante refatorações
+
+### DT-006: Idioma Misto EN/PT (RESOLVIDO)
+
+- **Descoberto:** Jan/2026
+- **Resolvido:** Fev/2026
+- **Referência:** ADR-018 (Language Standards)
+- **Resolução:** Tradução de mensagens CLI para PT-BR, criação de script lint-i18n.py
+- **Verificação:** `python scripts/lint-i18n.py` retorna 0 inconsistências
+
 ---
 
 ## 3. Detalhamento de Itens Pendentes
 
 ### DT-003: Cobertura Abaixo de 80%
 
-- **Cobertura atual:** 72%
+- **Cobertura atual:** 76%
 - **Meta:** 80%
-- **Gap principal:** commands/ (35%), tag_service.py (29%), routine_service.py (53%)
-- **Ação:** Testes de integração para commands, testes unitários para services
-- **Sprint:** v1.5.0 S2-S3
-
-### DT-004: EventReordering Parcial
-
-- **Cobertura atual:** event_reordering_service.py em 61%
-- **Linhas não cobertas:** 101-176 (fluxo de reorganização principal), 187-189, 204-207
-- **Ação:** Testes de integração cobrindo cenários de reorganização
-- **Sprint:** v1.5.0 S2
-
-### DT-005: Código Morto
-
-- **Descrição:** Possíveis imports não utilizados, funções órfãs
-- **Ação:** Análise com vulture ou ruff --select F401,F841
-- **Sprint:** v1.5.0
-
-### DT-006: Idioma Misto EN/PT
-
-- **Referência:** ADR-018 (Language Standards)
-- **Impacto:** Mensagens de CLI alternando entre inglês e português
-- **Exemplo:** `init.py:34` contém "Error initializing database" em vez de "Erro ao inicializar banco de dados"
-- **Ação:** Padronizar todas as mensagens user-facing para PT-BR
-- **Critério de conclusão:** `grep -rn "Error\|Warning\|Success\|Created\|Updated\|Deleted\|Not found\|Invalid" src/timeblock/commands/` retorna apenas linhas de código (except, class), não mensagens
-- **Sprint:** v1.5.0 S4
+- **Gap principal:** commands/ (média 40-70%), reschedule.py (35%), routine.py (33%)
+- **Ação:** Testes de integração para commands CLI
+- **Sprint:** v1.6.0
 
 ### DT-007: migration_001 Sem Cobertura (ACEITO)
 
@@ -98,12 +99,13 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 ## 5. Changelog do Documento
 
-| Data       | Versão | Mudanças                                       |
-| ---------- | ------ | ---------------------------------------------- |
-| 2026-02-01 | 1.0.0  | Extração do roadmap.md para documento dedicado |
+| Data       | Versão | Mudanças                                           |
+| ---------- | ------ | -------------------------------------------------- |
+| 2026-02-03 | 1.1.0  | Atualiza status: DT-004, DT-005, DT-006 resolvidos |
+| 2026-02-01 | 1.0.0  | Extração do roadmap.md para documento dedicado     |
 
 ---
 
-**Próxima Revisão:** Fim v1.5.0
+**Próxima Revisão:** Fim v1.6.0
 
-**Última atualização:** 01 de Fevereiro de 2026
+**Última atualização:** 03 de Fevereiro de 2026
