@@ -101,3 +101,31 @@ class TestBRHabitInstance006Listagem:
         """BR-HABITINSTANCE-006: --pending e --done são mutuamente exclusivos."""
         result = runner.invoke(atom_app, ["list", "--pending", "--done"])
         assert result.exit_code == 1
+
+
+class TestBRTimer007LogManual:
+    """Testes para BR-TIMER-007: Log Manual via CLI."""
+
+    def test_br_timer_007_log_requires_instance_id(self, isolated_db):
+        """BR-TIMER-007: Log requer instance_id."""
+        result = runner.invoke(atom_app, ["log"])
+        assert result.exit_code == 2  # Missing argument
+
+    def test_br_timer_007_log_with_duration(self, isolated_db):
+        """BR-TIMER-007: Log com --duration."""
+        # Sem instância válida, deve falhar com erro de instância
+        result = runner.invoke(atom_app, ["log", "999", "--duration", "60"])
+        assert result.exit_code == 1
+        # Valida que o comando foi processado (não erro de parsing)
+
+    def test_br_timer_007_log_with_interval(self, isolated_db):
+        """BR-TIMER-007: Log com --start e --end."""
+        result = runner.invoke(atom_app, ["log", "999", "--start", "08:00", "--end", "09:00"])
+        assert result.exit_code == 1
+        # Valida que o comando foi processado
+
+    def test_br_timer_007_log_invalid_time_format(self, isolated_db):
+        """BR-TIMER-007: Formato de tempo inválido retorna erro."""
+        result = runner.invoke(atom_app, ["log", "1", "--start", "invalid", "--end", "09:00"])
+        assert result.exit_code == 1
+        assert "formato" in result.output.lower() or "inválido" in result.output.lower()

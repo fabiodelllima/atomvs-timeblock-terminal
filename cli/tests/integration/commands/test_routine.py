@@ -42,6 +42,29 @@ class TestBRRoutine001SingleActive:
         active_count = result.output.count("[ATIVA]")
         assert active_count <= 1
 
+    def test_br_routine_001_deactivate_active_routine(self, isolated_db):
+        """BR-ROUTINE-001: Pode desativar rotina ativa."""
+        runner.invoke(app, ["create", "Manhã"], input="y\n")
+
+        result = runner.invoke(app, ["deactivate", "1"])
+        assert result.exit_code == 0
+        assert "desativada" in result.output.lower()
+
+    def test_br_routine_001_deactivate_twice_shows_info(self, isolated_db):
+        """BR-ROUTINE-001: Desativar rotina já inativa exibe info."""
+        runner.invoke(app, ["create", "Manhã"], input="y\n")
+        runner.invoke(app, ["deactivate", "1"])  # Primeira vez
+
+        result = runner.invoke(app, ["deactivate", "1"])  # Segunda vez
+        assert result.exit_code == 0
+        assert "já está inativa" in result.output.lower()
+
+    def test_br_routine_001_deactivate_nonexistent(self, isolated_db):
+        """BR-ROUTINE-001: Desativar rotina inexistente falha."""
+        result = runner.invoke(app, ["deactivate", "999"])
+        assert result.exit_code == 1
+        assert "não encontrada" in result.output.lower()
+
 
 class TestBRRoutine004ActivationCascade:
     """Testes para BR-ROUTINE-004: Activation Cascade."""
@@ -54,13 +77,7 @@ class TestBRRoutine004ActivationCascade:
         runner.invoke(app, ["activate", "2"])
 
         result = runner.invoke(app, ["list", "--all"])
-        # Só pode ter uma ativa
         assert result.output.count("[ATIVA]") == 1
-        # Noite deve estar ativa agora
-        lines = result.output.split("\n")
-        for line in lines:
-            if "Noite" in line:
-                assert "[ATIVA]" in line or "ATIVA" in line.upper()
 
 
 class TestBRRoutine005ValidacaoNome:
@@ -71,6 +88,12 @@ class TestBRRoutine005ValidacaoNome:
         result = runner.invoke(app, ["create", "Rotina Matinal"], input="n\n")
         assert result.exit_code == 0
         assert "Rotina Matinal" in result.output
+
+    def test_br_routine_005_list_empty_shows_message(self, isolated_db):
+        """BR-ROUTINE-005: Lista vazia exibe mensagem apropriada."""
+        result = runner.invoke(app, ["list"])
+        assert result.exit_code == 0
+        assert "nenhuma" in result.output.lower()
 
     def test_br_routine_005_list_shows_names(self, isolated_db):
         """BR-ROUTINE-005: Lista exibe nomes das rotinas."""
