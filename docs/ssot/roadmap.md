@@ -78,11 +78,11 @@ As métricas atuais refletem medições reais executadas em 03/02/2026.
 
 | Métrica       | Atual | Meta v1.6.0 | Status     |
 | ------------- | ----- | ----------- | ---------- |
-| Cobertura     | 87%   | 80%         | [OK]       |
+| Cobertura     | 76%   | 80%         | [PENDENTE] |
 | Erros mypy    | 0     | 0           | [OK]       |
-| Testes total  | 778   | 800+        | [OK]       |
-| CLI funcional | 95%   | 100%        | [OK]       |
-| BRs cobertas  | 92%   | 95%         | [OK]       |
+| Testes total  | 873   | 900+        | [OK]       |
+| CLI funcional | 85%   | 100%        | [PENDENTE] |
+| BRs cobertas  | 83%   | 95%         | [PENDENTE] |
 
 ### 3.2. Distribuição de Testes
 
