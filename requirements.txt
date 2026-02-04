@@ -24,7 +24,7 @@ pytest-cov==7.0.0
 python-dateutil==2.9.0.post0
 pytokens==0.1.10
 rich==14.1.0
-ruff==0.14.0
+ruff==0.14.14
 shellingham==1.5.4
 six==1.17.0
 SQLAlchemy==2.0.43
