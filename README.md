@@ -15,8 +15,8 @@
 ```
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-685%20passing-success.svg)](cli/tests/)
-[![Coverage](https://img.shields.io/badge/coverage-71%25-green.svg)](cli/tests/)
+[![Tests](https://img.shields.io/badge/tests-778%20passing-success.svg)](cli/tests/)
+[![Coverage](https://img.shields.io/badge/coverage-87%25-green.svg)](cli/tests/)
 
 ---
 
@@ -360,7 +360,7 @@ mypy src/
 
 ## Roadmap
 
-O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão atual (v1.4.x) consolidou a formalização de business rules e expandiu significativamente a cobertura de testes E2E. Versões futuras expandirão para API REST, microservices e aplicativo móvel.
+O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão atual (v1.6.0) expandiu cobertura de testes para 87% (778 testes). Versões futuras expandirão para API REST, microservices e aplicativo móvel.
 
 | Versão | Status    | Features                             |
 | ------ | --------- | ------------------------------------ |
@@ -369,8 +369,9 @@ O roadmap está organizado em releases incrementais, cada uma construindo sobre 
 | v1.2.x | [DONE]    | Logging, docs consolidados           |
 | v1.3.x | [DONE]    | Date parser, BDD tests, DI refactor  |
 | v1.4.0 | [DONE]    | Business rules formalizadas, 27 ADRs |
-| v1.4.1 | [CURRENT] | E2E tests expansion (685 tests, 71%) |
-| v1.5.0 | [PLANNED] | Infra Foundation (Docker, CI/CD)     |
+| v1.4.1 | [DONE]    | E2E tests expansion (685 tests, 71%) |
+| v1.5.0 | [DONE]    | Infra Foundation (Docker, CI/CD)     |
+| v1.6.0 | [CURRENT] | Coverage Sprint (778 tests, 87%)     |
 | v2.0.0 | [PLANNED] | FastAPI REST API + Observabilidade   |
 | v3.0.0 | [FUTURE]  | Microservices Ecosystem (Kafka)      |
 | v4.0.0 | [FUTURE]  | Android App (Kotlin)                 |
