@@ -60,7 +60,7 @@ O histórico de releases mostra uma progressão consistente: cada versão expand
 | v1.4.1 | Jan/2026 | E2E Tests, Quality Metrics   | CHANGELOG.md |
 | v1.5.0 | Fev/2026 | CI/CD Dual-Repo, i18n        | CHANGELOG.md |
 
-O detalhamento de métricas por release está disponível em `docs/ssot/quality-metrics.md`.
+O detalhamento de métricas por release está disponível em `docs/core/quality-metrics.md`.
 
 ---
 
@@ -220,7 +220,7 @@ A camada de commands/ está com cobertura desigual. Foco em testes de integraç�
 
 ## 5. Débito Técnico
 
-O inventário completo está em `docs/ssot/technical-debt.md`.
+O inventário completo está em `docs/core/technical-debt.md`.
 
 **Resumo:**
 

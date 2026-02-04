@@ -443,7 +443,7 @@ grep -rn "def isolated_db" tests/ --include="*.py"
 
 - ADR-007: Service Layer Pattern
 - ADR-019: Test Naming Convention
-- `docs/ssot/architecture.md` seção 4.4 (Database Layer)
+- `docs/core/architecture.md` seção 4.4 (Database Layer)
 
 ---
 
