@@ -229,7 +229,7 @@ Pipeline espelho no GitHub para validação no repositório de showcase.
 
 ## 7. Referências
 
-- **ROADMAP:** `docs/ssot/roadmap.md`
+- **ROADMAP:** `docs/core/roadmap.md`
 - **CHANGELOG:** `CHANGELOG.md`
 - **ADR-007:** Service Layer com Dependency Injection
 - **ADR-019:** Test Naming Convention

@@ -82,7 +82,7 @@ Toda mudança é explicável e reversível. Usuário sempre tem controle final.
 ```
 ┌------------------------------------------------------------------┐
 |                    1. DOCUMENTATION                              |
-|    docs/ssot/business-rules.md                                   |
+|    docs/core/business-rules.md                                   |
 |    - Business Rules documentadas (BR-DOMAIN-XXX)                 |
 |    - 50 regras formalizadas                                      |
 └------------------------------------------------------------------┘
@@ -1827,9 +1827,9 @@ Funcionalidade: Cálculo de Streak
 
 | Documento         | Conteúdo                     | Localização                 |
 | ----------------- | ---------------------------- | --------------------------- |
-| architecture.md   | Camadas, stack, princípios   | docs/ssot/architecture.md   |
-| business-rules.md | Todas as 50 BRs detalhadas   | docs/ssot/business-rules.md |
-| cli-reference.md  | Sintaxe completa de comandos | docs/ssot/cli-reference.md  |
+| architecture.md   | Camadas, stack, princípios   | docs/core/architecture.md   |
+| business-rules.md | Todas as 50 BRs detalhadas   | docs/core/business-rules.md |
+| cli-reference.md  | Sintaxe completa de comandos | docs/core/cli-reference.md  |
 
 ### 18.3 Referências Externas
 
@@ -1869,7 +1869,7 @@ Funcionalidade: Cálculo de Streak
 
 | Versão | Data       | Alterações                                    |
 | ------ | ---------- | --------------------------------------------- |
-| 2.1.0  | 01/12/2025 | Regeneração completa alinhada com docs/ssot/  |
+| 2.1.0  | 01/12/2025 | Regeneração completa alinhada com docs/core/  |
 |        |            | - Nomenclatura BR-REORDER-(não BR-EVENT-)     |
 |        |            | - Status: PENDING, DONE, NOT_DONE             |
 |        |            | - Substatuses alinhados com business-rules.md |

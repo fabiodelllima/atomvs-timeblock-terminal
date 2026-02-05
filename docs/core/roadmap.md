@@ -14,10 +14,10 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada e
 
 O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 8 jobs. O foco atual é fechar gaps de cobertura de testes antes da introdução da interface TUI.
 
-**Estado Atual (03/02/2026):**
+**Estado Atual (04/02/2026):**
 
-- Versão: v1.5.0 (estável)
-- Qualidade: 76% cobertura, 0 erros mypy, 873 testes
+- Versão: v1.6.0 (estável)
+- Qualidade: 87% cobertura, 0 erros mypy, 778 testes
 - Funcionalidade: 85% comandos CLI operacionais
 - Infraestrutura: CI/CD dual-repo com sync automático, 8 jobs bloqueantes
 
@@ -59,8 +59,9 @@ O histórico de releases mostra uma progressão consistente: cada versão expand
 | v1.4.0 | Jan/2026 | Mypy Zero, Services Complete | CHANGELOG.md |
 | v1.4.1 | Jan/2026 | E2E Tests, Quality Metrics   | CHANGELOG.md |
 | v1.5.0 | Fev/2026 | CI/CD Dual-Repo, i18n        | CHANGELOG.md |
+| v1.6.0 | Fev/2026 | Coverage Sprint (87%)        | CHANGELOG.md |
 
-O detalhamento de métricas por release está disponível em `docs/ssot/quality-metrics.md`.
+O detalhamento de métricas por release está disponível em `docs/core/quality-metrics.md`.
 
 ---
 
@@ -68,7 +69,7 @@ O detalhamento de métricas por release está disponível em `docs/ssot/quality-
 
 A versão v1.5.0 consolidou a infraestrutura de CI/CD com arquitetura dual-repo (GitLab como fonte de verdade, GitHub como showcase), sincronização automática via job sync:github, e padronização de mensagens CLI em português.
 
-- **Versão:** v1.5.0 (estável)
+- **Versão:** v1.6.0 (estável)
 - **Branch:** `develop`
 - **Data:** 03 de Fevereiro de 2026
 
@@ -92,7 +93,7 @@ Integration:  83 (9.5%)
 BDD:          52 (6.0%)
 E2E:          42 (4.8%)
 ─────────────────────────
-TOTAL:       873 testes
+TOTAL:       778 testes
 ```
 
 ### 3.3. Infraestrutura CI/CD
@@ -220,7 +221,7 @@ A camada de commands/ está com cobertura desigual. Foco em testes de integraç�
 
 ## 5. Débito Técnico
 
-O inventário completo está em `docs/ssot/technical-debt.md`.
+O inventário completo está em `docs/core/technical-debt.md`.
 
 **Resumo:**
 

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-02-04
+
+### Added
+
+- test: 49 novos testes de integração para commands/
+- test: Cobertura de BR-ROUTINE-001/004/005, BR-TIMER-001/007, BR-CLI-001
+
+### Changed
+
+- docs: Renomeia docs/ssot/ para docs/core/
+
+### Metrics
+
+- Total tests: 778 (+49 since v1.5.0)
+- Global coverage: 87% (+11pp since v1.5.0)
+- Commands coverage: atom 89%, reschedule 88%, routine 81%, tag 94%
+
 ## [1.5.0] - 2026-02-03
 
 ### Added
