@@ -1,4 +1,4 @@
-# GitLab CI/CD Pipeline - TimeBlock Organizer
+# GitLab CI/CD Pipeline
 image: python:3.13
 
 variables:
@@ -122,4 +122,5 @@ sync:github:
   only:
     - develop
     - main
+    - tags
   when: on_success
