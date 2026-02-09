@@ -23,6 +23,7 @@
 11. [Validações Globais](#11-validações-globais)
 12. [CLI](#12-cli)
 13. [Tag](#13-tag)
+14. [TUI](#14-tui)
 
 ---
 
@@ -334,6 +335,8 @@ Livros completados: 2
 
 ## 2. Conceitos do Domínio
 
+O modelo de domínio organiza o gerenciamento de tempo em torno de três conceitos centrais: Routines (templates semanais que agrupam hábitos relacionados), Habits (templates de eventos recorrentes que representam o planejamento ideal) e HabitInstances (ocorrências concretas em datas específicas que rastreiam a execução real). Tasks complementam o sistema como eventos independentes e não-recorrentes. As entidades Timer e TimeLog fornecem capacidades de rastreamento de tempo, enquanto Tags oferecem categorização visual.
+
 ### 2.1. Entidades Principais
 
 | Entidade          | Descrição                                              |
@@ -377,6 +380,8 @@ Task (Dentista 14:30 - independente de routine)
 ---
 
 ## 3. Routine
+
+Routines são a unidade organizacional de mais alto nível, funcionando como coleções temáticas de hábitos (ex: "Rotina Matinal", "Rotina de Trabalho"). A restrição de rotina única ativa garante que o usuário opera em um contexto por vez, simplificando o gerenciamento de hábitos. Rotinas definem o escopo para comandos de hábito e servem como contexto primário de navegação tanto na CLI quanto na TUI.
 
 ### BR-ROUTINE-001: Single Active Constraint
 
@@ -593,6 +598,8 @@ $ routine delete 1 --purge
 
 ## 4. Habit
 
+Habits representam templates de eventos recorrentes — o planejamento ideal que o usuário aspira seguir. Cada hábito pertence a exatamente uma rotina e define o que deve acontecer, quando e com qual frequência. O sistema gera HabitInstances concretas a partir destes templates, separando o plano (Habit) da execução (HabitInstance). Modificações no template afetam apenas instâncias futuras, preservando o histórico de execução.
+
 ### BR-HABIT-001: Estrutura de Habito
 
 **Descrição:** Habit é template de evento recorrente vinculado a Routine.
@@ -749,6 +756,8 @@ instances: list[HabitInstance] = Relationship(
 ---
 
 ## 5. HabitInstance
+
+HabitInstances são a unidade atômica do sistema — ocorrências concretas de um hábito em uma data específica. Elas rastreiam se o usuário efetivamente seguiu seu planejamento, com transições de status de PENDING para DONE ou NOT_DONE. O sistema de substatus fornece feedback granular sobre a qualidade da execução, permitindo distinguir entre conclusão completa, esforço parcial e diversos motivos para pular.
 
 ### BR-HABITINSTANCE-001: Status Principal
 
@@ -941,6 +950,8 @@ habit edit INSTANCE_ID --start 08:00 --end 09:30
 
 ## 6. Skip
 
+O sistema de skip fornece categorização estruturada para hábitos não realizados, distinguindo entre decisões conscientes (skips justificados com razão) e omissões passivas (injustificados ou ignorados). Esta granularidade alimenta análises comportamentais e respeita o princípio de Atomic Habits de que entender por que você pula é tão valioso quanto rastrear o que você completa.
+
 ### BR-SKIP-001: Categorização de Skip
 
 **Descrição:** Skip de habit deve ser categorizado usando enum SkipReason.
@@ -1065,6 +1076,8 @@ Escolha [1-9]: _
 
 ## 7. Streak
 
+Streaks medem consistência contando dias consecutivos de conclusão. O algoritmo segue a ênfase de Atomic Habits em "nunca quebrar a corrente" — qualquer status NOT_DONE quebra o streak independente da justificativa. Esta escolha de design deliberada reforça que consistência importa mais que perfeição, enquanto o sistema de substatus rastreia separadamente a qualidade e o contexto de cada skip.
+
 ### BR-STREAK-001: Algoritmo de Cálculo
 
 **Descrição:** Streak conta dias consecutivos com `status = DONE`, do mais recente para trás.
@@ -1171,6 +1184,8 @@ def calculate_streak(habit_id: int) -> int:
 ---
 
 ## 8. Task
+
+Tasks são eventos pontuais intencionalmente simples que complementam o sistema de hábitos. Diferente de hábitos, tasks não possuem associação com rotinas, integração com timer nem padrões de recorrência. Funcionam como checkboxes datados para atividades únicas como consultas ou compromissos, mantendo o sistema focado em sua missão principal de rastreamento de hábitos enquanto cobre necessidades básicas de gerenciamento de tarefas.
 
 ### BR-TASK-001: Estrutura de Task
 
@@ -1345,6 +1360,8 @@ task reopen ID
 ---
 
 ## 9. Timer
+
+O subsistema de timer fornece rastreamento em tempo real da execução de hábitos, medindo tempo efetivo gasto versus duração planejada. A restrição de timer único ativo previne medições conflitantes, enquanto o mecanismo de pause/resume acomoda interrupções. Os dados do timer alimentam diretamente o cálculo de porcentagem de conclusão, permitindo que o sistema de substatus classifique automaticamente a qualidade da execução.
 
 ### BR-TIMER-001: Single Active Timer
 
@@ -1629,6 +1646,8 @@ habit log INSTANCE_ID --duration 90
 
 ## 10. Event Reordering
 
+O reordenamento de eventos implementa a filosofia central do projeto: o sistema detecta e informa sobre conflitos de horário, mas nunca impõe mudanças. Conflitos são calculados dinamicamente ao invés de persistidos, e nunca bloqueiam ações do usuário. Este design reflete o princípio de que o usuário mantém autonomia completa sobre sua agenda, com o sistema servindo como conselheiro inteligente e não como agendador autoritário.
+
 ### BR-REORDER-001: Definição de Conflito
 
 **Descrição:** Conflito ocorre quando dois eventos tem sobreposição temporal no mesmo dia.
@@ -1747,6 +1766,8 @@ Iniciar timer mesmo assim? [Y/n]: y
 
 ## 11. Validações Globais
 
+Validações globais definem restrições transversais aplicáveis a todas as entidades: intervalos de tempo, limites de data e limites de strings. Estas regras garantem integridade de dados no nível do modelo, prevenindo estados inválidos antes de alcançarem o banco de dados. As validações são aplicadas consistentemente nas interfaces CLI e TUI através da camada de services compartilhada.
+
 ### BR-VAL-001: Validação de Horários
 
 **Regras:**
@@ -1796,6 +1817,8 @@ Iniciar timer mesmo assim? [Y/n]: y
 ---
 
 ## 12. CLI
+
+A interface CLI segue o padrão resource-first (ADR-005) onde comandos são estruturados como `timeblock <recurso> <ação>`. Textos voltados ao usuário são em Português Brasileiro (ADR-018), enquanto identificadores de código permanecem em inglês. O parser de datetime aceita múltiplos formatos incluindo ISO 8601 e convenções brasileiras, reduzindo fricção no uso diário.
 
 ### BR-CLI-001: Validação de Flags Dependentes
 
@@ -1907,6 +1930,8 @@ $ habit create --title "Academia" --start 07:00
 
 ## 13. Tag
 
+Tags fornecem categorização leve para hábitos e tasks através de cor e nome opcional. O design é intencionalmente mínimo — uma tag por entidade, sem hierarquias, sem nomes obrigatórios — mantendo o sistema simples enquanto habilita organização visual tanto na CLI quanto na TUI.
+
 ### BR-TAG-001: Estrutura de Tag
 
 **Descrição:** Tag é entidade para categorização de habits e tasks.
@@ -1971,12 +1996,267 @@ Tag (1) ----< Tasks (N)
 
 - **ADRs:** `docs/decisions/`
 - **Livro:** "Atomic Habits" - James Clear
-- **Service Layer:** `cli/src/timeblock/services/`
-- **Models:** `cli/src/timeblock/models/`
-- **Enums:** `cli/src/timeblock/models/enums.py`
+- **Service Layer:** `src/timeblock/services/`
+- **Models:** `src/timeblock/models/`
+- **Enums:** `src/timeblock/models/enums.py`
 
 ---
 
 **Documento consolidado em:** 28 de Novembro de 2025
 
 **Total de regras:** 50 BRs
+
+## 14. TUI
+
+A TUI (Terminal User Interface) oferece interface interativa como alternativa à CLI para uso diário. Implementada com Textual (ADR-031), compartilha 100% da camada de services com a CLI.
+
+**Referências:** ADR-006 (decisão original), ADR-031 (implementação), ADR-007 (service layer)
+
+---
+
+### BR-TUI-001: Entry Point Detection
+
+**Descrição:** O binário `timeblock` sem argumentos abre a TUI. Com argumentos, executa CLI normalmente. Se Textual não está instalado, exibe mensagem de orientação.
+
+**Regras:**
+
+1. `timeblock` (sem args) → Abre TUI
+2. `timeblock <qualquer-arg>` → Executa CLI (Typer)
+3. `timeblock --help` → Help da CLI (tem argumento)
+4. Se Textual não instalado e sem args → Mensagem orientando instalação
+5. CLI NUNCA depende de Textual (import condicional)
+
+**Implementação:**
+
+```python
+import sys
+
+def main():
+    if len(sys.argv) <= 1:
+        try:
+            from timeblock.tui.app import TimeBlockApp
+            TimeBlockApp().run()
+        except ImportError:
+            print("[WARN] TUI requer 'textual'.")
+            print("       Instale: pip install atomvs-timeblock-terminal[tui]")
+            print("       Uso CLI: timeblock --help")
+    else:
+        app()  # Typer
+```
+
+**Testes:**
+
+- `test_br_tui_001_no_args_launches_tui`
+- `test_br_tui_001_with_args_launches_cli`
+- `test_br_tui_001_help_uses_cli`
+- `test_br_tui_001_fallback_without_textual`
+
+---
+
+### BR-TUI-002: Screen Navigation
+
+**Descrição:** A TUI possui 5 screens navegáveis por sidebar. Navegação por keybindings numéricos ou mnemônicos. Apenas uma screen ativa por vez.
+
+**Regras:**
+
+1. Screens disponíveis: Dashboard, Routines, Habits, Tasks, Timer
+2. Screen inicial ao abrir: Dashboard
+3. Keybindings numéricos: `1`=Dashboard, `2`=Routines, `3`=Habits, `4`=Tasks, `5`=Timer
+4. Keybindings mnemônicos: `d`=Dashboard, `r`=Routines, `h`=Habits, `t`=Tasks, `m`=Timer (de "medidor")
+5. Sidebar exibe todas as screens com indicador da screen ativa
+6. Navegação preserva estado da screen anterior (não reseta dados em edição)
+
+**Testes:**
+
+- `test_br_tui_002_initial_screen_is_dashboard`
+- `test_br_tui_002_numeric_keybinding_navigation`
+- `test_br_tui_002_mnemonic_keybinding_navigation`
+- `test_br_tui_002_sidebar_shows_active_screen`
+
+---
+
+### BR-TUI-003: Dashboard Screen
+
+**Descrição:** O Dashboard exibe resumo do dia corrente: rotina ativa, hábitos pendentes/concluídos, tarefas ativas e status do timer. Serve como ponto de entrada e visão geral.
+
+**Regras:**
+
+1. Exibe nome da rotina ativa (ou "[Nenhuma rotina ativa]")
+2. Card "Hábitos Hoje": lista instâncias do dia com status (pending/done/not_done)
+3. Card "Tarefas": lista tarefas pendentes ordenadas por prioridade
+4. Card "Timer": exibe timer ativo (se houver) ou "[Sem timer ativo]"
+5. Dados atualizados ao entrar na screen (refresh on focus)
+6. Se não há rotina ativa, exibir orientação para criar/ativar uma
+
+**Testes:**
+
+- `test_br_tui_003_shows_active_routine_name`
+- `test_br_tui_003_shows_no_routine_message`
+- `test_br_tui_003_shows_today_habits_with_status`
+- `test_br_tui_003_shows_pending_tasks`
+- `test_br_tui_003_shows_active_timer`
+- `test_br_tui_003_refreshes_on_focus`
+
+---
+
+### BR-TUI-004: Global Keybindings
+
+**Descrição:** Keybindings globais funcionam em qualquer screen. Não conflitam com keybindings de screen específica.
+
+**Regras:**
+
+1. `q` ou `Q` → Sair da TUI (com confirmação se timer ativo)
+2. `?` → Exibir ajuda (overlay com lista de keybindings)
+3. `escape` → Fechar modal/dialog aberto, ou voltar ao Dashboard se nenhum modal
+4. Keybindings de navegação (1-5, d/r/h/t/m) são globais
+5. Keybindings de screen (CRUD) só funcionam na screen ativa
+6. Se timer está ativo e usuário pressiona `q`, exibir confirmação
+
+**Testes:**
+
+- `test_br_tui_004_quit_keybinding`
+- `test_br_tui_004_quit_confirms_with_active_timer`
+- `test_br_tui_004_help_overlay`
+- `test_br_tui_004_escape_closes_modal`
+- `test_br_tui_004_escape_returns_to_dashboard`
+
+---
+
+### BR-TUI-005: CRUD Operations Pattern
+
+**Descrição:** Todas as screens com CRUD seguem padrão consistente de interação. Create e Update usam formulários inline. Delete requer confirmação.
+
+**Regras:**
+
+1. `n` ou `a` → Novo item (abre formulário inline)
+2. `e` → Editar item selecionado
+3. `x` → Deletar item selecionado (abre confirmação)
+4. `enter` → Ver detalhes do item selecionado
+5. Confirmação de delete exibe nome do item e requer `y` explícito
+6. Operações de escrita usam session-per-action (ADR-031)
+7. Após operação bem-sucedida, lista atualizada automaticamente
+8. Erros de validação exibidos inline (não modal)
+
+**Testes:**
+
+- `test_br_tui_005_create_opens_form`
+- `test_br_tui_005_edit_opens_prefilled_form`
+- `test_br_tui_005_delete_requires_confirmation`
+- `test_br_tui_005_delete_confirmation_shows_name`
+- `test_br_tui_005_successful_operation_refreshes_list`
+- `test_br_tui_005_validation_error_shown_inline`
+
+---
+
+### BR-TUI-006: Timer Screen Live Display
+
+**Descrição:** O Timer screen exibe contagem em tempo real com atualização a cada segundo. Suporta start, pause, resume, stop e cancel. Integra com TimerService existente.
+
+**Regras:**
+
+1. Display atualiza a cada 1 segundo (set_interval)
+2. Keybindings de timer: `s`=start, `p`=pause/resume, `enter`=stop, `c`=cancel
+3. Display mostra: tempo decorrido, evento associado, status (running/paused)
+4. Pause congela display; resume retoma contagem
+5. Stop salva sessão e exibe resumo
+6. Cancel descarta sessão com confirmação
+7. Timer ativo visível na status bar de qualquer screen
+
+**Testes:**
+
+- `test_br_tui_006_timer_display_updates`
+- `test_br_tui_006_start_keybinding`
+- `test_br_tui_006_pause_resume_toggle`
+- `test_br_tui_006_stop_saves_session`
+- `test_br_tui_006_cancel_requires_confirmation`
+- `test_br_tui_006_active_timer_in_status_bar`
+
+---
+
+### BR-TUI-007: Status Bar
+
+**Descrição:** Barra de status persistente no rodapé exibe informações contextuais: rotina ativa, timer ativo (se houver) e hora atual.
+
+**Regras:**
+
+1. Posição: rodapé, largura total
+2. Seção esquerda: nome da rotina ativa
+3. Seção central: timer ativo com tempo decorrido (se houver)
+4. Seção direita: hora atual (HH:MM)
+5. Hora atualiza a cada minuto
+6. Timer atualiza a cada segundo (quando ativo)
+7. Se não há rotina ativa: exibe "[Sem rotina]"
+
+**Testes:**
+
+- `test_br_tui_007_shows_active_routine`
+- `test_br_tui_007_shows_active_timer`
+- `test_br_tui_007_shows_current_time`
+- `test_br_tui_007_updates_timer_every_second`
+
+---
+
+### BR-TUI-008: Consistência Visual (Material-like)
+
+**Descrição:** A TUI segue design system Material-like com paleta de cores definida, cards com bordas, spacing consistente e hierarquia visual clara.
+
+**Regras:**
+
+1. Paleta definida em theme.tcss (single source of truth para cores)
+2. Cards: borda arredondada, padding 1x2, margin 1
+3. Status colors: verde (done/success), amarelo (pending/warning), vermelho (missed/error)
+4. Texto primário: alto contraste sobre superfície
+5. Texto secundário: cor muted para labels e metadados
+6. Sidebar: largura fixa 22 caracteres, fundo surface-alt
+7. Tipografia: bold para títulos, normal para conteúdo, dim para metadados
+
+**Testes:**
+
+- `test_br_tui_008_theme_file_exists`
+- `test_br_tui_008_cards_have_consistent_style`
+- `test_br_tui_008_status_colors_applied`
+
+---
+
+### BR-TUI-009: Compartilhamento da Service Layer
+
+**Descrição:** A TUI consome os mesmos services que a CLI. Nenhuma lógica de negócio é duplicada na camada TUI. A TUI é exclusivamente UI: captura input, chama service, exibe resultado.
+
+**Regras:**
+
+1. TUI importa de `timeblock.services` (mesmo pacote que CLI)
+2. TUI NUNCA acessa models/ORM diretamente (sempre via service)
+3. Session criada por operação (session-per-action pattern)
+4. Erros de service propagados e exibidos como notificação
+5. Validações de negócio permanecem nos services (não na TUI)
+
+**Testes:**
+
+- `test_br_tui_009_uses_routine_service`
+- `test_br_tui_009_uses_habit_service`
+- `test_br_tui_009_uses_task_service`
+- `test_br_tui_009_uses_timer_service`
+- `test_br_tui_009_no_direct_model_access`
+
+---
+
+### BR-TUI-010: Ações de HabitInstance
+
+**Descrição:** A tela de Hábitos permite marcar instâncias como done ou skip com substatus, integrando com BR-HABITINSTANCE-001 e BR-SKIP-001.
+
+**Regras:**
+
+1. Lista instâncias do dia agrupadas por hábito
+2. `enter` em instância pendente → Menu de ação (Done/Skip)
+3. Done solicita duração real (minutos) para cálculo de substatus
+4. Skip solicita categoria (SkipReason) e justificativa opcional
+5. Instâncias já finalizadas (done/not_done) exibem status com cor
+6. Substatus calculado automaticamente pelo HabitInstanceService (BR-HABITINSTANCE-002/003)
+
+**Testes:**
+
+- `test_br_tui_010_lists_today_instances`
+- `test_br_tui_010_mark_done_asks_duration`
+- `test_br_tui_010_mark_skip_asks_reason`
+- `test_br_tui_010_shows_substatus_color`
+- `test_br_tui_010_completed_instances_readonly`

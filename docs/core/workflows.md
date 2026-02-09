@@ -77,38 +77,50 @@ Mudanças preservam a intenção original. Se planejou 30min de meditação, a d
 
 Toda mudança é explicável e reversível. Usuário sempre tem controle final.
 
-### 1.3 Hierarquia Metodológica
+### 1.3 Engenharia de Requisitos
+
+O projeto segue técnicas formais de Engenharia de Requisitos (ISO/IEC/IEEE 29148:2018, SWEBOK v4.0), onde cada fase produz artefatos que são pré-requisito da fase seguinte. A direção é sempre descendente: especificação informa validação, validação informa verificação, verificação informa implementação.
 
 ```
-┌------------------------------------------------------------------┐
-|                    1. DOCUMENTATION                              |
-|    docs/ssot/business-rules.md                                   |
-|    - Business Rules documentadas (BR-DOMAIN-XXX)                 |
-|    - 50 regras formalizadas                                      |
-└------------------------------------------------------------------┘
-                              |
+┌──────────────────────────────────────────────────────────────────┐
+│                    1. ESPECIFICAÇÃO DE REQUISITOS                │
+│    docs/core/business-rules.md                                   │
+│    - Business Rules formalizadas (BR-DOMAIN-XXX)                 │
+│    - 60 regras com critérios de aceitação verificáveis           │
+└──────────────────────────────────────────────────────────────────┘
+                              │
                               v
-┌------------------------------------------------------------------┐
-|                    2. BDD (Behavior-Driven)                      |
-|    Cenários em formato Gherkin (DADO/QUANDO/ENTÃO)               |
-|    Documentação executável                                       |
-└------------------------------------------------------------------┘
-                              |
+┌──────────────────────────────────────────────────────────────────┐
+│                    2. VALIDAÇÃO (BDD)                            │
+│    Cenários em formato Gherkin (DADO/QUANDO/ENTÃO)               │
+│    Documentação executável                                       │
+└──────────────────────────────────────────────────────────────────┘
+                              │
                               v
-┌------------------------------------------------------------------┐
-|                    3. TESTS                                      |
-|    tests/unit/         -> Validam BRs isoladamente               |
-|    tests/integration/  -> Validam workflows                      |
-|    tests/e2e/          -> Validam experiência completa           |
-└------------------------------------------------------------------┘
-                              |
+┌──────────────────────────────────────────────────────────────────┐
+│                    3. VERIFICAÇÃO (TDD)                          │
+│    tests/unit/         => Verificam BRs isoladamente             │
+│    tests/integration/  => Verificam workflows                    │
+│    tests/e2e/          => Verificam experiência completa         │
+└──────────────────────────────────────────────────────────────────┘
+                              │
                               v
-┌------------------------------------------------------------------┐
-|                    4. IMPLEMENTATION                             |
-|    src/timeblock/services/  -> Lógica de negócio                 |
-|    src/timeblock/commands/  -> Interface CLI                     |
-└------------------------------------------------------------------┘
+┌──────────────────────────────────────────────────────────────────┐
+│                    4. IMPLEMENTAÇÃO                              │
+│    src/timeblock/services/  => Lógica de negócio                 │
+│    src/timeblock/commands/  => Interface CLI                     │
+└──────────────────────────────────────────────────────────────────┘
 ```
+
+A fase de especificação formaliza cada requisito funcional como uma business rule com identificador único (BR-DOMAIN-XXX), descrição do comportamento esperado e critérios de aceitação verificáveis. Nenhum código ou teste é escrito sem que a BR correspondente exista em `docs/core/business-rules.md`.
+
+A fase de validação traduz as business rules em cenários executáveis no formato Gherkin com verbos em português (DADO/QUANDO/ENTÃO). Estes cenários confirmam que os requisitos expressam corretamente a intenção do sistema antes de qualquer implementação, servindo simultaneamente como documentação executável e contrato entre requisitos e comportamento.
+
+A fase de verificação aplica Strict TDD com as três leis de Robert C. Martin para garantir que a implementação atende ao requisito especificado. Os testes seguem a convenção `test_br_*` (ADR-019), criando rastreabilidade bidirecional entre cada business rule e seus testes correspondentes.
+
+A fase de implementação produz o código de produção guiado exclusivamente pelos testes que falharam na fase anterior. O princípio fundamental é que, quando um teste falha, o código está errado — não o teste.
+
+**SSOT de Processo:** O detalhamento completo está em `docs/core/development.md`. Ver também ADR-025 (Engenharia de Requisitos).
 
 ### 1.4 Stack Tecnológica
 
@@ -137,7 +149,7 @@ Toda mudança é explicável e reversível. Usuário sempre tem controle final.
        │ 1:N
        v
 ┌─────────────┐      1:N     ┌────────────────────┐
-│    Habit    │─────────────→│  HabitInstance     │
+│    Habit    │─────────────>│  HabitInstance     │
 │─────────────│              │────────────────────│
 │ id          │              │ id                 │
 │ routine_id  │              │ habit_id           │
@@ -245,21 +257,21 @@ Toda mudança é explicável e reversível. Usuário sempre tem controle final.
 │                                                              │
 │     ┌────────────┐                                           │
 │     │  NO TIMER  │  ← Estado inicial                         │
-│     └──────┬─────┘                                           │
-│            │ start                                           │
-│            v                                                 │
+│     └─────┬──────┘                                           │
+│           │ start                                            │
+│           v                                                  │
 │     ┌────────────┐                                           │
-│     │  RUNNING   │◄─────────┐                                │
-│     └──────┬─────┘          │                                │
-│            │                │ resume                         │
-│     ┌──────┼──────┐         │                                │
-│     │pause │stop  │reset    │                                │
-│     v      v      v         │                                │
-│  ┌──────┐ ┌────┐ ┌────────┐ │                                │
-│  │PAUSED│ │DONE│ │CANCELED│ │                                │
-│  └──┬───┘ └────┘ └────────┘ │                                │
-│     │                       │                                │
-│     └───────────────────────┘                                │
+│     │  RUNNING   │<──────────────┐                           │
+│     └─────────┬──┘               │                           │
+│               │                  │ resume                    │
+│    ┌──────────┼─────────┐        │                           │
+│    │ pause    │ stop    │ reset  │                           │
+│    v          v         v        │                           │
+│ ┌────────┐ ┌──────┐ ┌──────────┐ │                           │
+│ │ PAUSED │ │ DONE │ │ CANCELED │ │                           │
+│ └───┬────┘ └──────┘ └──────────┘ │                           │
+│     │                            │                           │
+│     └────────────────────────────┘                           │
 │                                                              │
 │  DONE: Salva TimeLog, marca instância DONE                   │
 │  CANCELED: Descarta sessão, instância continua PENDING       │
@@ -290,10 +302,10 @@ Toda mudança é explicável e reversível. Usuário sempre tem controle final.
 │            │ create                                          │
 │            v                                                 │
 │     ┌────────────┐     activate      ┌────────────┐          │
-│     │  INACTIVE  │──────────────────→│   ACTIVE   │          │
+│     │  INACTIVE  │──────────────────>│   ACTIVE   │          │
 │     └──────┬─────┘                   └──────┬─────┘          │
 │            │                                │                │
-│            │←───────────────────────────────┘                │
+│            │<───────────────────────────────┘                │
 │            │     deactivate / activate(outro)                │
 │            │                                                 │
 │     ┌──────┴─────────────────────────────────────┐           │
@@ -940,9 +952,9 @@ Toda mudança é explicável e reversível. Usuário sempre tem controle final.
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │ Instâncias pendentes hoje:                             │  │
 │  │                                                        │  │
-│  │ [1] Academia (07:00-08:30)                             │  │
-│  │ [2] Meditação (06:00-06:20)                            │  │
-│  │ [3] Leitura (21:00-22:00)                              │  │
+│  │ [1] Despertar (07:00-08:30)                            │  │
+│  │ [2] Academia  (06:00-06:20)                            │  │
+│  │ [3] Leitura   (21:00-22:00)                            │  │
 │  │                                                        │  │
 │  │ Qual deseja pular? [1-3]: 1                            │  │
 │  │                                                        │  │
@@ -1135,7 +1147,7 @@ class HabitInstance:
 
 ### 11.5 Persistência de Conflitos (BR-REORDER-005)
 
-```
+```plaintext
 Conflitos NÃO são persistidos no banco.
 São calculados dinamicamente quando necessário.
 
@@ -1827,9 +1839,9 @@ Funcionalidade: Cálculo de Streak
 
 | Documento         | Conteúdo                     | Localização                 |
 | ----------------- | ---------------------------- | --------------------------- |
-| architecture.md   | Camadas, stack, princípios   | docs/ssot/architecture.md   |
-| business-rules.md | Todas as 50 BRs detalhadas   | docs/ssot/business-rules.md |
-| cli-reference.md  | Sintaxe completa de comandos | docs/ssot/cli-reference.md  |
+| architecture.md   | Camadas, stack, princípios   | docs/core/architecture.md   |
+| business-rules.md | Todas as 50 BRs detalhadas   | docs/core/business-rules.md |
+| cli-reference.md  | Sintaxe completa de comandos | docs/core/cli-reference.md  |
 
 ### 18.3 Referências Externas
 
@@ -1869,7 +1881,7 @@ Funcionalidade: Cálculo de Streak
 
 | Versão | Data       | Alterações                                    |
 | ------ | ---------- | --------------------------------------------- |
-| 2.1.0  | 01/12/2025 | Regeneração completa alinhada com docs/ssot/  |
+| 2.1.0  | 01/12/2025 | Regeneração completa alinhada com docs/core/  |
 |        |            | - Nomenclatura BR-REORDER-(não BR-EVENT-)     |
 |        |            | - Status: PENDING, DONE, NOT_DONE             |
 |        |            | - Substatuses alinhados com business-rules.md |
