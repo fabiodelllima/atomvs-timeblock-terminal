@@ -10,7 +10,7 @@
 
 ## Sumário Executivo
 
-TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada em Time Blocking e nos princípios de Atomic Habits. A arquitetura segue o modelo offline-first, priorizando funcionalidade completa sem dependência de rede, com evolução planejada para TUI (v1.7.x), API REST (v2.x), sincronização distribuída (v3.x) e mobile Android (v4.x).
+ATOMVS TimeBlock é uma aplicação CLI para gerenciamento de tempo baseada em Time Blocking e nos princípios de Atomic Habits. A arquitetura segue o modelo offline-first, priorizando funcionalidade completa sem dependência de rede, com evolução planejada para TUI (v1.7.x), API REST (v2.x), sincronização distribuída (v3.x) e mobile Android (v4.x).
 
 O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 8 jobs. O foco atual é fechar gaps de cobertura de testes antes da introdução da interface TUI.
 
@@ -34,6 +34,8 @@ v1.5 CI/CD => v1.6 Cobertura => v1.7 TUI => v2.x API => v3.x Sync => v4.x Mobile
 ```
 
 A decisão de introduzir TUI ainda dentro da v1.x, antes da API, reflete a prioridade de manter a experiência do usuário local rica enquanto a camada de serviços amadurece. Detalhes em: `architecture.md` seção 9 (Evolução Futura).
+
+O projeto adota o branding ATOMVS com namespace `atomvs-timeblock-*` para o ecossistema multi-repo. Detalhes em: ADR-032.
 
 ### 1.2. Princípios de Desenvolvimento
 
@@ -60,7 +62,7 @@ O histórico de releases mostra uma progressão consistente: cada versão expand
 | v1.4.1 | Jan/2026 | E2E Tests, Quality Metrics   | CHANGELOG.md |
 | v1.5.0 | Fev/2026 | CI/CD Dual-Repo, i18n        | CHANGELOG.md |
 
-O detalhamento de métricas por release está disponível em `docs/ssot/quality-metrics.md`.
+O detalhamento de métricas por release está disponível em `docs/core/quality-metrics.md`.
 
 ---
 
@@ -195,10 +197,10 @@ Das business rules formalizadas, algumas não possuem testes rastreáveis. Verif
 
 Arquivos de service com maior gap de cobertura.
 
-| Arquivo            | Atual | Meta | Ação                  |
-| ------------------ | ----- | ---- | --------------------- |
-| tag_service.py     | 100%  | -    | [DONE]                |
-| routine_service.py | 91%   | -    | [DONE]                |
+| Arquivo            | Atual | Meta | Ação   |
+| ------------------ | ----- | ---- | ------ |
+| tag_service.py     | 100%  | -    | [DONE] |
+| routine_service.py | 91%   | -    | [DONE] |
 
 Nota: event_reordering_service.py já está em 86% (resolvido).
 
@@ -220,7 +222,7 @@ A camada de commands/ está com cobertura desigual. Foco em testes de integraç�
 
 ## 5. Débito Técnico
 
-O inventário completo está em `docs/ssot/technical-debt.md`.
+O inventário completo está em `docs/core/technical-debt.md`.
 
 **Resumo:**
 
@@ -268,4 +270,4 @@ Working Documents:
 
 **Próxima Revisão:** Fim v1.6.0
 
-**Última atualização:** 03 de Fevereiro de 2026
+**Última atualização:** 5 de Fevereiro de 2026

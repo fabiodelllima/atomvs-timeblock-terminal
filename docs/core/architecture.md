@@ -49,6 +49,8 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada n
 
 ### 1.3. Diagrama de Alto Nível
 
+O diagrama abaixo representa a arquitetura em camadas do sistema, desde a interface de usuário (CLI/TUI) até a persistência (SQLite), com a service layer como barreira que isola lógica de negócio das camadas de apresentação e dados.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Usuário (CLI)                          │
@@ -82,6 +84,8 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada n
 ---
 
 ## 2. Filosofia de Controle do Usuário
+
+A filosofia de controle do usuário permeia todas as decisões de design do sistema. O TimeBlock existe para informar e facilitar, não para restringir ou decidir. Esta seção formaliza os princípios que guiam como o sistema interage com a agenda do usuário, desde detecção de conflitos até sugestões de reorganização.
 
 ### 2.1. Princípio Fundamental
 
@@ -118,6 +122,8 @@ Muitos sistemas de produtividade tentam ser "inteligentes" tomando decisões aut
 - Apresenta eventos e permite usuário escolher
 
 ### 2.4. Routine como Norte Verdadeiro
+
+A Routine funciona como norte verdadeiro do sistema: define a intenção do usuário para a semana e serve como referência contra a qual o dia real é comparado. Desvios são detectados e informados, mas nunca corrigidos automaticamente.
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -197,6 +203,8 @@ if conflicts_detected:
 
 ## 3. Stack Tecnológica
 
+A stack tecnológica foi selecionada priorizando produtividade do desenvolvedor, type safety e facilidade de manutenção. Python 3.13+ como runtime permite uso de features modernas, SQLModel unifica validação e ORM em definições únicas, e Rich/Textual fornecem capacidades de terminal avançadas para CLI e TUI respectivamente.
+
 ### 3.1. Core
 
 | Componente | Tecnologia | Versão | Razão                     |
@@ -219,6 +227,8 @@ if conflicts_detected:
 
 ### 3.3. Dependências Principais
 
+As dependências são declaradas no pyproject.toml com versões mínimas pinadas. O core mantém apenas três dependências diretas (SQLModel, Typer, Rich), enquanto ferramentas de desenvolvimento e a TUI são gerenciadas como dependency groups opcionais.
+
 ```
 sqlmodel>=0.0.14
 typer>=0.9.0
@@ -231,6 +241,8 @@ python-dateutil>=2.8.0
 ---
 
 ## 4. Camadas da Aplicação
+
+A aplicação segue o padrão de camadas com separação rigorosa de responsabilidades. A camada de apresentação (CLI e TUI) comunica-se exclusivamente com a camada de services, que encapsula toda a lógica de negócio. Models gerenciam persistência via SQLModel, e utils fornecem funções transversais de validação e formatação. Nenhuma camada acessa diretamente camadas não adjacentes.
 
 ### 4.1. CLI Commands Layer
 
@@ -675,6 +687,8 @@ utils/
 
 ## 5. Modelos de Dados
 
+Os modelos de dados representam as entidades do domínio e seus relacionamentos usando SQLModel, que combina definições Pydantic (validação) com mapeamento SQLAlchemy (persistência) em classes únicas. O diagrama ER e as definições de entidade refletem o modelo conceitual descrito nas Business Rules, mantendo rastreabilidade direta entre especificação e implementação.
+
 ### 5.1. Diagrama ER
 
 ```
@@ -981,6 +995,8 @@ class ChangeType(str, Enum):
 
 ## 6. Fluxos Principais
 
+Os fluxos principais documentam as interações mais críticas do sistema: criação de hábitos com geração de instâncias, detecção de conflitos entre eventos, e operação completa do timer. Cada fluxo atravessa todas as camadas da aplicação e é validado por testes de integração e E2E.
+
 ### 6.1. Criação e Geração de Instâncias
 
 ```
@@ -1083,6 +1099,7 @@ As decisões arquiteturais são documentadas como ADRs (Architecture Decision Re
 | [ADR-002](../decisions/ADR-002-typer-cli.md)           | Typer CLI           | Typer ao invés de Click puro         |
 | [ADR-005](../decisions/ADR-005-resource-first-cli.md)  | Resource-First CLI  | Padrão `resource action` na CLI      |
 | [ADR-006](../decisions/ADR-006-textual-tui.md)         | Textual TUI         | Textual para interface TUI futura    |
+| [ADR-031](../decisions/ADR-031-tui-implementation.md)  | TUI Implementation  | Detalhes de implementação TUI v1.7.0 |
 | [ADR-011](../decisions/ADR-011-conflict-philosophy.md) | Conflict Philosophy | Sistema informa, usuário decide      |
 
 ### 7.2. ADRs de Arquitetura e Dados
@@ -1108,12 +1125,13 @@ As decisões arquiteturais são documentadas como ADRs (Architecture Decision Re
 
 ### 7.4. ADRs de Infraestrutura
 
-| ADR                                                        | Título                  | Decisão                      |
-| ---------------------------------------------------------- | ----------------------- | ---------------------------- |
-| [ADR-016](../decisions/ADR-016-alembic-timing.md)          | Alembic Timing          | Quando introduzir migrations |
-| [ADR-017](../decisions/ADR-017-environment-strategy.md)    | Environment Strategy    | Estratégia de ambientes      |
-| [ADR-023](../decisions/ADR-023-microservices-ecosystem.md) | Microservices Ecosystem | Arquitetura de microserviços |
-| [ADR-024](../decisions/ADR-024-homelab-infrastructure.md)  | Homelab Infrastructure  | Raspberry Pi como servidor   |
+| ADR                                                           | Título                  | Decisão                      |
+| ------------------------------------------------------------- | ----------------------- | ---------------------------- |
+| [ADR-016](../decisions/ADR-016-alembic-timing.md)             | Alembic Timing          | Quando introduzir migrations |
+| [ADR-017](../decisions/ADR-017-environment-strategy.md)       | Environment Strategy    | Estratégia de ambientes      |
+| [ADR-023](../decisions/ADR-023-microservices-ecosystem.md)    | Microservices Ecosystem | Arquitetura de microserviços |
+| [ADR-024](../decisions/ADR-024-homelab-infrastructure.md)     | Homelab Infrastructure  | Raspberry Pi como servidor   |
+| [ADR-032](../decisions/ADR-032-branding-repository-naming.md) | Branding & Repos        | ATOMVS + atomvs-timeblock-\* |
 
 ### 7.5. ADRs de Padrões e Qualidade
 
@@ -1123,7 +1141,7 @@ As decisões arquiteturais são documentadas como ADRs (Architecture Decision Re
 | [ADR-018](../decisions/ADR-018-language-standards.md)          | Language Standards      | Português agora, inglês v2.0+ |
 | [ADR-019](../decisions/ADR-019-test-naming-convention.md)      | Test Naming             | Padrão test*br*\*             |
 | [ADR-020](../decisions/ADR-020-business-rules-nomenclature.md) | BR Nomenclature         | Formato BR-DOMAIN-XXX         |
-| [ADR-025](../decisions/ADR-025-development-methodology.md)     | Development Methodology | Docs > BDD > TDD > Code       |
+| [ADR-025](../decisions/ADR-025-development-methodology.md)     | Engenharia de Requisitos | ISO/IEC/IEEE 29148:2018       |
 | [ADR-026](../decisions/ADR-026-test-database-isolation.md)     | Test DB Isolation       | Isolamento via env var        |
 | [ADR-027](../decisions/ADR-027-documentation-tooling.md)       | Documentation Tooling   | MkDocs + mkdocstrings         |
 | [ADR-028](../decisions/ADR-028-remove-legacy-commands.md)      | Remove Legacy Commands  | Remoção de add/list legados   |
@@ -1133,6 +1151,8 @@ As decisões arquiteturais são documentadas como ADRs (Architecture Decision Re
 ---
 
 ## 8. Padrões e Convenções
+
+Esta seção define os padrões de codificação e convenções que mantêm consistência no projeto. Cobre estrutura de diretórios, naming conventions para código e testes, organização de imports, uso de type hints, formato de docstrings e workflow Git. Todos os padrões são verificados automaticamente via ruff, mypy e hooks de pre-commit.
 
 ### 8.1. Estrutura de Diretórios
 
@@ -1285,6 +1305,8 @@ Footer opcional
 ---
 
 ## 9. Evolução Futura
+
+O roadmap técnico organiza a evolução do sistema em releases incrementais, cada uma construindo sobre a anterior. A v1.x consolida a CLI local e introduz a TUI, a v2.0 expande para API REST com observabilidade, a v3.0 evolui para microserviços com event sourcing, e a v4.0 adiciona o cliente Android nativo.
 
 ### v1.4.0 - MVP Event Reordering (Atual)
 
@@ -1555,24 +1577,24 @@ $ timeblock connect       # Funciona direto (Pi rodando 24/7)
 
 ### 11.1. Visão Geral
 
-O projeto adota **Vertical Slicing** com práticas de Docs-First, BDD e Strict TDD.
+O projeto adota técnicas de **Engenharia de Requisitos** (ISO/IEC/IEEE 29148:2018, SWEBOK v4.0) com **Vertical Slicing**, BDD e Strict TDD. O ciclo mapeia para o ciclo clássico da disciplina: especificação, validação, verificação e implementação.
 
-**Hierarquia obrigatória:**
+**Ciclo de Engenharia de Requisitos:**
 
 ```
-DOCS ──> BDD ──> TDD ──> CODE
+Especificação --> Validação (BDD) --> Verificação (TDD) --> Implementação
 ```
 
 ### 11.2. Práticas Adotadas
 
-| Prática          | Origem                   | Aplicação               |
-| ---------------- | ------------------------ | ----------------------- |
-| Vertical Slicing | Agile                    | Uma BR completa por vez |
-| Docs-First       | Specification by Example | BR documentada primeiro |
-| BDD              | Dan North (2006)         | pytest-bdd com Gherkin  |
-| Strict TDD       | Robert Martin (2003)     | 3 Leis rigorosas        |
-| Sprints          | Scrum                    | Iterações 1-2 semanas   |
-| WIP Limits       | Kanban/Lean              | Max 2 itens In Progress |
+| Prática           | Origem                  | Aplicação               |
+| ----------------- | ----------------------- | ----------------------- |
+| Vertical Slicing  | Agile                   | Uma BR completa por vez |
+| Especificação     | ISO/IEC/IEEE 29148:2018 | BRs formalizadas        |
+| Validação (BDD)   | Dan North (2006)        | pytest-bdd com Gherkin  |
+| Verificação (TDD) | Robert Martin (2003)    | 3 Leis rigorosas        |
+| Sprints           | Scrum                   | Iterações 1-2 semanas   |
+| WIP Limits        | Kanban/Lean             | Max 2 itens In Progress |
 
 ### 11.3. Fluxo por Business Rule
 
@@ -1580,10 +1602,10 @@ DOCS ──> BDD ──> TDD ──> CODE
 ┌─────────────────────────────────────────────────────────────┐
 │                  VERTICAL SLICE (1 BR)                      │
 ├─────────────────────────────────────────────────────────────┤
-│  1. Documentar BR (docs/ssot/business-rules.md)             │
-│  2. Escrever cenário BDD (.feature)                         │
+│  1. Especificar BR (docs/core/business-rules.md)            │
+│  2. Escrever cenário de validação (.feature)                │
 │  3. Implementar steps (step_defs/)                          │
-│  4. Criar teste unitário (RED)                              │
+│  4. Criar teste de verificação (RED)                        │
 │  5. Implementar código (GREEN)                              │
 │  6. Refatorar                                               │
 │  7. Commit                                                  │
@@ -1605,9 +1627,9 @@ cli/tests/
 ├── bdd/
 │   ├── features/        # .feature (Gherkin)
 │   └── step_defs/       # Steps Python
-├── unit/                # ~70% (BR isolada)
-├── integration/         # ~25% (Service + DB)
-└── e2e/                 # ~5% (CLI completa)
+├── unit/                # ~70% (verificação isolada)
+├── integration/         # ~20% (Service + DB)
+└── e2e/                 # ~5% (CLI/TUI completa)
 ```
 
 **Status BDD:** 8 testes passando com pytest-bdd.
@@ -1630,7 +1652,9 @@ cli/tests/
 - **Review:** Fim (validar entregas)
 - **Retro:** Fim (identificar melhorias)
 
-Ver também: [ADR-025: Processo de Desenvolvimento](../decisions/ADR-025-development-methodology.md)
+**SSOT de Processo:** [development.md](development.md)
+
+Ver também: [ADR-025: Engenharia de Requisitos](../decisions/ADR-025-development-methodology.md)
 
 ---
 
@@ -1766,28 +1790,28 @@ A partir da v2.0, o TimeBlock evolui de CLI local para ecossistema multi-platafo
 O projeto adota GitHub Organization com um repositório por serviço, seguindo padrões de microsserviços. Essa estrutura permite ciclos de deploy independentes e evolução paralela de componentes.
 
 ```
-timeblock-org/
+atomvs-timeblock/               # GitHub Organization
 │
-├── timeblock-contracts       # OpenAPI, Protobuf, AsyncAPI
+├── atomvs-timeblock-contracts       # OpenAPI, Protobuf, AsyncAPI
 │
 ├── # ─── BACKEND CORE ────────────────────────────
-├── timeblock-api             # Spring Boot (BRs, auth, CRUD)
-├── timeblock-gateway         # Spring Cloud Gateway
-├── timeblock-sync            # Go + Kafka
-├── timeblock-notifications   # Spring Boot (email, push)
+├── atomvs-timeblock-api             # Spring Boot (BRs, auth, CRUD)
+├── atomvs-timeblock-gateway         # Spring Cloud Gateway
+├── atomvs-timeblock-sync            # Go + Kafka
+├── atomvs-timeblock-notifications   # Spring Boot (email, push)
 │
 ├── # ─── BFFs ────────────────────────────────────
-├── timeblock-bff-web         # Spring Boot
-├── timeblock-bff-terminal    # Go ou Python
+├── atomvs-timeblock-bff-web         # Spring Boot
+├── atomvs-timeblock-bff-terminal    # Go ou Python
 │
 ├── # ─── CLIENTS ─────────────────────────────────
-├── timeblock-terminal        # Python (CLI + TUI)
-├── timeblock-web             # Angular + TypeScript
-├── timeblock-mobile          # Kotlin Full-Stack
-├── timeblock-desktop         # Tauri (Rust + Svelte/Angular)
+├── atomvs-timeblock-terminal        # Python (CLI + TUI)
+├── atomvs-timeblock-web             # Angular + TypeScript
+├── atomvs-timeblock-mobile          # Kotlin Full-Stack
+├── atomvs-timeblock-desktop         # Tauri (Rust + Svelte/Angular)
 │
 └── # ─── INFRA ───────────────────────────────────
-    └── timeblock-infra       # Docker, K8s, Terraform, Ansible
+    └── atomvs-timeblock-infra       # Docker, K8s, Terraform, Ansible
 ```
 
 ### 13.2. Padrão BFF (Backend For Frontend)
@@ -1807,8 +1831,8 @@ O padrão BFF cria backends dedicados por plataforma, otimizando payloads e comp
 │ Spring   │ │   Kotlin   │ │   Go/Python  │     │    Go       │
 └────┬─────┘ └────┬───────┘ └─────┬────────┘     └─────┬───────┘
      └────────────┴───────────────┴────────────────────┘
-                            │
-                            ↓
+                          │
+                          ↓
               ┌─────────────────────────┐
               │      API GATEWAY        │
               │  Spring Cloud Gateway   │
@@ -1816,10 +1840,10 @@ O padrão BFF cria backends dedicados por plataforma, otimizando payloads e comp
                           │
      ┌────────────────────┼────────────────────┐
      ↓                    ↓                    ↓
-┌──────────┐       ┌──────────┐        ┌──────────┐
-│ API Core │       │   Sync   │        │  Notif   │
-│  Spring  │       │   Go     │        │  Spring  │
-└──────────┘       └──────────┘        └──────────┘
+┌──────────┐         ┌──────────┐        ┌──────────┐
+│ API Core │         │   Sync   │        │  Notif   │
+│  Spring  │         │   Go     │        │  Spring  │
+└──────────┘         └──────────┘        └──────────┘
 ```
 
 ### 13.3. Stacks por Componente
@@ -1866,7 +1890,7 @@ timeblock-infra/
 
 ### 13.5. Contratos Compartilhados
 
-O repositório `timeblock-contracts` define interfaces entre serviços usando OpenAPI (REST), Protobuf (gRPC), AsyncAPI (Kafka) e JSON Schema (validação). Essa abordagem contract-first garante compatibilidade antes do deploy.
+O repositório `atomvs-timeblock-contracts` define interfaces entre serviços usando OpenAPI (REST), Protobuf (gRPC), AsyncAPI (Kafka) e JSON Schema (validação). Essa abordagem contract-first garante compatibilidade antes do deploy.
 
 Ver também: [ADR-030: Arquitetura Multi-Plataforma](../decisions/ADR-030-multiplatform-architecture.md)
 
@@ -1877,8 +1901,8 @@ Ver também: [ADR-030: Arquitetura Multi-Plataforma](../decisions/ADR-030-multip
 - **Rich:** <https://rich.readthedocs.io/>
 - **FastAPI:** <https://fastapi.tiangolo.com/>
 - **Apache Kafka:** <https://kafka.apache.org/>
-- **Business Rules:** `docs/ssot/business-rules.md`
+- **Business Rules:** `docs/core/business-rules.md`
 
 ---
 
-**Última atualização:** 01 de Fevereiro de 2026
+**Última atualização:** 5 de Fevereiro de 2026
