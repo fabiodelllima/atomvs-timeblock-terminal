@@ -1,124 +1,149 @@
-# GitLab CI/CD Pipeline
-image: python:3.13
-
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-
-cache:
-  paths:
-    - .cache/pip
-    - cli/venv/
-
 stages:
+  - quality
   - test
+  - coverage
+  - security
   - build
-  - deploy
   - sync
 
-before_script:
-  - pip install --upgrade pip
-  - pip install -r requirements.txt
-  - cd cli
-  - pip install -e .
-  - python -c "from timeblock.database.engine import create_db_and_tables; create_db_and_tables()"
+variables:
+  CI_IMAGE: $CI_REGISTRY_IMAGE/ci:latest
+
+lint:
+  stage: quality
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+  script:
+    - ruff check src/ tests/
+    - ruff format --check src/ tests/
 
 test:unit:
   stage: test
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
   script:
-    - python -m pytest tests/unit/ -v --cov=src/timeblock --cov-report=xml --cov-report=term
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+    - coverage run -m pytest tests/unit/ -v --tb=short
+  artifacts:
+    paths:
+      - .coverage.*
+    expire_in: 1 hour
+
+test:integration:
+  stage: test
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+  script:
+    - coverage run -m pytest tests/integration/ -v --tb=short
+  artifacts:
+    paths:
+      - .coverage.*
+    expire_in: 1 hour
+
+test:bdd:
+  stage: test
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+  script:
+    - coverage run -m pytest tests/bdd/ -v --tb=short
+  artifacts:
+    paths:
+      - .coverage.*
+    expire_in: 1 hour
+
+test:e2e:
+  stage: test
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+  script:
+    - coverage run -m pytest tests/e2e/ -v --tb=short
+  artifacts:
+    paths:
+      - .coverage.*
+    expire_in: 1 hour
+
+test:typecheck:
+  stage: test
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+  script:
+    - mypy src/timeblock --check-untyped-defs
+  timeout: 5m
+
+coverage:report:
+  stage: coverage
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+  needs:
+    - job: test:unit
+      artifacts: true
+    - job: test:integration
+      artifacts: true
+    - job: test:bdd
+      artifacts: true
+    - job: test:e2e
+      artifacts: true
+  script:
+    - ls -la .coverage.* || echo "No coverage files found"
+    - coverage combine
+    - coverage report --fail-under=85
+    - coverage xml -o coverage.xml
   artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: cli/coverage.xml
-    expire_in: 1 week
-  only:
-    - branches
-    - merge_requests
+        path: coverage.xml
 
-test:integration:
-  stage: test
+security:bandit:
+  stage: security
+  image: $CI_IMAGE
+  needs: []
+  before_script: []
   script:
-    - python -m pytest tests/integration/ -v
-  only:
-    - branches
-    - merge_requests
+    - bandit -r src/timeblock -f json -o bandit-report.json || true
+    - bandit -r src/timeblock -ll
+  artifacts:
+    paths:
+      - bandit-report.json
+    when: always
 
-test:bdd:
-  stage: test
+security:deps:
+  stage: security
+  image: $CI_IMAGE
+  needs: []
+  before_script: []
   script:
-    - python -m pytest tests/bdd/ -v
-  only:
-    - branches
-    - merge_requests
-
-test:e2e:
-  stage: test
-  script:
-    - python -m pytest tests/e2e/ -v
-  only:
-    - branches
-    - merge_requests
-
-test:lint:
-  stage: test
-  script:
-    - ruff check src/timeblock
-  only:
-    - branches
-    - merge_requests
-
-test:typecheck:
-  stage: test
-  allow_failure: false
-  script:
-    - mypy src/timeblock --check-untyped-defs
-  only:
-    - branches
-    - merge_requests
+    - pip-audit --format json --output pip-audit-report.json || true
+    - pip-audit || true
+  allow_failure: true
+  artifacts:
+    paths:
+      - pip-audit-report.json
+    when: always
 
 build:docs:
   stage: build
+  image: $CI_IMAGE
   before_script:
-    - pip install --upgrade pip
-    - pip install mkdocs mkdocs-material
+    - pip install --no-cache-dir mkdocs mkdocs-material
   script:
-    - mkdocs build
-  artifacts:
-    paths:
-      - site/
-    expire_in: 1 week
+    - mkdocs build --strict
   only:
     - develop
     - main
 
-pages:
-  stage: deploy
-  before_script:
-    - pip install --upgrade pip
-    - pip install mkdocs mkdocs-material
-  script:
-    - mkdocs build
-    - mv site public
-  artifacts:
-    paths:
-      - public
-  only:
-    - main
-
 sync:github:
   stage: sync
-  image: alpine:latest
-  before_script:
-    - apk add --no-cache git
+  before_script: []
   script:
-    - git config --global user.email "ci@gitlab.com"
-    - git config --global user.name "GitLab CI"
-    - git clone --mirror "$CI_REPOSITORY_URL" repo.git
-    - cd repo.git
-    - git remote add github "https://x-access-token:${GITHUB_TOKEN}@github.com/fabiodelllima/timeblock-organizer.git"
-    - git push github --mirror --force
+    - git push github HEAD:${CI_COMMIT_REF_NAME} --force
+    - git push github --tags --force
   only:
     - develop
     - main

@@ -1,0 +1,13 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+COPY requirements.txt pyproject.toml ./
+COPY src/ src/
+
+RUN pip install --no-cache-dir pip>=26.0 \
+    && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir -e ".[dev]" \
+    && pip install --no-cache-dir bandit pip-audit
+
+WORKDIR /builds

@@ -1,26 +1,10 @@
-# TimeBlock Organizer - Test Image
 FROM python:3.13-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install all dependencies including dev
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir pytest pytest-cov pytest-bdd freezegun ruff mypy
-
-# Copy everything
 COPY . .
 
-# Install package in editable mode
-WORKDIR /app/cli
-RUN pip install --no-cache-dir -e .
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -e ".[dev]"
 
-# Initialize test database
-RUN python -c "from timeblock.database.engine import create_db_and_tables; create_db_and_tables()"
-
-# Default: run all tests
-CMD ["pytest", "tests/", "-v", "--cov=src/timeblock"]
+CMD ["python", "-m", "pytest", "tests/", "-v", "--tb=short"]
