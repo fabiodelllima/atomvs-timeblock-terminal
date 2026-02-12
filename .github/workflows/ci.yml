@@ -1,75 +1,99 @@
-# GitHub Actions CI - TimeBlock Organizer
 name: CI
 
 on:
   push:
-    branches: [develop, main]
+    branches: [main, develop]
   pull_request:
-    branches: [develop, main]
+    branches: [main, develop]
   merge_group:
-    branches: [develop, main]
+    branches: [main, develop]
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run ruff
-        run: |
-          cd cli
-          ruff check src/timeblock
+          cache: "pip"
+      - run: pip install ruff
+      - run: ruff check src/ tests/
+      - run: ruff format --check src/ tests/
 
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          cd cli
-          pip install -e .
-      - name: Run mypy
-        run: |
-          cd cli
-          mypy src/timeblock --check-untyped-defs --explicit-package-bases
+          cache: "pip"
+      - run: pip install -r requirements.txt && pip install -e ".[dev]"
+      - run: mypy src/timeblock --check-untyped-defs
 
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        test-suite: [unit, integration, bdd, e2e]
+        suite: [unit, integration, bdd, e2e]
+        include:
+          - suite: unit
+            path: tests/unit/
+            extra_args: "--cov=src/timeblock --cov-report=xml:coverage.xml"
+          - suite: integration
+            path: tests/integration/
+            extra_args: ""
+          - suite: bdd
+            path: tests/bdd/
+            extra_args: ""
+          - suite: e2e
+            path: tests/e2e/
+            extra_args: ""
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          cd cli
-          pip install -e .
-      - name: Initialize database
-        run: |
-          cd cli
-          python -c "from timeblock.database.engine import create_db_and_tables; create_db_and_tables()"
-      - name: Run tests
-        run: |
-          cd cli
-          python -m pytest tests/${{ matrix.test-suite }}/ -v --cov=src/timeblock --cov-report=xml
-      - name: Upload coverage
-        if: matrix.test-suite == 'unit'
-        uses: codecov/codecov-action@v4
+          cache: "pip"
+      - run: pip install -r requirements.txt && pip install -e ".[dev]"
+      - run: python -m pytest ${{ matrix.path }} -v --tb=short ${{ matrix.extra_args }}
+      - uses: codecov/codecov-action@v4
         with:
-          file: ./cli/coverage.xml
-          fail_ci_if_error: false
+          file: ./coverage.xml
+        if: matrix.suite == 'unit' && always()
+
+  security-bandit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+      - run: pip install bandit
+      - run: bandit -r src/timeblock -ll
+
+  security-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+      - run: pip install -r requirements.txt && pip install -e ".[dev]"
+      - run: pip install pip-audit
+      - run: pip-audit
+
+  security-codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: python
+      - uses: github/codeql-action/analyze@v3
