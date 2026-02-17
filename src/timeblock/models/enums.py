@@ -1,9 +1,9 @@
 """Enumerações compartilhadas entre modelos."""
 
-from enum import Enum
+from enum import StrEnum
 
 
-class Status(str, Enum):
+class Status(StrEnum):
     """Status principal (PENDING/DONE/NOT_DONE)."""
 
     PENDING = "pending"
@@ -11,7 +11,7 @@ class Status(str, Enum):
     NOT_DONE = "not_done"
 
 
-class DoneSubstatus(str, Enum):
+class DoneSubstatus(StrEnum):
     """Substatus para eventos DONE."""
 
     FULL = "full"  # 90-110%
@@ -20,7 +20,7 @@ class DoneSubstatus(str, Enum):
     PARTIAL = "partial"  # <90%
 
 
-class NotDoneSubstatus(str, Enum):
+class NotDoneSubstatus(StrEnum):
     """Substatus para eventos NOT_DONE."""
 
     SKIPPED_JUSTIFIED = "skipped_justified"
@@ -28,7 +28,7 @@ class NotDoneSubstatus(str, Enum):
     IGNORED = "ignored"
 
 
-class SkipReason(str, Enum):
+class SkipReason(StrEnum):
     """Categorias de justificativa para skip."""
 
     HEALTH = "saude"
@@ -41,7 +41,7 @@ class SkipReason(str, Enum):
     OTHER = "outro"
 
 
-class TimerStatus(str, Enum):
+class TimerStatus(StrEnum):
     """Status do timer (BR-TIMER-002).
 
     Estados:

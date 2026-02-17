@@ -6,6 +6,15 @@ stages:
   - build
   - sync
 
+default:
+  timeout: 10m
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - scheduler_failure
+
 variables:
   CI_IMAGE: $CI_REGISTRY_IMAGE/ci:latest
 
@@ -119,24 +128,13 @@ security:deps:
   needs: []
   before_script: []
   script:
-    - pip-audit --format json --output pip-audit-report.json || true
-    - pip-audit || true
-  allow_failure: true
+    - pip-audit --format json --output pip-audit-report.json
+    - pip-audit
+  timeout: 5m
   artifacts:
     paths:
       - pip-audit-report.json
     when: always
-
-build:docs:
-  stage: build
-  image: $CI_IMAGE
-  before_script:
-    - pip install --no-cache-dir mkdocs mkdocs-material
-  script:
-    - mkdocs build --strict
-  only:
-    - develop
-    - main
 
 sync:github:
   stage: sync

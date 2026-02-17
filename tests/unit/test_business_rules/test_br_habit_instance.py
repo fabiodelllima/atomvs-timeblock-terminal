@@ -16,12 +16,12 @@ Valida BRs:
 """
 
 from datetime import date, datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 
 # === ENUMS TARGET (v2.0) ===
 
 
-class InstanceStatus(str, Enum):
+class InstanceStatus(StrEnum):
     """Status de instância (target v2.0)."""
 
     PENDING = "pending"
@@ -29,7 +29,7 @@ class InstanceStatus(str, Enum):
     NOT_DONE = "not_done"
 
 
-class DoneSubstatus(str, Enum):
+class DoneSubstatus(StrEnum):
     """Substatus quando DONE (target v2.0)."""
 
     EXCESSIVE = "excessive"  # > 150%
@@ -38,7 +38,7 @@ class DoneSubstatus(str, Enum):
     PARTIAL = "partial"  # < 90%
 
 
-class NotDoneSubstatus(str, Enum):
+class NotDoneSubstatus(StrEnum):
     """Substatus quando NOT_DONE (target v2.0)."""
 
     SKIPPED_JUSTIFIED = "skipped_justified"

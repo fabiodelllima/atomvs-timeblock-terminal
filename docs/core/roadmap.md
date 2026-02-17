@@ -12,14 +12,14 @@
 
 ATOMVS TimeBlock é uma aplicação CLI para gerenciamento de tempo baseada em Time Blocking e nos princípios de Atomic Habits. A arquitetura segue o modelo offline-first, priorizando funcionalidade completa sem dependência de rede, com evolução planejada para TUI (v1.7.x), API REST (v2.x), sincronização distribuída (v3.x) e mobile Android (v4.x).
 
-O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 8 jobs. O foco atual é fechar gaps de cobertura de testes antes da introdução da interface TUI.
+O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 9 jobs com Docker e DevSecOps. Cobertura atingiu 87% (threshold 85%). O foco atual é a implementação da TUI com Textual (v1.7.0).
 
-**Estado Atual (03/02/2026):**
+**Estado Atual (12/02/2026):**
 
-- Versão: v1.5.0 (estável)
-- Qualidade: 76% cobertura, 0 erros mypy, 873 testes
+- Versão: v1.6.0 (estável)
+- Qualidade: 87% cobertura, 0 erros mypy, 778 testes
 - Funcionalidade: 85% comandos CLI operacionais
-- Infraestrutura: CI/CD dual-repo com sync automático, 8 jobs bloqueantes
+- Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 9 jobs
 
 ---
 
@@ -29,7 +29,7 @@ O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (G
 
 A estratégia de evolução do TimeBlock Organizer segue um modelo incremental onde cada versão major adiciona uma camada de capacidade sem descartar as anteriores. A CLI permanece funcional mesmo após a introdução da TUI e da API, garantindo que automações e scripts existentes não sejam quebrados.
 
-```
+```plaintext
 v1.5 CI/CD => v1.6 Cobertura => v1.7 TUI => v2.x API => v3.x Sync => v4.x Mobile
 ```
 
@@ -80,9 +80,9 @@ As métricas atuais refletem medições reais executadas em 03/02/2026.
 
 | Métrica       | Atual | Meta v1.6.0 | Status     |
 | ------------- | ----- | ----------- | ---------- |
-| Cobertura     | 76%   | 80%         | [PENDENTE] |
+| Cobertura     | 87%   | 85%         | [OK]       |
 | Erros mypy    | 0     | 0           | [OK]       |
-| Testes total  | 873   | 900+        | [OK]       |
+| Testes total  | 778   | 800+        | [OK]       |
 | CLI funcional | 85%   | 100%        | [PENDENTE] |
 | BRs cobertas  | 83%   | 95%         | [PENDENTE] |
 
@@ -94,12 +94,12 @@ Integration:  83 (9.5%)
 BDD:          52 (6.0%)
 E2E:          42 (4.8%)
 ─────────────────────────
-TOTAL:       873 testes
+TOTAL:       778 testes
 ```
 
 ### 3.3. Infraestrutura CI/CD
 
-```
+```plaintext
 GitLab CI: 8 jobs (6 test + 1 build + 1 sync)
 GitHub Actions: 6 checks + CodeQL
 Sync automático: GitLab => GitHub (após pipeline verde)

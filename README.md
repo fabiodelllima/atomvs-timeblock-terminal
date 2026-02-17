@@ -1,4 +1,4 @@
-# TimeBlock Organizer
+# TimeBlock Planner
 
 > Gerenciador de tempo CLI baseado em time blocking e hábitos atômicos
 
@@ -9,14 +9,14 @@
 ║     ╱│╲       █▀█ ░█░ █▄█ █░▀░█ ▀▄▀ ▄█       ║
 ║    ○─┼─○      ─────────────────────────      ║
 ║     ╲│╱       TimeBlock  ░░░░░░░░░░░░░░      ║
-║      ◉        Organizer  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓      ║
+║      ◉          Planner  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓      ║
 ║                                              ║
 ╚══════════════════════════════════════════════╝
 ```
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-685%20passing-success.svg)](cli/tests/)
-[![Coverage](https://img.shields.io/badge/coverage-71%25-green.svg)](cli/tests/)
+[![Tests](https://img.shields.io/badge/tests-778%20passing-success.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-87%25-green.svg)](tests/)
 
 ---
 
@@ -180,29 +180,28 @@ O timer implementa uma máquina de estados simples que permite rastrear tempo de
 
 ## Estrutura do Projeto
 
-O projeto segue uma estrutura modular que facilita navegação e manutenção. O código fonte reside em `cli/src/timeblock/`, testes em `cli/tests/`, e documentação em `docs/`. Esta separação permite desenvolvimento independente de cada camada.
+O projeto segue uma estrutura modular que facilita navegação e manutenção. O código fonte reside em `src/timeblock/`, testes em `tests/`, e documentação em `docs/`. Esta separação permite desenvolvimento independente de cada camada.
 
 ```
-timeblock-organizer/
-├── cli/
-│   ├── src/timeblock/
-│   │   ├── commands/          # Comandos CLI (routine, habit, task, timer)
-│   │   ├── services/          # Lógica de negócio
-│   │   ├── models/            # Modelos SQLModel
-│   │   ├── database/          # Engine e migrations
-│   │   └── utils/             # Helpers e validadores
-│   │
-│   └── tests/                 # 685 testes
-│       ├── unit/              #   513 (75%)
-│       ├── integration/       #   83  (12%)
-│       ├── e2e/               #   42  (6%)
-│       └── bdd/               #   7   (1%)
+atomvs-timeblock-terminal/
+├── src/timeblock/
+│   ├── commands/          # Comandos CLI (routine, habit, task, timer)
+│   ├── services/          # Lógica de negócio
+│   ├── models/            # Modelos SQLModel
+│   ├── database/          # Engine e migrations
+│   └── utils/             # Helpers e validadores
+│
+├── tests/                 # 778 testes
+│   ├── unit/              #   576 (74%)
+│   ├── integration/       #   116 (15%)
+│   ├── bdd/               #   56  (7%)
+│   └── e2e/               #   30  (4%)
 │
 ├── docs/
-│   ├── core/                  # Documentação principal
-│   └── decisions/             # 27 ADRs
+│   ├── core/              # Documentação principal
+│   └── decisions/         # 32 ADRs
 │
-└── scripts/                   # Automação
+└── scripts/               # Automação
 ```
 
 ---
@@ -212,8 +211,8 @@ timeblock-organizer/
 A instalação é simples e requer apenas Python 3.13 ou superior. O projeto utiliza um ambiente virtual isolado para gerenciar dependências, evitando conflitos com outras aplicações Python no sistema.
 
 ```bash
-git clone https://github.com/fabiodelllima/timeblock-organizer.git
-cd timeblock-organizer/cli
+git clone https://github.com/fabiodelllima/atomvs-timeblock-terminal.git
+cd atomvs-timeblock-terminal
 
 python -m venv venv
 source venv/bin/activate
@@ -360,7 +359,7 @@ mypy src/
 
 ## Roadmap
 
-O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão atual (v1.4.x) consolidou a formalização de business rules e expandiu significativamente a cobertura de testes E2E. Versões futuras expandirão para API REST, microservices e aplicativo móvel.
+O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão atual (v1.6.0) consolidou a infraestrutura CI/CD com Docker, DevSecOps e cobertura combinada a 87%. A próxima versão (v1.7.0) introduzirá interface TUI com Textual.
 
 | Versão | Status    | Features                             |
 | ------ | --------- | ------------------------------------ |
@@ -368,9 +367,10 @@ O roadmap está organizado em releases incrementais, cada uma construindo sobre 
 | v1.1.0 | [DONE]    | Event reordering                     |
 | v1.2.x | [DONE]    | Logging, docs consolidados           |
 | v1.3.x | [DONE]    | Date parser, BDD tests, DI refactor  |
-| v1.4.0 | [DONE]    | Business rules formalizadas, 27 ADRs |
-| v1.4.1 | [CURRENT] | E2E tests expansion (685 tests, 71%) |
-| v1.5.0 | [PLANNED] | Infra Foundation (Docker, CI/CD)     |
+| v1.4.0 | [DONE]    | Business rules formalizadas, 32 ADRs |
+| v1.5.0 | [DONE]    | CI/CD dual-repo, i18n, 873 testes    |
+| v1.6.0 | [DONE]    | Docker, DevSecOps, 778 testes, 87%   |
+| v1.7.0 | [CURRENT] | TUI com Textual (ADR-031)            |
 | v2.0.0 | [PLANNED] | FastAPI REST API + Observabilidade   |
 | v3.0.0 | [FUTURE]  | Microservices Ecosystem (Kafka)      |
 | v4.0.0 | [FUTURE]  | Android App (Kotlin)                 |

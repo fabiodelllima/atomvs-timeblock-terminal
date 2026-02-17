@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-02-12
+
+### Added
+
+- CI/CD: Imagem Docker com deps pre-instaladas (Dockerfile.ci)
+- CI/CD: DevSecOps com Bandit (SAST) e pip-audit (SCA)
+- CI/CD: Cobertura combinada de 4 suites via coverage run
+- CI/CD: Pre-commit hooks atualizados (ruff commit, full suite push)
+
+### Changed
+
+- refactor: Estrutura aplanada de cli/ para raiz do projeto
+- CI/CD: Pipeline migrado para Docker (elimina overhead pip install)
+- CI/CD: Removido build:docs do pipeline (validacao manual)
+- CI/CD: GitHub Actions alinhado com GitLab CI
+
+### Fixed
+
+- fix: CVE-2026-1703 no pip 25.3 (atualizado para pip>=26.0)
+- fix: pytest-cov combinava parciais automaticamente (migrado para coverage run)
+- fix: Threshold parcial bloqueava jobs individuais (--cov-fail-under=0)
+
+### Metrics
+
+- Total tests: 778 (576 unit, 116 integration, 56 bdd, 30 e2e)
+- Global coverage: 87% (threshold 85%)
+- Pipeline: 9 jobs (quality + test + coverage + security + sync)
+- ADRs: 32 documented
+
 ## [1.5.0] - 2026-02-03
 
 ### Added
@@ -325,14 +354,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.5.0...HEAD
-[1.5.0]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.4.1...v1.5.0
-[1.4.1]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.4.0...v1.4.1
-[1.4.0]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.3.2...v1.4.0
-[1.3.2]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.3.1...v1.3.2
-[1.3.1]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.3.0...v1.3.1
-[1.3.0]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.2.2-logging...v1.3.0
-[1.2.2-logging]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.2.1-docs...v1.2.2-logging
-[1.2.1-docs]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.1.0...v1.2.1-docs
-[1.1.0]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/fabiodelllima/timeblock-organizer/releases/tag/v1.0.0
+[Unreleased]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.4.1...v1.5.0
+[1.4.1]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.3.2...v1.4.0
+[1.3.2]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.3.1...v1.3.2
+[1.3.1]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.2.2-logging...v1.3.0
+[1.2.2-logging]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.2.1-docs...v1.2.2-logging
+[1.2.1-docs]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.1.0...v1.2.1-docs
+[1.1.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/releases/tag/v1.0.0

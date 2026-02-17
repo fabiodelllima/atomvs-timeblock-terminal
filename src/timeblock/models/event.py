@@ -1,12 +1,12 @@
 """Data models for TimeBlock application."""
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 
 from sqlmodel import Field, SQLModel
 
 
-class EventStatus(str, Enum):
+class EventStatus(StrEnum):
     """Event lifecycle status."""
 
     PLANNED = "planned"
@@ -41,7 +41,7 @@ class PauseLog(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class ChangeType(str, Enum):
+class ChangeType(StrEnum):
     """Types of changes for audit logging."""
 
     CREATED = "created"
