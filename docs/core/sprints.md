@@ -48,31 +48,31 @@ A decisão de incluir branding e reestruturação na mesma sprint reflete que am
 - [x] Atualizar referências internas `docs/ssot/` → `docs/core/` em todos os .md
 - [x] ADR-031: Implementação TUI com Textual
 - [ ] Seção BR-TUI (BR-TUI-001 a BR-TUI-010) em `docs/core/business-rules.md`
-- [ ] Criar `docs/core/sprints.md` (este documento)
-- [ ] Criar `docs/core/sprints-archive.md` (histórico v1.0.0 a v1.6.0)
+- [x] Criar `docs/core/sprints.md` (este documento)
+- [x] Criar `docs/core/sprints-archive.md` (histórico v1.0.0 a v1.6.0)
 - [ ] Adicionar parágrafos introdutórios nas seções do `docs/core/business-rules.md`
 - [ ] Adicionar parágrafos introdutórios nas seções do `docs/core/architecture.md`
-- [ ] Criar `docs/core/development.md` — SSOT do processo de desenvolvimento
+- [x] Criar `docs/core/development.md` — SSOT do processo de desenvolvimento
 - [ ] Atualizar README.md seção "Desenvolvimento" — resumo breve + link para development.md
 - [ ] Atualizar `docs/decisions/README.md` — adicionar ADR-031 e ADR-032 ao índice
-- [ ] Flatten: mover `cli/src/` → `src/`
-- [ ] Flatten: mover `cli/tests/` → `tests/`
-- [ ] Flatten: mover `cli/data/` → `data/`
-- [ ] Flatten: mover `cli/pyproject.toml` → `pyproject.toml`
-- [ ] Flatten: mover `cli/pytest.ini` → `pytest.ini`
-- [ ] Flatten: mover `cli/.ruff.toml` → `.ruff.toml`
-- [ ] Remover diretório `cli/` vazio
-- [ ] Atualizar `.gitlab-ci.yml` — remover `cd cli/` de todos os jobs
-- [ ] Atualizar `.github/workflows/ci.yml` — remover `cd cli/`
-- [ ] Atualizar `scripts/test-cicd.sh` — paths sem `cli/`
-- [ ] Atualizar `Dockerfile` e `Dockerfile.test` — paths sem `cli/`
-- [ ] Atualizar `README.md` — paths, nome do repo, instruções
-- [ ] Atualizar `CHANGELOG.md` — entrada v1.7.0-dev
-- [ ] Atualizar `mkdocs.yml` — paths sem `cli/`
-- [ ] Validar: `python -m pytest tests/ -v` passa a partir da raiz
-- [ ] Validar: `ruff check .` sem erros a partir da raiz
-- [ ] Validar: `mypy src/timeblock` sem erros a partir da raiz
-- [ ] Validar: pipeline CI/CD verde no GitLab e GitHub
+- [x] Flatten: mover `cli/src/` → `src/`
+- [x] Flatten: mover `cli/tests/` → `tests/`
+- [x] Flatten: mover `cli/data/` → `data/`
+- [x] Flatten: mover `cli/pyproject.toml` → `pyproject.toml`
+- [x] Flatten: mover `cli/pytest.ini` → `pytest.ini`
+- [x] Flatten: mover `cli/.ruff.toml` → `.ruff.toml`
+- [x] Remover diretório `cli/` vazio
+- [x] Atualizar `.gitlab-ci.yml` — remover `cd cli/` de todos os jobs
+- [x] Atualizar `.github/workflows/ci.yml` — remover `cd cli/`
+- [x] Atualizar `scripts/test-cicd.sh` — paths sem `cli/`
+- [x] Atualizar `Dockerfile` e `Dockerfile.test` — paths sem `cli/`
+- [x] Atualizar `README.md` — paths, nome do repo, instruções
+- [x] Atualizar `CHANGELOG.md` — entrada v1.7.0-dev
+- [x] Atualizar `mkdocs.yml` — paths sem `cli/`
+- [x] Validar: `python -m pytest tests/ -v` passa a partir da raiz
+- [x] Validar: `ruff check .` sem erros a partir da raiz
+- [x] Validar: `mypy src/timeblock` sem erros a partir da raiz
+- [x] Validar: pipeline CI/CD verde no GitLab e GitHub
 
 ---
 

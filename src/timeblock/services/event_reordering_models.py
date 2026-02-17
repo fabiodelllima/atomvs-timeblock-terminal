@@ -2,10 +2,10 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 
-class ConflictType(str, Enum):
+class ConflictType(StrEnum):
     """Tipos de conflitos entre eventos."""
 
     OVERLAP = "overlap"  # Intervalos de tempo se sobrepõem

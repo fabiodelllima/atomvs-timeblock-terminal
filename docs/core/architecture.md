@@ -246,7 +246,7 @@ A aplicação segue o padrão de camadas com separação rigorosa de responsabil
 
 ### 4.1. CLI Commands Layer
 
-**Localização:** `cli/src/timeblock/commands/`
+**Localização:** `src/timeblock/commands/`
 
 **Responsabilidade:** Interface com usuário, parsing de argumentos.
 
@@ -295,7 +295,7 @@ def create(
 
 ### 4.2. Services Layer
 
-**Localização:** `cli/src/timeblock/services/`
+**Localização:** `src/timeblock/services/`
 
 **Responsabilidade:** Lógica de negócio, orquestração.
 
@@ -442,7 +442,7 @@ class HabitInstanceService:
 
 ### 4.3. Models Layer
 
-**Localização:** `cli/src/timeblock/models/`
+**Localização:** `src/timeblock/models/`
 
 **Responsabilidade:** Estrutura de dados, relacionamentos.
 
@@ -500,7 +500,7 @@ class HabitInstance(SQLModel, table=True):
 
 ### 4.4. Database Layer
 
-**Localização:** `cli/src/timeblock/database/`
+**Localização:** `src/timeblock/database/`
 
 **Responsabilidade:** Gerenciamento de conexões, configuração e migrations.
 
@@ -525,13 +525,13 @@ O path do banco de dados é configurado via environment variable `TIMEBLOCK_DB_P
 
 ```
 1. TIMEBLOCK_DB_PATH (environment variable) - se definida
-2. cli/data/timeblock.db (default relativo ao código)
+2. data/timeblock.db (default relativo ao código)
 ```
 
 **Implementação (Single Source of Truth):**
 
 ```python
-# cli/src/timeblock/database/engine.py
+# src/timeblock/database/engine.py
 
 import os
 from pathlib import Path
@@ -545,7 +545,7 @@ def get_db_path() -> str:
 
     Ordem de precedência:
     1. Environment variable TIMEBLOCK_DB_PATH
-    2. Default: cli/data/timeblock.db
+    2. Default: data/timeblock.db
 
     Returns:
         Caminho absoluto do arquivo SQLite
@@ -660,7 +660,7 @@ def test_task_create_cli(cli_runner: CliRunner, isolated_db: Path):
 
 ### 4.5. Utils Layer
 
-**Localização:** `cli/src/timeblock/utils/`
+**Localização:** `src/timeblock/utils/`
 
 **Responsabilidade:** Funcionalidades transversais.
 
@@ -1135,18 +1135,18 @@ As decisões arquiteturais são documentadas como ADRs (Architecture Decision Re
 
 ### 7.5. ADRs de Padrões e Qualidade
 
-| ADR                                                            | Título                  | Decisão                       |
-| -------------------------------------------------------------- | ----------------------- | ----------------------------- |
-| [ADR-009](../decisions/ADR-009-flags-consolidation.md)         | Flags Consolidation     | Consolidação de flags CLI     |
-| [ADR-018](../decisions/ADR-018-language-standards.md)          | Language Standards      | Português agora, inglês v2.0+ |
-| [ADR-019](../decisions/ADR-019-test-naming-convention.md)      | Test Naming             | Padrão test*br*\*             |
-| [ADR-020](../decisions/ADR-020-business-rules-nomenclature.md) | BR Nomenclature         | Formato BR-DOMAIN-XXX         |
+| ADR                                                            | Título                   | Decisão                       |
+| -------------------------------------------------------------- | ------------------------ | ----------------------------- |
+| [ADR-009](../decisions/ADR-009-flags-consolidation.md)         | Flags Consolidation      | Consolidação de flags CLI     |
+| [ADR-018](../decisions/ADR-018-language-standards.md)          | Language Standards       | Português agora, inglês v2.0+ |
+| [ADR-019](../decisions/ADR-019-test-naming-convention.md)      | Test Naming              | Padrão test*br*\*             |
+| [ADR-020](../decisions/ADR-020-business-rules-nomenclature.md) | BR Nomenclature          | Formato BR-DOMAIN-XXX         |
 | [ADR-025](../decisions/ADR-025-development-methodology.md)     | Engenharia de Requisitos | ISO/IEC/IEEE 29148:2018       |
-| [ADR-026](../decisions/ADR-026-test-database-isolation.md)     | Test DB Isolation       | Isolamento via env var        |
-| [ADR-027](../decisions/ADR-027-documentation-tooling.md)       | Documentation Tooling   | MkDocs + mkdocstrings         |
-| [ADR-028](../decisions/ADR-028-remove-legacy-commands.md)      | Remove Legacy Commands  | Remoção de add/list legados   |
-| [ADR-029](../decisions/ADR-029-package-by-feature.md)          | Package by Feature      | Organização por domínio       |
-| [ADR-030](../decisions/ADR-030-multiplatform-architecture.md)  | Multiplatform Arch      | BFF, multi-repo, IaC          |
+| [ADR-026](../decisions/ADR-026-test-database-isolation.md)     | Test DB Isolation        | Isolamento via env var        |
+| [ADR-027](../decisions/ADR-027-documentation-tooling.md)       | Documentation Tooling    | MkDocs + mkdocstrings         |
+| [ADR-028](../decisions/ADR-028-remove-legacy-commands.md)      | Remove Legacy Commands   | Remoção de add/list legados   |
+| [ADR-029](../decisions/ADR-029-package-by-feature.md)          | Package by Feature       | Organização por domínio       |
+| [ADR-030](../decisions/ADR-030-multiplatform-architecture.md)  | Multiplatform Arch       | BFF, multi-repo, IaC          |
 
 ---
 
@@ -1157,22 +1157,21 @@ Esta seção define os padrões de codificação e convenções que mantêm cons
 ### 8.1. Estrutura de Diretórios
 
 ```
-cli/
-├── src/
-│   └── timeblock/
-│       ├── commands/      # CLI commands
-│       ├── services/      # Business logic
-│       ├── models/        # Data models
-│       ├── database/      # DB management
-│       └── utils/         # Helpers
-├── tests/
-│   ├── unit/              # Testes unitários
-│   ├── integration/       # Testes integração
-│   └── e2e/               # Testes end-to-end
-└── docs/                  # Documentação
-```
+````
+src/timeblock/
+├── commands/          # CLI commands
+├── services/          # Business logic
+├── models/            # Data models
+├── database/          # DB management
+└── utils/             # Helpers
 
-### 8.2. Naming Conventions
+tests/
+├── unit/              # Testes unitários
+├── integration/       # Testes integração
+├── bdd/               # Cenários Gherkin
+├── e2e/               # Fluxos completos
+└── factories/         # Test factories
+```
 
 **Arquivos:**
 
@@ -1245,17 +1244,14 @@ def calculate_streak(habit_id: int) -> int:
 
 **Estrutura:**
 
-```
+````
 tests/
-├── unit/
-│   ├── test_models/
-│   ├── test_services/
-│   ├── test_business_rules/
-│   └── test_utils/
-├── integration/
-│   └── test_flows/
-└── e2e/
-    └── test_cli/
+├── unit/              # Testes unitários por módulo
+├── integration/       # Testes de integração
+├── bdd/               # Cenários Gherkin
+├── e2e/               # Fluxos completos CLI
+└── factories/         # Test factories
+```
 ```
 
 **Naming:**
@@ -1623,7 +1619,7 @@ Especificação --> Validação (BDD) --> Verificação (TDD) --> Implementaçã
 ### 11.5. Estrutura de Testes
 
 ```
-cli/tests/
+tests/
 ├── bdd/
 │   ├── features/        # .feature (Gherkin)
 │   └── step_defs/       # Steps Python
@@ -1905,4 +1901,4 @@ Ver também: [ADR-030: Arquitetura Multi-Plataforma](../decisions/ADR-030-multip
 
 ---
 
-**Última atualização:** 5 de Fevereiro de 2026
+**Última atualização:** 13 de Fevereiro de 2026

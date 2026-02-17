@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.6
+    rev: v0.15.1
     hooks:
       - id: ruff
         args: [--fix]
@@ -15,9 +15,11 @@ repos:
         language: system
         pass_filenames: false
         files: ^src/timeblock/
+        stages: [pre-push]
       - id: pytest-all
-        name: pytest full suite (unit + integration + e2e)
+        name: pytest full suite (unit + integration + bdd + e2e)
         entry: bash -c './venv/bin/python -m pytest tests/ -q --tb=short'
         language: system
         pass_filenames: false
         always_run: true
+        stages: [pre-push]

@@ -1899,14 +1899,14 @@ O TimeBlock Organizer mantém dois repositórios Git sincronizados com propósit
 
 #### **GitLab (origin) - Repositório de Desenvolvimento**
 
-- URL: `git@gitlab.com:delimafabio/timeblock-organizer.git`
+- URL: `git@gitlab.com:delimafabio/atomvs-timeblock-terminal.git`
 - Propósito: Workspace completo de desenvolvimento
 - Contém: Documentação completa, ADRs, comentários inline, notas de sessão
 - Audiência: Desenvolvimento interno, aprendizado, portfolio detalhado
 
 #### **GitHub (github) - Showcase Público**
 
-- URL: `git@github.com:fabiodelllima/timeblock-organizer.git`
+- URL: `git@github.com:fabiodelllima/atomvs-timeblock-terminal.git`
 - Propósito: Codebase limpo de produção
 - Contém: Código de produção, README público, licença
 - Audiência: Recrutadores, portfolio público, demonstração de código
@@ -1961,10 +1961,10 @@ Preservado no GitHub:
 
 ```bash
 git remote -v
-# origin  git@gitlab.com:delimafabio/timeblock-organizer.git (fetch)
-# origin  git@gitlab.com:delimafabio/timeblock-organizer.git (push)
-# github  git@github.com:fabiodelllima/timeblock-organizer.git (fetch)
-# github  git@github.com:fabiodelllima/timeblock-organizer.git (push)
+# origin  git@gitlab.com:delimafabio/atomvs-timeblock-terminal.git (fetch)
+# origin  git@gitlab.com:delimafabio/atomvs-timeblock-terminal.git (push)
+# github  git@github.com:fabiodelllima/atomvs-timeblock-terminal.git (fetch)
+# github  git@github.com:fabiodelllima/atomvs-timeblock-terminal.git (push)
 ```
 
 **Autenticação:**
