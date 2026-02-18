@@ -100,8 +100,8 @@ sync:github:
     - git remote add github https://x-access-token:$\{GITHUB_TOKEN\}@github.com/fabiodelllima/atomvs-timeblock-terminal.git
     - git push github HEAD:${CI_COMMIT_REF_NAME} --force
     - git push github --tags --force
-  only:
-    - develop
-    - main
-    - tags
-  when: on_success
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: on_success
+    - if: $CI_COMMIT_BRANCH
+      when: on_success
