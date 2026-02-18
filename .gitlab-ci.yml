@@ -3,7 +3,6 @@ stages:
   - test
   - coverage
   - security
-  - build
   - sync
 
 default:
@@ -27,51 +26,16 @@ lint:
     - ruff check src/ tests/
     - ruff format --check src/ tests/
 
-test:unit:
+test:all:
   stage: test
   image: $CI_IMAGE
   before_script:
     - pip install --no-deps -e .
   script:
-    - coverage run -m pytest tests/unit/ -v --tb=short
+    - coverage run -m pytest tests/ -v --tb=short
   artifacts:
     paths:
-      - .coverage.*
-    expire_in: 1 hour
-
-test:integration:
-  stage: test
-  image: $CI_IMAGE
-  before_script:
-    - pip install --no-deps -e .
-  script:
-    - coverage run -m pytest tests/integration/ -v --tb=short
-  artifacts:
-    paths:
-      - .coverage.*
-    expire_in: 1 hour
-
-test:bdd:
-  stage: test
-  image: $CI_IMAGE
-  before_script:
-    - pip install --no-deps -e .
-  script:
-    - coverage run -m pytest tests/bdd/ -v --tb=short
-  artifacts:
-    paths:
-      - .coverage.*
-    expire_in: 1 hour
-
-test:e2e:
-  stage: test
-  image: $CI_IMAGE
-  before_script:
-    - pip install --no-deps -e .
-  script:
-    - coverage run -m pytest tests/e2e/ -v --tb=short
-  artifacts:
-    paths:
+      - .coverage
       - .coverage.*
     expire_in: 1 hour
 
@@ -90,17 +54,10 @@ coverage:report:
   before_script:
     - pip install --no-deps -e .
   needs:
-    - job: test:unit
-      artifacts: true
-    - job: test:integration
-      artifacts: true
-    - job: test:bdd
-      artifacts: true
-    - job: test:e2e
+    - job: test:all
       artifacts: true
   script:
-    - ls -la .coverage.* || echo "No coverage files found"
-    - coverage combine
+    - ls -la .coverage* || echo "No coverage files found"
     - coverage report --fail-under=85
     - coverage xml -o coverage.xml
   artifacts:
@@ -140,6 +97,7 @@ sync:github:
   stage: sync
   before_script: []
   script:
+    - git remote add github https://x-access-token:$\{GITHUB_TOKEN\}@github.com/fabiodelllima/atomvs-timeblock-terminal.git
     - git push github HEAD:${CI_COMMIT_REF_NAME} --force
     - git push github --tags --force
   only:

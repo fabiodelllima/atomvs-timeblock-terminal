@@ -52,7 +52,6 @@ filterwarnings = [
 
 [tool.coverage.run]
 source = ["src/timeblock"]
-parallel = true
 omit = ["tests/*", "*/venv/*"]
 
 [tool.coverage.report]
