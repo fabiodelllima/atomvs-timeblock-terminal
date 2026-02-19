@@ -1,0 +1,17 @@
+/* ATOMVS TimeBlock - Material-like Theme */
+
+Screen {
+    background: #1E1E2E;
+    color: #CDD6F4;
+}
+
+#content-area {
+    width: 100%;
+    height: 1fr;
+    padding: 1 2;
+}
+
+Header {
+    background: #7C4DFF;
+    color: #CDD6F4;
+}
