@@ -12,14 +12,14 @@
 
 ATOMVS TimeBlock é uma aplicação CLI para gerenciamento de tempo baseada em Time Blocking e nos princípios de Atomic Habits. A arquitetura segue o modelo offline-first, priorizando funcionalidade completa sem dependência de rede, com evolução planejada para TUI (v1.7.x), API REST (v2.x), sincronização distribuída (v3.x) e mobile Android (v4.x).
 
-O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 9 jobs com Docker e DevSecOps. Cobertura atingiu 87% (threshold 85%). O foco atual é a implementação da TUI com Textual (v1.7.0).
+O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 7 jobs com Docker e DevSecOps. Cobertura atingiu 87% (threshold 85%). O foco atual é a implementação da TUI com Textual (v1.7.0).
 
-**Estado Atual (12/02/2026):**
+**Estado Atual (19/02/2026):**
 
 - Versão: v1.6.0 (estável)
 - Qualidade: 87% cobertura, 0 erros mypy, 778 testes
 - Funcionalidade: 85% comandos CLI operacionais
-- Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 9 jobs
+- Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 7 jobs
 
 ---
 
@@ -100,7 +100,7 @@ TOTAL:       778 testes
 ### 3.3. Infraestrutura CI/CD
 
 ```plaintext
-GitLab CI: 8 jobs (6 test + 1 build + 1 sync)
+GitLab CI: 7 jobs (test:all + lint + typecheck + coverage + 2 security + sync)
 GitHub Actions: 6 checks + CodeQL
 Sync automático: GitLab => GitHub (após pipeline verde)
 Pipeline time: ~3min (local => GitHub sync)

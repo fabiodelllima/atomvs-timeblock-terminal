@@ -7,27 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- TUI: Updated ADR-031 with horizontal navigation layout and proportional timeblocks
+- TUI: Planned screens - Dashboard, Routines, Habits, Tasks, Timer, Analytics, Habit Detail
+
+### Changed
+
+- CI/CD: Consolidated test jobs into single test:all (4 jobs to 1)
+- CI/CD: Optimized pipeline from 10 to 6 jobs
+- CI/CD: Aligned GitHub Actions with GitLab consolidation
+- CI/CD: Expanded sync:github to all branches (contribution graph)
+- CI/CD: Removed parallel=true from coverage (incompatible with test:all)
+
+### Fixed
+
+- CI/CD: GitHub remote added dynamically in CI container
+- CI/CD: Fixed GITHUB_TOKEN variable escaping in sync job
+- CI/CD: Full refspec (refs/heads/) for GitHub sync push
+
 ## [1.6.0] - 2026-02-12
 
 ### Added
 
-- CI/CD: Imagem Docker com deps pre-instaladas (Dockerfile.ci)
-- CI/CD: DevSecOps com Bandit (SAST) e pip-audit (SCA)
-- CI/CD: Cobertura combinada de 4 suites via coverage run
-- CI/CD: Pre-commit hooks atualizados (ruff commit, full suite push)
+- CI/CD: Docker image with pre-installed dependencies (Dockerfile.ci)
+- CI/CD: DevSecOps with Bandit (SAST) and pip-audit (SCA)
+- CI/CD: Combined coverage from 4 suites via coverage run
+- CI/CD: Updated pre-commit hooks (ruff on commit, full suite on push)
 
 ### Changed
 
-- refactor: Estrutura aplanada de cli/ para raiz do projeto
-- CI/CD: Pipeline migrado para Docker (elimina overhead pip install)
-- CI/CD: Removido build:docs do pipeline (validacao manual)
-- CI/CD: GitHub Actions alinhado com GitLab CI
+- refactor: Flattened structure from cli/ to project root
+- CI/CD: Pipeline migrated to Docker (eliminates pip install overhead)
+- CI/CD: Removed build:docs from pipeline (manual validation)
+- CI/CD: GitHub Actions aligned with GitLab CI
 
 ### Fixed
 
-- fix: CVE-2026-1703 no pip 25.3 (atualizado para pip>=26.0)
-- fix: pytest-cov combinava parciais automaticamente (migrado para coverage run)
-- fix: Threshold parcial bloqueava jobs individuais (--cov-fail-under=0)
+- fix: CVE-2026-1703 in pip 25.3 (updated to pip>=26.0)
+- fix: pytest-cov auto-combined partials (migrated to coverage run)
+- fix: Partial threshold blocked individual jobs (--cov-fail-under=0)
 
 ### Metrics
 
@@ -40,21 +59,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- CI/CD: Sincronizacao automatica GitLab => GitHub via job sync:github
-- CI/CD: Suporte a GitHub Merge Queue (evento merge_group)
-- CI/CD: Stage sync no pipeline GitLab
-- docs: cicd-flow.md v2.0 com arquitetura dual-repo completa
+- CI/CD: Automatic sync GitLab => GitHub via sync:github job
+- CI/CD: GitHub Merge Queue support (merge_group event)
+- CI/CD: Sync stage in GitLab pipeline
+- docs: cicd-flow.md v2.0 with complete dual-repo architecture
 
 ### Changed
 
-- CI/CD: GitLab definido como fonte de verdade (source of truth)
-- CI/CD: GitHub configurado como showcase publico
-- CI/CD: Branch protection ajustada para permitir sync automatico
+- CI/CD: GitLab defined as source of truth
+- CI/CD: GitHub configured as public showcase
+- CI/CD: Branch protection adjusted for automatic sync
 
 ### Fixed
 
-- CI/CD: Historicos divergentes entre GitLab e GitHub
-- CI/CD: Token scope workflow para atualizacao de GitHub Actions
+- CI/CD: Divergent histories between GitLab and GitHub
+- CI/CD: Token scope workflow for GitHub Actions updates
 
 ### Metrics
 

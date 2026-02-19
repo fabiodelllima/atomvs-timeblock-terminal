@@ -2055,7 +2055,7 @@ def main():
 
 ### BR-TUI-002: Screen Navigation
 
-**Descrição:** A TUI possui 5 screens navegáveis por sidebar. Navegação por keybindings numéricos ou mnemônicos. Apenas uma screen ativa por vez.
+**Descrição:** A TUI possui 5 screens navegáveis por nav bar horizontal no rodapé. Navegação por keybindings numéricos ou mnemônicos. Apenas uma screen ativa por vez.
 
 **Regras:**
 
@@ -2063,7 +2063,7 @@ def main():
 2. Screen inicial ao abrir: Dashboard
 3. Keybindings numéricos: `1`=Dashboard, `2`=Routines, `3`=Habits, `4`=Tasks, `5`=Timer
 4. Keybindings mnemônicos: `d`=Dashboard, `r`=Routines, `h`=Habits, `t`=Tasks, `m`=Timer (de "medidor")
-5. Sidebar exibe todas as screens com indicador da screen ativa
+5. Nav bar horizontal exibe todas as screens com indicador da screen ativa
 6. Navegação preserva estado da screen anterior (não reseta dados em edição)
 
 **Testes:**
@@ -2071,20 +2071,20 @@ def main():
 - `test_br_tui_002_initial_screen_is_dashboard`
 - `test_br_tui_002_numeric_keybinding_navigation`
 - `test_br_tui_002_mnemonic_keybinding_navigation`
-- `test_br_tui_002_sidebar_shows_active_screen`
+- `test_br_tui_002_nav_bar_shows_active_screen`
 
 ---
 
 ### BR-TUI-003: Dashboard Screen
 
-**Descrição:** O Dashboard exibe resumo do dia corrente: rotina ativa, hábitos pendentes/concluídos, tarefas ativas e status do timer. Serve como ponto de entrada e visão geral.
+**Descrição:** O Dashboard exibe o dia corrente como grade temporal proporcional (estilo calendário) com a rotina ativa à esquerda (~70%) e tasks pendentes à direita (~30%). Cada timeblock ocupa altura proporcional à duração (30min = 1 linha). Serve como ponto de entrada e visão geral.
 
 **Regras:**
 
 1. Exibe nome da rotina ativa (ou "[Nenhuma rotina ativa]")
-2. Card "Hábitos Hoje": lista instâncias do dia com status (pending/done/not_done)
-3. Card "Tarefas": lista tarefas pendentes ordenadas por prioridade
-4. Card "Timer": exibe timer ativo (se houver) ou "[Sem timer ativo]"
+2. Coluna esquerda: grade temporal com timeblocks proporcionais, bordas coloridas por tag, status semântico (verde=done, amarelo=pending, vermelho=not_done)
+3. Coluna direita: lista compacta de tasks pendentes com botão [>] para detalhes
+4. Timer ativo exibido na command bar (rodapé), visível em todas as screens
 5. Dados atualizados ao entrar na screen (refresh on focus)
 6. Se não há rotina ativa, exibir orientação para criar/ativar uma
 
@@ -2173,16 +2173,16 @@ def main():
 
 ---
 
-### BR-TUI-007: Status Bar
+### BR-TUI-007: Command Bar
 
-**Descrição:** Barra de status persistente no rodapé exibe informações contextuais: rotina ativa, timer ativo (se houver) e hora atual.
+**Descrição:** Command bar persistente no rodapé inferior exibe keybindings contextuais (esquerda) e timer ativo (direita). Acima dela, a nav bar exibe as screens disponíveis.
 
 **Regras:**
 
 1. Posição: rodapé, largura total
-2. Seção esquerda: nome da rotina ativa
-3. Seção central: timer ativo com tempo decorrido (se houver)
-4. Seção direita: hora atual (HH:MM)
+2. Seção esquerda: keybindings contextuais da screen ativa (ex: n:Nova e:Editar x:Del)
+3. Seção direita: timer ativo com tempo decorrido (se houver)
+4. Keybindings mudam conforme a screen ativa
 5. Hora atualiza a cada minuto
 6. Timer atualiza a cada segundo (quando ativo)
 7. Se não há rotina ativa: exibe "[Sem rotina]"
@@ -2207,7 +2207,7 @@ def main():
 3. Status colors: verde (done/success), amarelo (pending/warning), vermelho (missed/error)
 4. Texto primário: alto contraste sobre superfície
 5. Texto secundário: cor muted para labels e metadados
-6. Sidebar: largura fixa 22 caracteres, fundo surface-alt
+6. Nav bar: fundo surface-alt, screen ativa destacada com cor primary
 7. Tipografia: bold para títulos, normal para conteúdo, dim para metadados
 
 **Testes:**

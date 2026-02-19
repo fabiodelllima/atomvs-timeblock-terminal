@@ -1717,7 +1717,7 @@ Pipeline declarado em `.gitlab-ci.yml`, executado em cada push e merge request.
 ```
 test ──> build ──> deploy
 
-test:     6 jobs paralelos (acima)
+test:     1 job consolidado (test:all)
 build:    mkdocs build [develop, main]
 deploy:   GitLab Pages [main]
 ```
