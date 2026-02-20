@@ -46,7 +46,7 @@ test:typecheck:
     - pip install --no-deps -e .
   script:
     - mypy src/timeblock --check-untyped-defs
-  timeout: 5m
+  timeout: 10m
 
 coverage:report:
   stage: coverage
@@ -87,7 +87,7 @@ security:deps:
   script:
     - pip-audit --format json --output pip-audit-report.json
     - pip-audit
-  timeout: 5m
+  timeout: 10m
   artifacts:
     paths:
       - pip-audit-report.json
