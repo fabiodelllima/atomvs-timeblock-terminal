@@ -5,8 +5,9 @@ from typing import ClassVar
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container
-from textual.widgets import Footer, Header, Static
+from textual.widgets import Footer, Header
 
+from timeblock.tui.screens.dashboard import DashboardScreen
 from timeblock.tui.widgets.nav_bar import NavBar
 
 SCREENS = {
@@ -44,7 +45,7 @@ class TimeBlockApp(App):
         """Compõe o layout da aplicação."""
         yield Header()
         yield Container(
-            Static("Dashboard", id="screen-content"),
+            DashboardScreen(id="dashboard-view"),
             id="content-area",
         )
         yield NavBar()
@@ -54,7 +55,5 @@ class TimeBlockApp(App):
         """Alterna a screen ativa."""
         if screen_name in SCREENS:
             self.active_screen = screen_name
-            content = self.query_one("#screen-content", Static)
-            content.update(SCREENS[screen_name])
             nav_bar = self.query_one(NavBar)
             nav_bar.update_active(screen_name)
