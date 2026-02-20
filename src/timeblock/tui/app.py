@@ -8,6 +8,7 @@ from textual.containers import Container
 from textual.widgets import Footer, Header
 
 from timeblock.tui.screens.dashboard import DashboardScreen
+from timeblock.tui.widgets.help_overlay import HelpOverlay
 from timeblock.tui.widgets.nav_bar import NavBar
 
 SCREENS = {
@@ -36,6 +37,8 @@ class TimeBlockApp(App):
         Binding("h", "switch_screen('habits')", "Hábitos", show=False),
         Binding("t", "switch_screen('tasks')", "Tasks", show=False),
         Binding("m", "switch_screen('timer')", "Timer", show=False),
+        Binding("?", "toggle_help", "Ajuda", show=False),
+        Binding("escape", "handle_escape", "Voltar", show=False),
         Binding("q", "quit", "Sair"),
     ]
 
@@ -57,3 +60,19 @@ class TimeBlockApp(App):
             self.active_screen = screen_name
             nav_bar = self.query_one(NavBar)
             nav_bar.update_active(screen_name)
+
+    async def action_toggle_help(self) -> None:
+        """Exibe ou fecha o overlay de ajuda."""
+        existing = self.query("#help-overlay")
+        if existing:
+            existing.first().remove()
+        else:
+            await self.mount(HelpOverlay())
+
+    async def action_handle_escape(self) -> None:
+        """Fecha modal aberto ou volta ao Dashboard."""
+        help_overlay = self.query("#help-overlay")
+        if help_overlay:
+            help_overlay.first().remove()
+        elif self.active_screen != "dashboard":
+            await self.action_switch_screen("dashboard")
