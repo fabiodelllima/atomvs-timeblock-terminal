@@ -1,4 +1,6 @@
-"""Entry point do TimeBlock Organizer CLI."""
+"""Entry point do TimeBlock Organizer CLI/TUI."""
+
+import sys
 
 import typer
 
@@ -37,5 +39,26 @@ def version():
     typer.echo("CLI para gerenciamento de tempo e hábitos")
 
 
+def launch_tui() -> bool:
+    """Importa e executa a TUI. Raises ImportError se textual não instalado."""
+    from timeblock.tui.app import TimeBlockApp
+
+    TimeBlockApp().run()
+    return True
+
+
+def main():
+    """Entry point unificado: sem args abre TUI, com args executa CLI."""
+    if len(sys.argv) <= 1:
+        try:
+            launch_tui()
+        except ImportError:
+            print("[WARN] TUI requer 'textual'.")
+            print("       Instale: pip install atomvs-timeblock-terminal[tui]")
+            print("       Uso CLI: timeblock --help")
+    else:
+        app()
+
+
 if __name__ == "__main__":
-    app()
+    main()

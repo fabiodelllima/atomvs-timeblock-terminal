@@ -1,40 +1,40 @@
-# language: pt
-Funcionalidade: Skip de Habit com Categorização (BR-HABIT-SKIP-001)
+# language: en
+# BR-HABIT-SKIP-001: Skip de hábito com categorização
+Feature: Habit Skip with Categorization (BR-HABIT-SKIP-001)
+  As a TimeBlock user
+  I want to mark habits as skipped with a category
+  So that I can track interruption reasons and identify patterns
 
-  Como usuário do TimeBlock
-  Quero marcar hábitos como skipped com categoria
-  Para rastrear razões de interrupção e identificar padrões
+  Background:
+    Given a routine "Rotina Matinal" exists
+    And a habit "Academia" is scheduled for today at 07:00-08:30
+    And a HabitInstance with status "PENDING" exists
 
-  Contexto:
-    Dado que existe uma rotina "Rotina Matinal"
-    E existe um habit "Academia" agendado para hoje às 07:00-08:30
-    E existe uma HabitInstance com status "PENDING"
+  # Cenário 1: Skip com categoria HEALTH e nota
+  Scenario: Skip with category HEALTH
+    When the user marks skip with category "HEALTH" and note "Gripe, febre 38°C"
+    Then the status should be "NOT_DONE"
+    And the substatus should be "SKIPPED_JUSTIFIED"
+    And the skip_reason should be "saude"
+    And the skip_note should be "Gripe, febre 38°C"
+    And done_substatus should be NULL
+    And completion_percentage should be NULL
 
-  # SCENARIO 1: Skip com categoria HEALTH e nota
-  Cenário: Skip com categoria HEALTH
-    Quando usuário marca skip com categoria "HEALTH" e nota "Gripe, febre 38°C"
-    Então o status deve ser "NOT_DONE"
-    E o substatus deve ser "SKIPPED_JUSTIFIED"
-    E o skip_reason deve ser "saude"
-    E o skip_note deve ser "Gripe, febre 38°C"
-    E done_substatus deve ser NULL
-    E completion_percentage deve ser NULL
+  # Cenário 2: Skip com categoria WORK sem nota
+  Scenario: Skip with category WORK without note
+    When the user marks skip with category "WORK" without note
+    Then the status should be "NOT_DONE"
+    And the substatus should be "SKIPPED_JUSTIFIED"
+    And the skip_reason should be "trabalho"
+    And the skip_note should be NULL
 
-  # SCENARIO 2: Skip com categoria WORK sem nota
-  Cenário: Skip com categoria WORK sem nota
-    Quando usuário marca skip com categoria "WORK" sem nota
-    Então o status deve ser "NOT_DONE"
-    E o substatus deve ser "SKIPPED_JUSTIFIED"
-    E o skip_reason deve ser "trabalho"
-    E o skip_note deve ser NULL
+  # Cenário 7: Erro - instância inexistente
+  Scenario: Error when skipping nonexistent instance
+    When the user tries to skip HabitInstance with ID 99999
+    Then the system should return error "HabitInstance 99999 not found"
 
-  # SCENARIO 7: Erro - HabitInstance não existe
-  Cenário: Erro ao skip de instância inexistente
-    Quando usuário tenta skip de HabitInstance com ID 99999
-    Então o sistema deve retornar erro "HabitInstance 99999 not found"
-
-  # SCENARIO 8: Erro - Nota muito longa (>500 chars)
-  Cenário: Erro ao tentar skip com nota muito longa
-    Dado que skip_note tem 501 caracteres
-    Quando usuário tenta skip com categoria "HEALTH" e essa nota
-    Então o sistema deve retornar erro "Skip note must be <= 500 characters"
+  # Cenário 8: Erro - nota muito longa (>500 chars)
+  Scenario: Error when skip note is too long
+    Given the skip_note has 501 characters
+    When the user tries skip with category "HEALTH" and that note
+    Then the system should return error "Skip note must be <= 500 characters"

@@ -34,7 +34,8 @@ dev = [
 ]
 
 [project.scripts]
-timeblock = "timeblock.main:app"
+timeblock = "timeblock.main:main"
+atomvs = "timeblock.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

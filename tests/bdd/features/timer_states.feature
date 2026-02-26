@@ -9,7 +9,7 @@ Feature: Timer States (BR-TIMER-002, BR-TIMER-003)
     And a habit "Gym" exists in the routine
     And a pending instance exists for today
 
-  # BR-TIMER-002: State Transitions
+  # BR-TIMER-002: Transições de estado
 
   Scenario: Start timer creates RUNNING state
     When I start the timer for the instance
@@ -38,7 +38,7 @@ Feature: Timer States (BR-TIMER-002, BR-TIMER-003)
     When I try to resume the timer
     Then it should return error "Timer already running"
 
-  # BR-TIMER-003: Stop and Reset
+  # BR-TIMER-003: Parar e resetar
 
   Scenario: Stop finalizes timer with DONE
     Given a RUNNING timer exists

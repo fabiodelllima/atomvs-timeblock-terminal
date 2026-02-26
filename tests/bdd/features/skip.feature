@@ -1,110 +1,109 @@
-# language: pt
-Funcionalidade: Skip de Habit com Justificativa
+# language: en
+Feature: Habit Skip with Justification
+  As a TimeBlock user
+  I want to skip habits when necessary
+  So that I maintain flexibility without losing tracking
 
-  Como usuário do TimeBlock
-  Quero pular habits quando necessário
-  Para manter flexibilidade sem perder rastreamento
+  Background:
+    Given an active routine "Rotina Matinal" exists
+    And a habit "Academia" is scheduled for today at 07:00
 
-  Contexto:
-    Dado que existe uma rotina "Rotina Matinal" ativa
-    E existe um habit "Academia" agendado para hoje às 07:00
+  # BR-HABIT-SKIP-001: Categorização de skip com enum
+  Scenario: Skip with valid category (HEALTH)
+    When the user runs "habit skip Academia --reason HEALTH --note 'Consulta médica'"
+    Then habit "Academia" has status "NOT_DONE"
+    And habit "Academia" has substatus "SKIPPED_JUSTIFIED"
+    And the skip_reason is "saude"
+    And the skip_note is "Consulta médica"
+    And the streak for "Academia" is broken
 
-  # BR-HABIT-SKIP-001: Categorização de Skip com Enum
-  Cenário: Skip com categoria válida (HEALTH)
-    Quando usuário executa "habit skip Academia --reason HEALTH --note 'Consulta médica'"
-    Então o habit "Academia" tem status "NOT_DONE"
-    E o habit "Academia" tem substatus "SKIPPED_JUSTIFIED"
-    E o skip_reason é "saude"
-    E o skip_note é "Consulta médica"
-    E o streak de "Academia" é quebrado
+  Scenario: Skip with all 8 categories
+    When the user tries skip with reason "HEALTH"
+    Then the skip_reason should be "saude"
 
-  Cenário: Skip com todas as 8 categorias
-    Quando usuário tenta skip com reason "HEALTH"
-    Então o skip_reason deve ser "saude"
+    When the user tries skip with reason "WORK"
+    Then the skip_reason should be "trabalho"
 
-    Quando usuário tenta skip com reason "WORK"
-    Então o skip_reason deve ser "trabalho"
+    When the user tries skip with reason "FAMILY"
+    Then the skip_reason should be "familia"
 
-    Quando usuário tenta skip com reason "FAMILY"
-    Então o skip_reason deve ser "familia"
+    When the user tries skip with reason "TRAVEL"
+    Then the skip_reason should be "viagem"
 
-    Quando usuário tenta skip com reason "PERSONAL"
-    Então o skip_reason deve ser "pessoal"
+    When the user tries skip with reason "WEATHER"
+    Then the skip_reason should be "clima"
 
-    Quando usuário tenta skip com reason "WEATHER"
-    Então o skip_reason deve ser "clima"
+    When the user tries skip with reason "LACK_RESOURCES"
+    Then the skip_reason should be "falta_recursos"
 
-    Quando usuário tenta skip com reason "FATIGUE"
-    Então o skip_reason deve ser "cansaco"
+    When the user tries skip with reason "EMERGENCY"
+    Then the skip_reason should be "emergencia"
 
-    Quando usuário tenta skip com reason "EMERGENCY"
-    Então o skip_reason deve ser "emergencia"
+    When the user tries skip with reason "OTHER"
+    Then the skip_reason should be "outro"
 
-    Quando usuário tenta skip com reason "OTHER"
-    Então o skip_reason deve ser "outro"
+  Scenario: Skip with invalid category
+    When the user runs "habit skip Academia --reason INVALID"
+    Then the system returns error "Categoria inválida"
+    And habit "Academia" remains with status "PENDING"
 
-  Cenário: Skip com categoria inválida
-    Quando usuário executa "habit skip Academia --reason INVALID"
-    Então o sistema retorna erro "Categoria inválida"
-    E o habit "Academia" permanece com status "PENDING"
+  # BR-HABIT-SKIP-002: Campos de skip
+  Scenario: Skip note limited to 200 characters
+    Given the skip_note has 200 characters
+    When the user runs skip with that note
+    Then the skip is recorded successfully
 
-  # BR-HABIT-SKIP-002: Campos de Skip
-  Cenário: Skip note limitado a 200 caracteres
-    Dado que skip_note tem 200 caracteres
-    Quando usuário executa skip com essa nota
-    Então o skip é registrado com sucesso
+    Given the skip_note has 201 characters
+    When the user runs skip with that note
+    Then the system returns error "skip_note deve ter no máximo 200 caracteres"
 
-    Dado que skip_note tem 201 caracteres
-    Quando usuário executa skip com essa nota
-    Então o sistema retorna erro "skip_note deve ter no máximo 200 caracteres"
+  Scenario: Skip note is optional
+    When the user runs "habit skip Academia --reason HEALTH"
+    Then the habit is marked as SKIPPED_JUSTIFIED
+    And the skip_reason is "saude"
+    And the skip_note is NULL
 
-  Cenário: Skip note é opcional
-    Quando usuário executa "habit skip Academia --reason HEALTH"
-    Então o habit é marcado como SKIPPED_JUSTIFIED
-    E o skip_reason é "saude"
-    E o skip_note é NULL
+  Scenario: Skip fields NULL when not skipped
+    Given habit "Academia" has status "DONE"
+    Then the skip_reason should be NULL
+    And the skip_note should be NULL
 
-  Cenário: Skip fields NULL quando não skipped
-    Dado que habit "Academia" está com status "DONE"
-    Então o skip_reason deve ser NULL
-    E o skip_note deve ser NULL
+  # BR-HABIT-SKIP-003: Prazo para justificar skip
+  Scenario: Justify skip within 24h
+    Given the user skipped without justification at 08:00 on 14/11
+    And it is now 18:00 on 14/11 (10h later)
+    When the user runs "habit skip Academia --add-reason WORK"
+    Then the substatus changes from "SKIPPED_UNJUSTIFIED" to "SKIPPED_JUSTIFIED"
+    And the skip_reason is "trabalho"
 
-  # BR-HABIT-SKIP-003: Prazo para Justificar Skip
-  Cenário: Justificar skip dentro de 24h
-    Dado que usuário fez skip sem justificativa às 08:00 do dia 14/11
-    E agora são 18:00 do dia 14/11 (10h depois)
-    Quando usuário executa "habit skip Academia --add-reason WORK"
-    Então o substatus muda de "SKIPPED_UNJUSTIFIED" para "SKIPPED_JUSTIFIED"
-    E o skip_reason é "trabalho"
+  Scenario: Justify skip after 24h (deadline expired)
+    Given the user skipped without justification at 08:00 on 14/11
+    And it is now 09:00 on 15/11 (25h later)
+    When the user runs "habit skip Academia --add-reason WORK"
+    Then the system returns error "Prazo de 24h expirado"
+    And the substatus remains "SKIPPED_UNJUSTIFIED"
 
-  Cenário: Justificar skip após 24h (prazo expirado)
-    Dado que usuário fez skip sem justificativa às 08:00 do dia 14/11
-    E agora são 09:00 do dia 15/11 (25h depois)
-    Quando usuário executa "habit skip Academia --add-reason WORK"
-    Então o sistema retorna erro "Prazo de 24h expirado"
-    E o substatus permanece "SKIPPED_UNJUSTIFIED"
-
-  Cenário: Skip sem justificativa mostra deadline
-    Quando usuário executa "habit skip Academia --no-reason"
-    Então o sistema exibe mensagem:
+  Scenario: Skip without justification shows deadline
+    When the user runs "habit skip Academia --no-reason"
+    Then the system displays message:
       """
       [WARN] Skip sem justificativa
              Prazo para justificar: até <data + 24h>
       """
-    E o substatus é "SKIPPED_UNJUSTIFIED"
+    And the substatus is "SKIPPED_UNJUSTIFIED"
 
-  # BR-HABIT-SKIP-004: CLI Prompt Interativo
-  Cenário: Prompt interativo com 9 opções
-    Quando usuário executa "habit skip Academia" sem flags
-    Então o sistema exibe prompt:
+  # BR-HABIT-SKIP-004: Prompt interativo CLI
+  Scenario: Interactive prompt with 9 options
+    When the user runs "habit skip Academia" without flags
+    Then the system shows prompt:
       """
       Motivo do skip:
       [1] Saúde (consulta, doença)
       [2] Trabalho (reunião, deadline)
       [3] Família (evento, emergência)
-      [4] Pessoal (outro motivo)
+      [4] Viagem (deslocamento, fuso)
       [5] Clima (chuva, frio extremo)
-      [6] Cansaço/Fadiga
+      [6] Falta de Recursos (equipamento, local)
       [7] Emergência (não categorizada)
       [8] Outro motivo
       [9] Pular agora, justificar depois
@@ -112,32 +111,32 @@ Funcionalidade: Skip de Habit com Justificativa
       Escolha [1-9]:
       """
 
-  Cenário: Escolher opção 1-8 cria SKIPPED_JUSTIFIED
-    Dado que usuário executa "habit skip Academia"
-    Quando usuário escolhe opção "2" (Trabalho)
-    E usuário digita nota "Reunião urgente"
-    Então o substatus é "SKIPPED_JUSTIFIED"
-    E o skip_reason é "trabalho"
-    E o skip_note é "Reunião urgente"
+  Scenario: Choose option 1-8 creates SKIPPED_JUSTIFIED
+    Given the user runs "habit skip Academia"
+    When the user chooses option "2" (Work)
+    And the user types note "Reunião urgente"
+    Then the substatus is "SKIPPED_JUSTIFIED"
+    And the skip_reason is "trabalho"
+    And the skip_note is "Reunião urgente"
 
-  Cenário: Escolher opção 9 cria SKIPPED_UNJUSTIFIED
-    Dado que usuário executa "habit skip Academia"
-    Quando usuário escolhe opção "9" (Justificar depois)
-    Então o substatus é "SKIPPED_UNJUSTIFIED"
-    E o skip_reason é NULL
-    E o skip_note é NULL
-    E o sistema exibe prazo de 24h
+  Scenario: Choose option 9 creates SKIPPED_UNJUSTIFIED
+    Given the user runs "habit skip Academia"
+    When the user chooses option "9" (Justify later)
+    Then the substatus is "SKIPPED_UNJUSTIFIED"
+    And the skip_reason is NULL
+    And the skip_note is NULL
+    And the system shows the 24h deadline
 
-  Cenário: Skip com flag --reason pula prompt
-    Quando usuário executa "habit skip Academia --reason HEALTH"
-    Então o prompt interativo NÃO é exibido
-    E o substatus é "SKIPPED_JUSTIFIED"
-    E o skip_reason é "saude"
+  Scenario: Skip with --reason flag skips the prompt
+    When the user runs "habit skip Academia --reason HEALTH"
+    Then the interactive prompt is NOT shown
+    And the substatus is "SKIPPED_JUSTIFIED"
+    And the skip_reason is "saude"
 
-  Cenário: Prompt para nota é opcional
-    Dado que usuário executa "habit skip Academia"
-    E usuário escolhe opção "6" (Cansaço)
-    Quando sistema pergunta "Adicionar nota? (opcional)"
-    E usuário pressiona Enter sem digitar
-    Então o skip_note é NULL
-    E o skip_reason é "cansaco"
+  Scenario: Note prompt is optional
+    Given the user runs "habit skip Academia"
+    And the user chooses option "4" (Travel)
+    When the system asks "Adicionar nota? (opcional)"
+    And the user presses Enter without typing
+    Then the skip_note is NULL
+    And the skip_reason is "viagem"

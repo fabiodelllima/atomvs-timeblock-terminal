@@ -1,35 +1,39 @@
-# language: pt
-Funcionalidade: Comando CLI Habit Skip (BR-CLI-HABIT-SKIP-001)
+# language: en
+# BR-CLI-HABIT-SKIP-001: Comando CLI para skip de hábito
+Feature: CLI Habit Skip Command (BR-CLI-HABIT-SKIP-001)
+  As a TimeBlock user
+  I want to use timeblock habit skip in the terminal
+  So that I can mark habits as skipped quickly
 
-  Como usuário do TimeBlock
-  Quero usar timeblock habit skip no terminal
-  Para marcar hábitos como skipped rapidamente
+  Background:
+    Given an active routine "Rotina Matinal" exists
+    And a habit "Academia" with ID 1 exists
+    And a HabitInstance with ID 42 for today exists
 
-  Contexto:
-    Dado que existe uma rotina ativa "Rotina Matinal"
-    E existe um habit "Academia" com ID 1
-    E existe uma HabitInstance com ID 42 para hoje
+  # Skip com categoria via flag
+  Scenario: Skip with category via flag
+    When the user executes command "habit skip 42 --category WORK --note 'Reunião urgente'"
+    Then the command should succeed
+    And the output should contain "skipped"
+    And HabitInstance 42 should have status NOT_DONE
+    And HabitInstance 42 should have skip_reason WORK
+    And HabitInstance 42 should have skip_note "Reunião urgente"
 
-  Cenário: Skip com categoria via flag
-    Quando usuário executa comando "habit skip 42 --category WORK --note 'Reunião urgente'"
-    Então comando deve ter sucesso
-    E output deve conter "skipped"
-    E HabitInstance 42 deve ter status NOT_DONE
-    E HabitInstance 42 deve ter skip_reason WORK
-    E HabitInstance 42 deve ter skip_note "Reunião urgente"
+  # Skip com categoria sem nota
+  Scenario: Skip with category without note
+    When the user executes command "habit skip 42 --category FAMILY"
+    Then the command should succeed
+    And HabitInstance 42 should have skip_reason FAMILY
+    And HabitInstance 42 should have skip_note NULL
 
-  Cenário: Skip com categoria sem nota
-    Quando usuário executa comando "habit skip 42 --category FAMILY"
-    Então comando deve ter sucesso
-    E HabitInstance 42 deve ter skip_reason FAMILY
-    E HabitInstance 42 deve ter skip_note NULL
+  # Erro ao skip de instância inexistente
+  Scenario: Error when skipping nonexistent instance
+    When the user executes command "habit skip 999 --category HEALTH"
+    Then the command should fail
+    And the output should contain "não encontrada"
 
-  Cenário: Erro ao skip de instance inexistente
-    Quando usuário executa comando "habit skip 999 --category HEALTH"
-    Então comando deve falhar
-    E output deve conter "não encontrada"
-
-  Cenário: Erro ao usar categoria inválida
-    Quando usuário executa comando "habit skip 42 --category INVALID"
-    Então comando deve falhar
-    E output deve conter "inválida"
+  # Erro ao usar categoria inválida
+  Scenario: Error when using invalid category
+    When the user executes command "habit skip 42 --category INVALID"
+    Then the command should fail
+    And the output should contain "inválida"

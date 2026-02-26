@@ -1,6 +1,6 @@
-# TimeBlock Planner
+# ATOMVS TimeBlock Terminal
 
-> Gerenciador de tempo CLI baseado em time blocking e hábitos atômicos
+> Gerenciador de tempo CLI/TUI baseado em time blocking e hábitos atômicos
 
 ```
 ╔══════════════════════════════════════════════╗
@@ -9,13 +9,13 @@
 ║     ╱│╲       █▀█ ░█░ █▄█ █░▀░█ ▀▄▀ ▄█       ║
 ║    ○─┼─○      ─────────────────────────      ║
 ║     ╲│╱       TimeBlock  ░░░░░░░░░░░░░░      ║
-║      ◉          Planner  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓      ║
+║      ◉          Terminal ▓▓▓▓▓▓▓▓▓▓▓▓▓▓      ║
 ║                                              ║
 ╚══════════════════════════════════════════════╝
 ```
 
-[![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-778%20passing-success.svg)](tests/)
+[![Python](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/tests-797%20passing-success.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-87%25-green.svg)](tests/)
 
 ---
@@ -40,9 +40,9 @@
 
 ## Visão Geral
 
-TimeBlock Organizer é uma ferramenta de linha de comando para gerenciamento de tempo usando a técnica de time blocking, inspirada no livro "Atomic Habits" de James Clear. O sistema foi projetado com uma filosofia clara: detectar conflitos e fornecer informações, mantendo o usuário no controle total das decisões. Diferente de aplicativos que bloqueiam ações ou tomam decisões automáticas, o TimeBlock informa sobre sobreposições de horários e sugere reorganizações, mas nunca impõe mudanças.
+ATOMVS TimeBlock Terminal é uma ferramenta de linha de comando e interface terminal para gerenciamento de tempo usando a técnica de time blocking, inspirada no livro "Atomic Habits" de James Clear. O sistema foi projetado com uma filosofia clara: detectar conflitos e fornecer informações, mantendo o usuário no controle total das decisões. Diferente de aplicativos que bloqueiam ações ou tomam decisões automáticas, o TimeBlock informa sobre sobreposições de horários e sugere reorganizações, mas nunca impõe mudanças.
 
-A aplicação organiza o tempo através de três conceitos principais: Rotinas (coleções temáticas de hábitos), Hábitos (templates recorrentes com horários definidos) e Tarefas (eventos pontuais não recorrentes). Cada hábito gera instâncias diárias que podem ser rastreadas com timer, permitindo medir o tempo real dedicado versus o tempo planejado.
+A aplicação organiza o tempo através de três conceitos principais: Rotinas (coleções temáticas de hábitos), Hábitos (templates recorrentes com horários definidos) e Tarefas (eventos pontuais não recorrentes). Cada hábito gera instâncias diárias que podem ser rastreadas com timer, permitindo medir o tempo real dedicado versus o tempo planejado. A partir da v1.7.0, uma TUI (Terminal User Interface) complementa a CLI com navegação visual, dashboard interativo e grade semanal de rotinas.
 
 **Filosofia:** Conflitos são informados, nunca bloqueados. O sistema sugere, o usuário decide.
 
@@ -50,11 +50,11 @@ A aplicação organiza o tempo através de três conceitos principais: Rotinas (
 
 ## Arquitetura
 
-A arquitetura do TimeBlock segue o padrão de camadas com separação clara de responsabilidades. A camada de apresentação (CLI) comunica-se exclusivamente com a camada de serviços, que encapsula toda a lógica de negócio. Os modelos de dados utilizam SQLModel para mapeamento objeto-relacional, combinando a expressividade do Pydantic com a robustez do SQLAlchemy.
+A arquitetura do TimeBlock segue o padrão de camadas com separação clara de responsabilidades. A camada de apresentação (CLI e TUI) comunica-se exclusivamente com a camada de serviços, que encapsula toda a lógica de negócio. Os modelos de dados utilizam SQLModel para mapeamento objeto-relacional, combinando a expressividade do Pydantic com a robustez do SQLAlchemy. A TUI compartilha 100% da camada de services com a CLI — nenhuma lógica de negócio é duplicada.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        TIMEBLOCK ORGANIZER                          │
+│                    ATOMVS TIMEBLOCK TERMINAL                        │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐              │
@@ -79,14 +79,14 @@ A arquitetura do TimeBlock segue o padrão de camadas com separação clara de r
 
 ### Fluxo de Dados
 
-O fluxo de dados segue uma direção unidirecional clara, desde a entrada do usuário até a persistência. Comandos CLI recebem input, delegam para services que aplicam regras de negócio, e finalmente models persistem no SQLite. Utilitários auxiliam em validações e formatações transversais.
+O fluxo de dados segue uma direção unidirecional clara, desde a entrada do usuário até a persistência. CLI e TUI recebem input, delegam para services que aplicam regras de negócio, e finalmente models persistem no SQLite. Utilitários auxiliam em validações e formatações transversais.
 
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌────────────┐
-│   CLI    │────>│ COMMANDS │────>│ SERVICES │────>│   MODELS   │
-│  (Typer) │     │          │     │          │     │ (SQLModel) │
-└──────────┘     └──────────┘     └──────────┘     └────────────┘
-                                        │                │
+│ CLI/TUI  │────>│ COMMANDS │────>│ SERVICES │────>│   MODELS   │
+│ (Typer/  │     │          │     │          │     │ (SQLModel) │
+│ Textual) │     └──────────┘     └──────────┘     └────────────┘
+└──────────┘                            │                │
                                         v                v
                                   ┌──────────┐     ┌──────────┐
                                   │  UTILS   │     │  SQLite  │
@@ -101,6 +101,7 @@ O fluxo de dados segue uma direção unidirecional clara, desde a entrada do usu
 ║ PRESENTATION                                                      ║
 ║ ┌───────────────────────────────────────────────────────────────┐ ║
 ║ │ commands/  │ routine, habit, task, timer, tag, list           │ ║
+║ │ tui/       │ app, screens, widgets (Textual)                  │ ║
 ║ └───────────────────────────────────────────────────────────────┘ ║
 ╠═══════════════════════════════════════════════════════════════════╣
 ║ BUSINESS LOGIC                                                    ║
@@ -189,17 +190,21 @@ atomvs-timeblock-terminal/
 │   ├── services/          # Lógica de negócio
 │   ├── models/            # Modelos SQLModel
 │   ├── database/          # Engine e migrations
+│   ├── tui/               # Interface terminal (Textual)
+│   │   ├── screens/       # Dashboard, Routines, Habits, Tasks, Timer
+│   │   └── widgets/       # NavBar, Grid, CommandBar, HelpOverlay
 │   └── utils/             # Helpers e validadores
 │
-├── tests/                 # 778 testes
-│   ├── unit/              #   576 (74%)
-│   ├── integration/       #   116 (15%)
-│   ├── bdd/               #   56  (7%)
-│   └── e2e/               #   30  (4%)
+├── tests/                 # 797 testes
+│   ├── unit/              #   595 (74.7%)
+│   ├── integration/       #   116 (14.6%)
+│   ├── bdd/               #    56 (7.0%)
+│   └── e2e/               #    30 (3.8%)
 │
 ├── docs/
 │   ├── core/              # Documentação principal
-│   └── decisions/         # 32 ADRs
+│   ├── decisions/         # 32 ADRs
+│   └── tui/               # Mockups de telas TUI
 │
 └── scripts/               # Automação
 ```
@@ -208,7 +213,7 @@ atomvs-timeblock-terminal/
 
 ## Instalação
 
-A instalação é simples e requer apenas Python 3.13 ou superior. O projeto utiliza um ambiente virtual isolado para gerenciar dependências, evitando conflitos com outras aplicações Python no sistema.
+A instalação é simples e requer apenas Python 3.14 ou superior. O projeto utiliza um ambiente virtual isolado para gerenciar dependências, evitando conflitos com outras aplicações Python no sistema.
 
 ```bash
 git clone https://github.com/fabiodelllima/atomvs-timeblock-terminal.git
@@ -265,19 +270,23 @@ timeblock list --day 0        # Hoje
 timeblock list --week 0       # Esta semana
 timeblock list --month +1     # Próximo mês
 timeblock list --all          # Todos os eventos
+
+# TUI (interface visual)
+timeblock                     # Sem argumentos abre a TUI
 ```
 
 ---
 
 ## Stack Tecnológica
 
-A stack foi escolhida priorizando produtividade do desenvolvedor, type safety e facilidade de manutenção. Python 3.13+ permite uso de features modernas como pattern matching e improved generics. SQLModel combina validação Pydantic com ORM SQLAlchemy em uma única definição de modelo.
+A stack foi escolhida priorizando produtividade do desenvolvedor, type safety e facilidade de manutenção. Python 3.14 permite uso de features modernas como pattern matching e improved generics. SQLModel combina validação Pydantic com ORM SQLAlchemy em uma única definição de modelo. Textual fornece a TUI com widgets ricos e CSS-like styling.
 
 | Componente    | Tecnologia          | Versão   |
 | ------------- | ------------------- | -------- |
-| Runtime       | Python              | 3.13+    |
+| Runtime       | Python              | 3.14+    |
 | ORM           | SQLModel            | 0.0.31+  |
 | CLI Framework | Typer               | 0.21.1+  |
+| TUI Framework | Textual             | 1.0.0+   |
 | Terminal UI   | Rich                | 14.3.1+  |
 | Database      | SQLite              | 3.x      |
 | Testing       | pytest + pytest-cov | 9.0.2+   |
@@ -288,18 +297,23 @@ A stack foi escolhida priorizando produtividade do desenvolvedor, type safety e 
 
 ## Documentação
 
-A documentação técnica está organizada em níveis de detalhe. O diretório `core/` contém documentos de referência essenciais, enquanto `decisions/` preserva o histórico de decisões arquiteturais através de ADRs (Architecture Decision Records).
+A documentação técnica está organizada em níveis de detalhe. O diretório `core/` contém documentos de referência essenciais, `decisions/` preserva o histórico de decisões arquiteturais através de ADRs (Architecture Decision Records), e `tui/` contém mockups de design das telas da interface terminal.
 
 ```
 docs/
 ├── core/
 │   ├── architecture.md     # Design e princípios
-│   ├── business-rules.md   # 67 BRs formalizadas
+│   ├── business-rules.md   # 51 BRs formalizadas
 │   ├── cli-reference.md    # Referência completa CLI
 │   ├── quality-metrics.md  # Métricas de qualidade
+│   ├── roadmap.md          # Estado e planejamento
 │   └── workflows.md        # Fluxos e estados
 │
-└── decisions/              # 27 ADRs documentadas
+├── decisions/              # 32 ADRs documentadas
+│
+└── tui/                    # Mockups de telas TUI
+    ├── dashboard-mockup-v3.md
+    └── routines-weekly-mockup.md
 ```
 
 ---
@@ -332,7 +346,7 @@ Referências:
 
 ### Implementação
 
-Código é desenvolvido seguindo Test-Driven Development. Testes referenciam BRs pela nomenclatura (test_br_xxx), mantendo rastreabilidade bidirecional entre requisitos, testes e implementação. A pirâmide de testes distribui validações em três níveis: unitário (75%), integração (12%) e end-to-end (6%).
+Código é desenvolvido seguindo Test-Driven Development. Testes referenciam BRs pela nomenclatura (test_br_xxx), mantendo rastreabilidade bidirecional entre requisitos, testes e implementação. A pirâmide de testes distribui validações em quatro níveis: unitário (74.7%), integração (14.6%), BDD (7.0%) e end-to-end (3.8%).
 
 Referências:
 
@@ -359,7 +373,7 @@ mypy src/
 
 ## Roadmap
 
-O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão atual (v1.6.0) consolidou a infraestrutura CI/CD com Docker, DevSecOps e cobertura combinada a 87%. A próxima versão (v1.7.0) introduzirá interface TUI com Textual.
+O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão v1.6.0 consolidou a infraestrutura com Docker, DevSecOps e cobertura a 87%. A versão atual (v1.7.0) introduz a TUI com Textual como interface visual complementar à CLI.
 
 | Versão | Status    | Features                             |
 | ------ | --------- | ------------------------------------ |
@@ -369,7 +383,7 @@ O roadmap está organizado em releases incrementais, cada uma construindo sobre 
 | v1.3.x | [DONE]    | Date parser, BDD tests, DI refactor  |
 | v1.4.0 | [DONE]    | Business rules formalizadas, 32 ADRs |
 | v1.5.0 | [DONE]    | CI/CD dual-repo, i18n, 873 testes    |
-| v1.6.0 | [DONE]    | Docker, DevSecOps, 778 testes, 87%   |
+| v1.6.0 | [DONE]    | Docker, DevSecOps, 87% cobertura     |
 | v1.7.0 | [CURRENT] | TUI com Textual (ADR-031)            |
 | v2.0.0 | [PLANNED] | FastAPI REST API + Observabilidade   |
 | v3.0.0 | [FUTURE]  | Microservices Ecosystem (Kafka)      |
