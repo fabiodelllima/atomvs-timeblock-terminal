@@ -27,6 +27,7 @@ lint:
     - ruff format --check src/ tests/
 
 test:all:
+  timeout: 45m
   stage: test
   image: $CI_IMAGE
   before_script:
