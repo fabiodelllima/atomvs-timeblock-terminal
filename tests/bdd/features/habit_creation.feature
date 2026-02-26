@@ -1,31 +1,32 @@
-# language: pt
-Funcionalidade: Criação de Hábitos em Rotinas
-    Como usuário do TimeBlock
-    Eu quero criar hábitos com horários específicos
-    Para organizar minha rotina diária
+# language: en
+# BR-HABIT-001: Criação de hábitos em rotinas
+Feature: Habit Creation in Routines
+  As a TimeBlock user
+  I want to create habits with specific schedules
+  So that I can organize my daily routine
 
-    Contexto:
-        Dado que existe uma rotina chamada "Matinal"
+  Background:
+    Given a routine called "Matinal" exists
 
-    Cenário: Criar hábito com dados válidos
-        Quando eu crio um hábito com os seguintes dados:
-            | Campo             | Valor               |
-            | Título            | Exercício Matinal   |
-            | Horário Início    | 06:00               |
-            | Horário Fim       | 07:00               |
-            | Recorrência       | EVERYDAY            |
-        Então o hábito deve ser criado com sucesso
-        E o hábito deve ter um ID único
-        E o título deve ser "Exercício Matinal"
+  Scenario: Create habit with valid data
+    When I create a habit with the following data:
+      | Field          | Value             |
+      | Title          | Exercício Matinal |
+      | Start Time     | 06:00             |
+      | End Time       | 07:00             |
+      | Recurrence     | EVERYDAY          |
+    Then the habit should be created successfully
+    And the habit should have a unique ID
+    And the title should be "Exercício Matinal"
 
-    Cenário: Rejeitar título vazio
-        Quando eu tento criar um hábito com título vazio
-        Então o sistema deve rejeitar com erro "cannot be empty"
+  Scenario: Reject empty title
+    When I try to create a habit with an empty title
+    Then the system should reject with error "cannot be empty"
 
-    Cenário: Rejeitar horário inválido
-        Quando eu tento criar um hábito com:
-            | Campo             | Valor     |
-            | Título            | Inválido  |
-            | Horário Início    | 07:00     |
-            | Horário Fim       | 06:00     |
-        Então o sistema deve rejeitar com erro "Start time must be before end time"
+  Scenario: Reject invalid schedule
+    When I try to create a habit with:
+      | Field          | Value    |
+      | Title          | Invalid  |
+      | Start Time     | 07:00    |
+      | End Time       | 06:00    |
+    Then the system should reject with error "Start time must be before end time"

@@ -1,18 +1,18 @@
-# ADR-031: Implementação TUI com Textual
+# ADR-031: TUI Implementation with Textual
 
-**Status**: Acceito
+**Status**: Aceito
 
 **Data**: 2026-02-05
+
+**Atualizado**: 2026-02-20 (dashboard redesign)
 
 **Supersedes**: ADR-006 (expande decisão original com detalhes de implementação)
 
 ## Contexto
 
-O ATOMVS TimeBlock v1.6.0 possui CLI funcional com 95% dos comandos operacionais, 87% de cobertura e 778 testes. A interface CLI atende automação e uso pontual, mas a experiência interativa diária (consultar agenda, marcar hábitos, operar timer) requer navegação repetitiva entre comandos.
+O TimeBlock Organizer v1.6.0 possui CLI funcional com 95% dos comandos operacionais, 87% de cobertura e 778 testes. A interface CLI atende automação e uso pontual, mas a experiência interativa diária (consultar agenda, marcar hábitos, operar timer) requer navegação repetitiva entre comandos.
 
-A v1.7.0 introduz a TUI como interface interativa complementar. Simultaneamente, o repositório é reestruturado: `cli/` é eliminado (flatten), `src/`, `tests/` e configs sobem para a raiz, e o repo é renomeado para `atomvs-timeblock-terminal` seguindo o namespace ATOMVS definido em ADR-032.
-
-ADR-006 propôs Textual como framework. Este ADR detalha a implementação concreta.
+ADR-006 propôs Textual como framework TUI. Este ADR detalha a implementação concreta para v1.7.0.
 
 Requisitos:
 
@@ -24,79 +24,7 @@ Requisitos:
 
 ## Decisão
 
-A implementação da TUI se organiza em nove decisões técnicas que cobrem desde a reestruturação física do repositório até a estratégia de testes. Cada decisão foi tomada priorizando coexistência com a CLI, compartilhamento total da service layer e manutenção da testabilidade automatizada.
-
-A implementação da TUI se organiza em nove decisões técnicas que cobrem desde a reestruturação física do repositório até a estratégia de testes. Cada decisão foi tomada priorizando coexistência com a CLI, compartilhamento total da service layer e manutenção da testabilidade automatizada.
-
-### 1. Reestruturação do Repositório (Sprint 0)
-
-O diretório `cli/` é eliminado. Todo o conteúdo sobe para a raiz do repositório.
-
-**Antes (v1.6.0):**
-
-```
-timeblock-organizer/
-├── cli/
-│   ├── src/timeblock/
-│   ├── tests/
-│   ├── data/
-│   ├── pyproject.toml
-│   ├── pytest.ini
-│   └── .ruff.toml
-├── docs/
-├── scripts/
-└── README.md
-```
-
-**Depois (v1.7.0):**
-
-```
-atomvs-timeblock-terminal/
-├── src/timeblock/
-│   ├── commands/            # CLI (existente, inalterado)
-│   ├── tui/                 # TUI (novo)
-│   │   ├── __init__.py
-│   │   ├── app.py           # TimeBlockApp (classe principal)
-│   │   ├── screens/
-│   │   │   ├── __init__.py
-│   │   │   ├── dashboard.py
-│   │   │   ├── routines.py
-│   │   │   ├── habits.py
-│   │   │   ├── tasks.py
-│   │   │   └── timer.py
-│   │   ├── widgets/
-│   │   │   ├── __init__.py
-│   │   │   ├── card.py
-│   │   │   ├── sidebar.py
-│   │   │   ├── status_bar.py
-│   │   │   └── confirm_dialog.py
-│   │   └── styles/
-│   │       └── theme.tcss
-│   ├── services/            # Compartilhado (existente)
-│   ├── models/              # Compartilhado (existente)
-│   ├── database/            # Compartilhado (existente)
-│   ├── utils/               # Compartilhado (existente)
-│   ├── config.py
-│   └── main.py              # Entry point unificado
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   ├── e2e/
-│   └── bdd/
-├── data/
-├── docs/
-├── scripts/
-├── pyproject.toml
-├── pytest.ini
-├── .ruff.toml
-├── mkdocs.yml
-├── README.md
-└── CHANGELOG.md
-```
-
-**Justificativa:** O nome `cli/` era preciso quando só havia CLI. Com a TUI, o subdiretório deixa de representar o conteúdo. Flatten simplifica paths, elimina `cd cli/` de todos os workflows, e alinha com a convenção Python padrão (`src/` na raiz).
-
-### 2. Entry Point: Detecção Automática
+### 1. Entry Point: Detecção Automática
 
 `timeblock` sem argumentos abre a TUI. Com argumentos, executa CLI normalmente.
 
@@ -106,24 +34,15 @@ import sys
 
 def main():
     if len(sys.argv) <= 1:
-        try:
-            from timeblock.tui.app import TimeBlockApp
-            TimeBlockApp().run()
-        except ImportError:
-            print("[WARN] TUI requer 'textual'.")
-            print("       Instale: pip install atomvs-timeblock-terminal[tui]")
-            print("       Uso CLI: timeblock --help")
+        from timeblock.tui.app import TimeBlockApp
+        TimeBlockApp().run()
     else:
         app()  # Typer CLI
 ```
 
 **Justificativa:** O uso mais frequente será interativo (abrir, consultar, operar). Automação via CLI permanece idêntica. `timeblock --help` continua funcionando pois tem argumento.
 
-### 3. Framework: Textual
-
-Textual foi escolhido na ADR-006 e confirmado aqui como framework de TUI por sua integração nativa com Rich (já dependência do projeto), CSS-like styling via TCSS, e Pilot para testes automatizados. A dependência é mantida como opcional para que a CLI permaneça funcional sem instalação adicional.
-
-Textual foi escolhido na ADR-006 e confirmado aqui como framework de TUI por sua integração nativa com Rich (já dependência do projeto), CSS-like styling via TCSS, e Pilot para testes automatizados. A dependência é mantida como opcional para que a CLI permaneça funcional sem instalação adicional.
+### 2. Framework: Textual
 
 **Versão mínima:** textual >= 0.89.0
 **Dependência:** Opcional (grupo `[tui]` no pyproject.toml)
@@ -133,42 +52,93 @@ Textual foi escolhido na ADR-006 e confirmado aqui como framework de TUI por sua
 tui = ["textual>=0.89.0"]
 ```
 
-**Fallback:** Se Textual não está instalado e usuário executa sem args, exibe mensagem orientando instalação.
+**Fallback:** Se textual não instalado e usuário executar sem args, exibir mensagem orientando instalação.
 
-### 4. Arquitetura de Screens
+### 3. Package Structure
 
-A TUI é organizada em cinco screens que mapeiam diretamente os domínios do sistema. Cada screen é um widget Textual independente com seu próprio conjunto de keybindings locais, enquanto a sidebar e a status bar fornecem navegação e contexto global persistentes.
+```
+src/timeblock/
+├── commands/           # CLI (existente, inalterado)
+├── tui/                # TUI (novo)
+│   ├── __init__.py
+│   ├── app.py          # TimeBlockApp (classe principal)
+│   ├── screens/
+│   │   ├── __init__.py
+│   │   ├── dashboard.py
+│   │   ├── routines.py
+│   │   ├── habits.py
+│   │   ├── tasks.py
+│   │   └── timer.py
+│   ├── widgets/
+│   │   ├── __init__.py
+│   │   ├── card.py             # Card genérico com borda e título
+│   │   ├── sidebar.py          # Menu lateral de navegação
+│   │   ├── status_bar.py       # Barra inferior (rotina/timer/hora)
+│   │   ├── confirm_dialog.py   # Dialog de confirmação
+│   │   ├── header_bar.py       # Barra de contexto do dashboard
+│   │   ├── agenda.py           # Timeline vertical (Google Calendar)
+│   │   ├── habit_list.py       # Lista de hábitos com quick actions
+│   │   ├── task_list.py        # Lista de tarefas com prioridade
+│   │   ├── timer_display.py    # Display do timer com estados
+│   │   ├── metrics_panel.py    # Painel de métricas/streaks
+│   │   └── progress_bar.py     # Barra de progresso ASCII reutilizável
+│   └── styles/
+│       ├── theme.tcss          # Estilos globais Material-like
+│       └── dashboard.tcss      # Estilos específicos do dashboard
+├── services/                 # Compartilhado (existente)
+├── models/                   # Compartilhado (existente)
+└── main.py                   # Entry point modificado
+```
 
-A TUI é organizada em cinco screens que mapeiam diretamente os domínios do sistema. Cada screen é um widget Textual independente com seu próprio conjunto de keybindings locais, enquanto a sidebar e a status bar fornecem navegação e contexto global persistentes.
+### 4. Screen Architecture
 
 Cinco screens na v1.7.0, navegáveis por sidebar:
 
 | Screen    | Funcionalidade                         | Keybinding |
 | --------- | -------------------------------------- | ---------- |
 | Dashboard | Visão geral do dia, quick actions      | `1` ou `d` |
-| Routines  | CRUD rotinas, ativar/desativar         | `2` ou `r` |
+| Routines  | Grade semanal, CRUD rotinas/hábitos    | `2` ou `r` |
 | Habits    | Hábitos + instâncias, marcar done/skip | `3` ou `h` |
 | Tasks     | CRUD tarefas, marcar completa          | `4` ou `t` |
 | Timer     | Display live, start/pause/resume/stop  | `5` ou `m` |
 
-**Layout:**
+**Dashboard layout (tela principal):**
 
 ```
-┌───────────┬─────────────────────────────────────┐
-│  Sidebar  │            Content Area             │
-│           │                                     │
-│  [D] Dash │  ┌─────────┐  ┌─────────┐          │
-│  [R] Rout │  │  Card 1  │  │  Card 2  │         │
-│  [H] Habi │  └─────────┘  └─────────┘          │
-│  [T] Task │  ┌─────────┐  ┌─────────┐          │
-│  [M] Time │  │  Card 3  │  │  Card 4  │         │
-│           │  └─────────┘  └─────────┘          │
-├───────────┴─────────────────────────────────────┤
-│  Status Bar: Rotina Ativa | Timer 05:23 | 14:30 │
-└─────────────────────────────────────────────────┘
+┌──────────┬──────────────────────────────────────────────────────────────┐
+│          │  ┌─ Header Bar ──────────────────────────────────── Data ──┐ │
+│  Sidebar │  │  Rotina  │  Progresso  │  Tasks  │  Timer               │ │
+│          │  └─────────────────────────────────────────────────────────┘ │
+│ ▸[1] D   │  ┌─ Agenda ──────────────┐  ┌─ Hábitos ────────────────────┐ │
+│  [2] R   │  │  06:00 ┬ Gym   ✓ done │  │  ✓ Gym      06:00  55m       │ │
+│  [3] H   │  │        │ ▓▓▓▓▓▓▓▓▓▓▓▓ │  │  ✓ Inglês   08:00  30m       │ │
+│  [4] T   │  │  07:00 ┤              │  │  ▶ Deep W.  14:00  25m+      │ │
+│  [5] M   │  │  08:00 ┬ Inglês ✓     │  │  · Dev      16:00  60m       │ │
+│          │  │        │ ░░░░░░░░░░░░ │  │  [enter] [s] [g]             │ │
+│  ─────   │  │  ···   │              │  └──────────────────────────────┘ │
+│  q quit  │  │ 14:32▸ ┤ Deep W. ▶    │  ┌─ Tarefas ────────────────────┐ │
+│  ? help  │  │        │ ▓▓▓▓▓▓▓▓▓▓▓▓ │  │  !! Relatório   alta  venc   │ │
+│          │  │  ···   │              │  │  !  Review      média        │ │
+│          │  │  18:00 ┬ Corrida ·    │  │  [enter] [c] [g]             │ │
+│          │  │        │ ┄┄┄┄┄┄┄┄┄┄┄┄ │  └──────────────────────────────┘ │
+│          │  │  ···   │              │  ┌─ Timer ──────────────────────┐ │
+│          │  │        │              │  │  ◉ 25:43  ▶ RUNNING          │ │
+│          │  │        │              │  │  Sessões: 3  Total: 2h15m    │ │
+│          │  │        │              │  └──────────────────────────────┘ │
+│          │  │        │              │  ┌─ Métricas ───────────────────┐ │
+│          │  │        │              │  │  Streak: 12d  (best: 28)     │ │
+│          │  │        │              │  │  7d ▪▪▪▪▪▪▪░░░ 72%           │ │
+│          │  │        │              │  │  Seg 8/10  Ter 9/10  ···     │ │
+│          │  └───────────────────────┘  │  [f] filtrar                 │ │
+│          │                             └──────────────────────────────┘ │
+├──────────┴──────────────────────────────────────────────────────────────┤
+│  Rotina Matinal       │  ▶ Deep Work 25:43      │  Qui 20 Fev  14:32    │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 5. Gerenciamento de Session
+**Mockup completo:** `docs/tui/dashboard-mockup-v3.md` (terminal 120x42 com todos os detalhes)
+
+### 5. Session Management
 
 Services recebem `Session` no construtor. A TUI tem lifecycle longo (minutos/horas), diferente da CLI (segundos).
 
@@ -188,7 +158,7 @@ def get_session():
         session.commit()
 ```
 
-**Cada operação na TUI:**
+**Cada operação TUI:**
 
 1. Abre session via context manager
 2. Instancia service com session
@@ -197,11 +167,7 @@ def get_session():
 
 **Justificativa:** Evita sessions stale em TUI de longa duração. Cada ação vê dados frescos do banco. Consistente com CLI que já usa sessions curtas.
 
-### 6. Fluxo de Dados
-
-O fluxo de dados na TUI segue direção unidirecional: input do usuário aciona um handler de screen, que abre uma session atômica, invoca o service apropriado, e ao retornar, atualiza os widgets da screen. Este padrão garante que a TUI nunca manipula dados diretamente e que cada operação é isolada transacionalmente.
-
-O fluxo de dados na TUI segue direção unidirecional: input do usuário aciona um handler de screen, que abre uma session atômica, invoca o service apropriado, e ao retornar, atualiza os widgets da screen. Este padrão garante que a TUI nunca manipula dados diretamente e que cada operação é isolada transacionalmente.
+### 6. Data Flow
 
 ```
 User Input (keybinding/click)
@@ -225,11 +191,7 @@ Session commit/rollback
 Screen.refresh_data() → atualiza widgets
 ```
 
-### 7. Design Visual: Material-like
-
-O design visual segue princípios Material Design adaptados para terminal: superfícies com elevação via cores distintas, hierarquia tipográfica (bold, normal, dim) e cores semânticas consistentes para status. A paleta é definida inteiramente em theme.tcss como single source of truth, evitando cores hardcoded nos widgets.
-
-O design visual segue princípios Material Design adaptados para terminal: superfícies com elevação via cores distintas, hierarquia tipográfica (bold, normal, dim) e cores semânticas consistentes para status. A paleta é definida inteiramente em theme.tcss como single source of truth, evitando cores hardcoded nos widgets.
+### 7. Visual Design: Material-like
 
 **Paleta de cores (TCSS):**
 
@@ -238,28 +200,76 @@ $primary:       #7C4DFF   (deep purple)
 $primary-light: #B388FF   (light purple)
 $surface:       #1E1E2E   (dark surface)
 $surface-alt:   #2A2A3E   (elevated surface)
-$on-surface:    #CDD6F4   (texto sobre dark)
-$success:       #A6E3A1   (verde - done)
-$warning:       #F9E2AF   (amarelo - pending)
-$error:         #F38BA8   (vermelho - missed/overdue)
-$muted:         #6C7086   (texto secundário)
+$on-surface:    #CDD6F4   (text on dark)
+$success:       #A6E3A1   (green - done)
+$warning:       #F9E2AF   (yellow - pending)
+$error:         #F38BA8   (red - missed/overdue)
+$muted:         #6C7086   (secondary text)
 ```
 
-**Card widget:** Borda arredondada (`border: round $primary`), padding 1x2, margin 1, título em bold com cor contextual, conteúdo com texto muted para labels.
+**Card widget:**
 
-**Spacing:** Padding padrão 1 (vertical) e 2 (horizontal), margin entre cards 1, sidebar 22 caracteres fixo, content area fluid.
+- Borda arredondada (border: round $primary)
+- Padding interno: 1 2 (vertical horizontal)
+- Margin: 1
+- Título em bold com cor contextual
+- Conteúdo com texto muted para labels
 
-### 8. Estratégia de Testes
+**Spacing system:**
 
-A TUI é testada com Textual Pilot, framework de testes assíncronos embutido no Textual que permite simular interações de usuário (keypresses, clicks) e inspecionar estado de widgets programaticamente. A distribuição de testes segue a pirâmide do projeto, com ênfase em testes unitários de widgets isolados.
+- Padding padrão: 1 (vertical), 2 (horizontal)
+- Margin entre cards: 1
+- Sidebar width: 22 caracteres fixo
+- Content area: fluid
 
-A TUI é testada com Textual Pilot, framework de testes assíncronos embutido no Textual que permite simular interações de usuário (keypresses, clicks) e inspecionar estado de widgets programaticamente. A distribuição de testes segue a pirâmide do projeto, com ênfase em testes unitários de widgets isolados.
+**Indicadores ASCII padronizados:**
+
+| Indicador | Significado       | Cor              |
+| --------- | ----------------- | ---------------- |
+| ✓         | Done/concluído    | `$success`       |
+| ✗         | Skipped           | `$warning`       |
+| !         | Alta/missed       | `$error`         |
+| !!        | Overdue + alta    | `$error` bold    |
+| ▪         | Média             | `$warning`       |
+| ·         | Baixa/pending     | `$muted`         |
+| ▶         | Running           | `$primary-light` |
+| ◼         | Sparkline esforço | contextual       |
+
+**Agenda do Dia — legenda visual:**
+
+| Padrão        | Significado       | Cor              |
+| ------------- | ----------------- | ---------------- |
+| ▓▓▓▓▓▓▓▓▓▓▓▓  | Bloco ativo       | `$primary-light` |
+| ░░░░░░░░░░░░  | Bloco concluído   | `$success`       |
+| ┄┄┄┄┄┄┄┄┄┄┄┄  | Bloco pendente    | `$muted`         |
+| ╌╌╌╌╌╌╌╌╌╌╌╌  | Bloco skipado     | `$warning`       |
+| · · · · · · · | Projeção (futuro) | `$muted` dim     |
+| ┈ livre ┈     | Horário livre     | `$muted` dim     |
+
+**Barras de progresso — cores por faixa:**
+
+| Faixa  | Cor        |
+| ------ | ---------- |
+| ≥ 80%  | `$success` |
+| 50–79% | `$warning` |
+| < 50%  | `$error`   |
+
+**Responsividade (3 breakpoints):**
+
+| Breakpoint | Colunas | Layout                                                |
+| ---------- | ------- | ----------------------------------------------------- |
+| Completo   | ≥ 120   | Sidebar + Agenda vertical + Cards grid (2 subcolunas) |
+| Compacto   | 80–119  | Sidebar + Agenda reduzida + Cards truncados           |
+| Minimal    | < 80    | Sidebar + Cards empilhados (1 coluna), agenda oculta  |
+
+### 8. Testing Strategy
 
 **Framework:** Textual Pilot (built-in testing)
 
 ```python
 async def test_dashboard_shows_active_routine():
     async with TimeBlockApp().run_test() as pilot:
+        # Verificar que dashboard exibe rotina ativa
         assert pilot.app.query_one("#routine-name").renderable == "Rotina Matinal"
 ```
 
@@ -271,13 +281,9 @@ async def test_dashboard_shows_active_routine():
 | Integration | Screen + Service (com DB)             | 30%  |
 | E2E         | Navegação completa, flows de usuário  | 10%  |
 
-**Naming:** Segue ADR-019: `test_br_tui_xxx_cenário`
+**Naming:** Segue ADR-019: `test_br_tui_xxx_scenario`
 
-### 9. Gerenciamento de Dependências
-
-Textual e suas ferramentas de desenvolvimento são gerenciadas como dependency groups opcionais no pyproject.toml. O grupo `[tui]` instala apenas o runtime, enquanto `[dev]` inclui textual-dev e pytest-asyncio para desenvolvimento e testes. Esta separação garante que ambientes de produção CLI permaneçam enxutos.
-
-Textual e suas ferramentas de desenvolvimento são gerenciadas como dependency groups opcionais no pyproject.toml. O grupo `[tui]` instala apenas o runtime, enquanto `[dev]` inclui textual-dev e pytest-asyncio para desenvolvimento e testes. Esta separação garante que ambientes de produção CLI permaneçam enxutos.
+### 9. Dependency Management
 
 ```toml
 [project.optional-dependencies]
@@ -285,54 +291,63 @@ tui = ["textual>=0.89.0"]
 dev = [
     "pytest>=8.0.0",
     "pytest-cov>=4.1.0",
-    "pytest-asyncio>=0.23.0",
     "ruff>=0.1.0",
     "mypy>=1.8.0",
-    "textual-dev>=1.0.0",
+    "textual-dev>=1.0.0",  # Debug tools
 ]
+```
+
+**Import guard em main.py:**
+
+```python
+try:
+    from timeblock.tui.app import TimeBlockApp
+    HAS_TEXTUAL = True
+except ImportError:
+    HAS_TEXTUAL = False
+
+# No entry point:
+if len(sys.argv) <= 1:
+    if HAS_TEXTUAL:
+        TimeBlockApp().run()
+    else:
+        print("[WARN] TUI requer 'textual'. Instale com: pip install timeblock-organizer[tui]")
+        print("       Uso CLI: timeblock --help")
 ```
 
 ## Alternativas Consideradas
 
-Quatro alternativas foram avaliadas nas dimensões de UX, complexidade de manutenção e consistência com a arquitetura existente.
-
-Quatro alternativas foram avaliadas nas dimensões de UX, complexidade de manutenção e consistência com a arquitetura existente.
-
 ### Textual sem detecção automática (subcomando `timeblock tui`)
 
-**Prós:** Explícito, sem ambiguidade
-**Contras:** Mais digitação para uso mais frequente, UX inferior
+- **Pros:** Explícito, sem ambiguidade
+- **Contras:** Mais digitação para uso mais frequente, UX inferior
 
 ### Prompt Toolkit para TUI
 
-**Prós:** Maduro, menos opinionado
-**Contras:** Low-level, requer mais código para visual Material-like, não aproveita Rich
+- **Pros:** Maduro, menos opinionado
+- **Contras:** Low-level, requer mais código para visual Material-like, não aproveita Rich
 
 ### Session-per-screen (em vez de session-per-action)
 
-**Prós:** Menos overhead de conexão
-**Contras:** Sessions stale em TUI longa, risco de dados desatualizados, inconsistência com CLI
+- **Pros:** Menos overhead de conexão
+- **Contras:** Sessions stale em TUI longa, risco de dados desatualizados, inconsistência com CLI
 
-### Manter subdiretório cli/ (ou renomear para terminal/)
+### Timeline horizontal (barra de tempo no topo)
 
-**Prós:** Menos alterações no flatten
-**Contras:** Path desnecessário, inconsistente com convenção Python `src/` na raiz
+- **Pros:** Mais compacta, ocupa menos espaço vertical
+- **Contras:** Pouco espaço para labels, não permite ver o dia inteiro de relance, perde a familiaridade com Google Calendar. A timeline vertical permite ver blocos de tempo com duração proporcional real e acomodar informações dentro de cada bloco (nome, status, duração).
 
 ## Consequências
-
-A introdução da TUI impacta o projeto em três dimensões: amplia significativamente a experiência do usuário, introduz complexidade de manutenção de duas interfaces, e requer reestruturação do repositório. O balanço é positivo desde que a service layer compartilhada previna duplicação de lógica.
-
-A introdução da TUI impacta o projeto em três dimensões: amplia significativamente a experiência do usuário, introduz complexidade de manutenção de duas interfaces, e requer reestruturação do repositório. O balanço é positivo desde que a service layer compartilhada previna duplicação de lógica.
 
 ### Positivas
 
 - Experiência interativa rica para uso diário
 - Visual moderno e consistente
-- Compartilha 100% da lógica de negócios com CLI (service layer)
+- Compartilha 100% da lógica de negócios com CLI (services layer)
 - Textual usa Rich internamente (já é dependência)
 - Testes automatizados com Pilot
 - CLI permanece funcional e independente
-- Estrutura flatten simplifica todos os workflows
+- Dashboard de alta densidade permite monitorar todo o dia sem navegar entre screens
 
 ### Negativas
 
@@ -340,13 +355,13 @@ A introdução da TUI impacta o projeto em três dimensões: amplia significativ
 - Complexidade de manutenção em duas interfaces
 - Testes TUI são assíncronos (pytest-asyncio necessário)
 - TCSS é específico do Textual (vendor lock-in para styling)
-- Flatten requer atualização de CI/CD, README, scripts
+- Dashboard com muitos widgets aumenta complexidade de testes (33 testes só para BR-TUI-003)
 
 ### Neutras
 
 - CLI permanece interface primária para automação
 - TUI é opcional via dependency group
-- Repositório segue namespace ATOMVS (ADR-032)
+- Não afeta pipeline CI/CD existente (testes TUI são adicionais)
 
 ## Validação
 
@@ -357,13 +372,68 @@ Consideramos acertada se:
 - 80%+ cobertura no pacote tui/
 - Zero regressão na CLI existente
 - Timer display atualiza a cada segundo sem flicker
-- Pipeline CI/CD verde após flatten
+- Dashboard renderiza completo em < 200ms com 10+ eventos
+
+## Implementação
+
+### Sprint 1: Foundation
+
+1. Criar estrutura de pacotes tui/
+2. Implementar TimeBlockApp com sidebar navigation
+3. Definir theme.tcss
+4. Modificar main.py (entry point)
+5. Screens placeholder (5 screens vazias com navegação funcional)
+
+### Sprint 2: Navegação + Status
+
+1. Sidebar widget funcional com indicador de screen ativa
+2. Keybindings globais (quit, help, escape)
+3. Status bar (rotina, timer, hora)
+4. ConfirmDialog widget
+
+### Sprint 3: Dashboard — Foundation
+
+1. HeaderBar widget (rotina, progresso, tasks, timer, data)
+2. AgendaWidget — rendering básico (régua de horas, blocos, marcador "agora")
+3. DashboardScreen com compose() e layout TCSS (dashboard.tcss)
+4. Testes: header, agenda rendering, layout zones
+
+### Sprint 4: Dashboard — Cards Interativos
+
+1. HabitListWidget com quick actions (done/skip)
+2. TaskListWidget com prioridade e conclusão
+3. TimerDisplayWidget integrado com TimerService
+4. ProgressBar reutilizável
+5. Testes: quick actions, cursor navigation, refresh
+
+### Sprint 5: Dashboard — Métricas + Polish
+
+1. MetricsPanelWidget com streaks, histórico e dot matrix
+2. Responsividade (3 breakpoints via TCSS media queries)
+3. Tab navigation entre zonas do dashboard
+4. Agenda: conflitos lado a lado, blocos skipados, projeção
+5. Testes: métricas, responsividade, tab order, estados alternativos
+
+### Sprint 6: CRUD Screens
+
+1. RoutinesScreen com CRUD completo
+2. HabitsScreen com instâncias
+3. TasksScreen com CRUD
+4. Formulários inline
+
+### Sprint 7: Timer Screen + Integração Final
+
+1. TimerScreen com display live
+2. Integração timer ↔ status bar ↔ dashboard
+3. Testes completos de integração
+4. Polish visual final
 
 ## Referências
 
 - [ADR-006](ADR-006-textual-tui.md) — Decisão original Textual
 - [ADR-007](ADR-007-service-layer.md) — Service Layer (consumida pela TUI)
-- [ADR-032](ADR-032-branding-repository-naming.md) — Branding e nomenclatura de repositórios
+- [Dashboard Mockup v3](../tui/dashboard-mockup-v3.md) — Mockup detalhado do dashboard
+- [Routines Weekly Mockup](../tui/routines-weekly-mockup.md) — Mockup da grade semanal de rotinas
 - [Textual Documentation](https://textual.textualize.io/)
 - [Textual CSS Reference](https://textual.textualize.io/css_types/)
 - [Material Design 3 Color System](https://m3.material.io/styles/color)

@@ -6,7 +6,7 @@ O sistema de CI/CD do TimeBlock Organizer implementa uma estratégia de proteç�
 
 ## Arquitetura Dual-Repo
 
-A arquitetura dual-repo estabelece o GitLab como repositório principal de desenvolvimento e o GitHub como showcase público para recrutadores e colaboradores externos. Esta separação permite manter todo o histórico de desenvolvimento, branches experimentais e discussões internas no GitLab, enquanto o GitHub apresenta apenas o código polido e pronto para demonstração. A sincronização entre os repositórios acontece automaticamente através do job sync:github, que executa após cada pipeline bem-sucedida nos branches develop e main, garantindo que o showcase público esteja sempre atualizado sem intervenção manual.
+A arquitetura dual-repo estabelece o GitLab como repositório principal de desenvolvimento e o GitHub como showcase público para recrutadores e colaboradores externos. Esta separação permite manter todo o histórico de desenvolvimento, branches experimentais e discussões internas no GitLab, enquanto o GitHub apresenta apenas o código polido e pronto para demonstração. A sincronização entre os repositórios acontece automaticamente através do job sync:github, que executa após cada pipeline bem-sucedida em qualquer branch, garantindo que o showcase público e o contribution graph estejam sempre atualizados sem intervenção manual.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -18,7 +18,7 @@ A arquitetura dual-repo estabelece o GitLab como repositório principal de desen
 ┌─────────────────────────────────────────────────────────────────┐
 │                   GITLAB (Fonte de Verdade)                     │
 ├─────────────────────────────────────────────────────────────────┤
-│ 1. Pipeline CI executa (8 jobs)                                 │
+│ 1. Pipeline CI executa (7 jobs)                                 │
 │ 2. MR criado e revisado                                         │
 │ 3. Merge para develop                                           │
 │ 4. Job sync:github espelha automaticamente                      │
@@ -128,7 +128,7 @@ O hook pre-push adiciona uma segunda camada de proteção local, executando imed
 
 ## Camada 3: GitLab CI
 
-A pipeline do GitLab CI representa a validação autoritativa do código, executando em um ambiente limpo e reproduzível que elimina variações do ambiente local do desenvolvedor. Os 873 testes são divididos em 6 jobs paralelos (unit, integration, bdd, e2e, lint, typecheck) que executam simultaneamente, mantendo o tempo total em aproximadamente 1m30s. Além dos testes, a pipeline inclui o stage build para gerar documentação com MkDocs e o stage sync que espelha automaticamente o código para o GitHub após pipelines bem-sucedidas nos branches develop e main. Esta separação em stages garante que a sincronização só ocorra quando todo o código passou por todas as validações.
+A pipeline do GitLab CI representa a validação autoritativa do código, executando em um ambiente limpo e reproduzível que elimina variações do ambiente local do desenvolvedor. Os 778 testes executam em um único job consolidado (test:all) junto com lint, typecheck, coverage, security (bandit + deps) e sync, totalizando 7 jobs. O stage sync espelha automaticamente o código para o GitHub após cada pipeline bem-sucedida em qualquer branch. Esta separação em stages garante que a sincronização só ocorra quando todo o código passou por todas as validações.
 
 ## Camada 4: Branch Protection
 
@@ -161,7 +161,7 @@ A proteção da branch develop no GitHub está configurada de forma a permitir a
 
 ## Sincronização Automática
 
-O job sync:github é o componente que conecta os dois repositórios, executando automaticamente após cada pipeline bem-sucedida nos branches develop e main. O job utiliza uma imagem Alpine leve para minimizar o tempo de inicialização, clona o repositório em modo mirror para capturar todas as referências, e faz push forçado para o GitHub usando um token com scopes repo e workflow. A opção --mirror garante que tags, branches e todas as referências sejam sincronizadas, mantendo os dois repositórios como cópias idênticas. O uso de when: on_success garante que a sincronização só ocorre quando todos os testes passaram, evitando que código quebrado seja publicado no showcase.
+O job sync:github é o componente que conecta os dois repositórios, executando automaticamente após cada pipeline bem-sucedida em qualquer branch. O job executa no container Docker padrão (python:3.13), adiciona o remote GitHub dinamicamente, e faz push forçado para o GitHub usando um token com scopes repo e workflow. A opção --mirror garante que tags, branches e todas as referências sejam sincronizadas, mantendo os dois repositórios como cópias idênticas. O uso de when: on_success garante que a sincronização só ocorre quando todos os testes passaram, evitando que código quebrado seja publicado no showcase.
 
 ```yaml
 sync:github:
@@ -265,7 +265,7 @@ A configuração do CI/CD está distribuída em três arquivos principais que tr
 
 ```
 .pre-commit-config.yaml       => Hooks locais (ruff, mypy, pytest)
-.gitlab-ci.yml                => Pipeline GitLab (8 jobs incluindo sync)
+.gitlab-ci.yml                => Pipeline GitLab (7 jobs incluindo sync)
 .github/workflows/ci.yml      => GitHub Actions (6 checks + merge_group)
 ```
 

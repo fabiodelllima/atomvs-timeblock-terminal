@@ -1157,20 +1157,19 @@ Esta seção define os padrões de codificação e convenções que mantêm cons
 ### 8.1. Estrutura de Diretórios
 
 ```
-````
 src/timeblock/
-├── commands/          # CLI commands
-├── services/          # Business logic
-├── models/            # Data models
-├── database/          # DB management
-└── utils/             # Helpers
+├── commands/ # CLI commands
+├── services/ # Business logic
+├── models/ # Data models
+├── database/ # DB management
+└── utils/ # Helpers
 
 tests/
-├── unit/              # Testes unitários
-├── integration/       # Testes integração
-├── bdd/               # Cenários Gherkin
-├── e2e/               # Fluxos completos
-└── factories/         # Test factories
+├── unit/ # Testes unitários
+├── integration/ # Testes integração
+├── bdd/ # Cenários Gherkin
+├── e2e/ # Fluxos completos
+└── factories/ # Test factories
 ```
 
 **Arquivos:**
@@ -1244,14 +1243,13 @@ def calculate_streak(habit_id: int) -> int:
 
 **Estrutura:**
 
-````
+```
 tests/
 ├── unit/              # Testes unitários por módulo
 ├── integration/       # Testes de integração
 ├── bdd/               # Cenários Gherkin
 ├── e2e/               # Fluxos completos CLI
 └── factories/         # Test factories
-```
 ```
 
 **Naming:**
@@ -1717,7 +1715,7 @@ Pipeline declarado em `.gitlab-ci.yml`, executado em cada push e merge request.
 ```
 test ──> build ──> deploy
 
-test:     6 jobs paralelos (acima)
+test:     1 job consolidado (test:all)
 build:    mkdocs build [develop, main]
 deploy:   GitLab Pages [main]
 ```

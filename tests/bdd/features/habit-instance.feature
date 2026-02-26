@@ -1,107 +1,106 @@
-# language: pt
-Funcionalidade: Estados e Transições de HabitInstance
+# language: en
+Feature: HabitInstance States and Transitions
+  As a TimeBlock system
+  I want to manage habit instance states
+  So that I can track execution and calculate metrics
 
-  Como sistema TimeBlock
-  Quero gerenciar estados de habit instances
-  Para rastrear execução e calcular métricas
+  Background:
+    Given an active routine "Rotina Matinal" exists
+    And a habit "Academia" with expected duration of 90 minutes exists
 
-  Contexto:
-    Dado que existe uma rotina "Rotina Matinal" ativa
-    E existe um habit "Academia" com duração esperada de 90 minutos
+  # BR-HABIT-INSTANCE-001: Transições de status
+  Scenario: Transition PENDING to DONE via timer stop
+    Given an instance with status "PENDING" exists
+    When the timer is started
+    And the timer is stopped after 90 minutes
+    Then the status changes to "DONE"
+    And the done_substatus is calculated
 
-  # BR-HABIT-INSTANCE-001: Status Transitions
-  Cenário: Transição PENDING → DONE via timer stop
-    Dado que existe um instance com status "PENDING"
-    Quando timer é iniciado
-    E timer é parado após 90 minutos
-    Então o status muda para "DONE"
-    E o done_substatus é calculado
+  Scenario: Transition PENDING to NOT_DONE via skip
+    Given an instance with status "PENDING" exists
+    When the user runs "habit skip Academia --reason HEALTH"
+    Then the status changes to "NOT_DONE"
+    And the not_done_substatus is "SKIPPED_JUSTIFIED"
 
-  Cenário: Transição PENDING → NOT_DONE via skip
-    Dado que existe um instance com status "PENDING"
-    Quando usuário executa "habit skip Academia --reason HEALTH"
-    Então o status muda para "NOT_DONE"
-    E o not_done_substatus é "SKIPPED_JUSTIFIED"
+  Scenario: Transition PENDING to NOT_DONE via timeout (48h)
+    Given an instance with status "PENDING" created 49 hours ago exists
+    When the timeout job runs
+    Then the status changes to "NOT_DONE"
+    And the not_done_substatus is "IGNORED"
 
-  Cenário: Transição PENDING → NOT_DONE via timeout (48h)
-    Dado que existe um instance com status "PENDING" criado há 49 horas
-    Quando job de timeout executa
-    Então o status muda para "NOT_DONE"
-    E o not_done_substatus é "IGNORED"
+  Scenario: Forbidden transitions from DONE
+    Given an instance with status "DONE" exists
+    When an attempt to change to "PENDING" is made
+    Then the system returns error "Status DONE é final"
 
-  Cenário: Transições proibidas de DONE
-    Dado que existe um instance com status "DONE"
-    Quando tentativa de mudar para "PENDING"
-    Então o sistema retorna erro "Status DONE é final"
-    
-    Quando tentativa de mudar para "NOT_DONE"
-    Então o sistema retorna erro "Status DONE é final"
+    When an attempt to change to "NOT_DONE" is made
+    Then the system returns error "Status DONE é final"
 
-  Cenário: Transições proibidas de NOT_DONE
-    Dado que existe um instance com status "NOT_DONE"
-    Quando tentativa de mudar para "PENDING"
-    Então o sistema retorna erro "Status NOT_DONE é final"
-    
-    Quando tentativa de mudar para "DONE"
-    Então o sistema retorna erro "Status NOT_DONE é final"
+  Scenario: Forbidden transitions from NOT_DONE
+    Given an instance with status "NOT_DONE" exists
+    When an attempt to change to "PENDING" is made
+    Then the system returns error "Status NOT_DONE é final"
 
-  # BR-HABIT-INSTANCE-002: Substatus Assignment
-  Cenário: DONE sempre tem done_substatus
-    Dado que instance transiciona para "DONE"
-    Então done_substatus NÃO pode ser NULL
-    E not_done_substatus deve ser NULL
+    When an attempt to change to "DONE" is made
+    Then the system returns error "Status NOT_DONE é final"
 
-  Cenário: NOT_DONE sempre tem not_done_substatus
-    Dado que instance transiciona para "NOT_DONE"
-    Então not_done_substatus NÃO pode ser NULL
-    E done_substatus deve ser NULL
+  # BR-HABIT-INSTANCE-002: Atribuição de substatus
+  Scenario: DONE always has done_substatus
+    Given the instance transitions to "DONE"
+    Then done_substatus CANNOT be NULL
+    And not_done_substatus must be NULL
 
-  Cenário: PENDING tem ambos substatus NULL
-    Dado que instance está com status "PENDING"
-    Então done_substatus deve ser NULL
-    E not_done_substatus deve ser NULL
+  Scenario: NOT_DONE always has not_done_substatus
+    Given the instance transitions to "NOT_DONE"
+    Then not_done_substatus CANNOT be NULL
+    And done_substatus must be NULL
 
-  Cenário: Substatus mutuamente exclusivos
-    Dado que instance tem status "DONE"
-    Quando tentativa de setar not_done_substatus
-    Então o sistema retorna erro "Substatus mutuamente exclusivos"
+  Scenario: PENDING has both substatus NULL
+    Given the instance has status "PENDING"
+    Then done_substatus must be NULL
+    And not_done_substatus must be NULL
 
-  # BR-HABIT-INSTANCE-003: Completion Thresholds
-  Cenário: EXCESSIVE quando completion > 150%
-    Dado que duração esperada é 90 minutos
-    Quando duração real é 180 minutos
-    Então completion é 200%
-    E done_substatus é "EXCESSIVE"
-    E sistema exibe warning sobre impacto
+  Scenario: Substatus are mutually exclusive
+    Given the instance has status "DONE"
+    When an attempt to set not_done_substatus is made
+    Then the system returns error "Substatus mutuamente exclusivos"
 
-  Cenário: OVERDONE quando completion 110-150%
-    Dado que duração esperada é 90 minutos
-    Quando duração real é 100 minutos
-    Então completion é 111%
-    E done_substatus é "OVERDONE"
-    E sistema exibe info sobre recorrência
+  # BR-HABIT-INSTANCE-003: Thresholds de completion
+  Scenario: EXCESSIVE when completion > 150%
+    Given the expected duration is 90 minutes
+    When the actual duration is 180 minutes
+    Then completion is 200%
+    And done_substatus is "EXCESSIVE"
+    And the system shows a warning about impact
 
-  Cenário: FULL quando completion 90-110%
-    Dado que duração esperada é 90 minutos
-    Quando duração real é 90 minutos
-    Então completion é 100%
-    E done_substatus é "FULL"
-    E sistema exibe feedback positivo
+  Scenario: OVERDONE when completion 110-150%
+    Given the expected duration is 90 minutes
+    When the actual duration is 100 minutes
+    Then completion is 111%
+    And done_substatus is "OVERDONE"
+    And the system shows info about recurrence
 
-  Cenário: PARTIAL quando completion < 90%
-    Dado que duração esperada é 90 minutos
-    Quando duração real é 60 minutos
-    Então completion é 67%
-    E done_substatus é "PARTIAL"
-    E sistema mantém streak
+  Scenario: FULL when completion 90-110%
+    Given the expected duration is 90 minutes
+    When the actual duration is 90 minutes
+    Then completion is 100%
+    And done_substatus is "FULL"
+    And the system shows positive feedback
 
-  Esquema do Cenário: Edge cases de thresholds
-    Dado que duração esperada é 90 minutos
-    Quando duração real é <real> minutos
-    Então completion é <percentage>%
-    E done_substatus é "<substatus>"
+  Scenario: PARTIAL when completion < 90%
+    Given the expected duration is 90 minutes
+    When the actual duration is 60 minutes
+    Then completion is 67%
+    And done_substatus is "PARTIAL"
+    And the system maintains the streak
 
-    Exemplos:
+  Scenario Outline: Threshold edge cases
+    Given the expected duration is 90 minutes
+    When the actual duration is <real> minutes
+    Then completion is <percentage>%
+    And done_substatus is "<substatus>"
+
+    Examples:
       | real | percentage | substatus  |
       | 136  | 151.11     | EXCESSIVE  |
       | 135  | 150.00     | EXCESSIVE  |
@@ -113,100 +112,100 @@ Funcionalidade: Estados e Transições de HabitInstance
       | 81   | 90.00      | FULL       |
       | 80   | 88.89      | PARTIAL    |
 
-  # BR-HABIT-INSTANCE-004: Streak Calculation with Substatus
-  Cenário: Qualquer DONE mantém streak
-    Dado que streak atual é 5 dias
-    E last instance foi DONE com substatus "<substatus>"
-    Quando nova instance é marcada como DONE
-    Então streak incrementa para 6 dias
+  # BR-HABIT-INSTANCE-004: Cálculo de streak com substatus
+  Scenario: Any DONE maintains streak
+    Given the current streak is 5 days
+    And the last instance was DONE with substatus "<substatus>"
+    When a new instance is marked as DONE
+    Then the streak increments to 6 days
 
-    Exemplos:
+    Examples:
       | substatus  |
       | EXCESSIVE  |
       | OVERDONE   |
       | FULL       |
       | PARTIAL    |
 
-  Cenário: Qualquer NOT_DONE quebra streak
-    Dado que streak atual é 14 dias
-    E nova instance é marcada como NOT_DONE com substatus "<substatus>"
-    Então streak reseta para 0 dias
+  Scenario: Any NOT_DONE breaks streak
+    Given the current streak is 14 days
+    And a new instance is marked as NOT_DONE with substatus "<substatus>"
+    Then the streak resets to 0 days
 
-    Exemplos:
+    Examples:
       | substatus            |
       | SKIPPED_JUSTIFIED    |
       | SKIPPED_UNJUSTIFIED  |
       | IGNORED              |
 
-  Cenário: EXCESSIVE mantém streak mas alerta impacto
-    Dado que streak atual é 12 dias
-    Quando instance é marcada como DONE (EXCESSIVE)
-    Então streak incrementa para 13 dias
-    E sistema exibe warning:
+  Scenario: EXCESSIVE maintains streak but warns about impact
+    Given the current streak is 12 days
+    When the instance is marked as DONE (EXCESSIVE)
+    Then the streak increments to 13 days
+    And the system shows a warning:
       """
       [WARN] Academia ultrapassou meta em Xmin
-             
+
       Impacto na rotina:
         - <habit>: PERDIDO/ATRASADO
       """
 
-  # BR-HABIT-INSTANCE-005: Ignored Auto-Assignment
-  Cenário: Instance PENDING por < 48h não é ignored
-    Dado que instance foi criado há 24 horas
-    Quando job de timeout executa
-    Então status permanece "PENDING"
+  # BR-HABIT-INSTANCE-005: Atribuição automática de ignored
+  Scenario: PENDING instance less than 48h is not ignored
+    Given the instance was created 24 hours ago
+    When the timeout job runs
+    Then the status remains "PENDING"
 
-  Cenário: Instance PENDING por > 48h é ignored
-    Dado que instance foi criado há 49 horas
-    E status é "PENDING"
-    Quando job de timeout executa
-    Então status muda para "NOT_DONE"
-    E not_done_substatus é "IGNORED"
-    E ignored_at timestamp é registrado
+  Scenario: PENDING instance over 48h is ignored
+    Given the instance was created 49 hours ago
+    And the status is "PENDING"
+    When the timeout job runs
+    Then the status changes to "NOT_DONE"
+    And not_done_substatus is "IGNORED"
+    And the ignored_at timestamp is recorded
 
-  Cenário: Apenas instances PENDING são verificadas
-    Dado que existem instances com status "DONE" e "NOT_DONE"
-    Quando job de timeout executa
-    Então apenas instances "PENDING" são processadas
-    E instances "DONE" e "NOT_DONE" não são alteradas
+  Scenario: Only PENDING instances are checked
+    Given instances with status "DONE" and "NOT_DONE" exist
+    When the timeout job runs
+    Then only "PENDING" instances are processed
+    And "DONE" and "NOT_DONE" instances are not altered
 
-  Cenário: User ação antes de 48h previne IGNORED
-    Dado que instance foi criado há 30 horas
-    Quando usuário executa "habit skip Academia --reason WORK"
-    Então status é "NOT_DONE"
-    E not_done_substatus é "SKIPPED_JUSTIFIED"
-    E job de timeout NÃO marca como IGNORED
+  Scenario: User action before 48h prevents IGNORED
+    Given the instance was created 30 hours ago
+    When the user runs "habit skip Academia --reason WORK"
+    Then the status is "NOT_DONE"
+    And not_done_substatus is "SKIPPED_JUSTIFIED"
+    And the timeout job does NOT mark it as IGNORED
 
-  # BR-HABIT-INSTANCE-006: Impact Analysis on EXCESSIVE/OVERDONE
-  Cenário: EXCESSIVE com impacto em habits posteriores
-    Dado que Academia está agendada para 07:00-08:30 (90min)
-    E Trabalho está agendado para 09:00-12:00 (180min)
-    E Inglês está agendado para 13:00-14:00 (60min)
-    Quando Academia termina às 10:00 (180min real)
-    Então done_substatus é "EXCESSIVE"
-    E sistema detecta impacto:
-      | habit    | impacto   |
+  # BR-HABIT-INSTANCE-006: Análise de impacto em EXCESSIVE/OVERDONE
+  Scenario: EXCESSIVE with impact on subsequent habits
+    Given Academia is scheduled for 07:00-08:30 (90min)
+    And Trabalho is scheduled for 09:00-12:00 (180min)
+    And Inglês is scheduled for 13:00-14:00 (60min)
+    When Academia ends at 10:00 (180min actual)
+    Then done_substatus is "EXCESSIVE"
+    And the system detects impact:
+      | habit    | impact    |
       | Trabalho | PERDIDO   |
       | Inglês   | ATRASADO  |
-    E sistema sugere "Ajustar meta de Academia para 2h?"
+    And the system suggests "Ajustar meta de Academia para 2h?"
 
-  Cenário: OVERDONE sem impacto (gap suficiente)
-    Dado que Academia está agendada para 07:00-08:30 (90min)
-    E Inglês está agendado para 14:00-15:00 (60min)
-    Quando Academia termina às 09:00 (120min real)
-    Então done_substatus é "OVERDONE"
-    E nenhum habit foi afetado
-    E sistema exibe info:
+  Scenario: OVERDONE without impact (sufficient gap)
+    Given Academia is scheduled for 07:00-08:30 (90min)
+    And Inglês is scheduled for 14:00-15:00 (60min)
+    When Academia ends at 09:00 (120min actual)
+    Then done_substatus is "OVERDONE"
+    And no habit was affected
+    And the system shows info:
       """
       [INFO] Acima da meta. Frequente? Considere ajustar para 2h.
       """
 
-  Cenário: FULL sem análise de impacto
-    Dado que Academia termina exatamente no horário (90min)
-    Quando done_substatus é "FULL"
-    Então análise de impacto NÃO é executada
+  Scenario: FULL does not trigger impact analysis
+    Given Academia ends exactly on time (90min)
+    When done_substatus is "FULL"
+    Then impact analysis is NOT executed
 
-  Cenário: PARTIAL sem análise de impacto
-    Dado que Academia termina antes do horário (60min)
-    Quando done_substatus é "PARTIAL"
-    Então análise de impacto NÃO é executada
+  Scenario: PARTIAL does not trigger impact analysis
+    Given Academia ends before the scheduled time (60min)
+    When done_substatus is "PARTIAL"
+    Then impact analysis is NOT executed

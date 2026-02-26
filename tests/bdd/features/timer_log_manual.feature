@@ -1,3 +1,5 @@
+# language: en
+# BR-TIMER-007: Log manual de tempo
 Feature: Manual Time Logging (BR-TIMER-007)
   As a TimeBlock user
   I want to log time manually without using a timer
@@ -8,7 +10,7 @@ Feature: Manual Time Logging (BR-TIMER-007)
     And a habit "Meditation" with 60 minutes duration exists
     And a pending instance for today exists
 
-  # Modo Intervalo
+  # Modo intervalo
   Scenario: Log time using start and end times
     When I log time with start "07:00" and end "08:00"
     Then a TimeLog should be created with duration 3600 seconds
@@ -21,7 +23,7 @@ Feature: Manual Time Logging (BR-TIMER-007)
     And the instance should have completion 50%
     And the instance should have substatus PARTIAL
 
-  # Modo Duração
+  # Modo duração
   Scenario: Log time using duration in minutes
     When I log time with duration 60 minutes
     Then a TimeLog should be created with duration 3600 seconds

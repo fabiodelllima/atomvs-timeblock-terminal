@@ -1,0 +1,1908 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ATOMVS Color System - Catppuccin Mocha</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --base: #1e1e2e;
+        --mantle: #181825;
+        --crust: #11111b;
+        --surface0: #313244;
+        --surface1: #45475a;
+        --surface2: #585b70;
+        --overlay0: #6c7086;
+        --overlay1: #7f849c;
+        --overlay2: #9399b2;
+        --subtext0: #a6adc8;
+        --subtext1: #bac2de;
+        --text: #cdd6f4;
+        --rosewater: #f5e0dc;
+        --flamingo: #f2cdcd;
+        --pink: #f5c2e7;
+        --mauve: #cba6f7;
+        --red: #f38ba8;
+        --maroon: #eba0ac;
+        --peach: #fab387;
+        --yellow: #f9e2af;
+        --green: #a6e3a1;
+        --teal: #94e2d5;
+        --sky: #89dcfe;
+        --sapphire: #74c7ec;
+        --blue: #89b4fa;
+        --lavender: #b4befe;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--crust);
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        padding: 1.5rem;
+        line-height: 1.6;
+      }
+      h1 {
+        font-weight: 700;
+        font-size: clamp(1.2rem, 4vw, 1.8rem);
+        margin-bottom: 0.15rem;
+        letter-spacing: -0.02em;
+      }
+      h1 span {
+        color: var(--mauve);
+      }
+      .subtitle {
+        color: var(--overlay1);
+        font-size: clamp(0.7rem, 2vw, 0.85rem);
+        margin-bottom: 2rem;
+        font-weight: 300;
+      }
+      h2 {
+        font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+        font-weight: 600;
+        color: var(--subtext1);
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--surface1);
+      }
+      h3 {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--overlay1);
+        margin: 1.5rem 0 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      /* panel */
+      .panel {
+        background: var(--base);
+        border: 1px solid var(--surface1);
+        border-radius: 8px;
+        padding: 0.75rem 0.9rem;
+        margin-bottom: 1.5rem;
+        overflow-x: auto;
+        scrollbar-color: var(--surface1) var(--base);
+        scrollbar-width: thin;
+      }
+
+      /* tables */
+      table.t {
+        border-collapse: collapse;
+        font-size: clamp(0.58rem, 1.6vw, 0.75rem);
+        line-height: 1.85;
+        white-space: nowrap;
+      }
+      table.t td {
+        padding: 0.05rem 0.6rem 0.05rem 0;
+        vertical-align: baseline;
+      }
+      table.t td:first-child {
+        padding-left: 0;
+      }
+
+      /* colors */
+      .done {
+        color: var(--green);
+      }
+      .partial {
+        color: var(--rosewater);
+      }
+      .over {
+        color: var(--flamingo);
+      }
+      .excess {
+        color: var(--peach);
+      }
+      .warn {
+        color: var(--yellow);
+      }
+      .running {
+        color: var(--mauve);
+      }
+      .pending {
+        color: var(--overlay0);
+      }
+      .err {
+        color: var(--red);
+      }
+      .passive {
+        color: var(--maroon);
+      }
+      .inf {
+        color: var(--blue);
+      }
+      .dim {
+        color: var(--surface1);
+      }
+      .txt {
+        color: var(--text);
+      }
+      .sub {
+        color: var(--subtext0);
+      }
+      .sub1 {
+        color: var(--subtext1);
+      }
+      .ovl {
+        color: var(--overlay1);
+      }
+      .b {
+        font-weight: 700;
+      }
+      .strike {
+        text-decoration: line-through;
+      }
+
+      /* swatches */
+      .palette-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .swatch {
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--surface0);
+        border: 1px solid var(--surface1);
+        transition: transform 0.15s ease;
+      }
+      .swatch:hover {
+        transform: translateY(-2px);
+      }
+      .swatch-color {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.62rem;
+        font-weight: 600;
+      }
+      .swatch-info {
+        padding: 0.35rem 0.45rem;
+      }
+      .swatch-name {
+        font-weight: 600;
+        color: var(--text);
+        display: block;
+        font-size: 0.62rem;
+      }
+      .swatch-hex {
+        color: var(--overlay1);
+        font-size: 0.55rem;
+      }
+
+      /* semantic cards */
+      .semantic-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .semantic-card {
+        background: var(--base);
+        border: 1px solid var(--surface1);
+        border-radius: 8px;
+        padding: 0.6rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .semantic-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+      }
+      .semantic-card.c-success::before {
+        background: var(--green);
+      }
+      .semantic-card.c-below::before {
+        background: var(--rosewater);
+      }
+      .semantic-card.c-above::before {
+        background: var(--flamingo);
+      }
+      .semantic-card.c-overlimit::before {
+        background: var(--peach);
+      }
+      .semantic-card.c-warning::before {
+        background: var(--yellow);
+      }
+      .semantic-card.c-error::before {
+        background: var(--red);
+      }
+      .semantic-card.c-passive::before {
+        background: var(--maroon);
+      }
+      .semantic-card.c-info::before {
+        background: var(--blue);
+      }
+      .semantic-card.c-accent::before {
+        background: var(--mauve);
+      }
+      .semantic-card.c-muted::before {
+        background: var(--overlay0);
+      }
+      .sc-label {
+        font-size: 0.46rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.15rem;
+        font-weight: 600;
+      }
+      .sc-icon {
+        font-size: 0.95rem;
+        margin-bottom: 0.1rem;
+      }
+      .sc-desc {
+        font-size: 0.56rem;
+        color: var(--subtext0);
+        line-height: 1.5;
+      }
+      .sc-desc code {
+        font-size: 0.5rem;
+        color: var(--overlay1);
+      }
+
+      /* tags */
+      .tag-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.55rem;
+        margin-bottom: 1.5rem;
+      }
+      .tag-card {
+        background: var(--base);
+        border: 1px solid var(--surface1);
+        border-radius: 8px;
+        padding: 0.55rem 0.7rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .tag-dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .tag-info {
+        font-size: 0.62rem;
+      }
+      .tag-name {
+        font-weight: 600;
+        color: var(--text);
+      }
+      .tag-hex {
+        color: var(--overlay1);
+        font-size: 0.55rem;
+      }
+      .tag-examples {
+        color: var(--subtext0);
+        font-size: 0.55rem;
+      }
+
+      /* progress */
+      .progress-demo {
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+        margin: 0.6rem 0;
+      }
+      .progress-row {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        font-size: 0.7rem;
+      }
+      .progress-label {
+        width: 38px;
+        text-align: right;
+        flex-shrink: 0;
+      }
+      .progress-bar {
+        flex: 1;
+        height: 9px;
+        background: var(--surface0);
+        border-radius: 6px;
+        overflow: hidden;
+        min-width: 60px;
+        max-width: 240px;
+      }
+      .progress-fill {
+        height: 100%;
+        border-radius: 6px;
+      }
+      .progress-value {
+        width: 48px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      /* timer widget */
+      .timer-demo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        background: var(--base);
+        border: 1px solid var(--surface1);
+        border-radius: 8px;
+        padding: 0.6rem 0.9rem;
+        margin: 0.5rem 0;
+      }
+      .timer-icon {
+        color: var(--mauve);
+        font-size: 0.9rem;
+      }
+      .timer-time {
+        color: var(--mauve);
+        font-size: clamp(1rem, 3vw, 1.25rem);
+        font-weight: 700;
+      }
+      .timer-label {
+        color: var(--mauve);
+        font-size: 0.65rem;
+        font-weight: 400;
+      }
+
+      /* compare */
+      .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.7rem;
+        margin: 1rem 0;
+      }
+      .compare-box {
+        background: var(--base);
+        border: 1px solid var(--surface1);
+        border-radius: 8px;
+        padding: 0.75rem;
+        text-align: center;
+      }
+      .compare-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        margin: 0.4rem auto;
+      }
+      .compare-label {
+        font-size: 0.6rem;
+        color: var(--overlay1);
+      }
+      .compare-name {
+        font-weight: 600;
+        font-size: 0.75rem;
+        margin-top: 0.15rem;
+      }
+
+      /* backgrounds */
+      .bg-stack {
+        display: flex;
+        flex-wrap: wrap;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+      .bg-layer {
+        flex: 1 1 55px;
+        min-height: 46px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(0.4rem, 1.1vw, 0.55rem);
+        font-weight: 500;
+        padding: 0.25rem 0.1rem;
+      }
+      .bg-layer span {
+        font-size: 0.45rem;
+        opacity: 0.7;
+        margin-top: 1px;
+      }
+
+      /* heat bar */
+      .heat-bar {
+        display: flex;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 0.8rem 0;
+        height: 32px;
+      }
+      .heat-segment {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(0.4rem, 1vw, 0.52rem);
+        font-weight: 600;
+      }
+
+      /* section note */
+      .section-note {
+        background: var(--base);
+        border-left: 3px solid var(--surface1);
+        padding: 0.5rem 0.8rem;
+        margin: 1rem 0;
+        font-size: 0.68rem;
+        color: var(--subtext0);
+        border-radius: 0 6px 6px 0;
+      }
+      .section-note strong {
+        color: var(--subtext1);
+      }
+
+      /* card frame */
+      .card-frame {
+        font-size: clamp(0.58rem, 1.6vw, 0.75rem);
+        line-height: 1.85;
+        white-space: nowrap;
+      }
+      .card-border {
+        color: var(--surface1);
+      }
+
+      /* timeblock fill bar */
+      .tb-fill {
+        display: inline-block;
+        padding: 0 0.3rem;
+        border-radius: 2px;
+      }
+
+      /* footer */
+      .footer {
+        margin-top: 3rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--surface1);
+        color: var(--overlay0);
+        font-size: 0.6rem;
+        text-align: center;
+      }
+      .footer a {
+        color: var(--blue);
+        text-decoration: none;
+      }
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 0.8rem;
+        }
+        .palette-grid {
+          grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+          gap: 0.35rem;
+        }
+        .semantic-grid {
+          grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+        }
+        .tag-grid {
+          grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        }
+        .compare-grid {
+          grid-template-columns: 1fr;
+        }
+        .swatch-color {
+          height: 32px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1><span>ATOMVS</span> Color System</h1>
+    <p class="subtitle">
+      TimeBlock Planner &middot; Catppuccin Mocha &middot; ADR-021 &middot; ISO
+      3864 / ANSI Z535
+    </p>
+
+    <!-- ═══ BACKGROUNDS ═══ -->
+    <h2>Backgrounds</h2>
+    <div class="bg-stack">
+      <div class="bg-layer" style="background: #11111b; color: #6c7086">
+        Crust<span>#11111B</span>
+      </div>
+      <div class="bg-layer" style="background: #181825; color: #6c7086">
+        Mantle<span>#181825</span>
+      </div>
+      <div class="bg-layer" style="background: #1e1e2e; color: #7f849c">
+        Base<span>#1E1E2E</span>
+      </div>
+      <div class="bg-layer" style="background: #313244; color: #a6adc8">
+        Srf0<span>#313244</span>
+      </div>
+      <div class="bg-layer" style="background: #45475a; color: #bac2de">
+        Srf1<span>#45475A</span>
+      </div>
+      <div class="bg-layer" style="background: #585b70; color: #cdd6f4">
+        Srf2<span>#585B70</span>
+      </div>
+      <div class="bg-layer" style="background: #6c7086; color: #cdd6f4">
+        Ovl0<span>#6C7086</span>
+      </div>
+      <div class="bg-layer" style="background: #7f849c; color: #1e1e2e">
+        Ovl1<span>#7F849C</span>
+      </div>
+    </div>
+
+    <!-- ═══ TEXT HIERARCHY ═══ -->
+    <h2>Hierarquia Tipogr&aacute;fica</h2>
+    <div class="panel">
+      <table class="t">
+        <tr>
+          <td class="txt b">Text (#CDD6F4)</td>
+          <td class="txt">T&iacute;tulos, corpo, labels</td>
+        </tr>
+        <tr>
+          <td class="sub1">Subtext1 (#BAC2DE)</td>
+          <td class="sub1">Subt&iacute;tulos, border_subtitle</td>
+        </tr>
+        <tr>
+          <td class="sub">Subtext0 (#A6ADC8)</td>
+          <td class="sub">Metadata, info auxiliar</td>
+        </tr>
+        <tr>
+          <td class="ovl">Overlay1 (#7F849C)</td>
+          <td class="ovl">Timestamps, hints</td>
+        </tr>
+        <tr>
+          <td class="pending">Overlay0 (#6C7086)</td>
+          <td class="pending">Desabilitado, pendente</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ═══ PALETTE ═══ -->
+    <h2>Paleta Catppuccin Mocha</h2>
+    <div class="palette-grid">
+      <div class="swatch">
+        <div class="swatch-color" style="background: #f5e0dc; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Rosewater</span
+          ><span class="swatch-hex">#F5E0DC</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #f2cdcd; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Flamingo</span
+          ><span class="swatch-hex">#F2CDCD</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #f5c2e7; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Pink</span
+          ><span class="swatch-hex">#F5C2E7</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #cba6f7; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Mauve</span
+          ><span class="swatch-hex">#CBA6F7</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #f38ba8; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Red</span
+          ><span class="swatch-hex">#F38BA8</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #eba0ac; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Maroon</span
+          ><span class="swatch-hex">#EBA0AC</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #fab387; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Peach</span
+          ><span class="swatch-hex">#FAB387</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #f9e2af; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Yellow</span
+          ><span class="swatch-hex">#F9E2AF</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #a6e3a1; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Green</span
+          ><span class="swatch-hex">#A6E3A1</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #94e2d5; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Teal</span
+          ><span class="swatch-hex">#94E2D5</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #89dcfe; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Sky</span
+          ><span class="swatch-hex">#89DCFE</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #74c7ec; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Sapphire</span
+          ><span class="swatch-hex">#74C7EC</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #89b4fa; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Blue</span
+          ><span class="swatch-hex">#89B4FA</span>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background: #b4befe; color: #1e1e2e">
+          Aa
+        </div>
+        <div class="swatch-info">
+          <span class="swatch-name">Lavender</span
+          ><span class="swatch-hex">#B4BEFE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SEMANTIC COLORS ═══ -->
+    <h2>Cores Sem&acirc;nticas</h2>
+    <div class="section-note">
+      Baseado em <strong>ISO 3864</strong> e <strong>ANSI Z535</strong>.
+      Verde=seguro, amarelo=aten&ccedil;&atilde;o, laranja=extremo
+      t&eacute;rmico, vermelho=perigo, azul=informa&ccedil;&atilde;o.
+    </div>
+    <div class="semantic-grid">
+      <div class="semantic-card c-success">
+        <div class="sc-label done">SUCCESS</div>
+        <div class="sc-icon done">&#10003;</div>
+        <div class="sc-desc">
+          Conclu&iacute;do, done/full<br /><code>Green #A6E3A1</code>
+        </div>
+      </div>
+      <div class="semantic-card c-below">
+        <div class="sc-label partial">BELOW TARGET</div>
+        <div class="sc-icon partial">&#10003;~</div>
+        <div class="sc-desc">
+          Partial, abaixo<br /><code>Rosewater #F5E0DC</code>
+        </div>
+      </div>
+      <div class="semantic-card c-above">
+        <div class="sc-label over">ABOVE TARGET</div>
+        <div class="sc-icon over">&#10003;+</div>
+        <div class="sc-desc">
+          Overdone, acima<br /><code>Flamingo #F2CDCD</code>
+        </div>
+      </div>
+      <div class="semantic-card c-overlimit">
+        <div class="sc-label excess">OVER-LIMIT</div>
+        <div class="sc-icon excess">&#10003;!</div>
+        <div class="sc-desc">
+          Excessive, &gt;150%<br /><code>Peach #FAB387</code>
+        </div>
+      </div>
+      <div class="semantic-card c-warning">
+        <div class="sc-label warn">WARNING</div>
+        <div class="sc-icon warn">!</div>
+        <div class="sc-desc">
+          Paused, skip justif.<br /><code>Yellow #F9E2AF</code>
+        </div>
+      </div>
+      <div class="semantic-card c-error">
+        <div class="sc-label err">ERROR</div>
+        <div class="sc-icon err">&#10007;!</div>
+        <div class="sc-desc">
+          Unjustified, overdue<br /><code>Red #F38BA8</code>
+        </div>
+      </div>
+      <div class="semantic-card c-passive">
+        <div class="sc-label passive">PASSIVE FAIL</div>
+        <div class="sc-icon passive">&#10007;?</div>
+        <div class="sc-desc">
+          Ignored, omiss&atilde;o<br /><code>Maroon #EBA0AC</code>
+        </div>
+      </div>
+      <div class="semantic-card c-info">
+        <div class="sc-label inf">INFO</div>
+        <div class="sc-icon inf">i</div>
+        <div class="sc-desc">
+          Links, rescheduled<br /><code>Blue #89B4FA</code>
+        </div>
+      </div>
+      <div class="semantic-card c-accent">
+        <div class="sc-label running">ACCENT</div>
+        <div class="sc-icon running">&#9654;</div>
+        <div class="sc-desc">
+          Running, foco ativo<br /><code>Mauve #CBA6F7</code>
+        </div>
+      </div>
+      <div class="semantic-card c-muted">
+        <div class="sc-label pending">MUTED</div>
+        <div class="sc-icon pending">&middot;</div>
+        <div class="sc-desc">
+          Pendente, cancelled<br /><code>Overlay0 #6C7086</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ WARM GRADIENT ═══ -->
+    <h2>Gradiente T&eacute;rmico Quente</h2>
+    <div class="section-note">
+      As quatro cores quentes da Catppuccin formam um gradiente reutilizado em
+      dois subsistemas: <strong>substatus DONE</strong> (h&aacute;bitos) e
+      <strong>proximidade</strong> (tasks).
+    </div>
+    <div class="heat-bar">
+      <div class="heat-segment" style="background: #f9e2af; color: #1e1e2e">
+        Yellow
+      </div>
+      <div class="heat-segment" style="background: #fab387; color: #1e1e2e">
+        Peach
+      </div>
+      <div class="heat-segment" style="background: #f2cdcd; color: #1e1e2e">
+        Flamingo
+      </div>
+      <div class="heat-segment" style="background: #f5e0dc; color: #1e1e2e">
+        Rosewater
+      </div>
+    </div>
+
+    <!-- ═══ AGENCY SCALE ═══ -->
+    <h2>Escala de Ag&ecirc;ncia do Usu&aacute;rio</h2>
+    <div class="panel">
+      <table class="t">
+        <tr>
+          <td class="done">&#10003;</td>
+          <td class="done">done/full</td>
+          <td class="done">Green</td>
+          <td class="ovl">Fez conforme planejado</td>
+        </tr>
+        <tr>
+          <td class="partial">&#10003;~</td>
+          <td class="partial">done/partial</td>
+          <td class="partial">Rosewater</td>
+          <td class="ovl">Fez abaixo, mas fez</td>
+        </tr>
+        <tr>
+          <td class="over">&#10003;+</td>
+          <td class="over">done/overdone</td>
+          <td class="over">Flamingo</td>
+          <td class="ovl">Fez acima (informativo)</td>
+        </tr>
+        <tr>
+          <td class="excess">&#10003;!</td>
+          <td class="excess">done/excessive</td>
+          <td class="excess">Peach</td>
+          <td class="ovl">Fez muito acima (over-limit)</td>
+        </tr>
+        <tr>
+          <td class="warn">!</td>
+          <td class="warn">skip/justified</td>
+          <td class="warn">Yellow</td>
+          <td class="ovl">Desviou com consci&ecirc;ncia</td>
+        </tr>
+        <tr>
+          <td class="err">&#10007;!</td>
+          <td class="err">skip/unjustif.</td>
+          <td class="err">Red</td>
+          <td class="ovl">Neglig&ecirc;ncia ativa</td>
+        </tr>
+        <tr>
+          <td class="passive">&#10007;?</td>
+          <td class="passive">ignored</td>
+          <td class="passive">Maroon</td>
+          <td class="ovl">Omiss&atilde;o passiva</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ═══ DONE HEAT ═══ -->
+    <h2>Heat de Substatus DONE</h2>
+    <div class="section-note">
+      Green &eacute; o centro ideal ("frio"). Desvios esquentam: abaixo &rarr;
+      Rosewater, acima &rarr; Flamingo, muito acima &rarr; Peach.
+    </div>
+    <div class="heat-bar">
+      <div class="heat-segment" style="background: #fab387; color: #1e1e2e">
+        &#10003;! &gt;150%
+      </div>
+      <div class="heat-segment" style="background: #f2cdcd; color: #1e1e2e">
+        &#10003;+ 110-150%
+      </div>
+      <div class="heat-segment" style="background: #a6e3a1; color: #1e1e2e">
+        &#10003; 90-110%
+      </div>
+      <div class="heat-segment" style="background: #f5e0dc; color: #1e1e2e">
+        &#10003;~ &lt;90%
+      </div>
+    </div>
+    <div class="panel">
+      <table class="t">
+        <tr>
+          <td class="done">&#10003;</td>
+          <td class="done">FULL</td>
+          <td class="sub">90-110%</td>
+          <td>
+            <span class="done">&#9724;&#9724;&#9724;&#9724;</span
+            ><span class="dim">&#9724;&#9724;</span>
+          </td>
+          <td class="ovl">Perfeito</td>
+          <td class="done">Green #A6E3A1</td>
+        </tr>
+        <tr>
+          <td class="partial">&#10003;~</td>
+          <td class="partial">PARTIAL</td>
+          <td class="sub">&lt; 90%</td>
+          <td>
+            <span class="partial">&#9724;&#9724;</span
+            ><span class="dim">&#9724;&#9724;&#9724;&#9724;</span>
+          </td>
+          <td class="ovl">Abaixo</td>
+          <td class="partial">Rosewater #F5E0DC</td>
+        </tr>
+        <tr>
+          <td class="over">&#10003;+</td>
+          <td class="over">OVERDONE</td>
+          <td class="sub">110-150%</td>
+          <td>
+            <span class="over">&#9724;&#9724;&#9724;&#9724;&#9724;</span
+            ><span class="dim">&#9724;</span>
+          </td>
+          <td class="ovl">Acima (ok)</td>
+          <td class="over">Flamingo #F2CDCD</td>
+        </tr>
+        <tr>
+          <td class="excess">&#10003;!</td>
+          <td class="excess">EXCESSIVE</td>
+          <td class="sub">&gt; 150%</td>
+          <td class="excess">&#9724;&#9724;&#9724;&#9724;&#9724;&#9724;</td>
+          <td class="ovl">Muito acima</td>
+          <td class="excess">Peach #FAB387</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ═══ MIGRATION ═══ -->
+    <h2>Migra&ccedil;&atilde;o: #B388FF &rarr; #CBA6F7</h2>
+    <div class="compare-grid">
+      <div class="compare-box">
+        <div class="compare-label">ANTES (n&atilde;o-Catppuccin)</div>
+        <div class="compare-circle" style="background: #b388ff"></div>
+        <div class="compare-name" style="color: #b388ff">#B388FF</div>
+      </div>
+      <div class="compare-box">
+        <div class="compare-label">DEPOIS (Mauve oficial)</div>
+        <div class="compare-circle" style="background: #cba6f7"></div>
+        <div class="compare-name" style="color: #cba6f7">#CBA6F7</div>
+      </div>
+    </div>
+
+    <!-- ═══ HABIT STATUS ═══ -->
+    <h2>HabitInstance -- Todos os Status</h2>
+
+    <h3>Status Principal</h3>
+    <div class="panel">
+      <table class="t">
+        <tr>
+          <td class="pending">&#183;</td>
+          <td class="pending b">PENDING</td>
+          <td class="pending">Aguardando execu&ccedil;&atilde;o</td>
+        </tr>
+        <tr>
+          <td class="done">&#10003;</td>
+          <td class="done b">DONE</td>
+          <td class="done">Conclu&iacute;do (ver substatus)</td>
+        </tr>
+        <tr>
+          <td class="err">&#10007;</td>
+          <td class="err b">NOT_DONE</td>
+          <td class="err">N&atilde;o realizado (ver substatus)</td>
+        </tr>
+        <tr>
+          <td class="running">&#9654;</td>
+          <td class="running b">RUNNING</td>
+          <td class="running">Em execu&ccedil;&atilde;o agora</td>
+        </tr>
+        <tr>
+          <td class="warn">&#9208;</td>
+          <td class="warn b">PAUSED</td>
+          <td class="warn">Pausado, aten&ccedil;&atilde;o</td>
+        </tr>
+      </table>
+    </div>
+
+    <h3>Substatus NOT_DONE (BR-HABITINSTANCE-002)</h3>
+    <div class="panel">
+      <table class="t">
+        <tr>
+          <td class="warn">!</td>
+          <td class="warn">SKIPPED_JUSTIFIED</td>
+          <td class="warn">&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;</td>
+          <td class="ovl">Desvio consciente</td>
+        </tr>
+        <tr>
+          <td class="err">&#10007;!</td>
+          <td class="err">SKIPPED_UNJUSTIFIED</td>
+          <td class="err">&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;</td>
+          <td class="ovl">Neglig&ecirc;ncia ativa</td>
+        </tr>
+        <tr>
+          <td class="passive">&#10007;?</td>
+          <td class="passive">IGNORED</td>
+          <td class="passive">&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;</td>
+          <td class="ovl">Omiss&atilde;o passiva</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ═══ TIMER STATUS ═══ -->
+    <h2>Timer -- Status Completo</h2>
+    <div class="panel">
+      <table class="t">
+        <tr>
+          <td class="running">&#9654;</td>
+          <td class="running b">RUNNING</td>
+          <td class="ovl">Timer contando</td>
+          <td class="running">&#9673; 47:23</td>
+        </tr>
+        <tr>
+          <td class="warn">&#9208;</td>
+          <td class="warn b">PAUSED</td>
+          <td class="ovl">Timer pausado</td>
+          <td class="warn">&#9673; 47:23 [paused]</td>
+        </tr>
+        <tr>
+          <td class="done">&#10003;</td>
+          <td class="done">DONE</td>
+          <td class="ovl">Sess&atilde;o finalizada</td>
+          <td class="done">&#10003; 1h 23m</td>
+        </tr>
+        <tr>
+          <td class="err">&#10007;</td>
+          <td class="err">CANCELLED</td>
+          <td class="ovl">Sess&atilde;o cancelada</td>
+          <td class="err">&#10007; descartada</td>
+        </tr>
+      </table>
+    </div>
+    <div class="timer-demo">
+      <span class="timer-icon">&#9673;</span>
+      <span class="timer-time">47:23</span>
+      <span class="timer-label">&#9654; em andamento &middot; Leitura</span>
+    </div>
+
+    <!-- ═══ EVENT STATUS ═══ -->
+    <h2>Event -- Status Completo</h2>
+    <div class="panel">
+      <table class="t">
+        <tr>
+          <td class="pending">&#183;</td>
+          <td class="pending">PLANNED</td>
+          <td class="ovl">Agendado</td>
+        </tr>
+        <tr>
+          <td class="running">&#9654;</td>
+          <td class="running b">IN_PROGRESS</td>
+          <td class="ovl">Em andamento</td>
+        </tr>
+        <tr>
+          <td class="warn">&#9208;</td>
+          <td class="warn b">PAUSED</td>
+          <td class="ovl">Pausado</td>
+        </tr>
+        <tr>
+          <td class="done">&#10003;</td>
+          <td class="done">COMPLETED</td>
+          <td class="ovl">Conclu&iacute;do</td>
+        </tr>
+        <tr>
+          <td class="err">&#10007;</td>
+          <td class="err">CANCELLED</td>
+          <td class="ovl">Cancelado</td>
+        </tr>
+        <tr>
+          <td class="inf">&#8635;</td>
+          <td class="inf">RESCHEDULED</td>
+          <td class="ovl">Reagendado</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ═══ HEAT SUBSYSTEM ═══ -->
+    <h2>Subsistema: Heat de Proximidade</h2>
+    <div class="section-note">
+      Exclusivo do card de <strong>Tasks</strong>. Cores quentes (Yellow &rarr;
+      Peach &rarr; Flamingo &rarr; Rosewater) cobrem a semana. Al&eacute;m de 7
+      dias, transiciona para hierarquia tipogr&aacute;fica neutra.
+    </div>
+    <div class="heat-bar">
+      <div class="heat-segment" style="background: #f9e2af; color: #1e1e2e">
+        Hoje
+      </div>
+      <div class="heat-segment" style="background: #fab387; color: #1e1e2e">
+        Amanh&atilde;
+      </div>
+      <div class="heat-segment" style="background: #f2cdcd; color: #1e1e2e">
+        2-3d
+      </div>
+      <div class="heat-segment" style="background: #f5e0dc; color: #1e1e2e">
+        4-7d
+      </div>
+      <div class="heat-segment" style="background: #bac2de; color: #1e1e2e">
+        1-2s
+      </div>
+      <div class="heat-segment" style="background: #a6adc8; color: #1e1e2e">
+        2+s
+      </div>
+      <div class="heat-segment" style="background: #6c7086; color: #cdd6f4">
+        1+m
+      </div>
+    </div>
+    <div class="panel">
+      <table class="t">
+        <tr>
+          <td class="warn">!</td>
+          <td class="warn">Dentista</td>
+          <td class="warn">Hoje</td>
+          <td class="warn">23 Feb</td>
+          <td class="warn">15:00</td>
+          <td class="ovl">Yellow</td>
+        </tr>
+        <tr>
+          <td class="excess">!</td>
+          <td class="excess">Email cliente</td>
+          <td class="excess">Amanh&atilde;</td>
+          <td class="excess">24 Feb</td>
+          <td class="excess">09:00</td>
+          <td class="ovl">Peach</td>
+        </tr>
+        <tr>
+          <td class="over">&#183;</td>
+          <td class="over">Deploy staging</td>
+          <td class="over">3 dias</td>
+          <td class="over">26 Feb</td>
+          <td class="ovl">10:00</td>
+          <td class="ovl">Flamingo</td>
+        </tr>
+        <tr>
+          <td class="partial">&#183;</td>
+          <td class="partial">Code review</td>
+          <td class="partial">5 dias</td>
+          <td class="partial">28 Feb</td>
+          <td class="ovl">14:00</td>
+          <td class="ovl">Rosewater</td>
+        </tr>
+        <tr>
+          <td class="sub1">&#183;</td>
+          <td class="sub1">Sprint retro</td>
+          <td class="sub1">1 sem</td>
+          <td class="sub1">02 Mar</td>
+          <td class="ovl">10:00</td>
+          <td class="ovl">Subtext1</td>
+        </tr>
+        <tr>
+          <td class="sub">&#183;</td>
+          <td class="sub">Conf tickets</td>
+          <td class="sub">3 sem</td>
+          <td class="sub">16 Mar</td>
+          <td class="ovl">--:--</td>
+          <td class="ovl">Subtext0</td>
+        </tr>
+        <tr>
+          <td class="pending">&#183;</td>
+          <td class="pending">Retrospectiva</td>
+          <td class="pending">2 m&ecirc;s</td>
+          <td class="pending">25 Apr</td>
+          <td class="ovl">--:--</td>
+          <td class="ovl">Overlay0</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ═══ TASK CARD ═══ -->
+    <h2>Tarefas -- Card Completo</h2>
+    <div class="section-note">
+      Ordem: pendentes (por proximidade), completed, cancelled, overdue (por
+      data crescente). Sem separadores -- a mudan&ccedil;a de cor e &iacute;cone
+      comunica a transi&ccedil;&atilde;o.
+    </div>
+    <div class="panel">
+      <div class="card-frame">
+        <div class="card-border">
+          &#9484;&#9472;
+          <span class="txt">Tarefas</span>
+          &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+          <span class="sub">5 pend. 1 done 1 canc. 2 over.</span> &#9472;&#9488;
+        </div>
+        <table class="t" style="margin: 0.3rem 0 0.3rem 0.6rem">
+          <tr>
+            <td class="warn">!</td>
+            <td class="warn">Dentista</td>
+            <td class="warn">Hoje</td>
+            <td class="warn">23 Feb</td>
+            <td class="warn">15:00</td>
+          </tr>
+          <tr>
+            <td class="excess">!</td>
+            <td class="excess">Email cliente</td>
+            <td class="excess">Amanh&atilde;</td>
+            <td class="excess">24 Feb</td>
+            <td class="excess">09:00</td>
+          </tr>
+          <tr>
+            <td class="over">&#183;</td>
+            <td class="over">Deploy staging</td>
+            <td class="over">3 dias</td>
+            <td class="over">26 Feb</td>
+            <td class="ovl">10:00</td>
+          </tr>
+          <tr>
+            <td class="partial">&#183;</td>
+            <td class="partial">Code review</td>
+            <td class="partial">5 dias</td>
+            <td class="partial">28 Feb</td>
+            <td class="ovl">14:00</td>
+          </tr>
+          <tr>
+            <td class="pending">&#183;</td>
+            <td class="pending">Retrospectiva</td>
+            <td class="pending">2 m&ecirc;s</td>
+            <td class="pending">25 Apr</td>
+            <td class="ovl">--:--</td>
+          </tr>
+          <tr>
+            <td class="done">&#10003;</td>
+            <td class="done strike">Comprar dom&iacute;nio</td>
+            <td class="done">Hoje</td>
+            <td class="done">23 Feb</td>
+            <td class="done">09:30</td>
+          </tr>
+          <tr>
+            <td class="pending">&#10007;</td>
+            <td class="pending strike">Evento cancelado</td>
+            <td class="pending">--</td>
+            <td class="pending">20 Feb</td>
+            <td class="pending">16:00</td>
+          </tr>
+          <tr>
+            <td class="err">&#10007;</td>
+            <td class="err">Enviar relat&oacute;rio</td>
+            <td class="err">1 sem</td>
+            <td class="err">16 Feb</td>
+            <td class="err">--:--</td>
+          </tr>
+          <tr>
+            <td class="err">&#10007;</td>
+            <td class="err">Revisar PR #142</td>
+            <td class="err">3 dias</td>
+            <td class="err">20 Feb</td>
+            <td class="err">14:00</td>
+          </tr>
+        </table>
+        <div class="card-border">
+          &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TIMEBLOCK AGENDA ═══ -->
+    <h2>TimeBlocks -- Cor por Status</h2>
+    <div class="section-note">
+      Formato:
+      <strong
+        >hor&aacute;rio &#9472;&#9532;&#9472; nome &middot;
+        dura&ccedil;&atilde;o &nbsp;&nbsp; &iacute;cone substatus</strong
+      >. Running e paused usam nome e status em <strong>bold</strong>. Tags
+      s&atilde;o para reports.
+    </div>
+    <div class="panel">
+      <table class="t">
+        <tr>
+          <td class="ovl">06:00</td>
+          <td class="dim">&#9472;&#9516;&#9472;</td>
+          <td>
+            <span class="txt">Despertar</span> <span class="dim">&middot;</span>
+            <span class="sub">1h</span>
+          </td>
+          <td class="done">&#10003; done</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class="dim">&#9474;</td>
+          <td colspan="2">
+            <span
+              class="tb-fill"
+              style="background: rgba(166, 227, 161, 0.15); color: #a6e3a1"
+              >&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span
+            >
+          </td>
+        </tr>
+
+        <tr>
+          <td class="ovl">07:00</td>
+          <td class="dim">&#9472;&#9532;&#9472;</td>
+          <td>
+            <span class="txt">Caf&eacute; da Manh&atilde;</span>
+            <span class="dim">&middot;</span> <span class="sub">30m</span>
+          </td>
+          <td class="done">&#10003; done</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class="dim">&#9474;</td>
+          <td colspan="2">
+            <span
+              class="tb-fill"
+              style="background: rgba(166, 227, 161, 0.15); color: #a6e3a1"
+              >&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span
+            >
+          </td>
+        </tr>
+
+        <tr>
+          <td class="ovl">07:30</td>
+          <td class="dim">&#9472;&#9532;&#9472;</td>
+          <td>
+            <span class="txt">Academia</span> <span class="dim">&middot;</span>
+            <span class="sub">1h</span>
+          </td>
+          <td class="partial">&#10003;~ partial</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class="dim">&#9474;</td>
+          <td colspan="2">
+            <span
+              class="tb-fill"
+              style="background: rgba(245, 224, 220, 0.12); color: #f5e0dc"
+              >&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span
+            >
+          </td>
+        </tr>
+
+        <tr>
+          <td class="ovl">09:00</td>
+          <td class="dim">&#9472;&#9532;&#9472;</td>
+          <td>
+            <span class="running b">Trabalho</span>
+            <span class="dim">&middot;</span> <span class="running">3h</span>
+          </td>
+          <td class="running b">&#9654; running 47m</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class="dim">&#9474;</td>
+          <td colspan="2">
+            <span
+              class="tb-fill"
+              style="background: rgba(203, 166, 247, 0.18); color: #cba6f7"
+              >&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;&#9619;</span
+            >
+          </td>
+        </tr>
+
+        <tr>
+          <td class="ovl">12:00</td>
+          <td class="dim">&#9472;&#9532;&#9472;</td>
+          <td>
+            <span class="txt">Almo&ccedil;o</span>
+            <span class="dim">&middot;</span> <span class="sub">1h</span>
+          </td>
+          <td class="over">&#10003;+ overdone</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class="dim">&#9474;</td>
+          <td colspan="2">
+            <span
+              class="tb-fill"
+              style="background: rgba(242, 205, 205, 0.15); color: #f2cdcd"
+              >&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span
+            >
+          </td>
+        </tr>
+
+        <tr>
+          <td class="ovl">14:00</td>
+          <td class="dim">&#9472;&#9532;&#9472;</td>
+          <td>
+            <span class="warn b">Estudo</span> <span class="dim">&middot;</span>
+            <span class="warn">2h</span>
+          </td>
+          <td class="warn b">&#9208; paused 12m</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class="dim">&#9474;</td>
+          <td colspan="2">
+            <span
+              class="tb-fill"
+              style="
+                background: rgba(249, 226, 175, 0.1);
+                color: #f9e2af;
+                opacity: 0.6;
+              "
+              >&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;&#9618;</span
+            >
+          </td>
+        </tr>
+
+        <tr>
+          <td class="ovl">15:00</td>
+          <td class="dim">&#9472;&#9532;&#9472;</td>
+          <td>
+            <span class="txt">Caf&eacute; da Tarde</span>
+            <span class="dim">&middot;</span> <span class="sub">30m</span>
+          </td>
+          <td class="excess">&#10003;! excessive</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class="dim">&#9474;</td>
+          <td colspan="2">
+            <span
+              class="tb-fill"
+              style="background: rgba(250, 179, 135, 0.15); color: #fab387"
+              >&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span
+            >
+          </td>
+        </tr>
+
+        <tr>
+          <td class="ovl">16:00</td>
+          <td class="dim">&#9472;&#9532;&#9472;</td>
+          <td>
+            <span class="txt">Organiza&ccedil;&atilde;o</span>
+            <span class="dim">&middot;</span> <span class="sub">30m</span>
+          </td>
+          <td class="err">&#10007;! unjustified</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class="dim">&#9474;</td>
+          <td colspan="2">
+            <span
+              class="tb-fill"
+              style="
+                background: rgba(243, 139, 168, 0.06);
+                color: #f38ba8;
+                opacity: 0.3;
+              "
+              >&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;</span
+            >
+          </td>
+        </tr>
+
+        <tr>
+          <td class="ovl">19:00</td>
+          <td class="dim">&#9472;&#9532;&#9472;</td>
+          <td>
+            <span class="txt">Jantar</span> <span class="dim">&middot;</span>
+            <span class="sub">1h</span>
+          </td>
+          <td class="passive">&#10007;? ignored</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class="dim">&#9474;</td>
+          <td colspan="2">
+            <span
+              class="tb-fill"
+              style="
+                background: rgba(235, 160, 172, 0.05);
+                color: #eba0ac;
+                opacity: 0.2;
+              "
+              >&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;&#9476;</span
+            >
+          </td>
+        </tr>
+
+        <tr>
+          <td class="ovl">21:00</td>
+          <td class="dim">&#9472;&#9532;&#9472;</td>
+          <td>
+            <span class="txt">Leitura</span> <span class="dim">&middot;</span>
+            <span class="sub">1h</span>
+          </td>
+          <td class="pending">&#183; pending</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class="dim">&#9474;</td>
+          <td colspan="2">
+            <span
+              class="tb-fill"
+              style="
+                background: rgba(108, 112, 134, 0.08);
+                color: #6c7086;
+                opacity: 0.3;
+              "
+              >&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;&#9617;</span
+            >
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ═══ HABITS CARD ═══ -->
+    <h2>H&aacute;bitos -- Card Completo</h2>
+    <div class="panel">
+      <div class="card-frame">
+        <div class="card-border">
+          &#9484;&#9472;
+          <span class="txt">H&aacute;bitos</span>
+          &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+          <span class="sub"
+            >&#9679;&#9679;&#9679;&#9679;&#9679;&#9675;&#9675;&#9675;&#9675;&#9675;
+            5/10 50%</span
+          >
+          &#9472;&#9488;
+        </div>
+        <table class="t" style="margin: 0.3rem 0 0.3rem 0.6rem">
+          <tr>
+            <td class="done">&#10003;</td>
+            <td class="txt">Despertar</td>
+            <td class="ovl">06:00-07:00</td>
+            <td class="sub">1h</td>
+            <td><span class="done">&#9724;&#9724;&#9724;&#9724;</span></td>
+            <td class="ovl">done/full</td>
+          </tr>
+          <tr>
+            <td class="done">&#10003;</td>
+            <td class="txt">Caf&eacute; da Manh&atilde;</td>
+            <td class="ovl">07:00-07:30</td>
+            <td class="sub">30m</td>
+            <td><span class="done">&#9724;&#9724;&#9724;&#9724;</span></td>
+            <td class="ovl">done/full</td>
+          </tr>
+          <tr>
+            <td class="partial">&#10003;~</td>
+            <td class="txt">Academia</td>
+            <td class="ovl">07:30-08:30</td>
+            <td class="sub">1h</td>
+            <td>
+              <span class="partial">&#9724;&#9724;</span
+              ><span class="dim">&#9724;&#9724;</span>
+            </td>
+            <td class="ovl">done/partial</td>
+          </tr>
+          <tr>
+            <td class="over">&#10003;+</td>
+            <td class="txt">Trabalho</td>
+            <td class="ovl">09:00-12:00</td>
+            <td class="sub">3h</td>
+            <td>
+              <span class="over">&#9724;&#9724;&#9724;&#9724;&#9724;</span>
+            </td>
+            <td class="ovl">done/overdone</td>
+          </tr>
+          <tr>
+            <td class="done">&#10003;</td>
+            <td class="txt">Almo&ccedil;o</td>
+            <td class="ovl">12:00-13:00</td>
+            <td class="sub">1h</td>
+            <td><span class="done">&#9724;&#9724;&#9724;&#9724;</span></td>
+            <td class="ovl">done/full</td>
+          </tr>
+          <tr>
+            <td class="excess">&#10003;!</td>
+            <td class="txt">Caf&eacute; da Tarde</td>
+            <td class="ovl">15:00-15:30</td>
+            <td class="sub">30m</td>
+            <td>
+              <span class="excess"
+                >&#9724;&#9724;&#9724;&#9724;&#9724;&#9724;</span
+              >
+            </td>
+            <td class="ovl">done/excessive</td>
+          </tr>
+          <tr>
+            <td class="warn">!</td>
+            <td class="txt">Estudo</td>
+            <td class="ovl">16:00-18:00</td>
+            <td class="sub">2h</td>
+            <td class="dim">&#9472;&#9472;&#9472;&#9472;</td>
+            <td class="ovl">skip/justified</td>
+          </tr>
+          <tr>
+            <td class="err">&#10007;!</td>
+            <td class="txt">Organiza&ccedil;&atilde;o</td>
+            <td class="ovl">18:00-18:30</td>
+            <td class="sub">30m</td>
+            <td class="dim">&#9472;&#9472;&#9472;&#9472;</td>
+            <td class="ovl">skip/unjustified</td>
+          </tr>
+          <tr>
+            <td class="passive">&#10007;?</td>
+            <td class="txt">Jantar</td>
+            <td class="ovl">19:00-20:00</td>
+            <td class="sub">1h</td>
+            <td class="dim">&#9472;&#9472;&#9472;&#9472;</td>
+            <td class="ovl">ignored</td>
+          </tr>
+          <tr>
+            <td class="running">&#9654;</td>
+            <td class="running b">Leitura</td>
+            <td class="ovl">21:00-22:00</td>
+            <td class="running">47m</td>
+            <td><span class="running">&#9724;&#9724;&#9724;</span></td>
+            <td class="ovl">running</td>
+          </tr>
+        </table>
+        <div class="card-border">
+          &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAGS ═══ -->
+    <h2>Tags -- Para Reports e Analytics</h2>
+    <div class="section-note">
+      Tags definem categorias para agrupamento em relat&oacute;rios. Na agenda
+      visual, a cor vem do <strong>status</strong>.
+    </div>
+    <div class="tag-grid">
+      <div class="tag-card">
+        <div class="tag-dot" style="background: #94e2d5"></div>
+        <div class="tag-info">
+          <span class="tag-name">Sa&uacute;de</span><br /><span class="tag-hex"
+            >Teal #94E2D5</span
+          ><br /><span class="tag-examples">academia, yoga</span>
+        </div>
+      </div>
+      <div class="tag-card">
+        <div class="tag-dot" style="background: #89b4fa"></div>
+        <div class="tag-info">
+          <span class="tag-name">Trabalho</span><br /><span class="tag-hex"
+            >Blue #89B4FA</span
+          ><br /><span class="tag-examples">deep work, reuni&otilde;es</span>
+        </div>
+      </div>
+      <div class="tag-card">
+        <div class="tag-dot" style="background: #cba6f7"></div>
+        <div class="tag-info">
+          <span class="tag-name">Estudo</span><br /><span class="tag-hex"
+            >Mauve #CBA6F7</span
+          ><br /><span class="tag-examples">cursos, leitura</span>
+        </div>
+      </div>
+      <div class="tag-card">
+        <div class="tag-dot" style="background: #f5c2e7"></div>
+        <div class="tag-info">
+          <span class="tag-name">Pessoal</span><br /><span class="tag-hex"
+            >Pink #F5C2E7</span
+          ><br /><span class="tag-examples">journaling, hobbies</span>
+        </div>
+      </div>
+      <div class="tag-card">
+        <div class="tag-dot" style="background: #a6e3a1"></div>
+        <div class="tag-info">
+          <span class="tag-name">Alimenta&ccedil;&atilde;o</span><br /><span
+            class="tag-hex"
+            >Green #A6E3A1</span
+          ><br /><span class="tag-examples"
+            >caf&eacute;, almo&ccedil;o, jantar</span
+          >
+        </div>
+      </div>
+      <div class="tag-card">
+        <div class="tag-dot" style="background: #fab387"></div>
+        <div class="tag-info">
+          <span class="tag-name">Social</span><br /><span class="tag-hex"
+            >Peach #FAB387</span
+          ><br /><span class="tag-examples">encontros</span>
+        </div>
+      </div>
+      <div class="tag-card">
+        <div class="tag-dot" style="background: #b4befe"></div>
+        <div class="tag-info">
+          <span class="tag-name">Descanso</span><br /><span class="tag-hex"
+            >Lavender #B4BEFE</span
+          ><br /><span class="tag-examples">sono, pausas</span>
+        </div>
+      </div>
+      <div class="tag-card">
+        <div class="tag-dot" style="background: #89dcfe"></div>
+        <div class="tag-info">
+          <span class="tag-name">Organiza&ccedil;&atilde;o</span><br /><span
+            class="tag-hex"
+            >Sky #89DCFE</span
+          ><br /><span class="tag-examples">planejamento</span>
+        </div>
+      </div>
+      <div class="tag-card">
+        <div class="tag-dot" style="background: #7f849c"></div>
+        <div class="tag-info">
+          <span class="tag-name">Outro</span><br /><span class="tag-hex"
+            >Overlay1 #7F849C</span
+          ><br /><span class="tag-examples">sem categoria</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PROGRESS ═══ -->
+    <h2>Barras de Progresso</h2>
+    <div class="panel">
+      <div class="progress-demo">
+        <div class="progress-row">
+          <span class="progress-label done">92%</span>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              style="width: 92%; background: var(--green)"
+            ></div>
+          </div>
+          <span class="progress-value done">&#10003; 11/12</span>
+        </div>
+        <div class="progress-row">
+          <span class="progress-label warn">65%</span>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              style="width: 65%; background: var(--yellow)"
+            ></div>
+          </div>
+          <span class="progress-value warn">! 5/8</span>
+        </div>
+        <div class="progress-row">
+          <span class="progress-label err">30%</span>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              style="width: 30%; background: var(--red)"
+            ></div>
+          </div>
+          <span class="progress-value err">&#10007; 2/7</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FULL MAP ═══ -->
+    <h2>Mapa Completo</h2>
+    <div class="panel">
+      <table class="t">
+        <colgroup>
+          <col style="width: 2em" />
+          <col />
+          <col style="padding-right: 2em" />
+          <col style="width: 1.5em" />
+          <col style="width: 2em" />
+          <col />
+          <col style="padding-right: 2em" />
+          <col style="width: 1.5em" />
+          <col style="width: 2em" />
+          <col />
+          <col />
+        </colgroup>
+        <tr>
+          <td colspan="3" class="dim">H&Aacute;BITOS</td>
+          <td></td>
+          <td colspan="3" class="dim">TAREFAS</td>
+          <td></td>
+          <td colspan="3" class="dim">SISTEMA</td>
+        </tr>
+        <tr>
+          <td colspan="3" class="dim">
+            &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+          </td>
+          <td></td>
+          <td colspan="3" class="dim">
+            &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+          </td>
+          <td></td>
+          <td colspan="3" class="dim">
+            &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;
+          </td>
+        </tr>
+        <tr>
+          <td class="done">&#10003;</td>
+          <td class="done">done/full</td>
+          <td class="done">#A6E3A1</td>
+          <td></td>
+          <td class="err">&#10007;</td>
+          <td class="err">overdue</td>
+          <td class="err">#F38BA8</td>
+          <td></td>
+          <td class="done">&#10003;</td>
+          <td class="done">sucesso</td>
+          <td class="done">#A6E3A1</td>
+        </tr>
+        <tr>
+          <td class="partial">&#10003;~</td>
+          <td class="partial">done/partial</td>
+          <td class="partial">#F5E0DC</td>
+          <td></td>
+          <td class="warn">!</td>
+          <td class="warn">hoje</td>
+          <td class="warn">#F9E2AF</td>
+          <td></td>
+          <td class="warn">!</td>
+          <td class="warn">aviso</td>
+          <td class="warn">#F9E2AF</td>
+        </tr>
+        <tr>
+          <td class="over">&#10003;+</td>
+          <td class="over">done/overdone</td>
+          <td class="over">#F2CDCD</td>
+          <td></td>
+          <td class="excess">!</td>
+          <td class="excess">amanh&atilde;</td>
+          <td class="excess">#FAB387</td>
+          <td></td>
+          <td class="warn">&#9208;</td>
+          <td class="warn">paused</td>
+          <td class="warn">#F9E2AF</td>
+        </tr>
+        <tr>
+          <td class="excess">&#10003;!</td>
+          <td class="excess">done/excessive</td>
+          <td class="excess">#FAB387</td>
+          <td></td>
+          <td class="over">&#183;</td>
+          <td class="over">2-3 dias</td>
+          <td class="over">#F2CDCD</td>
+          <td></td>
+          <td class="err">&#10007;!</td>
+          <td class="err">erro</td>
+          <td class="err">#F38BA8</td>
+        </tr>
+        <tr>
+          <td class="warn">!</td>
+          <td class="warn">skip/justified</td>
+          <td class="warn">#F9E2AF</td>
+          <td></td>
+          <td class="partial">&#183;</td>
+          <td class="partial">4-7 dias</td>
+          <td class="partial">#F5E0DC</td>
+          <td></td>
+          <td class="passive">&#10007;?</td>
+          <td class="passive">passivo</td>
+          <td class="passive">#EBA0AC</td>
+        </tr>
+        <tr>
+          <td class="err">&#10007;!</td>
+          <td class="err">skip/unjustif.</td>
+          <td class="err">#F38BA8</td>
+          <td></td>
+          <td class="sub1">&#183;</td>
+          <td class="sub1">1-2 sem</td>
+          <td class="sub1">#BAC2DE</td>
+          <td></td>
+          <td class="inf">i</td>
+          <td class="inf">info</td>
+          <td class="inf">#89B4FA</td>
+        </tr>
+        <tr>
+          <td class="passive">&#10007;?</td>
+          <td class="passive">ignored</td>
+          <td class="passive">#EBA0AC</td>
+          <td></td>
+          <td class="sub">&#183;</td>
+          <td class="sub">2+ sem</td>
+          <td class="sub">#A6ADC8</td>
+          <td></td>
+          <td class="running">&#9654;</td>
+          <td class="running">ativo</td>
+          <td class="running">#CBA6F7</td>
+        </tr>
+        <tr>
+          <td class="running">&#9654;</td>
+          <td class="running">running</td>
+          <td class="running">#CBA6F7</td>
+          <td></td>
+          <td class="pending">&#183;</td>
+          <td class="pending">1+ m&ecirc;s</td>
+          <td class="pending">#6C7086</td>
+          <td></td>
+          <td class="excess">&#10003;!</td>
+          <td class="excess">limite</td>
+          <td class="excess">#FAB387</td>
+        </tr>
+        <tr>
+          <td class="warn">&#9208;</td>
+          <td class="warn">paused</td>
+          <td class="warn">#F9E2AF</td>
+          <td></td>
+          <td class="done">&#10003;</td>
+          <td class="done"><span class="strike">completed</span></td>
+          <td class="done">#A6E3A1</td>
+          <td></td>
+          <td class="pending">&#183;</td>
+          <td class="pending">neutro</td>
+          <td class="pending">#6C7086</td>
+        </tr>
+        <tr>
+          <td class="pending">&#183;</td>
+          <td class="pending">pending</td>
+          <td class="pending">#6C7086</td>
+          <td></td>
+          <td class="pending">&#10007;</td>
+          <td class="pending"><span class="strike">cancelled</span></td>
+          <td class="pending">#6C7086</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="footer">
+      ATOMVS TimeBlock Planner &middot; Catppuccin Mocha &middot; ADR-021<br />
+      ISO 3864 &middot; ANSI Z535 &middot;
+      <a
+        href="https://github.com/catppuccin/catppuccin/blob/main/docs/style-guide.md"
+        >Catppuccin Style Guide</a
+      >
+    </div>
+  </body>
+</html>

@@ -1,18 +1,17 @@
-# language: pt
-Funcionalidade: Timer e Tracking de Tempo
+# language: en
+Feature: Timer and Time Tracking
+  As a TimeBlock user
+  I want to track time spent on habits
+  So that I can calculate completion % and substatus
 
-  Como usuário do TimeBlock
-  Quero rastrear tempo dedicado a habits
-  Para calcular completion % e substatus
+  Background:
+    Given a habit "Academia" with expected duration of 90 minutes exists
 
-  Contexto:
-    Dado que existe um habit "Academia" com duração esperada de 90 minutos
-
-  # BR-TIMER-001: Single Active Timer Constraint
-  Cenário: Apenas um timer ativo por vez
-    Dado que timer de "Academia" está RUNNING
-    Quando tentativa de iniciar timer de "Meditação"
-    Então sistema retorna erro:
+  # BR-TIMER-001: Restrição de timer ativo único
+  Scenario: Only one active timer at a time
+    Given the timer for "Academia" is RUNNING
+    When an attempt to start the timer for "Meditação" is made
+    Then the system returns error:
       """
       [ERROR] Timer já ativo: Academia (45min decorridos)
 
@@ -22,101 +21,101 @@ Funcionalidade: Timer e Tracking de Tempo
         [3] Continuar com Academia
       """
 
-  Cenário: Timer PAUSED bloqueia novo start
-    Dado que timer de "Academia" está PAUSED
-    Quando tentativa de iniciar timer de "Meditação"
-    Então sistema retorna erro "Timer já ativo (pausado)"
+  Scenario: PAUSED timer blocks new start
+    Given the timer for "Academia" is PAUSED
+    When an attempt to start the timer for "Meditação" is made
+    Then the system returns error "Timer já ativo (pausado)"
 
-  Cenário: Timer após stop NÃO bloqueia novo start
-    Dado que timer de "Academia" foi stopped
-    Quando usuário executa "timer start Meditação"
-    Então novo timer inicia com sucesso
-    E timer anterior não está mais ativo
+  Scenario: Timer after stop does NOT block new start
+    Given the timer for "Academia" was stopped
+    When the user runs "timer start Meditação"
+    Then the new timer starts successfully
+    And the previous timer is no longer active
 
-  Cenário: Múltiplas sessões do mesmo habit permitidas
-    Dado que timer de "Academia" foi stopped (sessão 1: 60min)
-    Quando usuário executa "timer start Academia"
-    Então novo timer inicia com sucesso (sessão 2)
-    E ambas sessões serão acumuladas
+  Scenario: Multiple sessions of the same habit allowed
+    Given the timer for "Academia" was stopped (session 1: 60min)
+    When the user runs "timer start Academia"
+    Then the new timer starts successfully (session 2)
+    And both sessions will be accumulated
 
-  # BR-TIMER-002: State Transitions
-  Cenário: Estados válidos: apenas RUNNING e PAUSED
-    Quando sistema verifica enum TimerStatus
-    Então apenas 2 estados existem:
-      | estado  |
+  # BR-TIMER-002: Transições de estado
+  Scenario: Valid states: only RUNNING and PAUSED
+    When the system checks the TimerStatus enum
+    Then only 2 states exist:
+      | state   |
       | RUNNING |
       | PAUSED  |
 
-  Cenário: Fluxo normal (start → pause → resume → stop)
-    Quando usuário executa "timer start Academia"
-    Então status é RUNNING
+  Scenario: Normal flow (start, pause, resume, stop)
+    When the user runs "timer start Academia"
+    Then the status is RUNNING
 
-    Quando usuário executa "timer pause"
-    Então status é PAUSED
+    When the user runs "timer pause"
+    Then the status is PAUSED
 
-    Quando usuário executa "timer resume"
-    Então status é RUNNING
+    When the user runs "timer resume"
+    Then the status is RUNNING
 
-    Quando usuário executa "timer stop"
-    Então timer não existe mais (finalizado)
-    E sessão foi salva como DONE
+    When the user runs "timer stop"
+    Then the timer no longer exists (finalized)
+    And the session was saved as DONE
 
-  Cenário: stop salva sessão e marca DONE
-    Dado que timer está RUNNING há 90 minutos
-    Quando usuário executa "timer stop"
-    Então sessão é salva com duration = 90
-    E instance é marcada como DONE
-    E done_substatus é calculado
+  Scenario: Stop saves session and marks DONE
+    Given the timer has been RUNNING for 90 minutes
+    When the user runs "timer stop"
+    Then the session is saved with duration = 90
+    And the instance is marked as DONE
+    And done_substatus is calculated
 
-  Cenário: reset cancela sem salvar
-    Dado que timer está RUNNING há 30 minutos
-    Quando usuário executa "timer reset"
-    Então timer não existe mais (cancelado)
-    E sessão NÃO é salva
-    E instance permanece PENDING
+  Scenario: Reset cancels without saving
+    Given the timer has been RUNNING for 30 minutes
+    When the user runs "timer reset"
+    Then the timer no longer exists (cancelled)
+    And the session is NOT saved
+    And the instance remains PENDING
 
-  Cenário: pause só funciona em RUNNING
-    Dado que timer está PAUSED
-    Quando tentativa de executar "timer pause"
-    Então sistema retorna erro "Timer já está pausado"
+  Scenario: Pause only works when RUNNING
+    Given the timer is PAUSED
+    When an attempt to run "timer pause" is made
+    Then the system returns error "Timer já está pausado"
 
-  Cenário: resume só funciona em PAUSED
-    Dado que timer está RUNNING
-    Quando tentativa de executar "timer resume"
-    Então sistema retorna erro "Timer não está pausado"
+  Scenario: Resume only works when PAUSED
+    Given the timer is RUNNING
+    When an attempt to run "timer resume" is made
+    Then the system returns error "Timer não está pausado"
 
-  Cenário: stop funciona em RUNNING ou PAUSED
-    Dado que timer está em estado "<estado>"
-    Quando usuário executa "timer stop"
-    Então sessão é salva com sucesso
+  Scenario: Stop works when RUNNING or PAUSED
+    Given the timer is in state "<state>"
+    When the user runs "timer stop"
+    Then the session is saved successfully
 
-    Exemplos:
-      | estado  |
+    Examples:
+      | state   |
       | RUNNING |
       | PAUSED  |
 
-  Cenário: reset funciona em RUNNING ou PAUSED
-    Dado que timer está em estado "<estado>"
-    Quando usuário executa "timer reset"
-    Então timer é cancelado sem salvar
+  Scenario: Reset works when RUNNING or PAUSED
+    Given the timer is in state "<state>"
+    When the user runs "timer reset"
+    Then the timer is cancelled without saving
 
-    Exemplos:
-      | estado  |
+    Examples:
+      | state   |
       | RUNNING |
       | PAUSED  |
 
-  # BR-TIMER-003: Multiple Sessions Same Day
-  Cenário: Duas sessões acumulam duração (PARTIAL → OVERDONE)
-    Dado que usuário faz sessão 1 de "Academia": 60min
-    Quando usuário faz sessão 2 de "Academia": 35min
-    Então duração total é 95min
-    E completion é 106%
-    E done_substatus é OVERDONE
+  # BR-TIMER-003: Múltiplas sessões no mesmo dia
+  Scenario: Two sessions accumulate duration (PARTIAL to OVERDONE)
+    Given the user completes session 1 of "Academia": 60min
+    When the user completes session 2 of "Academia": 35min
+    Then the total duration is 95min
+    And completion is 106%
+    And done_substatus is OVERDONE
 
-  Cenário: CLI exibe breakdown de múltiplas sessões
-    Dado que usuário completou 2 sessões de "Academia"
-    Quando último "timer stop" é executado
-    Então sistema exibe:
+  Scenario: CLI shows breakdown of multiple sessions
+    Given the user completed 2 sessions of "Academia"
+    When the last "timer stop" is executed
+    Then the system shows:
       """
       ✓ Sessão 2 completa: 35min
 
@@ -129,86 +128,86 @@ Funcionalidade: Timer e Tracking de Tempo
       ╚════════════════════════════════╝
       """
 
-  Cenário: Três sessões levam a EXCESSIVE
-    Quando usuário completa sessões de "Academia":
-      | sessão | duração |
-      | 1      | 60min   |
-      | 2      | 40min   |
-      | 3      | 70min   |
-    Então duração total é 170min
-    E completion é 189%
-    E done_substatus é EXCESSIVE
+  Scenario: Three sessions lead to EXCESSIVE
+    When the user completes sessions of "Academia":
+      | session | duration |
+      | 1       | 60min    |
+      | 2       | 40min    |
+      | 3       | 70min    |
+    Then the total duration is 170min
+    And completion is 189%
+    And done_substatus is EXCESSIVE
 
-  Cenário: Cada stop salva uma sessão independente
-    Quando usuário executa fluxo:
-      | comando              | resultado         |
-      | timer start Academia | Timer iniciado    |
-      | timer stop           | Sessão 1 salva    |
-      | timer start Academia | Timer iniciado    |
-      | timer stop           | Sessão 2 salva    |
-    Então 2 sessões independentes existem
-    E ambas têm duração registrada
+  Scenario: Each stop saves an independent session
+    When the user executes the flow:
+      | command              | result            |
+      | timer start Academia | Timer started     |
+      | timer stop           | Session 1 saved   |
+      | timer start Academia | Timer started     |
+      | timer stop           | Session 2 saved   |
+    Then 2 independent sessions exist
+    And both have recorded duration
 
-  Cenário: Instance marcada DONE após primeira sessão
-    Dado que instance está PENDING
-    Quando primeira sessão é completada (60min)
-    Então instance é marcada como DONE
-    E done_substatus é PARTIAL (67%)
+  Scenario: Instance marked DONE after first session
+    Given the instance is PENDING
+    When the first session is completed (60min)
+    Then the instance is marked as DONE
+    And done_substatus is PARTIAL (67%)
 
-    Quando segunda sessão é adicionada (35min)
-    Então done_substatus é atualizado para OVERDONE (106%)
+    When the second session is added (35min)
+    Then done_substatus is updated to OVERDONE (106%)
 
-  # BR-TIMER-004: Manual Log Validation
-  Cenário: Log manual com horários (start + end)
-    Quando usuário executa "habit log Academia --start 07:00 --end 08:30"
-    Então duração calculada é 90min
-    E completion é 100%
-    E done_substatus é FULL
+  # BR-TIMER-004: Validação de log manual
+  Scenario: Manual log with times (start + end)
+    When the user runs "habit log Academia --start 07:00 --end 08:30"
+    Then the calculated duration is 90min
+    And completion is 100%
+    And done_substatus is FULL
 
-  Cenário: Log manual com duração
-    Quando usuário executa "habit log Academia --duration 90"
-    Então duração é 90min
-    E completion é 100%
+  Scenario: Manual log with duration
+    When the user runs "habit log Academia --duration 90"
+    Then the duration is 90min
+    And completion is 100%
 
-  Cenário: Validação: start < end
-    Quando usuário executa "habit log Academia --start 08:00 --end 07:00"
-    Então sistema retorna erro "Horário de fim antes do início"
+  Scenario: Validation: start < end
+    When the user runs "habit log Academia --start 08:00 --end 07:00"
+    Then the system returns error "Horário de fim antes do início"
 
-  Cenário: Validação: duração positiva
-    Quando usuário executa "habit log Academia --duration -10"
-    Então sistema retorna erro "Duração deve ser positiva"
+  Scenario: Validation: positive duration
+    When the user runs "habit log Academia --duration -10"
+    Then the system returns error "Duração deve ser positiva"
 
-  Cenário: Validação: apenas um método
-    Quando usuário executa "habit log Academia --start 07:00 --end 08:00 --duration 60"
-    Então sistema retorna erro "Use start+end OU duration, não ambos"
+  Scenario: Validation: only one method
+    When the user runs "habit log Academia --start 07:00 --end 08:00 --duration 60"
+    Then the system returns error "Use start+end OU duration, não ambos"
 
-  Cenário: Validação: bloqueia se timer ativo
-    Dado que timer de "Academia" está RUNNING
-    Quando usuário executa "habit log Academia --duration 90"
-    Então sistema retorna erro:
+  Scenario: Validation: blocks if timer is active
+    Given the timer for "Academia" is RUNNING
+    When the user runs "habit log Academia --duration 90"
+    Then the system returns error:
       """
       [ERROR] Timer ativo para Academia
               Stop timer primeiro: timer stop
       """
 
-  Cenário: Adicionar nova sessão manual em habit DONE
-    Dado que "Academia" já tem 1 sessão (timer): 60min
-    Quando usuário executa "habit log Academia --duration 30"
-    Então sistema pergunta:
+  Scenario: Add new manual session to DONE habit
+    Given "Academia" already has 1 session (timer): 60min
+    When the user runs "habit log Academia --duration 30"
+    Then the system asks:
       """
       Habit já completo (1 sessão: 60min).
       Adicionar nova sessão? [y/N]:
       """
-    E ao confirmar, nova sessão é adicionada
-    E total acumulado é 90min
+    And upon confirmation, a new session is added
+    And the accumulated total is 90min
 
-  # BR-TIMER-005: Completion Percentage Calculation
-  Cenário: Fórmula de completion
-    Dado que duração esperada é 90min
-    Quando duração real acumulada é <real>min
-    Então completion é <percentage>%
+  # BR-TIMER-005: Cálculo de completion percentage
+  Scenario: Completion formula
+    Given the expected duration is 90min
+    When the accumulated actual duration is <real>min
+    Then completion is <percentage>%
 
-    Exemplos:
+    Examples:
       | real | percentage |
       | 180  | 200.00     |
       | 135  | 150.00     |
@@ -216,12 +215,12 @@ Funcionalidade: Timer e Tracking de Tempo
       | 90   | 100.00     |
       | 60   | 66.67      |
 
-  Cenário: Substatus baseado em thresholds
-    Dado que duração esperada é 90min
-    Quando completion é <percentage>%
-    Então done_substatus é "<substatus>"
+  Scenario: Substatus based on thresholds
+    Given the expected duration is 90min
+    When completion is <percentage>%
+    Then done_substatus is "<substatus>"
 
-    Exemplos:
+    Examples:
       | percentage | substatus  |
       | 200        | EXCESSIVE  |
       | 150        | EXCESSIVE  |
@@ -234,71 +233,71 @@ Funcionalidade: Timer e Tracking de Tempo
       | 89         | PARTIAL    |
       | 67         | PARTIAL    |
 
-  Cenário: Múltiplas sessões acumuladas no cálculo
-    Dado que existem sessões:
-      | tipo  | duração |
-      | timer | 60min   |
-      | timer | 25min   |
-      | log   | 10min   |
-    Quando completion é calculado
-    Então total acumulado é 95min
-    E completion é 106%
-    E done_substatus é OVERDONE
+  Scenario: Multiple sessions accumulated in calculation
+    Given the following sessions exist:
+      | type  | duration |
+      | timer | 60min    |
+      | timer | 25min    |
+      | log   | 10min    |
+    When completion is calculated
+    Then the accumulated total is 95min
+    And completion is 106%
+    And done_substatus is OVERDONE
 
-  Cenário: Pausas descontadas do tempo total
-    Dado que timer iniciou às 07:00
-    E timer foi pausado das 07:30 às 07:40 (10min)
-    E timer foi pausado das 08:10 às 08:15 (5min)
-    E timer parou às 08:45
-    Quando completion é calculado
-    Então tempo total decorrido é 105min
-    E pausas totalizam 15min
-    E duração efetiva é 90min
-    E completion é 100%
+  Scenario: Pauses deducted from total time
+    Given the timer started at 07:00
+    And the timer was paused from 07:30 to 07:40 (10min)
+    And the timer was paused from 08:10 to 08:15 (5min)
+    And the timer stopped at 08:45
+    When completion is calculated
+    Then total elapsed time is 105min
+    And pauses total 15min
+    And effective duration is 90min
+    And completion is 100%
 
-  Cenário: Arredondamento para 2 casas decimais
-    Dado que duração esperada é 90min
-    Quando duração real é 85min
-    Então completion é 94.44%
-    E não 94.444444...%
+  Scenario: Rounding to 2 decimal places
+    Given the expected duration is 90min
+    When the actual duration is 85min
+    Then completion is 94.44%
+    And not 94.444444...%
 
-  # BR-TIMER-006: Pause Tracking
-  Cenário: Pausar cria TimeLog
-    Dado que timer está RUNNING
-    Quando usuário executa "timer pause"
-    Então TimeLog é criado com:
-      | campo       | valor              |
-      | timer_id    | <id do timer>      |
-      | pause_start | <timestamp atual>  |
+  # BR-TIMER-006: Rastreamento de pausas
+  Scenario: Pausing creates a TimeLog
+    Given the timer is RUNNING
+    When the user runs "timer pause"
+    Then a TimeLog is created with:
+      | field       | value              |
+      | timer_id    | <timer id>         |
+      | pause_start | <current timestamp>|
       | pause_end   | NULL               |
       | duration    | NULL               |
 
-  Cenário: Resumir finaliza TimeLog
-    Dado que timer está PAUSED há 10 minutos
-    Quando usuário executa "timer resume"
-    Então TimeLog é atualizado com:
-      | campo       | valor              |
-      | pause_end   | <timestamp atual>  |
+  Scenario: Resuming finalizes the TimeLog
+    Given the timer has been PAUSED for 10 minutes
+    When the user runs "timer resume"
+    Then the TimeLog is updated with:
+      | field       | value              |
+      | pause_end   | <current timestamp>|
       | duration    | 10                 |
 
-  Cenário: Múltiplas pausas rastreadas
-    Quando usuário executa fluxo:
-      | comando      | horário | resultado               |
-      | timer start  | 07:00   | Timer iniciado          |
-      | timer pause  | 07:30   | TimeLog 1 criado        |
-      | timer resume | 07:40   | TimeLog 1 finalizado    |
-      | timer pause  | 08:10   | TimeLog 2 criado        |
-      | timer resume | 08:15   | TimeLog 2 finalizado    |
-      | timer stop   | 08:45   | Timer finalizado        |
-    Então 2 TimeLogs existem:
+  Scenario: Multiple pauses tracked
+    When the user executes the flow:
+      | command      | time  | result                |
+      | timer start  | 07:00 | Timer started         |
+      | timer pause  | 07:30 | TimeLog 1 created     |
+      | timer resume | 07:40 | TimeLog 1 finalized   |
+      | timer pause  | 08:10 | TimeLog 2 created     |
+      | timer resume | 08:15 | TimeLog 2 finalized   |
+      | timer stop   | 08:45 | Timer finalized       |
+    Then 2 TimeLogs exist:
       | log | pause_start | pause_end | duration |
       | 1   | 07:30       | 07:40     | 10min    |
       | 2   | 08:10       | 08:15     | 5min     |
 
-  Cenário: CLI exibe pausas no output final
-    Dado que timer teve 2 pausas (10min + 5min)
-    Quando usuário executa "timer stop"
-    Então sistema exibe:
+  Scenario: CLI shows pauses in final output
+    Given the timer had 2 pauses (10min + 5min)
+    When the user runs "timer stop"
+    Then the system shows:
       """
       ✓ SESSÃO COMPLETA!
       ╔════════════════════════════════════════╗
@@ -317,15 +316,15 @@ Funcionalidade: Timer e Tracking de Tempo
       ╚════════════════════════════════════════╝
       """
 
-  Cenário: Pausas opcionais (reason)
-    Quando usuário pausa timer
-    E adiciona reason "Telefone tocou"
-    Então TimeLog tem reason = "Telefone tocou"
+  Scenario: Pauses with optional reason
+    When the user pauses the timer
+    And adds reason "Telefone tocou"
+    Then the TimeLog has reason = "Telefone tocou"
 
-  Cenário: Duração efetiva descontando pausas
-    Dado que timer rodou das 07:00 às 08:00 (60min)
-    E teve pausas de 5min + 3min + 2min
-    Quando duração efetiva é calculada
-    Então tempo bruto é 60min
-    E pausas totalizam 10min
-    E duração efetiva é 50min
+  Scenario: Effective duration deducting pauses
+    Given the timer ran from 07:00 to 08:00 (60min)
+    And had pauses of 5min + 3min + 2min
+    When effective duration is calculated
+    Then raw time is 60min
+    And pauses total 10min
+    And effective duration is 50min

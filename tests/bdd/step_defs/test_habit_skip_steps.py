@@ -21,7 +21,7 @@ scenarios("../features/habit_skip.feature")
 # ==================== CONTEXTO ====================
 
 
-@given('que existe uma rotina "Rotina Matinal"', target_fixture="test_routine")
+@given('a routine "Rotina Matinal" exists', target_fixture="test_routine")
 def criar_rotina(session: Session):
     """Cria rotina para testes."""
     routine = Routine(name="Rotina Matinal")
@@ -32,7 +32,10 @@ def criar_rotina(session: Session):
     return routine
 
 
-@given('existe um habit "Academia" agendado para hoje às 07:00-08:30', target_fixture="test_habit")
+@given(
+    'a habit "Academia" is scheduled for today at 07:00-08:30',
+    target_fixture="test_habit",
+)
 def criar_habit(session: Session, test_routine: Routine):
     """Cria habit para testes."""
     assert test_routine.id is not None
@@ -51,7 +54,7 @@ def criar_habit(session: Session, test_routine: Routine):
     return habit
 
 
-@given('existe uma HabitInstance com status "PENDING"', target_fixture="test_instance")
+@given('a HabitInstance with status "PENDING" exists', target_fixture="test_instance")
 def criar_habit_instance(session: Session, test_habit: Habit):
     """Cria HabitInstance PENDING para testes."""
     assert test_habit.id is not None
@@ -73,54 +76,62 @@ def criar_habit_instance(session: Session, test_habit: Habit):
 # ==================== WHEN (AÇÕES) ====================
 
 
-@when(parsers.parse('usuário marca skip com categoria "{category}" e nota "{note}"'))
+@when(parsers.parse('the user marks skip with category "{category}" and note "{note}"'))
 def skip_com_nota(session: Session, test_instance: HabitInstance, category: str, note: str):
     """Executa skip com categoria e nota."""
     skip_reason = SkipReason[category]
     service = HabitInstanceService()
 
     result = service.skip_habit_instance(
-        habit_instance_id=test_instance.id, skip_reason=skip_reason, skip_note=note, session=session
+        habit_instance_id=test_instance.id,
+        skip_reason=skip_reason,
+        skip_note=note,
+        session=session,
     )
 
-    # Armazenar resultado no contexto
-    session.info = {"result": result}  # type: ignore
+    session.info = {"result": result}
 
 
-@when(parsers.parse('usuário marca skip com categoria "{category}" sem nota'))
+@when(parsers.parse('the user marks skip with category "{category}" without note'))
 def skip_sem_nota(session: Session, test_instance: HabitInstance, category: str):
     """Executa skip com categoria sem nota."""
     skip_reason = SkipReason[category]
     service = HabitInstanceService()
 
     result = service.skip_habit_instance(
-        habit_instance_id=test_instance.id, skip_reason=skip_reason, skip_note=None, session=session
+        habit_instance_id=test_instance.id,
+        skip_reason=skip_reason,
+        skip_note=None,
+        session=session,
     )
 
-    session.info = {"result": result}  # type: ignore
+    session.info = {"result": result}
 
 
-@when("usuário tenta skip de HabitInstance com ID 99999")
+@when("the user tries to skip HabitInstance with ID 99999")
 def skip_id_inexistente(session: Session):
     """Tenta skip de ID inexistente."""
     service = HabitInstanceService()
 
     try:
         service.skip_habit_instance(
-            habit_instance_id=99999, skip_reason=SkipReason.HEALTH, skip_note=None, session=session
+            habit_instance_id=99999,
+            skip_reason=SkipReason.HEALTH,
+            skip_note=None,
+            session=session,
         )
-        session.info = {"error": None}  # type: ignore
+        session.info = {"error": None}
     except ValueError as e:
-        session.info = {"error": str(e)}  # type: ignore
+        session.info = {"error": str(e)}
 
 
-@given("que skip_note tem 501 caracteres", target_fixture="nota_longa")
+@given("the skip_note has 501 characters", target_fixture="nota_longa")
 def nota_longa():
     """Cria nota com 501 caracteres."""
     return "A" * 501
 
 
-@when(parsers.parse('usuário tenta skip com categoria "{category}" e essa nota'))
+@when(parsers.parse('the user tries skip with category "{category}" and that note'))
 def skip_nota_longa(session: Session, test_instance: HabitInstance, category: str, nota_longa: str):
     """Tenta skip com nota muito longa."""
     skip_reason = SkipReason[category]
@@ -133,22 +144,22 @@ def skip_nota_longa(session: Session, test_instance: HabitInstance, category: st
             skip_note=nota_longa,
             session=session,
         )
-        session.info = {"error": None}  # type: ignore
+        session.info = {"error": None}
     except ValueError as e:
-        session.info = {"error": str(e)}  # type: ignore
+        session.info = {"error": str(e)}
 
 
 # ==================== THEN (ASSERÇÕES) ====================
 
 
-@then(parsers.parse('o status deve ser "{expected_status}"'))
+@then(parsers.parse('the status should be "{expected_status}"'))
 def verificar_status(session: Session, test_instance: HabitInstance, expected_status: str):
     """Verifica status da instância."""
     session.refresh(test_instance)
     assert test_instance.status.value == expected_status.lower()
 
 
-@then(parsers.parse('o substatus deve ser "{expected_substatus}"'))
+@then(parsers.parse('the substatus should be "{expected_substatus}"'))
 def verificar_substatus(session: Session, test_instance: HabitInstance, expected_substatus: str):
     """Verifica substatus da instância."""
     session.refresh(test_instance)
@@ -156,7 +167,7 @@ def verificar_substatus(session: Session, test_instance: HabitInstance, expected
     assert test_instance.not_done_substatus.value == expected_substatus.lower()
 
 
-@then(parsers.parse('o skip_reason deve ser "{expected_reason}"'))
+@then(parsers.parse('the skip_reason should be "{expected_reason}"'))
 def verificar_skip_reason(session: Session, test_instance: HabitInstance, expected_reason: str):
     """Verifica skip_reason."""
     session.refresh(test_instance)
@@ -164,35 +175,35 @@ def verificar_skip_reason(session: Session, test_instance: HabitInstance, expect
     assert test_instance.skip_reason.value == expected_reason
 
 
-@then(parsers.parse('o skip_note deve ser "{expected_note}"'))
+@then(parsers.parse('the skip_note should be "{expected_note}"'))
 def verificar_skip_note(session: Session, test_instance: HabitInstance, expected_note: str):
     """Verifica skip_note."""
     session.refresh(test_instance)
     assert test_instance.skip_note == expected_note
 
 
-@then("o skip_note deve ser NULL")
+@then("the skip_note should be NULL")
 def verificar_skip_note_null(session: Session, test_instance: HabitInstance):
     """Verifica que skip_note é None."""
     session.refresh(test_instance)
     assert test_instance.skip_note is None
 
 
-@then("done_substatus deve ser NULL")
+@then("done_substatus should be NULL")
 def verificar_done_substatus_null(session: Session, test_instance: HabitInstance):
     """Verifica que done_substatus é None."""
     session.refresh(test_instance)
     assert test_instance.done_substatus is None
 
 
-@then("completion_percentage deve ser NULL")
+@then("completion_percentage should be NULL")
 def verificar_completion_null(session: Session, test_instance: HabitInstance):
     """Verifica que completion_percentage é None."""
     session.refresh(test_instance)
     assert test_instance.completion_percentage is None
 
 
-@then(parsers.parse('o sistema deve retornar erro "{expected_error}"'))
+@then(parsers.parse('the system should return error "{expected_error}"'))
 def verificar_erro(session: Session, expected_error: str):
     """Verifica mensagem de erro."""
     error = session.info.get("error")  # type: ignore

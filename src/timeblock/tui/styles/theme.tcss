@@ -1,0 +1,479 @@
+/* ATOMVS TimeBlock - Material-like Theme
+ *
+ * BR-TUI-008: Visual Consistency
+ * Paleta Catppuccin Mocha como base, adaptada para Material Design 3.
+ * Este arquivo é SSOT (Single Source of Truth) para cores da TUI.
+ *
+ * Variáveis semânticas (color-system.md):
+/*   $success:      #a6e3a1  (done/full, completed, salvo)
+/*   $below-target: #f5e0dc  (done/partial <90%)
+/*   $above-target: #f2cdcd  (done/overdone 110-150%)
+/*   $over-limit:   #fab387  (done/excessive >150%)
+/*   $warning:      #f9e2af  (paused, skip justificado, hoje)
+/*   $error:        #f38ba8  (NOT_DONE, skip unjustified, overdue)
+/*   $passive-fail: #eba0ac  (ignored, omissão passiva)
+/*   $info:         #89b4fa  (rescheduled, links, tooltips)
+/*   $accent:       #cba6f7  (running, timer, foco ativo)
+/*   $muted:        #6c7086  (pending, cancelled, futuro)
+ *
+ * Hierarquia de cores:
+ *   - Primary: ações principais, header, destaque ativo
+ *   - Surface: fundos de cards, painéis, overlays
+ *   - Status: success (verde), warning (amarelo), error (vermelho)
+ *   - Text: primário (alto contraste), secundário (muted), metadados (dim)
+ *
+ * Referências:
+ *   - Paleta: docs/tui/color-system.md
+ *   - Substatus: docs/architecture/adr-021-status-substatus-refactor.md
+ *   - Mockup: docs/tui/dashboard-mockup-v4.md
+ */
+
+/* ==========================================================================
+   Base - Screen e fundo global
+   Catppuccin Mocha Base (#1E1E2E) como cor de fundo principal.
+   Text (#CDD6F4) como cor padrão para todo texto.
+   Scrollbar mínima (1 char) usando Surface0/Surface1/Overlay0.
+   ========================================================================== */
+
+Screen {
+    background: #1E1E2E;               /* Mocha Base: fundo principal da aplicação */
+    color: #CDD6F4;                    /* Mocha Text: cor padrão de texto */
+    scrollbar-size-vertical: 1;          /* Scrollbar fina (1 caractere) */
+    scrollbar-color: #45475A;          /* Surface1: thumb da scrollbar (idle) */
+    scrollbar-background: #1E1E2E;     /* Base: fundo da scrollbar */
+    scrollbar-color-hover: #585B70;    /* Surface2: thumb da scrollbar (hover) */
+    scrollbar-color-active: #7F849C;   /* Overlay1: thumb da scrollbar (ativo) */
+}
+
+/* ==========================================================================
+   Header - Barra superior customizada (HeaderBar widget)
+   Header nativo do Textual desabilitado; usamos widget customizado
+   com borda arredondada Surface1 e espaçamento inferior.
+   ========================================================================== */
+
+HeaderBar {
+    width: 100%;                       /* Ocupa largura total */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    border: round #45475A;           /* Borda arredondada Surface1 */
+    border-title-color: #CDD6F4;     /* Título da borda em Text */
+    background: #1E1E2E;             /* Fundo Base (transparente ao screen) */
+    padding: 0 1;                      /* Padding horizontal 1 char */
+    margin-bottom: 1;                  /* Separação do conteúdo abaixo */
+}
+
+/* ==========================================================================
+   Content Area - Região principal de conteúdo
+   Largura fixa de 122 chars com máximo 140 para terminais largos.
+   ========================================================================== */
+
+#content-area {
+    width: 122;                        /* Largura fixa: 122 caracteres */
+    max-width: 140;                    /* Máximo para terminais ultra-wide */
+    height: 100%;                      /* Ocupa altura total disponível */
+    padding: 1 2;                      /* Padding vertical 1, horizontal 2 */
+}
+
+/* ==========================================================================
+   Main Layout - Container horizontal centralizado
+   Alinha conteúdo no topo centralizado horizontalmente.
+   ========================================================================== */
+
+#main-layout {
+    align: center top;                 /* Centraliza horizontalmente, topo */
+    width: 100%;                       /* Largura total */
+    height: 1fr;                       /* Preenche espaço restante */
+}
+
+/* ==========================================================================
+   Sidebar - Navegação vertical lateral (20 chars)
+   Estrutura: logo (topo) + nav (meio) + footer (dock bottom).
+   ========================================================================== */
+
+#sidebar {
+    width: 20;                         /* Largura fixa: 20 caracteres */
+    height: 100%;                      /* Altura total */
+    background: #1E1E2E;             /* Fundo Base */
+    padding: 1 1;                      /* Padding uniforme 1 char */
+}
+
+#sidebar-inner {
+    width: 100%;                       /* Preenche sidebar */
+    height: 100%;                      /* Preenche sidebar */
+}
+
+#sidebar-logo {
+    width: 100%;                       /* Largura total da sidebar */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    margin-bottom: 1;                  /* Separação do nav */
+}
+
+#sidebar-nav {
+    width: 100%;                       /* Largura total da sidebar */
+    height: auto;                      /* Altura adapta ao conteúdo */
+}
+
+#sidebar-footer {
+    width: 100%;                       /* Largura total da sidebar */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    dock: bottom;                      /* Fixo no rodapé da sidebar */
+}
+
+NavBar {
+    width: 22;                         /* Widget de navegação: 22 chars */
+    height: 100%;                      /* Altura total */
+    background: #1E1E2E;             /* Fundo Base */
+}
+
+/* ==========================================================================
+   Card - Componente reutilizável (BR-TUI-008-R02)
+   Borda arredondada Surface1, fundo Surface0 (#313244).
+   Padding 1x2, margin 1 para espaçamento entre cards.
+   ========================================================================== */
+
+Card {
+    border: round #45475A;           /* Borda arredondada Surface1 */
+    padding: 1 2;                      /* Padding vertical 1, horizontal 2 */
+    margin: 1;                         /* Margem uniforme entre cards */
+    width: 100%;                       /* Largura total do container */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    background: #313244;             /* Surface0: fundo elevado do card */
+}
+
+.card-title {
+    text-style: bold;                  /* Título do card em negrito */
+    margin-bottom: 1;                  /* Separação do conteúdo */
+}
+
+.card-content {
+    color: #CDD6F4;                  /* Text: conteúdo padrão do card */
+}
+
+/* ==========================================================================
+   Status Colors (BR-TUI-008-R03, color-system.md)
+   10 cores semânticas Catppuccin Mocha para classes CSS reutilizáveis.
+   Usadas em labels, ícones e indicadores de status.
+   ========================================================================== */
+
+.success {
+    color: #A6E3A1;                    /* Green: done/full, completed */
+}
+
+.below-target {
+    color: #F5E0DC;                    /* Rosewater: done/partial (<90%) */
+}
+
+.above-target {
+    color: #F2CDCD;                    /* Flamingo: done/overdone (110-150%) */
+}
+
+.over-limit {
+    color: #FAB387;                    /* Peach: done/excessive (>150%) */
+}
+
+.warning {
+    color: #F9E2AF;                    /* Yellow: paused, skip justified, hoje */
+}
+
+.error {
+    color: #F38BA8;                    /* Red: NOT_DONE, skip unjustified */
+}
+
+.passive-fail {
+    color: #EBA0AC;                    /* Maroon: ignored (omissão passiva) */
+}
+
+.info {
+    color: #89B4FA;                    /* Blue: rescheduled, links */
+}
+
+.accent {
+    color: #CBA6F7;                    /* Mauve: running, timer, foco ativo */
+}
+
+.muted {
+    color: #6C7086;                    /* Overlay0: pending, cancelled */
+}
+
+/* ==========================================================================
+   Tipografia (BR-TUI-008-R04)
+   bold = títulos e destaques, normal = conteúdo, dim = metadados.
+   ========================================================================== */
+
+.title {
+    text-style: bold;                  /* Títulos de seção e cards */
+    color: #CDD6F4;                  /* Text: máximo contraste */
+}
+
+.metadata {
+    text-style: none;                  /* Metadados sem estilo extra */
+    color: #6C7086;                  /* Overlay0: baixo contraste */
+}
+
+/* ==========================================================================
+   HelpOverlay - Modal de ajuda (layer overlay)
+   Fundo Surface0 com borda Mauve (accent), flutuante sobre conteúdo.
+   ========================================================================== */
+
+HelpOverlay {
+    width: 60;                         /* Largura fixa: 60 chars */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    max-height: 80%;                   /* Máximo 80% da tela */
+    background: #313244;             /* Surface0: fundo do modal */
+    border: solid #CBA6F7;           /* Mauve: borda accent do overlay */
+    padding: 1 2;                      /* Padding interno */
+    layer: overlay;                    /* Renderiza acima do conteúdo */
+    dock: top;                         /* Ancora no topo */
+    margin: 4 10;                      /* Margem para centralizar visual */
+}
+
+/* ==========================================================================
+   DashboardScreen (BR-TUI-003, mockup v4)
+   Layout 50/50: agenda esquerda + cards direita.
+   Agenda com borda arredondada e fundo Base.
+   Cards em coluna scrollável.
+   ========================================================================== */
+
+DashboardScreen {
+    width: 100%;                       /* Ocupa largura total */
+    height: 100%;                      /* Ocupa altura total */
+}
+
+#dashboard-layout {
+    width: 100%;                       /* Container horizontal principal */
+    height: 100%;                      /* Altura total */
+}
+
+/* --- Coluna Esquerda: Agenda do Dia --- */
+
+#agenda-column {
+    width: 50%;                        /* Metade da largura */
+    height: 100%;                      /* Altura total */
+    border: round #45475A;           /* Borda arredondada Surface1 */
+    border-title-color: #CDD6F4;     /* Título "Agenda do Dia" em Text */
+    background: #1E1E2E;             /* Fundo Base */
+}
+
+#agenda-header {
+    width: 100%;                       /* Largura total da coluna */
+    height: 1;                         /* 1 linha para header interno */
+    padding: 0 1;                      /* Padding horizontal */
+}
+
+#agenda-content {
+    width: 100%;                       /* Largura total da coluna */
+    height: 1fr;                       /* Preenche espaço restante */
+    overflow-y: auto;                  /* Scroll vertical quando necessário */
+    padding: 0 1 1 1;                  /* Padding: 0 top, 1 lados, 1 bottom */
+}
+
+#agenda-actions {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha para ações */
+    dock: bottom;                      /* Fixo no rodapé da agenda */
+    padding: 0 1;                      /* Padding horizontal */
+}
+
+/* --- Coluna Direita: Cards empilhados --- */
+
+#panels-column {
+    width: 50%;                          /* Metade da largura */
+    height: 100%;                        /* Altura total */
+    padding: 0 1;                        /* Padding horizontal */
+    overflow-y: auto;                    /* Scroll vertical para cards */
+    scrollbar-size-vertical: 1;          /* Scrollbar fina */
+    scrollbar-color: #45475A;          /* Surface1: thumb */
+    scrollbar-background: #1E1E2E;     /* Base: fundo */
+    scrollbar-color-hover: #585B70;    /* Surface2: hover */
+    scrollbar-color-active: #7F849C;   /* Overlay1: ativo */
+}
+
+/* --- Cards individuais: Hábitos, Tarefas, Timer, Métricas ---     */
+/* Todos seguem o mesmo padrão visual: borda Surface1, fundo Base,  */
+/* padding 1, sem margin-bottom (colados verticalmente).            */
+
+#panel-habits {
+    border-title-color: #CDD6F4;     /* Título em Text */
+    width: 100%;                       /* Largura total da coluna */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    border: round #45475A;           /* Borda arredondada Surface1 */
+    padding: 1 1;                      /* Padding uniforme */
+    margin-bottom: 0;                  /* Sem espaço entre cards */
+    background: #1E1E2E;             /* Fundo Base */
+}
+
+#panel-tasks {
+    border-title-color: #CDD6F4;     /* Título em Text */
+    width: 100%;                       /* Largura total da coluna */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    border: round #45475A;           /* Borda arredondada Surface1 */
+    padding: 1 1;                      /* Padding uniforme */
+    margin-bottom: 0;                  /* Sem espaço entre cards */
+    background: #1E1E2E;             /* Fundo Base */
+}
+
+#panel-timer {
+    border-title-color: #CDD6F4;     /* Título em Text */
+    width: 100%;                       /* Largura total da coluna */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    border: round #45475A;           /* Borda arredondada Surface1 */
+    padding: 1 1;                      /* Padding uniforme */
+    margin-bottom: 0;                  /* Sem espaço entre cards */
+    background: #1E1E2E;             /* Fundo Base */
+}
+
+#panel-metrics {
+    border-title-color: #CDD6F4;     /* Título em Text */
+    width: 100%;                       /* Largura total da coluna */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    border: round #45475A;           /* Borda arredondada Surface1 */
+    padding: 1 1;                      /* Padding uniforme */
+    background: #1E1E2E;             /* Fundo Base (último card) */
+}
+
+/* ==========================================================================
+   RoutinesScreen
+   ========================================================================== */
+
+RoutinesScreen {
+    width: 100%;                       /* Tela cheia */
+    height: 100%;                      /* Tela cheia */
+}
+
+/* ==========================================================================
+   Placeholder Screens (futuras telas dedicadas)
+   ========================================================================== */
+
+HabitsScreen {
+    width: 100%;                       /* Tela cheia */
+    height: 100%;                      /* Tela cheia */
+}
+
+TasksScreen {
+    width: 100%;                       /* Tela cheia */
+    height: 100%;                      /* Tela cheia */
+}
+
+TimerScreen {
+    width: 100%;                       /* Tela cheia */
+    height: 100%;                      /* Tela cheia */
+}
+
+/* ==========================================================================
+   Status Bar (BR-TUI-007)
+   Barra inferior com 3 regiões: left (contexto), center (accent),
+   right (relógio/info). Fundo Surface0, docked no bottom.
+   ========================================================================== */
+
+#status-bar {
+    dock: bottom;                      /* Fixo no rodapé da aplicação */
+    height: 1;                         /* 1 linha */
+    width: 100%;                       /* Largura total */
+    background: #313244;             /* Surface0: fundo elevado */
+    color: #CDD6F4;                  /* Text: cor padrão */
+    layout: horizontal;                /* Filhos lado a lado */
+}
+
+#status-left {
+    width: 1fr;                        /* Expande para preencher */
+    content-align: left middle;        /* Alinha à esquerda, vertical center */
+}
+
+#status-center {
+    width: 1fr;                        /* Expande para preencher */
+    content-align: center middle;      /* Centralizado */
+    color: #CBA6F7;                  /* Mauve: destaque accent */
+}
+
+#status-right {
+    width: auto;                       /* Largura do conteúdo */
+    min-width: 8;                      /* Mínimo para "HH:MM" */
+    content-align: right middle;       /* Alinha à direita */
+    color: #6C7086;                  /* Overlay0: info secundária */
+}
+
+/* ==========================================================================
+   Timer Screen (BR-TUI-006)
+   Tela dedicada do timer com display ASCII art centralizado.
+   Borda Mauve ao redor do display, fundo Surface0.
+   ========================================================================== */
+
+#timer-content {
+    width: 100%;                       /* Largura total */
+    height: 100%;                      /* Altura total */
+    align: center middle;              /* Centralizado em ambos os eixos */
+    padding: 2 4;                      /* Padding generoso */
+}
+
+#timer-header {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha */
+    text-align: center;                /* Texto centralizado */
+    color: #CBA6F7;                  /* Mauve: destaque accent */
+}
+
+#timer-display {
+    width: 100%;                       /* Largura total */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    min-height: 5;                     /* Mínimo para ASCII art */
+    text-align: center;                /* Texto centralizado */
+    padding: 1 2;                      /* Padding interno */
+    margin: 1 0;                       /* Margem vertical */
+    border: round #CBA6F7;           /* Borda Mauve arredondada */
+    background: #313244;             /* Surface0: fundo do display */
+}
+
+#timer-status {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha */
+    text-align: center;                /* Texto centralizado */
+}
+
+#timer-actions {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha */
+    text-align: center;                /* Texto centralizado */
+    color: #6C7086;                  /* Overlay0: ações muted */
+    margin-top: 1;                     /* Separação do status */
+}
+
+/* ==========================================================================
+   CRUD Screen Pattern (BR-TUI-005)
+   Layout genérico para telas de CRUD: header + lista + form + actions.
+   ========================================================================== */
+
+#crud-content {
+    width: 100%;                       /* Largura total */
+    height: 100%;                      /* Altura total */
+    padding: 1 2;                      /* Padding padrão */
+}
+
+#crud-header {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha */
+    color: #CBA6F7;                  /* Mauve: título accent */
+}
+
+#crud-list {
+    width: 100%;                       /* Largura total */
+    height: 1fr;                       /* Preenche espaço restante */
+    padding: 1 0;                      /* Padding vertical */
+}
+
+#crud-form {
+    width: 100%;                       /* Largura total */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    padding: 1 2;                      /* Padding do formulário */
+}
+
+#crud-error {
+    width: 100%;                       /* Largura total */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    color: #F38BA8;                    /* Red: mensagens de erro */
+}
+
+#crud-actions {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha */
+    dock: bottom;                      /* Fixo no rodapé */
+    color: #6C7086;                  /* Overlay0: ações muted */
+}

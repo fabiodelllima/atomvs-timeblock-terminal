@@ -1,6 +1,6 @@
 # language: en
-# BR-VAL-002: Date Validation
-Feature: Date Validation
+# BR-VAL-002: Validação de Datas
+Feature: Date Validation (BR-VAL-002)
   As a system
   I need to validate dates
   So that only valid dates within acceptable range are processed
