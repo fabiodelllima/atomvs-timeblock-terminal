@@ -97,7 +97,7 @@ sync:github:
   stage: sync
   before_script: []
   script:
-    - git remote add github https://x-access-token:$\{GITHUB_TOKEN\}@github.com/fabiodelllima/atomvs-timeblock-terminal.git
+    - git remote add github https://x-access-token:${GITHUB_TOKEN}@github.com/fabiodelllima/atomvs-timeblock-terminal.git
     - git push github HEAD:${CI_COMMIT_REF_NAME} --force
     - git push github --tags --force
   only:
