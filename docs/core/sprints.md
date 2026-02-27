@@ -20,14 +20,14 @@ A v1.7.0 marca a transição do ATOMVS TimeBlock de ferramenta CLI pura para uma
 
 **Métricas de acompanhamento:**
 
-| Métrica               | Início (v1.6.0) | Meta v1.7.0 |
-| --------------------- | --------------- | ----------- |
-| Cobertura global      | 87%             | >= 85%      |
-| Cobertura tui/        | 0%              | >= 80%      |
-| Testes totais         | 778             | 830+        |
-| Erros mypy            | 0               | 0           |
-| BRs TUI implementadas | 0/10            | 10/10       |
-| Screens funcionais    | 0/5             | 5/5         |
+| Métrica              | Início (v1.6.0) | Atual | Meta v1.7.0 |
+| -------------------- | --------------- | ----- | ----------- |
+| Cobertura global     | 87%             | 87%   | >= 85%      |
+| Cobertura tui/       | 0%              | 30%   | >= 80%      |
+| Testes totais        | 778             | 1071  | 830+        |
+| Erros mypy           | 0               | 0     | 0           |
+| BRs TUI formalizadas | 0/10            | 28/10 | 10/10       |
+| Screens funcionais   | 0/5             | 2/5   | 5/5         |
 
 ---
 
@@ -88,38 +88,38 @@ A ordem das entregas é deliberada: o session helper (BR-TUI-009) vem primeiro p
 
 **BR-TUI-009: Compartilhamento da Service Layer**
 
-- [ ] Criar `src/timeblock/tui/__init__.py`
-- [ ] Criar `src/timeblock/tui/session.py` com context manager `get_session()`
-- [ ] Criar `tests/unit/test_tui/__init__.py`
-- [ ] Criar `tests/unit/test_tui/test_session.py`
-- [ ] Teste: `test_br_tui_009_session_provides_working_session`
-- [ ] Teste: `test_br_tui_009_session_commits_on_success`
-- [ ] Teste: `test_br_tui_009_session_rollbacks_on_error`
-- [ ] Validar: 3 testes verdes, `get_session()` funcional com services existentes
+- [x] Criar `src/timeblock/tui/__init__.py`
+- [x] Criar `src/timeblock/tui/session.py` com context manager `get_session()`
+- [x] Criar `tests/unit/test_tui/__init__.py`
+- [x] Criar `tests/unit/test_tui/test_session.py`
+- [x] Teste: `test_br_tui_009_session_provides_working_session`
+- [x] Teste: `test_br_tui_009_session_commits_on_success`
+- [x] Teste: `test_br_tui_009_session_rollbacks_on_error`
+- [x] Validar: 3 testes verdes, `get_session()` funcional com services existentes
 
 **BR-TUI-008: Consistência Visual (Material-like)**
 
-- [ ] Criar `src/timeblock/tui/styles/` com `__init__.py`
-- [ ] Criar `src/timeblock/tui/styles/theme.tcss` com paleta completa
-- [ ] Criar `src/timeblock/tui/widgets/__init__.py`
-- [ ] Criar `src/timeblock/tui/widgets/card.py` — widget Card reutilizável
-- [ ] Criar `tests/unit/test_tui/test_widgets/__init__.py`
-- [ ] Criar `tests/unit/test_tui/test_widgets/test_card.py`
-- [ ] Teste: `test_br_tui_008_theme_file_exists`
-- [ ] Teste: `test_br_tui_008_card_renders_title`
-- [ ] Teste: `test_br_tui_008_card_renders_content`
-- [ ] Validar: Card renderiza com estilo definido, tema carrega sem erros
+- [x] Criar `src/timeblock/tui/styles/` com `__init__.py`
+- [x] Criar `src/timeblock/tui/styles/theme.tcss` com paleta completa
+- [x] Criar `src/timeblock/tui/widgets/__init__.py`
+- [x] Criar `src/timeblock/tui/widgets/card.py` — widget Card reutilizável
+- [x] Criar `tests/unit/test_tui/test_widgets/__init__.py`
+- [x] Criar `tests/unit/test_tui/test_widgets/test_card.py`
+- [x] Teste: `test_br_tui_008_theme_file_exists`
+- [x] Teste: `test_br_tui_008_card_renders_title`
+- [x] Teste: `test_br_tui_008_card_renders_content`
+- [x] Validar: Card renderiza com estilo definido, tema carrega sem erros
 
 **BR-TUI-001: Entry Point Detection**
 
-- [ ] Criar `src/timeblock/tui/app.py` — TimeBlockApp mínimo (tela com título)
-- [ ] Modificar `src/timeblock/main.py` — detecção `sys.argv`
-- [ ] Atualizar `pyproject.toml` — dependência opcional `[tui]`
-- [ ] Criar `tests/unit/test_tui/test_entry_point.py`
-- [ ] Teste: `test_br_tui_001_no_args_launches_tui`
-- [ ] Teste: `test_br_tui_001_with_args_launches_cli`
-- [ ] Teste: `test_br_tui_001_fallback_without_textual`
-- [ ] Validar: `timeblock` abre TUI, `timeblock --help` abre CLI
+- [x] Criar `src/timeblock/tui/app.py` — TimeBlockApp mínimo (tela com título)
+- [x] Modificar `src/timeblock/main.py` — detecção `sys.argv`
+- [x] Atualizar `pyproject.toml` — dependência opcional `[tui]`
+- [x] Criar `tests/unit/test_tui/test_entry_point.py`
+- [x] Teste: `test_br_tui_001_no_args_launches_tui`
+- [x] Teste: `test_br_tui_001_with_args_launches_cli`
+- [x] Teste: `test_br_tui_001_fallback_without_textual`
+- [x] Validar: `timeblock` abre TUI, `timeblock --help` abre CLI
 
 ---
 
@@ -135,39 +135,39 @@ A sidebar e os keybindings definem o contrato de interação que todas as screen
 
 **BR-TUI-002: Screen Navigation**
 
-- [ ] Criar `src/timeblock/tui/widgets/sidebar.py`
-- [ ] Criar `src/timeblock/tui/screens/__init__.py`
-- [ ] Criar 5 screens placeholder (dashboard.py, routines.py, habits.py, tasks.py, timer.py)
-- [ ] Atualizar `app.py` — compose sidebar + content area, bindings de navegação
-- [ ] Criar `tests/unit/test_tui/test_navigation.py`
-- [ ] Teste: `test_br_tui_002_initial_screen_is_dashboard`
-- [ ] Teste: `test_br_tui_002_numeric_keybinding_navigation`
-- [ ] Teste: `test_br_tui_002_mnemonic_keybinding_navigation`
-- [ ] Teste: `test_br_tui_002_sidebar_shows_active_screen`
-- [ ] Validar: navegação entre 5 screens via teclado funcional
+- [x] Criar `src/timeblock/tui/widgets/sidebar.py`
+- [x] Criar `src/timeblock/tui/screens/__init__.py`
+- [x] Criar 5 screens placeholder (dashboard.py, routines.py, habits.py, tasks.py, timer.py)
+- [x] Atualizar `app.py` — compose sidebar + content area, bindings de navegação
+- [x] Criar `tests/unit/test_tui/test_navigation.py`
+- [x] Teste: `test_br_tui_002_initial_screen_is_dashboard`
+- [x] Teste: `test_br_tui_002_numeric_keybinding_navigation`
+- [x] Teste: `test_br_tui_002_mnemonic_keybinding_navigation`
+- [x] Teste: `test_br_tui_002_sidebar_shows_active_screen`
+- [x] Validar: navegação entre 5 screens via teclado funcional
 
 **BR-TUI-004: Global Keybindings**
 
-- [ ] Implementar `q` → quit
-- [ ] Implementar `?` → help overlay
-- [ ] Implementar `escape` → fechar modal ou voltar ao Dashboard
-- [ ] Criar `tests/unit/test_tui/test_keybindings.py`
-- [ ] Teste: `test_br_tui_004_quit_keybinding`
-- [ ] Teste: `test_br_tui_004_help_overlay`
-- [ ] Teste: `test_br_tui_004_escape_returns_to_dashboard`
-- [ ] Validar: `q` fecha, `?` exibe help, `escape` retorna ao Dashboard
+- [x] Implementar `q` → quit
+- [x] Implementar `?` → help overlay
+- [x] Implementar `escape` → fechar modal ou voltar ao Dashboard
+- [x] Criar `tests/unit/test_tui/test_keybindings.py`
+- [x] Teste: `test_br_tui_004_quit_keybinding`
+- [x] Teste: `test_br_tui_004_help_overlay`
+- [x] Teste: `test_br_tui_004_escape_returns_to_dashboard`
+- [x] Validar: `q` fecha, `?` exibe help, `escape` retorna ao Dashboard
 
 **BR-TUI-007: Status Bar**
 
-- [ ] Criar `src/timeblock/tui/widgets/status_bar.py`
-- [ ] Integrar na composição do app (rodapé fixo)
-- [ ] Consultar RoutineService para rotina ativa
-- [ ] Exibir hora atual (atualiza a cada minuto)
-- [ ] Criar `tests/unit/test_tui/test_widgets/test_status_bar.py`
-- [ ] Teste: `test_br_tui_007_shows_active_routine`
-- [ ] Teste: `test_br_tui_007_shows_current_time`
-- [ ] Teste: `test_br_tui_007_shows_no_routine_message`
-- [ ] Validar: status bar exibe rotina ativa (ou "[Sem rotina]") e hora
+- [x] Criar `src/timeblock/tui/widgets/status_bar.py`
+- [x] Integrar na composição do app (rodapé fixo)
+- [x] Consultar RoutineService para rotina ativa
+- [x] Exibir hora atual (atualiza a cada minuto)
+- [x] Criar `tests/unit/test_tui/test_widgets/test_status_bar.py`
+- [x] Teste: `test_br_tui_007_shows_active_routine`
+- [x] Teste: `test_br_tui_007_shows_current_time`
+- [x] Teste: `test_br_tui_007_shows_no_routine_message`
+- [x] Validar: status bar exibe rotina ativa (ou "[Sem rotina]") e hora
 
 ---
 
@@ -183,12 +183,12 @@ O Sprint 3 transforma o placeholder do Dashboard em uma screen funcional com dad
 
 - [ ] Implementar DashboardScreen com 3 cards (Hábitos Hoje, Tarefas, Timer)
 - [ ] Integrar com RoutineService, HabitInstanceService, TaskService
-- [ ] Usar session-per-action para carregar dados
+- [x] Usar session-per-action para carregar dados
 - [ ] Implementar refresh on focus
 - [ ] Criar `tests/unit/test_tui/test_screens/__init__.py`
 - [ ] Criar `tests/unit/test_tui/test_screens/test_dashboard.py`
-- [ ] Teste: `test_br_tui_003_shows_active_routine_name`
-- [ ] Teste: `test_br_tui_003_shows_no_routine_message`
+- [x] Teste: `test_br_tui_003_shows_active_routine_name`
+- [x] Teste: `test_br_tui_003_shows_no_routine_message`
 - [ ] Teste: `test_br_tui_003_shows_today_habits_with_status`
 - [ ] Teste: `test_br_tui_003_shows_pending_tasks`
 - [ ] Teste: `test_br_tui_003_refreshes_on_focus`
@@ -304,12 +304,13 @@ O Sprint 6 fecha a v1.7.0 com revisão de cobertura, validação completa de reg
 
 ## Changelog do Documento
 
-| Data       | Versão | Mudanças                                            |
-| ---------- | ------ | --------------------------------------------------- |
-| 2026-02-05 | 1.0.0  | Criação inicial — planejamento v1.7.0 com 7 sprints |
+| Data       | Versão | Mudanças                                                       |
+| ---------- | ------ | -------------------------------------------------------------- |
+| 2026-02-05 | 1.0.0  | Criação inicial — planejamento v1.7.0 com 7 sprints            |
+| 2026-02-26 | 1.1.0  | Sprints 0-2 concluídos, Sprint 3 parcial, métricas atualizadas |
 
 ---
 
-**Próxima revisão:** Após Sprint 0 concluído
+**Próxima revisão:** Após Sprint 3 concluído
 
-**Última atualização:** 5 de Fevereiro de 2026
+**Última atualização:** 26 de Fevereiro de 2026
