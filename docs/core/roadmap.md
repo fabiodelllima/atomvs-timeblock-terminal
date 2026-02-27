@@ -80,19 +80,20 @@ A branch `feat/tui-phase1` contém a implementação progressiva da TUI: estrutu
 
 ### 3.1. Métricas Principais
 
-As métricas atuais refletem medições reais executadas em 23/02/2026. Os testes saltaram de 797 para 1071, um aumento de 34% motivado pela expansão do dashboard com substatus, cores semânticas e mock data abrangente. Cobertura se mantém em 87%.
+As métricas atuais refletem medições reais executadas em 26/02/2026. Os testes saltaram de 778 para 1071, um aumento de 38% motivado pela implementação completa do dashboard com substatus, cores semânticas, mock data, e refactor SOLID em 9 módulos. A formalização de BRs cresceu de 63 para 81 com 17 novas regras do dashboard (R12-R28) e revisão de BR-TUI-004 e BR-TUI-007.
 
 | Métrica       | Atual | Meta v1.7.0 | Status     |
 | ------------- | ----- | ----------- | ---------- |
 | Cobertura     | 87%   | 85%         | [OK]       |
 | Erros mypy    | 0     | 0           | [OK]       |
 | Testes total  | 1071  | 850+        | [OK]       |
+| BRs totais    | 81    | 70+         | [OK]       |
 | CLI funcional | 85%   | 100%        | [PENDENTE] |
 | BRs cobertas  | 83%   | 95%         | [PENDENTE] |
 
 ### 3.2. Distribuição de Testes
 
-A pirâmide de testes cresceu significativamente com a implementação do dashboard. Os 104 testes do dashboard cobrem: formatação de duração (2 formatos), localização de blocos, mapeamento status/substatus para cores/ícones/bold/fill/background, heat de proximidade para tasks, renderização ASCII art do timer, e validação estrutural de mock data.
+A pirâmide de testes cresceu significativamente com a implementação da TUI. Os 293 testes novos cobrem: dashboard (formatação, cores, mock data, panels), navegação entre screens, CRUD pattern, keybindings globais, service layer, status bar, timer screen, routines screen, habit actions e consistência visual.
 
 ```
 Unit:        869 (81.1%)
@@ -105,18 +106,18 @@ TOTAL:      1071 testes
 
 ### 3.3. Infraestrutura CI/CD
 
-A infraestrutura de CI/CD opera em duas camadas complementares. O GitLab é a fonte de verdade com pipeline completo de 7 jobs, incluindo testes, linting, typecheck, cobertura com threshold, auditoria de segurança e build de documentação. O GitHub recebe sincronização automática após pipeline verde e executa validação espelho para garantir que o repositório de showcase permaneça íntegro.
+A infraestrutura de CI/CD opera em duas camadas complementares. O GitLab é a fonte de verdade com pipeline completo de 7 jobs. O sync:github foi corrigido (escape de variável e restrição a branches protegidas) e o CodeQL duplicado removido do GitHub Actions (default setup ativo no repo).
 
 ```plaintext
 GitLab CI: 7 jobs (test:all + lint + typecheck + coverage + 2 security + sync)
-GitHub Actions: 6 checks + CodeQL
-Sync automático: GitLab => GitHub (após pipeline verde)
-Pipeline time: ~3min (local => GitHub sync)
+GitHub Actions: 5 checks (sem CodeQL duplicado, default setup ativo)
+Sync automático: GitLab => GitHub (develop/main/tags apenas)
+Pipeline time: ~33min CI, ~29s local
 ```
 
 ### 3.4. Progresso TUI (v1.7.0)
 
-A implementação da TUI segue o ADR-031 com sprints incrementais. A fase 1 cobriu a infraestrutura base (entry point, theme, navegação) e evoluiu para o dashboard com sistema de cores semânticas completo (ADR-021). A integração com a paleta Catppuccin Mocha foi documentada em `docs/tui/color-system.md` (550 linhas) com showcase visual em HTML. A fase 2 focará nas telas de conteúdo (Routines, Habits, Tasks) com CRUD contextual.
+A implementação da TUI segue o ADR-031 com sprints incrementais. A fase 1 cobriu infraestrutura base, dashboard completo com sistema de cores Catppuccin Mocha, e refactor SOLID extraindo 1023 linhas em 9 módulos especializados (todos < 175 linhas). Foram formalizadas 17 BRs novas (R12-R28) cobrindo truncation, effort bar, ordenação, períodos, timer compacto e mock data. As decisões D-009 a D-014 e D-023 a D-024 foram registradas.
 
 | Componente                                      | Status     | Commits             |
 | ----------------------------------------------- | ---------- | ------------------- |
@@ -128,9 +129,10 @@ A implementação da TUI segue o ADR-031 com sprints incrementais. A fase 1 cobr
 | Global keybindings, help overlay (BR-TUI-004)   | [DONE]     | `4b74b90`           |
 | color-system.md + showcase HTML (ADR-021)       | [DONE]     | `1e9772b`           |
 | Migração cores Catppuccin Mocha                 | [DONE]     | `9733624`           |
-| Substatus + backgrounds + ASCII timer           | [DONE]     | pendente commit     |
-| Refactor SOLID (colors.py, mock_data.py)        | [PENDENTE] | próximo commit      |
-| Documentação BRs novas (substatus, heat, etc.)  | [PENDENTE] | após refactor       |
+| Substatus + backgrounds + ASCII timer           | [DONE]     | `81ea2df`           |
+| Refactor SOLID dashboard (9 módulos)            | [DONE]     | `81ea2df`           |
+| 17 BRs novas R12-R28 formalizadas               | [DONE]     | `81ea2df`           |
+| CI/CD: sync:github fix + CodeQL cleanup         | [DONE]     | `81ea2df`           |
 | Routines Screen (BR-TUI-011)                    | [PENDENTE] | Documentação pronta |
 | CRUD pattern (BR-TUI-005)                       | [PENDENTE] | -                   |
 | Timer live display (BR-TUI-006)                 | [PENDENTE] | -                   |
@@ -264,4 +266,4 @@ Working Documents:
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 25 de Fevereiro de 2026
+**Última atualização:** 26 de Fevereiro de 2026
