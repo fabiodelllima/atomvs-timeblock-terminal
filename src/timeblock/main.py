@@ -5,6 +5,7 @@ import sys
 import typer
 
 from timeblock.commands import (
+    demo,
     habit,
     init,
     reschedule,
@@ -30,6 +31,7 @@ app.add_typer(task.app, name="task")
 app.add_typer(timer.app, name="timer")
 app.add_typer(tag.app, name="tag")
 app.add_typer(reschedule.app, name="reschedule")
+app.add_typer(demo.app, name="demo")
 
 
 @app.command()
