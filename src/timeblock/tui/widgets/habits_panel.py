@@ -50,7 +50,11 @@ class HabitsPanel(Static):
         max_bars = 4
 
         if not instances:
-            lines.append("  [dim]Nenhum hábito agendado[/dim]")
+            lines.append("  [dim]---              · --:-- · --min[/dim]")
+            lines.append("  [dim]---              · --:-- · --min[/dim]")
+            lines.append("  [dim]---              · --:-- · --min[/dim]")
+            lines.append("")
+            lines.append("  [dim]Crie uma rotina: atomvs routine add[/dim]")
         else:
             for inst in instances[:12]:
                 name = inst["name"][:16]

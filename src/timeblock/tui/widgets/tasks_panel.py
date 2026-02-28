@@ -94,7 +94,10 @@ class TasksPanel(Static):
             )
 
         if not lines:
-            lines.append("  [dim]Nenhuma task[/dim]")
+            lines.append("  [dim]---                --/--   --:--[/dim]")
+            lines.append("  [dim]---                --/--   --:--[/dim]")
+            lines.append("")
+            lines.append("  [dim]Crie uma task: atomvs task add[/dim]")
 
         return lines
 
