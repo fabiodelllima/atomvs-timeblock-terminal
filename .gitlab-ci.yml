@@ -95,6 +95,7 @@ security:deps:
     when: always
 
 sync:github:
+  needs: ["test:all"]
   stage: sync
   before_script: []
   script:
