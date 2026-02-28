@@ -1,23 +1,48 @@
-# TimeBlock Organizer
+# ATOMVS TimeBlock Terminal
 
-> Gerenciador de tempo CLI baseado em time blocking e hábitos atômicos
+> Gerenciador de tempo CLI/TUI baseado em time blocking e hábitos atômicos
 
 ```
-╔═══════════════════════════════════════════════════════════════╗
-║  TimeBlock Organizer v1.4.0                                   ║
-║  ───────────────────────────────────────────────────────────  ║
-║  [x] 513 testes  [x] 44% cobertura  [x] 27 ADRs  [x] 67 BRs   ║
-╚═══════════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════╗
+║                                              ║
+║      ◉        ▄▀█ ▀█▀ █▀█ █▀▄▀█ █░█ █▀       ║
+║     ╱│╲       █▀█ ░█░ █▄█ █░▀░█ ▀▄▀ ▄█       ║
+║    ○─┼─○      ─────────────────────────      ║
+║     ╲│╱       TimeBlock  ░░░░░░░░░░░░░░      ║
+║      ◉          Terminal ▓▓▓▓▓▓▓▓▓▓▓▓▓▓      ║
+║                                              ║
+╚══════════════════════════════════════════════╝
 ```
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-513%20passing-success.svg)](cli/tests/)
-[![Coverage](https://img.shields.io/badge/coverage-44%25-yellow.svg)](cli/tests/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-1071%20passing-success.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-87%25-green.svg)](tests/)
+
+---
+
+## Sumário
+
+- [Visão Geral](#visão-geral)
+- [Arquitetura](#arquitetura)
+- [Estados do Sistema](#estados-do-sistema)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Instalação](#instalação)
+- [Comandos CLI](#comandos-cli)
+- [Stack Tecnológica](#stack-tecnológica)
+- [Documentação](#documentação)
+- [Desenvolvimento](#desenvolvimento)
+  - [Engenharia de Requisitos](#engenharia-de-requisitos)
+  - [Análise Comportamental](#análise-comportamental)
+  - [Implementação](#implementação)
+- [Roadmap](#roadmap)
+
+---
 
 ## Visão Geral
 
-TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando time blocking, inspirada em "Atomic Habits" de James Clear. O sistema detecta conflitos e fornece informações, mantendo o usuário no controle das decisões.
+ATOMVS TimeBlock Terminal é uma ferramenta de linha de comando e interface terminal para gerenciamento de tempo usando a técnica de time blocking, inspirada no livro "Atomic Habits" de James Clear. O sistema foi projetado com uma filosofia clara: detectar conflitos e fornecer informações, mantendo o usuário no controle total das decisões. Diferente de aplicativos que bloqueiam ações ou tomam decisões automáticas, o TimeBlock informa sobre sobreposições de horários e sugere reorganizações, mas nunca impõe mudanças.
+
+A aplicação organiza o tempo através de três conceitos principais: Rotinas (coleções temáticas de hábitos), Hábitos (templates recorrentes com horários definidos) e Tarefas (eventos pontuais não recorrentes). Cada hábito gera instâncias diárias que podem ser rastreadas com timer, permitindo medir o tempo real dedicado versus o tempo planejado. A partir da v1.7.0, uma TUI (Terminal User Interface) complementa a CLI com navegação visual, dashboard interativo e grade semanal de rotinas.
 
 **Filosofia:** Conflitos são informados, nunca bloqueados. O sistema sugere, o usuário decide.
 
@@ -25,9 +50,11 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
 
 ## Arquitetura
 
+A arquitetura do TimeBlock segue o padrão de camadas com separação clara de responsabilidades. A camada de apresentação (CLI e TUI) comunica-se exclusivamente com a camada de serviços, que encapsula toda a lógica de negócio. Os modelos de dados utilizam SQLModel para mapeamento objeto-relacional, combinando a expressividade do Pydantic com a robustez do SQLAlchemy. A TUI compartilha 100% da camada de services com a CLI — nenhuma lógica de negócio é duplicada.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        TIMEBLOCK ORGANIZER                          │
+│                    ATOMVS TIMEBLOCK TERMINAL                        │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐              │
@@ -52,12 +79,14 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
 
 ### Fluxo de Dados
 
+O fluxo de dados segue uma direção unidirecional clara, desde a entrada do usuário até a persistência. CLI e TUI recebem input, delegam para services que aplicam regras de negócio, e finalmente models persistem no SQLite. Utilitários auxiliam em validações e formatações transversais.
+
 ```
 ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌────────────┐
-│   CLI    │────>│ COMMANDS │────>│ SERVICES │────>│   MODELS   │
-│  (Typer) │     │          │     │          │     │ (SQLModel) │
-└──────────┘     └──────────┘     └──────────┘     └────────────┘
-                                        │                │
+│ CLI/TUI  │────>│ COMMANDS │────>│ SERVICES │────>│   MODELS   │
+│ (Typer/  │     │          │     │          │     │ (SQLModel) │
+│ Textual) │     └──────────┘     └──────────┘     └────────────┘
+└──────────┘                            │                │
                                         v                v
                                   ┌──────────┐     ┌──────────┐
                                   │  UTILS   │     │  SQLite  │
@@ -71,7 +100,8 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
 ╔═══════════════════════════════════════════════════════════════════╗
 ║ PRESENTATION                                                      ║
 ║ ┌───────────────────────────────────────────────────────────────┐ ║
-║ │ commands/  │ routine, habit, task, timer, tag, report         │ ║
+║ │ commands/  │ routine, habit, task, timer, tag, list, demo     │ ║
+║ │ tui/       │ app, screens, widgets (Textual)                  │ ║
 ║ └───────────────────────────────────────────────────────────────┘ ║
 ╠═══════════════════════════════════════════════════════════════════╣
 ║ BUSINESS LOGIC                                                    ║
@@ -90,6 +120,8 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
 ---
 
 ## Estados do Sistema
+
+O sistema de estados controla o ciclo de vida de cada entidade. HabitInstances transitam entre estados baseados em ações do usuário e passagem de tempo. O design de estados foi influenciado pela metodologia Atomic Habits, onde o foco está em manter consistência (streaks) e entender padrões de comportamento.
 
 ### HabitInstance Status
 
@@ -120,268 +152,227 @@ TimeBlock Organizer é uma ferramenta CLI para gerenciamento de tempo usando tim
 
 ### Timer Flow
 
+O timer implementa uma máquina de estados simples que permite rastrear tempo dedicado a cada atividade. Pausas são registradas separadamente, permitindo calcular tempo efetivo versus tempo total da sessão.
+
 ```
-    ┌─────────┐
-    │  IDLE   │
-    └────┬────┘
-         │ start
-         v
-    ┌─────────┐
-    │ RUNNING │<─────────┐
-    └────┬────┘          │
-         │               │
-    ┌────┴────┐     resume
-    │         │          │
-    v         v          │
-┌───────┐ ┌───────┐      │
-│ stop  │ │ pause │──────┘
-└───┬───┘ └───────┘
-    │
-    v
-┌─────────┐
-│  DONE   │
-└─────────┘
+    ┌─────────────┐
+    │    IDLE     │
+    └──────┬──────┘
+           │ start
+           v
+    ┌─────────────┐
+    │   RUNNING   │<────────┐
+    └──────┬──────┘         │
+           │                │
+     ┌─────┴─────┐      resume
+     │           │          │
+     v           v          │
+┌────────┐  ┌────────┐      │
+│  stop  │  │ pause  │──────┘
+└────┬───┘  └────────┘
+     │
+     v
+┌─────────────┐
+│    DONE     │
+└─────────────┘
 ```
 
 ---
 
 ## Estrutura do Projeto
 
+O projeto segue uma estrutura modular que facilita navegação e manutenção. O código fonte reside em `src/timeblock/`, testes em `tests/`, e documentação em `docs/`. Esta separação permite desenvolvimento independente de cada camada.
+
 ```
-timeblock-organizer/
-├── cli/
-│   ├── src/timeblock/
-│   │   ├── commands/          # Comandos CLI
-│   │   │   ├── routine.py
-│   │   │   ├── habit.py
-│   │   │   ├── task.py
-│   │   │   ├── timer.py
-│   │   │   ├── tag.py
-│   │   │   └── report.py
-│   │   │
-│   │   ├── services/          # Camada de negócio
-│   │   │   ├── routine_service.py
-│   │   │   ├── habit_service.py
-│   │   │   ├── habit_instance_service.py
-│   │   │   ├── task_service.py
-│   │   │   ├── timer_service.py
-│   │   │   └── tag_service.py
-│   │   │
-│   │   ├── models/            # Modelos de dados
-│   │   │   ├── routine.py
-│   │   │   ├── habit.py
-│   │   │   ├── habit_instance.py
-│   │   │   ├── task.py
-│   │   │   ├── time_log.py
-│   │   │   ├── tag.py
-│   │   │   └── enums.py
-│   │   │
-│   │   ├── database/          # Persistência
-│   │   │   ├── engine.py
-│   │   │   └── migrations/
-│   │   │
-│   │   └── utils/             # Helpers
-│   │
-│   └── tests/                 # 466 testes
-│       ├── unit/              #   377 (85%)
-│       ├── integration/       #   64  (15%)
-│       ├── e2e/
-│       └── bdd/
+atomvs-timeblock-terminal/
+├── src/timeblock/
+│   ├── commands/       # Comandos CLI (routine, habit, task, timer, demo)
+│   ├── services/       # Lógica de negócio
+│   ├── models/         # Modelos SQLModel
+│   ├── database/       # Engine e migrations
+│   ├── tui/            # Interface terminal (Textual)
+│   │   ├── screens/    # Dashboard, Routines, Habits, Tasks, Timer
+│   │   └── widgets/    # NavBar, Grid, Panels, CommandBar, HelpOverlay
+│   └── utils/          # Helpers e validadores
+│
+├── tests/              # 1071 testes
+│   ├── unit/           #   ~814 (76.0%)
+│   ├── integration/    #   ~118 (11.0%)
+│   ├── bdd/            #   ~109 (10.2%)
+│   └── e2e/            #    ~30 (2.8%)
 │
 ├── docs/
-│   ├── core/                  # Documentação principal
-│   │   ├── architecture.md
-│   │   ├── business-rules.md
-│   │   ├── cli-reference.md
-│   │   └── workflows.md
-│   │
-│   └── decisions/             # 27 ADRs
+│   ├── core/           # Documentação principal
+│   ├── decisions/      # 32 ADRs
+│   └── tui/            # Mockups e specs de telas TUI
 │
-└── scripts/                   # Automação
+└── scripts/            # Automação
 ```
 
 ---
 
 ## Instalação
 
+A instalação requer Python 3.13 ou superior. O projeto utiliza um ambiente virtual isolado para gerenciar dependências, evitando conflitos com outras aplicações Python no sistema.
+
 ```bash
-git clone https://github.com/fabiodelllima/timeblock-organizer.git
-cd timeblock-organizer/cli
+git clone https://github.com/fabiodelllima/atomvs-timeblock-terminal.git
+cd atomvs-timeblock-terminal
 
 python -m venv venv
 source venv/bin/activate
 
-pip install -e .
+pip install -e ".[tui]"
 ```
 
 ---
 
-## Comandos
+## Comandos CLI
+
+A interface de linha de comando foi projetada para ser intuitiva e consistente. Cada recurso (routine, habit, task, timer) possui um conjunto padronizado de subcomandos que seguem convenções POSIX. Flags curtas (-t, -D) estão disponíveis para comandos frequentes.
 
 ### Visão Geral
 
-```
-┌────────────────────────────────────────────────────────────────────┐
-│ RECURSO      │ DESCRIÇÃO                                           │
-├────────────────────────────────────────────────────────────────────┤
-│ routine      │ Gerencia rotinas (coleções de hábitos)              │
-│ habit        │ Gerencia hábitos (templates recorrentes)            │
-│ habit atom   │ Gerencia instâncias de hábitos (ocorrências)        │
-│ task         │ Gerencia tarefas (eventos únicos)                   │
-│ timer        │ Controla cronômetro                                 │
-│ tag          │ Gerencia categorias (cor + título)                  │
-│ report       │ Gera relatórios de produtividade                    │
-└────────────────────────────────────────────────────────────────────┘
-```
-
-### Comandos por Recurso
-
-```
-routine
-├── create     Cria nova rotina
-├── edit       Edita rotina existente
-├── delete     Remove rotina
-├── list       Lista rotinas
-├── activate   Ativa rotina
-└── deactivate Desativa rotina
-
-habit
-├── create     Cria novo hábito
-├── edit       Edita hábito existente
-├── delete     Remove hábito
-├── list       Lista hábitos
-├── renew      Renova instâncias
-├── details    Mostra detalhes
-└── skip       Wizard para pular instância
-
-habit atom
-├── create     Cria instância avulsa
-├── edit       Edita instância
-├── delete     Remove instância
-├── list       Lista instâncias
-├── skip       Pula instância
-└── log        Registra tempo manualmente
-
-task
-├── create     Cria nova tarefa
-├── edit       Edita tarefa
-├── delete     Remove tarefa
-├── list       Lista tarefas
-├── complete   Marca como concluída
-└── uncheck    Reverte para pendente
-
-timer
-├── start      Inicia cronômetro
-├── pause      Pausa cronômetro
-├── resume     Retoma cronômetro
-├── stop       Para e salva
-├── reset      Cancela sem salvar
-└── status     Mostra status atual
-```
+| Recurso | Descrição                                   |
+| ------- | ------------------------------------------- |
+| routine | Gerencia rotinas (coleções de hábitos)      |
+| habit   | Gerencia hábitos (templates recorrentes)    |
+| task    | Gerencia tarefas (eventos únicos)           |
+| timer   | Controla cronômetro                         |
+| list    | Lista eventos com filtros temporais         |
+| tag     | Gerencia categorias (cor + título)          |
+| demo    | Popula/limpa banco com dados demonstrativos |
+| init    | Inicializa banco de dados                   |
 
 ### Exemplos
 
 ```bash
 # Rotinas
-timeblock routine create "Rotina Matinal"
-timeblock routine activate 1
-timeblock routine list
+atomvs routine create "Rotina Matinal"
+atomvs routine activate 1
+atomvs routine list
 
 # Hábitos
-timeblock habit create --title "Academia" --start 07:00 --end 08:30 --repeat weekdays
-timeblock habit renew 1 month 3
-timeblock habit list
-
-# Instâncias (habit atom)
-timeblock habit atom list
-timeblock habit atom list -w
-timeblock habit atom skip 42
+atomvs habit create --title "Academia" --start 07:00 --end 08:30 --repeat weekdays
+atomvs habit list
 
 # Timer
-timeblock timer start 42
-timeblock timer pause
-timeblock timer resume
-timeblock timer stop
+atomvs timer start --schedule 1
+atomvs timer pause
+atomvs timer resume
+atomvs timer stop
 
 # Tarefas
-timeblock task create -l "Dentista" -D "2025-12-01 14:30"
-timeblock task list
-timeblock task complete 1
+atomvs task create --title "Dentista" --datetime "2026-03-15 14:30"
+atomvs task list --pending
+atomvs task check 1
+
+# Listagem com filtros
+atomvs list --day 0        # Hoje
+atomvs list --week 0       # Esta semana
+atomvs list --month +1     # Próximo mês
+atomvs list --all          # Todos os eventos
+
+# Demo (dados demonstrativos)
+atomvs demo create          # 3 rotinas + 8 tasks
+atomvs demo clear           # Remove dados demo
+
+# TUI (interface visual)
+atomvs                      # Sem argumentos abre a TUI
 ```
 
 ---
 
 ## Stack Tecnológica
 
-```
-┌────────────────────────────────────────────────────────────────────┐
-│ COMPONENTE      │ TECNOLOGIA           │ VERSÃO                    │
-├────────────────────────────────────────────────────────────────────┤
-│ Runtime         │ Python               │ 3.13+                     │
-│ ORM             │ SQLModel             │ 0.0.14+                   │
-│ CLI Framework   │ Typer                │ 0.9.0+                    │
-│ Terminal UI     │ Rich                 │ 13.7.0+                   │
-│ Database        │ SQLite               │ 3.x                       │
-│ Testing         │ pytest + pytest-cov  │ 8.0.0+                    │
-│ Linting         │ ruff                 │ 0.1.0+                    │
-│ Type Checking   │ mypy                 │ 1.8.0+                    │
-└────────────────────────────────────────────────────────────────────┘
-```
+A stack foi escolhida priorizando produtividade do desenvolvedor, type safety e facilidade de manutenção. SQLModel combina validação Pydantic com ORM SQLAlchemy em uma única definição de modelo. Textual fornece a TUI com widgets ricos e CSS-like styling.
 
----
-
-## Métricas
-
-```
-╔════════════════════════════════════════════════════════════════════╗
-║                         MÉTRICAS v1.4.0                            ║
-╠════════════════════════════════════════════════════════════════════╣
-║                                                                    ║
-║   Testes          513        ████████████████████████████  100%    ║
-║   Cobertura       44%        ████████████░░░░░░░░░░░░░░░░   44%    ║
-║   Modelos         9          █████████░░░░░░░░░░░░░░░░░░░   30%    ║
-║   Services        9          █████████░░░░░░░░░░░░░░░░░░░   30%    ║
-║   ADRs            27         ██████████████████████████░░   90%    ║
-║   Business Rules  67         ████████████████████████████  100%    ║
-║                                                                    ║
-╚════════════════════════════════════════════════════════════════════╝
-```
+| Componente    | Tecnologia          | Versão  |
+| ------------- | ------------------- | ------- |
+| Runtime       | Python              | 3.13+   |
+| ORM           | SQLModel            | 0.0.24+ |
+| CLI Framework | Typer               | 0.19.0+ |
+| TUI Framework | Textual             | 0.89.0+ |
+| Terminal UI   | Rich                | 14.0.0+ |
+| Database      | SQLite              | 3.x     |
+| Testing       | pytest + pytest-cov | 8.0+    |
+| Linting       | ruff                | 0.14.0+ |
+| Type Checking | mypy                | 1.18.0+ |
 
 ---
 
 ## Documentação
 
+A documentação técnica está organizada em níveis de detalhe. O diretório `core/` contém documentos de referência essenciais, `decisions/` preserva o histórico de decisões arquiteturais através de ADRs (Architecture Decision Records), e `tui/` contém mockups de design e especificações das telas da interface terminal.
+
 ```
 docs/
 ├── core/
 │   ├── architecture.md     # Design e princípios
-│   ├── business-rules.md   # 67 BRs formalizadas
+│   ├── business-rules.md   # 81 BRs formalizadas
 │   ├── cli-reference.md    # Referência completa CLI
+│   ├── development.md      # Guia de desenvolvimento
+│   ├── quality-metrics.md  # Métricas de qualidade
+│   ├── roadmap.md          # Estado e planejamento
+│   ├── sprints.md          # Planejamento de sprints
+│   ├── technical-debt.md   # Dívida técnica rastreada
 │   └── workflows.md        # Fluxos e estados
 │
-└── decisions/              # 27 ADRs documentadas
+├── decisions/              # 32 ADRs documentadas
+│
+└── tui/                    # Mockups e specs TUI
+    ├── dashboard-mockup-v4.md
+    ├── dashboard-cards-spec.md
+    ├── color-system.md
+    └── routines-weekly-mockup.md
 ```
 
 ---
 
 ## Desenvolvimento
 
-### Metodologia
+O projeto segue uma metodologia de desenvolvimento orientada por especificação, integrando práticas de engenharia de requisitos com técnicas modernas de validação automatizada.
 
-```
-┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│   DOCS   │────>│   BDD    │────>│   TDD    │────>│   CODE   │
-│          │     │          │     │          │     │          │
-│ BR-XXX   │     │ Gherkin  │     │ test_*   │     │ impl     │
-└──────────┘     └──────────┘     └──────────┘     └──────────┘
-```
+### Engenharia de Requisitos
+
+Requisitos funcionais são formalizados como Business Rules (BRs) antes da implementação. Cada BR recebe identificador único (BR-DOMAIN-XXX) e documenta comportamento esperado, restrições e casos de borda. Este artefato estabelece o contrato entre especificação e código, servindo como base para rastreabilidade.
+
+Referências:
+
+- ISO/IEC/IEEE 29148:2018: Systems and Software Engineering - Life Cycle Processes - Requirements Engineering
+- SWEBOK v4.0, Chapter 1: Software Requirements. IEEE Computer Society, 2024
+- Sommerville, I. Software Engineering, 10th ed. Pearson, 2016
+- Wiegers, K.; Beatty, J. Software Requirements, 3rd ed. Microsoft Press, 2013
+
+### Análise Comportamental
+
+BRs são decompostas em cenários executáveis usando Gherkin (DADO/QUANDO/ENTÃO). Os cenários descrevem fluxos concretos em linguagem de domínio, funcionando simultaneamente como especificação e teste de aceitação.
+
+Referências:
+
+- North, D. Introducing BDD. Better Software, 2006
+- Adzic, G. Specification by Example. Manning, 2011
+- Cucumber Documentation. cucumber.io
+- ISO/IEC/IEEE 29119-5:2016: Software Testing - Keyword-Driven Testing
+
+### Implementação
+
+Código é desenvolvido seguindo Test-Driven Development. Testes referenciam BRs pela nomenclatura (test_br_xxx), mantendo rastreabilidade bidirecional entre requisitos, testes e implementação. A pirâmide de testes distribui validações em quatro níveis: unitário (76.0%), integração (11.0%), BDD (10.2%) e end-to-end (2.8%).
+
+Referências:
+
+- Beck, K. Test-Driven Development: By Example. Addison-Wesley, 2002
+- Meszaros, G. xUnit Test Patterns. Addison-Wesley, 2007
+- Fowler, M. TestPyramid. martinfowler.com, 2012
+- ISO/IEC/IEEE 29119-1:2022: Software and Systems Engineering - Software Testing
 
 ### Comandos
 
 ```bash
 # Testes
 python -m pytest tests/ -v
-python -m pytest tests/unit/ -v --cov=src/timeblock
+python -m pytest tests/e2e/ -v
+python -m pytest tests/ --cov=src/timeblock
 
 # Qualidade
 ruff check .
@@ -389,31 +380,32 @@ ruff format .
 mypy src/
 ```
 
-### Commits
-
-```
-type(scope): Descrição em português
-
-Tipos: feat, fix, refactor, test, docs, chore
-```
-
 ---
 
 ## Roadmap
 
+O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão v1.6.0 consolidou a infraestrutura com Docker, DevSecOps e cobertura a 87%. A versão atual (v1.7.0) introduz a TUI com Textual como interface visual complementar à CLI, incluindo dashboard interativo com 6 painéis, navegação por telas e comando demo para showcase.
+
+| Versão | Status    | Features                                  |
+| ------ | --------- | ----------------------------------------- |
+| v1.0.0 | [DONE]    | CLI básica, CRUD eventos                  |
+| v1.1.0 | [DONE]    | Event reordering                          |
+| v1.2.x | [DONE]    | Logging, docs consolidados                |
+| v1.3.x | [DONE]    | Date parser, BDD tests, DI refactor       |
+| v1.4.0 | [DONE]    | Business rules formalizadas, 32 ADRs      |
+| v1.5.0 | [DONE]    | CI/CD dual-repo, i18n, 873 testes         |
+| v1.6.0 | [DONE]    | Docker, DevSecOps, 87% cobertura          |
+| v1.7.0 | [CURRENT] | TUI Textual, dashboard, demo, 1071 testes |
+| v2.0.0 | [PLANNED] | FastAPI REST API + Observabilidade        |
+| v3.0.0 | [FUTURE]  | Microservices Ecosystem (Kafka)           |
+| v4.0.0 | [FUTURE]  | Android App (Kotlin)                      |
+
+---
+
 ```
-┌────────────────────────────────────────────────────────────────────┐
-│ VERSÃO │ STATUS    │ FEATURES                                      │
-├────────────────────────────────────────────────────────────────────┤
-│ v1.0.0 │ [DONE]    │ CLI básica, CRUD eventos                      │
-│ v1.1.0 │ [DONE]    │ Event reordering                              │
-│ v1.2.x │ [DONE]    │ Logging, docs consolidados                    │
-│ v1.4.0 │ [CURRENT] │ Business rules formalizadas                   │
-│ v1.4.0 │ [WIP]     │ MVP Event Reordering, E2E tests               │
-├────────────────────────────────────────────────────────────────────┤
-│ v1.5.0 │ [PLANNED] │ Infra Foundation (Docker, CI/CD)              │
-│ v2.0.0 │ [PLANNED] │ FastAPI REST API + Observabilidade            │
-│ v3.0.0 │ [FUTURE]  │ Microservices Ecosystem (Kafka)               │
-│ v4.0.0 │ [FUTURE]  │ Android App (Kotlin)                          │
-└────────────────────────────────────────────────────────────────────┘
+┌────────────┐
+│ ▓▓▓▓░░░░▓▓ │
+│ ░░▓▓▓▓▓░░░ │   A T O M V S
+│ ▓▓░░░░▓▓▓▓ │
+└────────────┘
 ```

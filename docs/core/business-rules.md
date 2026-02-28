@@ -8,7 +8,7 @@
 
 ---
 
-## Índice
+## Sumário
 
 1. [Introdução e Fundamentos](#1-introdução-e-fundamentos)
 2. [Conceitos do Domínio](#2-conceitos-do-domínio)
@@ -23,6 +23,7 @@
 11. [Validações Globais](#11-validações-globais)
 12. [CLI](#12-cli)
 13. [Tag](#13-tag)
+14. [TUI](#14-tui)
 
 ---
 
@@ -334,6 +335,8 @@ Livros completados: 2
 
 ## 2. Conceitos do Domínio
 
+O modelo de domínio organiza o gerenciamento de tempo em torno de três conceitos centrais: Routines (templates semanais que agrupam hábitos relacionados), Habits (templates de eventos recorrentes que representam o planejamento ideal) e HabitInstances (ocorrências concretas em datas específicas que rastreiam a execução real). Tasks complementam o sistema como eventos independentes e não-recorrentes. As entidades Timer e TimeLog fornecem capacidades de rastreamento de tempo, enquanto Tags oferecem categorização visual.
+
 ### 2.1. Entidades Principais
 
 | Entidade          | Descrição                                              |
@@ -377,6 +380,12 @@ Task (Dentista 14:30 - independente de routine)
 ---
 
 ## 3. Routine
+
+A Routine é a unidade organizacional de mais alto nível no TimeBlock Organizer. Ela representa o plano ideal de uma semana — o desenho intencional de como o usuário quer distribuir seu tempo entre os hábitos que compõem sua identidade. No vocabulário do Atomic Habits, criar uma rotina é um ato de _environment design_: ao posicionar blocos de tempo fixos para exercício, estudo, trabalho profundo e descanso, o usuário está construindo o ambiente temporal onde bons hábitos se tornam o caminho de menor resistência.
+
+Cada rotina agrupa um conjunto de hábitos recorrentes e define o contexto operacional do sistema. Apenas uma rotina pode estar ativa por vez, funcionando como um "modo" que determina quais hábitos aparecem na agenda diária e na TUI. Trocar de rotina é trocar de contexto de vida: a rotina de dias úteis cede lugar à rotina de férias, que por sua vez pode dar espaço a uma rotina de preparação para provas. Essa troca é sempre explícita e consciente — o sistema nunca altera a rotina ativa automaticamente.
+
+É fundamental distinguir a Routine das instâncias que ela gera. A Routine é imutável no sentido conceitual: ela expressa a _intenção_ do usuário, o cenário ideal onde tudo acontece no horário planejado. A realidade do dia a dia se materializa nas HabitInstances, que podem ser ajustadas, adiadas ou puladas sem comprometer o plano original. Quando uma segunda-feira caótica obriga o usuário a reorganizar toda a manhã, suas instâncias mudam mas sua Routine permanece intacta — e na terça-feira, o sistema apresenta novamente o plano ideal como ponto de partida. Essa separação entre intenção e execução é o que permite ao sistema servir simultaneamente como planejador e como registro honesto da realidade.
 
 ### BR-ROUTINE-001: Single Active Constraint
 
@@ -593,6 +602,12 @@ $ routine delete 1 --purge
 
 ## 4. Habit
 
+O Habit é o template que materializa a identidade do usuário em blocos de tempo recorrentes. Onde a Routine define o agrupamento ("minha rotina matinal"), o Habit define a ação específica ("academia das 7h às 8h, dias úteis"). Na filosofia do Atomic Habits, hábitos baseados em identidade são mais duráveis do que hábitos baseados em objetivos. O usuário não "precisa se exercitar" — ele _é_ alguém que se exercita. O campo `title` deveria refletir isso: "Exercício" em vez de "Perder peso".
+
+Cada Habit pertence obrigatoriamente a uma Routine e define três propriedades fundamentais: _o que_ (título), _quando se repete_ (recorrência — dias específicos, dias úteis, todos os dias) e _por quanto tempo_ (horário início/fim). A recorrência é o mecanismo que transforma intenção em sistema: não é necessário decidir diariamente se vai meditar, porque o sistema já posicionou o bloco no horário certo em todos os dias da semana. Essa previsibilidade reduz o custo cognitivo da decisão, que segundo James Clear é o principal inimigo da consistência.
+
+O Habit funciona como _fábrica_ de HabitInstances. Ao criar um hábito com recorrência WEEKDAYS e solicitar geração de instâncias para 3 meses, o sistema produz automaticamente uma instância concreta para cada dia útil no período. Modificar o Habit afeta apenas instâncias futuras (PENDING) — as já executadas preservam o registro histórico fiel. Essa separação entre template e ocorrência é a base de toda a rastreabilidade do sistema.
+
 ### BR-HABIT-001: Estrutura de Habito
 
 **Descrição:** Habit é template de evento recorrente vinculado a Routine.
@@ -749,6 +764,12 @@ instances: list[HabitInstance] = Relationship(
 ---
 
 ## 5. HabitInstance
+
+A HabitInstance é o átomo do TimeBlock Organizer — a menor unidade acionável do sistema. Cada instância representa uma oportunidade concreta e específica de executar um hábito: "Leitura, dia 20 de fevereiro, das 21:00 às 22:00". Enquanto o Habit expressa a intenção recorrente, a HabitInstance captura a realidade de um único dia. É nela que o ciclo de feedback se completa: o usuário planeja (Habit), executa (HabitInstance), mede (Timer/TimeLog) e avalia (substatus).
+
+O ciclo de vida de uma instância segue três estados principais: PENDING (aguardando execução), DONE (concluída) e NOT*DONE (não realizada). Mas a riqueza do modelo está nos substatus que qualificam \_como* cada transição aconteceu. Uma instância DONE pode ser FULL (tempo completo), PARTIAL (tempo reduzido), OVERDONE (ligeiramente acima) ou EXCESSIVE (muito acima do planejado). Uma instância NOT_DONE pode ser SKIPPED (pulada conscientemente, com justificativa) ou IGNORED (expirou sem ação). Essa granularidade transforma um simples checkbox em um registro nuanceado que permite ao usuário identificar padrões e ajustar sua rotina com dados reais.
+
+O cálculo de substatus é automático e baseado no percentual de completude: a razão entre o tempo real de execução e o tempo planejado. Se a meditação planejada para 30 minutos durou 25 minutos, o percentual é 83% e o substatus é PARTIAL. Essa automação libera o usuário de avaliações subjetivas — o sistema calcula, o usuário decide o que fazer com a informação. Cada HabitInstance mantém referência ao seu Habit pai, data específica e horários (que podem diferir do template se o usuário fez ajustes pontuais naquele dia), preservando a separação entre plano e execução.
 
 ### BR-HABITINSTANCE-001: Status Principal
 
@@ -941,6 +962,12 @@ habit edit INSTANCE_ID --start 08:00 --end 09:30
 
 ## 6. Skip
 
+O Skip é o mecanismo que transforma ausência em informação. Na maioria dos sistemas de rastreamento de hábitos, não fazer algo é simplesmente um vazio — um dia sem marcação que pode significar esquecimento, preguiça, doença ou uma decisão racional. O TimeBlock Organizer distingue entre "não fiz porque escolhi não fazer" (Skip) e "não fiz porque ignorei" (Ignored), e dentro do Skip, diferencia _por que_ o usuário optou por pular.
+
+As categorias de SkipReason cobrem os motivos mais comuns: saúde, trabalho, família, viagem, clima, falta de recursos, emergência e outros. Quando o usuário pula um hábito conscientemente e registra o motivo, está gerando dados que o sistema pode usar para identificar padrões. Se toda segunda-feira o hábito "Corrida" é skipado com motivo "Trabalho", talvez a segunda não seja o melhor dia para correr — e a rotina deveria ser ajustada. Uma nota opcional permite contexto adicional: "Reunião de emergência" ou "Gripe, repouso médico".
+
+Essa filosofia se conecta diretamente com o princípio de transparência do sistema. Pular conscientemente não é falhar — é adaptar-se com honestidade. O registro de skips preserva a integridade da cadeia de hábitos: um skip com justificativa não quebra o streak (dependendo da configuração), enquanto uma instância ignorada (que expirou sem ação do usuário) quebra. Essa distinção incentiva o usuário a manter o sistema atualizado mesmo nos dias em que não consegue executar o plano, porque há uma recompensa tangível: a preservação do streak e a geração de dados úteis.
+
 ### BR-SKIP-001: Categorização de Skip
 
 **Descrição:** Skip de habit deve ser categorizado usando enum SkipReason.
@@ -1065,6 +1092,12 @@ Escolha [1-9]: _
 
 ## 7. Streak
 
+O Streak é a métrica motivacional central do TimeBlock Organizer. Ele conta dias consecutivos em que o hábito foi executado (status DONE), e sua simples existência cria um poderoso incentivo psicológico: quanto maior a sequência, maior o custo percebido de quebrá-la. Jerry Seinfeld popularizou esse conceito como "don't break the chain" — marque um X no calendário todo dia, e a corrente de Xs se torna a motivação.
+
+O cálculo de streak no TimeBlock é intencionalmente justo com o usuário. A contagem só considera dias em que o hábito tinha instância agendada: se o hábito é WEEKDAYS e hoje é sábado, a ausência de execução no fim de semana não quebra a cadeia. Da mesma forma, instâncias SKIPPED com justificativa são tratadas como neutras — o dia não conta como executado, mas também não interrompe a sequência. Apenas instâncias com status NOT_DONE e substatus IGNORED (o usuário simplesmente não apareceu) quebram o streak. Essa lógica reflete a filosofia de que a vida acontece e adaptações conscientes não deveriam ser punidas.
+
+O sistema mantém dois valores: o streak atual (corrente em andamento) e o melhor streak histórico (recorde pessoal). A visualização na TUI usa esses valores no card de Métricas do Dashboard e no painel de detalhes da tela de Rotinas, criando um loop de feedback imediato que conecta a ação diária ao progresso de longo prazo.
+
 ### BR-STREAK-001: Algoritmo de Cálculo
 
 **Descrição:** Streak conta dias consecutivos com `status = DONE`, do mais recente para trás.
@@ -1171,6 +1204,12 @@ def calculate_streak(habit_id: int) -> int:
 ---
 
 ## 8. Task
+
+A Task é o complemento pontual dos Habits recorrentes. Enquanto hábitos representam identidade e repetição ("sou alguém que lê todos os dias"), tasks representam compromissos únicos e finitos ("dentista dia 25 às 14h", "entregar relatório até sexta"). São os eventos que não fazem parte do plano ideal da semana, mas que precisam ocupar espaço na agenda e competir por atenção com os blocos de hábitos.
+
+A independência estrutural da Task em relação à Routine é uma decisão deliberada de design. Uma tarefa de trabalho não pertence à "Rotina Matinal" nem à "Rotina Noturna" — ela existe por si só, visível independente de qual rotina está ativa. Trocar de rotina não esconde tarefas pendentes. Deletar uma rotina não afeta tarefas. Essa separação garante que compromissos pontuais nunca desapareçam acidentalmente ao reorganizar hábitos recorrentes.
+
+O modelo de Task é intencionalmente simples: título, data/hora, descrição opcional e um estado binário derivado (pendente se `completed_datetime` é nulo, concluída se preenchido). Não há prioridade, não há subtarefas, não há dependências. Essa simplicidade é proposital: o TimeBlock Organizer não é um gerenciador de projetos. Tasks existem para que eventos pontuais possam ser posicionados na linha do tempo ao lado dos hábitos, criando uma visão completa do dia — e para que o sistema possa detectar conflitos entre tasks e hábitos da rotina.
 
 ### BR-TASK-001: Estrutura de Task
 
@@ -1345,6 +1384,12 @@ task reopen ID
 ---
 
 ## 9. Timer
+
+O Timer fecha o loop de feedback do Atomic Habits. Planejar (Routine/Habit), executar (HabitInstance), e agora _medir_ — com precisão de segundos, quanto tempo o usuário realmente dedicou a cada atividade. James Clear escreve que "o que é medido é gerenciado", e o Timer torna essa medição automática e sem fricção: iniciar é um comando, pausar é outro, parar registra o tempo no banco.
+
+O Timer opera sobre uma entidade única (um HabitInstance ou uma Task) e produz um TimeLog ao final: registro imutável com horário de início e fim reais. A diferença entre o tempo planejado (definido no Habit) e o tempo real (registrado pelo Timer) alimenta diretamente o cálculo de substatus da HabitInstance — o percentual de completude que determina se a execução foi FULL, PARTIAL, OVERDONE ou EXCESSIVE. Sem o Timer, o usuário precisaria informar manualmente a duração real ao marcar um hábito como concluído, o que introduz imprecisão e fricção.
+
+O ciclo de vida do Timer inclui estados intermediários que refletem a realidade de uma sessão de trabalho: RUNNING (contando), PAUSED (interrupção temporária) e STOPPED (sessão encerrada e salva). O cancelamento descarta a sessão sem registro, útil quando o usuário inicia por engano ou decide que a atividade mudou de natureza. A visibilidade do timer ativo é global — ele aparece na status bar da TUI independente da screen, garantindo que o usuário nunca perca noção do tempo mesmo enquanto navega pelo sistema.
 
 ### BR-TIMER-001: Single Active Timer
 
@@ -1629,6 +1674,12 @@ habit log INSTANCE_ID --duration 90
 
 ## 10. Event Reordering
 
+O Event Reordering trata do problema mais frequente no uso diário de time blocking: o que acontece quando a realidade diverge do plano. Um hábito atrasou quinze minutos, uma reunião invadiu o horário da leitura, o almoço se estendeu. Em um sistema rígido, esses desvios gerariam erros ou bloqueios. O TimeBlock Organizer adota a abordagem oposta: conflitos são permitidos, detectados, apresentados e — crucialmente — nunca resolvidos automaticamente.
+
+Essa filosofia reflete o princípio de Controle do Usuário: o sistema informa, o usuário decide. Quando dois eventos ocupam o mesmo intervalo de tempo, o sistema detecta a sobreposição e a apresenta visualmente (blocos lado a lado na timeline, borda vermelha), mas não move nenhum evento. Não sugere novos horários. Não aplica regras de prioridade. A razão é simples: o sistema não tem informação suficiente para tomar essa decisão. Só o usuário sabe se a reunião que invadiu o horário de leitura é mais importante que a leitura, ou se prefere encurtar ambas, ou se vai compensar no dia seguinte.
+
+Conflitos são calculados dinamicamente por comparação temporal entre eventos, não armazenados como entidade separada. Isso garante que, ao ajustar o horário de uma instância, os conflitos se recalculam automaticamente. O algoritmo de sugestão de reordenamento automático (Simple Cascade) está planejado para v2.0, mas seguirá o mesmo princípio: o sistema _sugerirá_, nunca _imporá_.
+
 ### BR-REORDER-001: Definição de Conflito
 
 **Descrição:** Conflito ocorre quando dois eventos tem sobreposição temporal no mesmo dia.
@@ -1747,6 +1798,10 @@ Iniciar timer mesmo assim? [Y/n]: y
 
 ## 11. Validações Globais
 
+As Validações Globais são restrições estruturais que garantem integridade dos dados independente do domínio. Correspondem ao Nível 1 da hierarquia de regras (seção 1.2): violá-las torna o sistema inconsistente, e por isso são aplicadas incondicionalmente em todas as operações de escrita. Um horário de início posterior ao de fim, uma duração negativa ou um título vazio são erros que nenhuma lógica de domínio deveria permitir, independente do contexto.
+
+Essas validações operam na camada de services (antes de chegar ao banco) e na camada de models (restrições de tipo e formato). A duplicidade é intencional: a validação no service garante feedback imediato e mensagens legíveis para o usuário, enquanto a validação no model serve como última linha de defesa contra bugs na camada superior. Erros de validação são sempre exibidos inline na TUI e com mensagem clara na CLI, indicando exatamente qual campo falhou e qual é o formato esperado.
+
 ### BR-VAL-001: Validação de Horários
 
 **Regras:**
@@ -1796,6 +1851,10 @@ Iniciar timer mesmo assim? [Y/n]: y
 ---
 
 ## 12. CLI
+
+A CLI (Command Line Interface) é a interface primária do TimeBlock Organizer e a única que existia antes da TUI. Toda funcionalidade do sistema é acessível via comandos no terminal, seguindo o padrão resource-first definido no ADR-005: o substantivo vem antes do verbo (`habit create`, `routine activate`, `task list`). Esse padrão torna os comandos previsíveis e autodescritivos — um usuário que sabe usar `habit create` adivinha corretamente que `habit list`, `habit edit` e `habit delete` existem.
+
+A CLI serve dois públicos com necessidades distintas. Para uso interativo diário, ela oferece atalhos, flags curtas e outputs formatados com Rich. Para automação e scripts, ela garante códigos de saída consistentes, outputs parseáveis e comportamento determinístico (sem prompts interativos quando o input é completo). As regras desta seção formalizam comportamentos que cruzam domínios: validação de flags dependentes (se informou `--start`, deve informar `--end`), formatos de data/hora aceitos e padrões de output entre comandos.
 
 ### BR-CLI-001: Validação de Flags Dependentes
 
@@ -1907,6 +1966,10 @@ $ habit create --title "Academia" --start 07:00
 
 ## 13. Tag
 
+Tags são um sistema leve de categorização visual que complementa a organização por rotina. Enquanto a Routine agrupa hábitos por contexto de vida (matinal, noturna, férias) e a recorrência define _quando_ acontecem, a Tag permite agrupar hábitos e tasks por _natureza_: saúde, estudo, trabalho, lazer. Um hábito de corrida na rotina matinal e um hábito de musculação na rotina noturna podem compartilhar a mesma tag "Fitness", criando uma dimensão transversal de organização.
+
+O modelo é deliberadamente mínimo: uma tag tem uma cor (obrigatória, com default amarelo) e um nome (opcional — uma tag pode ser puramente cromática). Cada hábito ou task pode ter no máximo uma tag. A simplicidade é intencional: tags não são folders, projetos ou hierarquias. São um canal visual rápido que permite ao usuário identificar categorias de atividade na timeline e nos relatórios sem adicionar complexidade ao modelo de dados. Deletar uma tag não afeta os hábitos e tasks associados — apenas remove a cor, setando o campo para nulo.
+
 ### BR-TAG-001: Estrutura de Tag
 
 **Descrição:** Tag é entidade para categorização de habits e tasks.
@@ -1967,16 +2030,858 @@ Tag (1) ----< Tasks (N)
 
 ---
 
+## 14. TUI
+
+A TUI (Terminal User Interface) é a segunda interface do TimeBlock Organizer, projetada para o uso interativo diário que a CLI, por sua natureza sequencial, não consegue atender com a mesma fluidez. Consultar a agenda, marcar hábitos como concluídos, iniciar um timer e verificar métricas são operações que no CLI exigem múltiplos comandos separados; na TUI, estão a um ou dois keybindings de distância, visíveis simultaneamente na mesma tela.
+
+A TUI foi implementada com o framework Textual (ADR-031), que utiliza Rich internamente — uma dependência que o projeto já possui para a formatação do output da CLI. A decisão arquitetural mais importante é que a TUI compartilha 100% da camada de services com a CLI: nenhuma lógica de negócio é duplicada. A TUI é exclusivamente interface — captura input do usuário, chama o service apropriado com uma session de banco de dados efêmera (session-per-action), e exibe o resultado com widgets estilizados. Se um service funciona na CLI, funciona na TUI; se uma regra de negócio muda, muda em um único lugar.
+
+O design visual segue um sistema Material-like com paleta de cores definida em TCSS (arquivo único, single source of truth), cards com bordas arredondadas, spacing consistente e hierarquia visual clara entre texto primário, secundário e metadados. A TUI opera em cinco screens navegáveis por sidebar (Dashboard, Routines, Habits, Tasks, Timer), cada uma com keybindings específicos documentados nas BRs a seguir. O Dashboard concentra a visão do dia com alta densidade informacional; a tela de Rotinas exibe a semana completa em grade temporal; as demais screens oferecem CRUD completo com formulários inline.
+
+**Referências:** ADR-006 (decisão original), ADR-031 (implementação), ADR-007 (service layer)
+
+---
+
+### BR-TUI-001: Entry Point Detection
+
+**Descrição:** O binário `timeblock` sem argumentos abre a TUI. Com argumentos, executa CLI normalmente. Se Textual não está instalado, exibe mensagem de orientação.
+
+**Regras:**
+
+1. `timeblock` (sem args) → Abre TUI
+2. `timeblock <qualquer-arg>` → Executa CLI (Typer)
+3. `timeblock --help` → Help da CLI (tem argumento)
+4. Se Textual não instalado e sem args → Mensagem orientando instalação
+5. CLI NUNCA depende de Textual (import condicional)
+
+**Implementação:**
+
+```python
+import sys
+
+def main():
+    if len(sys.argv) <= 1:
+        try:
+            from timeblock.tui.app import TimeBlockApp
+            TimeBlockApp().run()
+        except ImportError:
+            print("[WARN] TUI requer 'textual'.")
+            print("       Instale: pip install timeblock-organizer[tui]")
+            print("       Uso CLI: timeblock --help")
+    else:
+        app()  # Typer
+```
+
+**Testes:**
+
+- `test_br_tui_001_no_args_launches_tui`
+- `test_br_tui_001_with_args_launches_cli`
+- `test_br_tui_001_help_uses_cli`
+- `test_br_tui_001_fallback_without_textual`
+
+---
+
+### BR-TUI-002: Screen Navigation
+
+**Descrição:** A TUI possui 5 screens navegáveis por sidebar. Navegação por keybindings numéricos ou mnemônicos. Apenas uma screen ativa por vez.
+
+**Regras:**
+
+1. Screens disponíveis: Dashboard, Routines, Habits, Tasks, Timer
+2. Screen inicial ao abrir: Dashboard
+3. Keybindings numéricos: `1`=Dashboard, `2`=Routines, `3`=Habits, `4`=Tasks, `5`=Timer
+4. Keybindings mnemônicos: `d`=Dashboard, `r`=Routines, `h`=Habits, `t`=Tasks, `m`=Timer (de "medidor")
+5. Sidebar exibe todas as screens com indicador da screen ativa
+6. Navegação preserva estado da screen anterior (não reseta dados em edição)
+
+**Testes:**
+
+- `test_br_tui_002_initial_screen_is_dashboard`
+- `test_br_tui_002_numeric_keybinding_navigation`
+- `test_br_tui_002_mnemonic_keybinding_navigation`
+- `test_br_tui_002_sidebar_shows_active_screen`
+
+---
+
+### BR-TUI-003: Dashboard Screen
+
+**Descrição:** O Dashboard exibe visão completa e interativa do dia corrente com alta densidade informacional. Layout híbrido composto por: header bar com contexto resumido, agenda vertical estilo Google Calendar com blocos de tempo proporcionais, e grid de cards (hábitos, tarefas, timer, métricas). Serve como ponto de entrada principal e painel de controle diário.
+
+**Referências:** ADR-031 seção 4, BR-TUI-008 (visual), BR-TUI-009 (services)
+
+**Regras:**
+
+1. **Header Bar:** barra compacta (3 linhas) exibe rotina ativa, progresso do dia (X/Y hábitos + barra visual + percentual), contagem de tarefas pendentes, timer ativo (se houver) e data atual. Se não há rotina ativa, exibe "[Sem rotina]" com orientação para criar/ativar
+2. **Agenda do Dia (timeline vertical):** coluna esquerda do conteúdo. Régua de tempo com granularidade de 30 minutos (06:00, 06:30, 07:00, ..., 22:00) e blocos proporcionais à duração — um bloco de 30min ocupa 1 slot visual, um de 1h ocupa 2 slots, etc. Cada bloco exibe: nome do evento, status com cor, duração formatada (Xmin para < 60, Xh ou XhYY para >= 60). Marcador `▸` indica slot atual. Blocos concluídos usam `░` ($success), ativo usa `▓` ($primary-light), pendentes usam `┄` ($muted), skipados usam `╌` ($warning). Horários livres entre blocos exibem `┈ livre ┈` centralizado. Conflitos (overlaps) renderizam blocos lado a lado divididos por `│`
+3. **Card Hábitos:** lista instâncias do dia com indicador de status (✓ done, ▶ running, ✗ skipped, ! missed, · pending), nome, horário início–fim, duração real/planejada e sparkline de esforço relativo (◼◼◼). Título inclui contador X/Y. Quick actions: `enter`=done (solicita duração), `s`=skip (solicita categoria), `g`=navegar para screen Habits
+4. **Card Tarefas:** lista tarefas pendentes com indicador de prioridade (!! overdue+alta, ! alta, ▪ média, · baixa), nome, prioridade, deadline abreviado. Tarefas vencidas destacadas em $error com marcador `venc.`. Quick actions: `enter`=detalhes, `c`=concluir, `g`=navegar para screen Tasks
+5. **Card Timer:** display centralizado com tempo decorrido, evento associado e status (▶ RUNNING, ⏸ PAUSED, ⏹ IDLE). Resumo do dia: sessões concluídas, tempo total acumulado, média por sessão. Keybindings contextuais (exibe apenas ações válidas para o estado atual). Se idle, exibe último timer concluído com horário
+6. **Card Métricas:** streak atual e melhor streak, barras de completude 7d e 30d com percentual. Histórico semanal com barra de progresso + dot matrix por hábito (✓/·) por dia. Dia atual destacado com `← hoje`. Cores das barras: verde (≥ 80%), amarelo (50–79%), vermelho (< 50%). Filtro de período alternável com `f` (7d → 14d → 30d)
+7. **Layout:** três colunas — sidebar fixa (22 chars), agenda do dia (coluna central, scroll vertical), cards em grid (coluna direita, 2 cards empilhados por subcoluna)
+8. **Navegação entre zonas:** `Tab`/`Shift+Tab` navegam entre zonas focáveis (Agenda → Hábitos → Tarefas → Timer → Métricas → cicla). Cada zona tem keybindings próprios. `g` em qualquer zona navega para a screen completa correspondente
+9. **Refresh:** dados atualizados ao entrar na screen (on_focus) e após qualquer quick action. Timer atualiza header e card Timer a cada segundo quando ativo
+10. **Responsividade:** 3 breakpoints — ≥120 cols (completo: 3 colunas, agenda + cards), 80–119 cols (compacto: agenda reduzida, cards com conteúdo truncado), <80 cols (minimal: layout 1 coluna, agenda oculta, cards empilhados verticalmente)
+
+**Mockup de referência:** `docs/tui/dashboard-mockup-v3.md`
+
+**Composição de widgets:**
+
+```python
+class DashboardScreen(Screen):
+    """Dashboard principal com layout híbrido."""
+
+    def compose(self) -> ComposeResult:
+        yield HeaderBar(id="header-bar")
+        with Horizontal(id="content"):
+            yield AgendaWidget(id="agenda")
+            with Vertical(id="cards"):
+                yield HabitListWidget(id="habits-today")
+                yield TaskListWidget(id="tasks-pending")
+            with Vertical(id="cards-right"):
+                yield TimerDisplayWidget(id="timer-display")
+                yield MetricsPanelWidget(id="metrics-panel")
+```
+
+**Testes:**
+
+- `test_br_tui_003_header_shows_routine_and_progress`
+- `test_br_tui_003_header_shows_no_routine_message`
+- `test_br_tui_003_header_shows_timer_active`
+- `test_br_tui_003_header_shows_task_count`
+- `test_br_tui_003_agenda_renders_day_blocks`
+- `test_br_tui_003_agenda_shows_current_time_marker`
+- `test_br_tui_003_agenda_block_colors_by_status`
+- `test_br_tui_003_agenda_shows_free_slots`
+- `test_br_tui_003_agenda_renders_conflict_side_by_side`
+- `test_br_tui_003_agenda_running_block_with_projection`
+- `test_br_tui_003_habits_list_with_status_and_time`
+- `test_br_tui_003_habits_shows_effort_sparkline`
+- `test_br_tui_003_habits_quick_done_action`
+- `test_br_tui_003_habits_quick_skip_action`
+- `test_br_tui_003_habits_go_to_screen`
+- `test_br_tui_003_tasks_sorted_by_priority`
+- `test_br_tui_003_tasks_overdue_highlighted`
+- `test_br_tui_003_tasks_quick_complete_action`
+- `test_br_tui_003_timer_shows_active_session`
+- `test_br_tui_003_timer_shows_idle_with_last_session`
+- `test_br_tui_003_timer_shows_session_summary`
+- `test_br_tui_003_timer_contextual_keybindings`
+- `test_br_tui_003_metrics_shows_streak`
+- `test_br_tui_003_metrics_shows_weekly_history`
+- `test_br_tui_003_metrics_dot_matrix_per_habit`
+- `test_br_tui_003_metrics_period_filter`
+- `test_br_tui_003_metrics_bar_colors_by_threshold`
+- `test_br_tui_003_responsive_compact_layout`
+- `test_br_tui_003_responsive_minimal_layout`
+- `test_br_tui_003_tab_navigates_zones`
+- `test_br_tui_003_refreshes_on_focus`
+- `test_br_tui_003_refreshes_after_quick_action`
+- `test_br_tui_003_timer_updates_every_second`
+
+---
+
+### BR-TUI-004: Global Keybindings (REVISADA 25/02/2026)
+
+**Descrição:** Keybindings globais funcionam em qualquer screen. Ações exigem modificador Ctrl. Navegação pura não exige modificador. Ações destrutivas e irreversíveis exigem modal de confirmação.
+
+**Política de modificador:**
+
+```plaintext
+SEM modificador (navegação pura, sem risco):
+  Tab / Shift+Tab ...... navegar entre zonas/cards
+  1-5 .................. trocar screen (numérico)
+  d/r/h/t/m ............ trocar screen (mnemônico)
+  Setas / j/k .......... navegar dentro do card
+  ? .................... help overlay (leitura)
+  Escape ............... fechar modal / voltar ao Dashboard
+
+COM Ctrl (todas as ações):
+  Ctrl+Q ............... sair da TUI [MODAL]
+  Ctrl+Enter ........... confirmar / mark done [MODAL se irreversível]
+  Ctrl+S ............... skip (hábito) / start (timer)
+  Ctrl+P ............... pause/resume (timer)
+  Ctrl+X ............... deletar item selecionado [MODAL]
+  Ctrl+N ............... novo item (abre formulário)
+  Ctrl+E ............... editar item selecionado
+  Ctrl+K ............... complete task [MODAL]
+  Ctrl+W ............... cancel timer [MODAL]
+
+PROIBIDOS (reservados pelo OS):
+  Ctrl+C ............... SIGINT (nunca capturar)
+  Ctrl+Z ............... SIGTSTP (nunca capturar)
+  Ctrl+D ............... EOF (nunca capturar)
+```
+
+**Modal de confirmação exigido em:**
+
+- Ctrl+Q (sair, especialmente com timer ativo)
+- Ctrl+X (deletar item)
+- Ctrl+W (cancelar timer, descarta sessão)
+- Ctrl+K (completar task, irreversível)
+- Ctrl+Enter (mark done, quando hábito já done/overdone)
+
+**Regras:**
+
+1. Todas as ações exigem modificador Ctrl
+2. Navegação pura (Tab, setas, números, ?, Escape) sem modificador
+3. Ações destrutivas/irreversíveis exigem modal de confirmação
+4. Modal exibe nome do item afetado e ação a ser executada
+5. Modal responde apenas a Enter (confirmar) e Escape (cancelar)
+6. Ctrl+C, Ctrl+Z, Ctrl+D nunca são capturados pela TUI
+7. Se timer ativo e Ctrl+Q, modal informa que sessão será perdida
+8. Keybindings de screen (CRUD) só funcionam na screen/zona ativa
+9. Help overlay (?) lista todos os keybindings com modificadores
+
+**Testes:**
+
+- `test_br_tui_004_quit_requires_ctrl_q`
+- `test_br_tui_004_plain_q_does_nothing`
+- `test_br_tui_004_quit_shows_confirmation_modal`
+- `test_br_tui_004_quit_with_timer_warns_session_loss`
+- `test_br_tui_004_modal_only_responds_enter_escape`
+- `test_br_tui_004_help_overlay_shows_ctrl_bindings`
+- `test_br_tui_004_escape_closes_modal`
+- `test_br_tui_004_escape_returns_to_dashboard`
+- `test_br_tui_004_ctrl_c_not_captured`
+
+---
+
+### BR-TUI-005: CRUD Operations Pattern
+
+**Descrição:** Todas as screens com CRUD seguem padrão consistente de interação. Create e Update usam formulários inline. Delete requer confirmação.
+
+**Regras:**
+
+1. `n` ou `a` → Novo item (abre formulário inline)
+2. `e` → Editar item selecionado
+3. `x` → Deletar item selecionado (abre confirmação)
+4. `enter` → Ver detalhes do item selecionado
+5. Confirmação de delete exibe nome do item e requer `y` explícito
+6. Operações de escrita usam session-per-action (ADR-031)
+7. Após operação bem-sucedida, lista atualizada automaticamente
+8. Erros de validação exibidos inline (não modal)
+
+**Testes:**
+
+- `test_br_tui_005_create_opens_form`
+- `test_br_tui_005_edit_opens_prefilled_form`
+- `test_br_tui_005_delete_requires_confirmation`
+- `test_br_tui_005_delete_confirmation_shows_name`
+- `test_br_tui_005_successful_operation_refreshes_list`
+- `test_br_tui_005_validation_error_shown_inline`
+
+---
+
+### BR-TUI-006: Timer Screen Live Display
+
+**Descrição:** O Timer screen exibe contagem em tempo real com atualização a cada segundo. Suporta start, pause, resume, stop e cancel. Integra com TimerService existente.
+
+**Regras:**
+
+1. Display atualiza a cada 1 segundo (set_interval)
+2. Keybindings de timer: `s`=start, `p`=pause/resume, `enter`=stop, `c`=cancel
+3. Display mostra: tempo decorrido, evento associado, status (running/paused)
+4. Pause congela display; resume retoma contagem
+5. Stop salva sessão e exibe resumo
+6. Cancel descarta sessão com confirmação
+7. Timer ativo visível na status bar de qualquer screen
+
+**Testes:**
+
+- `test_br_tui_006_timer_display_updates`
+- `test_br_tui_006_start_keybinding`
+- `test_br_tui_006_pause_resume_toggle`
+- `test_br_tui_006_stop_saves_session`
+- `test_br_tui_006_cancel_requires_confirmation`
+- `test_br_tui_006_active_timer_in_status_bar`
+
+---
+
+### BR-TUI-007: Footer Contextual (REVISADA 25/02/2026)
+
+**Descrição:** Barra de rodapé persistente com três seções: rotina ativa (esquerda, persistente), keybindings da zona focada (centro, contextual) e timer + hora (direita, persistente). O header exibe informação (o quê), o footer exibe ações (o que fazer).
+
+**Layout:**
+
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│ Rotina Matinal     │  Ctrl+Enter done  Ctrl+S skip    │ ▶ 47:23    14:32 │
+└────────────────────────────────────────────────────────────────────────────┘
+  c_left (1fr)         c_center (1fr)                     c_right (auto)
+```
+
+**Keybindings por zona focada:**
+
+| Zona    | Footer center                                 |
+| ------- | --------------------------------------------- |
+| Agenda  | `Ctrl+Enter done  Ctrl+S skip`                |
+| Hábitos | `Ctrl+Enter done  Ctrl+S skip`                |
+| Tarefas | `Ctrl+K complete  Ctrl+Enter detalhe`         |
+| Timer   | `Ctrl+S start  Ctrl+P pause  Ctrl+Enter stop` |
+| Nenhum  | `Tab navegar  ? ajuda  Ctrl+Q sair`           |
+
+**Regras:**
+
+1. Posição: rodapé, largura total, 1 linha de altura
+2. Seção esquerda: nome da rotina ativa. "[Sem rotina]" se nenhuma
+3. Seção central: keybindings da zona/card focado. Atualiza em on_focus
+4. Seção direita: timer elapsed (atualiza 1s) + hora HH:MM (atualiza 1min)
+5. Tecla em Overlay0 #6C7086, label da ação em Subtext0 #A6ADC8
+6. Timer exibe ícone de estado: ▶ (running, Mauve #CBA6F7), ⏸ (paused, Yellow #F9E2AF)
+7. Se nenhum timer ativo, seção direita exibe apenas hora
+8. Footer visível em todas as screens, não apenas no Dashboard
+
+**Testes:**
+
+- `test_br_tui_007_footer_shows_active_routine`
+- `test_br_tui_007_footer_shows_no_routine`
+- `test_br_tui_007_footer_shows_current_time`
+- `test_br_tui_007_footer_keybindings_change_on_focus`
+- `test_br_tui_007_footer_agenda_zone_keybindings`
+- `test_br_tui_007_footer_habits_zone_keybindings`
+- `test_br_tui_007_footer_tasks_zone_keybindings`
+- `test_br_tui_007_footer_timer_zone_keybindings`
+- `test_br_tui_007_footer_default_keybindings`
+- `test_br_tui_007_footer_timer_updates_every_second`
+
+---
+
+### BR-TUI-003-R12: Viewport-Aware Truncation
+
+**Descrição:** Cards não definem limite fixo de itens. A quantidade exibida é determinada pela altura disponível do viewport. Itens que excedem o viewport são indicados por overflow indicator.
+
+**Regras:**
+
+1. Máximo de itens visíveis = viewport_height do card - 2 (bordas)
+2. Se total > visíveis, exibe `+N ▼` no rodapé interno, alinhado à direita
+3. Cor do indicador: Overlay0 #6C7086
+4. Scroll interno com j/k quando card está focado (Tab)
+5. Item selecionado (cursor) indicado por fundo Surface0 #313244
+6. Scroll mantém item selecionado visível (auto-scroll)
+
+**Testes:**
+
+- `test_br_tui_003_r12_no_fixed_item_limit`
+- `test_br_tui_003_r12_overflow_indicator_shown`
+- `test_br_tui_003_r12_overflow_count_correct`
+- `test_br_tui_003_r12_scroll_with_jk`
+- `test_br_tui_003_r12_selected_item_always_visible`
+
+---
+
+### BR-TUI-003-R13: Régua de Horário Adaptativa
+
+**Descrição:** A agenda exibe range de horários baseado nos eventos do dia, com piso e teto para evitar espaço desperdiçado.
+
+**Algoritmo:** `range_start = min(06, first_event_hour - 1)`, `range_end = max(22, last_event_hour + 1)`
+
+**Regras:**
+
+1. Range: `min(06, first_event - 1)` até `max(22, last_event + 1)`
+2. Piso absoluto: 06:00 (não exibe antes das 06:00)
+3. Teto absoluto: 23:00 (não exibe após 23:00)
+4. Granularidade: 30 minutos = 1 linha
+5. Se nenhum evento no dia, exibe 06:00-22:00
+
+**Testes:**
+
+- `test_br_tui_003_r13_range_adapts_to_events`
+- `test_br_tui_003_r13_floor_06_ceiling_22`
+- `test_br_tui_003_r13_early_event_extends_range`
+- `test_br_tui_003_r13_no_events_default_range`
+- `test_br_tui_003_r13_granularity_30min`
+
+---
+
+### BR-TUI-003-R14: Subtítulo do Card Hábitos
+
+**Descrição:** O border_title do card Hábitos exibe dot matrix com contagem e percentual de completude do dia.
+
+**Formato:** `●●●○○○ X/Y Z%` onde ● = done/running, ○ = pending/not_done
+
+**Regras:**
+
+1. X = instâncias com status done (qualquer substatus) + running
+2. Y = total de instâncias agendadas para hoje
+3. Z = percentual (X / Y \* 100), arredondado
+4. Dot matrix: 1 dot por instância, ● preenchido, ○ vazio
+5. Máximo de dots exibidos: min(Y, 10). Se Y > 10, exibe apenas X/Y Z%
+6. Cor dos ● e do Z%: Green #A6E3A1 (>= 80%), Yellow #F9E2AF (50-79%), Red #F38BA8 (< 50%)
+7. Cor dos ○: Overlay0 #6C7086
+
+**Testes:**
+
+- `test_br_tui_003_r14_dot_matrix_count`
+- `test_br_tui_003_r14_percentage_calculation`
+- `test_br_tui_003_r14_color_green_above_80`
+- `test_br_tui_003_r14_color_yellow_50_to_79`
+- `test_br_tui_003_r14_color_red_below_50`
+- `test_br_tui_003_r14_max_10_dots`
+- `test_br_tui_003_r14_running_counts_as_done`
+
+---
+
+### BR-TUI-003-R15: Auto-scroll na Agenda
+
+**Descrição:** Ao abrir o dashboard, a agenda faz scroll automático para posicionar a hora atual no terço superior do viewport.
+
+**Regras:**
+
+1. Ao montar a screen (on_mount), agenda faz scroll para hora atual
+2. Posição: hora atual no terço superior do viewport visível
+3. Se hora atual está antes do primeiro evento, scroll para o topo
+4. Se hora atual está após o último evento, scroll para o final
+5. Scroll automático ocorre apenas no mount, não a cada refresh
+
+**Testes:**
+
+- `test_br_tui_003_r15_autoscroll_on_mount`
+- `test_br_tui_003_r15_current_time_upper_third`
+- `test_br_tui_003_r15_no_scroll_if_fits_viewport`
+
+---
+
+### BR-TUI-003-R16: Marcador de Hora Atual
+
+**Descrição:** O slot correspondente à hora atual recebe marcador visual ▸ no início da linha, cor Mauve #CBA6F7.
+
+**Regras:**
+
+1. Marcador `▸` posicionado antes do horário no slot atual
+2. Cor do marcador: Mauve #CBA6F7
+3. Slot atual = slot de 30min que contém a hora corrente
+4. Apenas 1 marcador visível por vez
+5. Marcador atualiza a cada 30 minutos (quando slot muda)
+
+**Testes:**
+
+- `test_br_tui_003_r16_marker_on_current_slot`
+- `test_br_tui_003_r16_marker_color_mauve`
+- `test_br_tui_003_r16_only_one_marker`
+
+---
+
+### BR-TUI-003-R17: Indicador de Tempo Livre
+
+**Descrição:** Gaps de 30 minutos ou mais entre blocos exibem indicador `┈ livre ┈` centralizado em Overlay0 #6C7086.
+
+**Regras:**
+
+1. Gap = tempo entre end de um bloco e start do próximo
+2. Gaps >= 30 minutos exibem `┈ livre ┈` centralizado
+3. Gaps < 30 minutos não exibem indicador (só espaço vazio)
+4. Cor do indicador: Overlay0 #6C7086
+5. Proporcionalidade mantida: gap de 1h = 2 linhas (indicador na primeira)
+
+**Testes:**
+
+- `test_br_tui_003_r17_gap_30min_shows_indicator`
+- `test_br_tui_003_r17_gap_under_30min_no_indicator`
+- `test_br_tui_003_r17_indicator_centered`
+- `test_br_tui_003_r17_indicator_color_overlay0`
+
+---
+
+### BR-TUI-003-R18: Effort Bar nos Hábitos
+
+**Descrição:** Cada hábito exibe barra de esforço proporcional ao tempo real dedicado versus planejado. Fórmula: `filled = round((actual / planned) * 5)`, clamp [0, 7].
+
+**Regras:**
+
+1. Base: 5 dots. Overflow: até 7 dots (+40% max)
+2. Dot cheio: `●`, cor do status
+3. Dot vazio: `·`, Overlay0 #6C7086
+4. Not_done (qualquer substatus): `─────`, cor do status
+5. Pending (sem registro): `·····`, Overlay0
+6. Largura fixa: 5 chars (base) + até 2 chars (overflow)
+
+**Testes:**
+
+- `test_br_tui_003_r18_100_percent_5_dots`
+- `test_br_tui_003_r18_80_percent_4_dots`
+- `test_br_tui_003_r18_overflow_120_percent_6_dots`
+- `test_br_tui_003_r18_max_overflow_7_dots`
+- `test_br_tui_003_r18_not_done_dashes`
+- `test_br_tui_003_r18_pending_empty_dots`
+
+---
+
+### BR-TUI-003-R19: Ordenação dos Hábitos
+
+**Descrição:** Hábitos no card são ordenados cronologicamente pelo horário de início planejado.
+
+**Regras:**
+
+1. Ordenação: ascendente por `start_time` do hábito
+2. Hábitos sem horário definido ficam no final
+3. Hábito com status running é sempre visível (auto-scroll se necessário)
+4. Empate em horário: ordem alfabética por nome
+
+**Testes:**
+
+- `test_br_tui_003_r19_sorted_by_start_time`
+- `test_br_tui_003_r19_no_time_at_end`
+- `test_br_tui_003_r19_running_always_visible`
+
+---
+
+### BR-TUI-003-R20: Ordenação das Tarefas
+
+**Descrição:** Tarefas no card são ordenadas por urgência, com concluídas e canceladas agrupadas no final.
+
+**Regras:**
+
+1. Grupo 1 (topo): overdue, ordenado por data ascendente (mais atrasada primeiro)
+2. Grupo 2: pendentes, ordenado por proximidade ascendente (mais próxima primeiro)
+3. Grupo 3 (final): done, ordenado por data de conclusão descendente
+4. Grupo 4 (final): cancelled, ordenado por data descendente
+
+**Testes:**
+
+- `test_br_tui_003_r20_overdue_first`
+- `test_br_tui_003_r20_pending_by_proximity`
+- `test_br_tui_003_r20_done_after_pending`
+- `test_br_tui_003_r20_cancelled_last`
+
+### BR-TUI-003-R21: Overflow nos Cards
+
+**Descrição:** Quando itens excedem o viewport do card, um indicador `+N ▼` é exibido no rodapé interno. Alias de BR-TUI-003-R12 para rastreabilidade com o spec original.
+
+**Regras:** Ver BR-TUI-003-R12 (Viewport-Aware Truncation).
+
+**Testes:** Mesmos de BR-TUI-003-R12.
+
+---
+
+---
+
+### BR-TUI-003-R22: Strikethrough em Done/Cancelled
+
+**Descrição:** Tarefas concluídas e canceladas exibem nome com strikethrough via Rich markup `[strike]nome[/strike]`.
+
+**Regras:**
+
+1. Strikethrough aplicado apenas ao campo nome (c1)
+2. Aplica-se a: status done (qualquer substatus) e cancelled
+3. Cor do nome mantém a cor do status (Green para done, Overlay0 para cancelled)
+4. Demais colunas sem strikethrough
+
+**Testes:**
+
+- `test_br_tui_003_r22_done_task_strikethrough`
+- `test_br_tui_003_r22_cancelled_task_strikethrough`
+- `test_br_tui_003_r22_pending_no_strikethrough`
+- `test_br_tui_003_r22_only_name_column`
+
+---
+
+### BR-TUI-003-R23: Subtítulo do Card Tarefas
+
+**Descrição:** O border_title do card Tarefas exibe contadores por status com cores semânticas. Contadores com valor 0 são omitidos.
+
+**Formato:** `N pend. N done N canc. N over.`
+
+**Cores:** pend.=Text #CDD6F4, done=Green #A6E3A1, canc.=Overlay0 #6C7086, over.=Red #F38BA8
+
+**Regras:**
+
+1. Contadores com valor 0 são omitidos
+2. Overdue = tarefa pendente com data no passado
+3. Atualiza após cada quick action e on_focus
+
+**Testes:**
+
+- `test_br_tui_003_r23_shows_pending_count`
+- `test_br_tui_003_r23_shows_overdue_count`
+- `test_br_tui_003_r23_omits_zero_counters`
+- `test_br_tui_003_r23_correct_colors`
+
+---
+
+### BR-TUI-003-R24: Períodos da Agenda
+
+**Descrição:** A agenda agrupa blocos em 3 períodos fixos com separadores visuais: Manhã (06:00-12:00), Tarde (12:00-18:00), Noite (18:00-23:00). Cada período exibe header com nome, rotina associada e progresso X/Y.
+
+**Separador:** `── Manhã ─── Rotina Matinal ──── 3/4 ──────`
+
+**Regras:**
+
+1. Períodos fixos: Manhã (06:00-12:00), Tarde (12:00-18:00), Noite (18:00-23:00)
+2. Períodos sem eventos são ocultos (não renderizam separador)
+3. Separador exibe: nome do período + rotina associada + progresso X/Y
+4. X = eventos done + running no período. Y = total de eventos no período
+5. Cor do progresso: Green (>= 80%), Yellow (50-79%), Red (< 50%)
+6. Cor do nome do período e traços: Subtext0 #A6ADC8
+7. Cor do nome da rotina: Text #CDD6F4
+8. Se nenhuma rotina associada ao período: "[Sem rotina]" em Overlay0
+9. Na v1.7, períodos são fixos. Customização em v1.8+ (SettingsScreen)
+
+**Testes:**
+
+- `test_br_tui_003_r24_three_periods`
+- `test_br_tui_003_r24_empty_period_hidden`
+- `test_br_tui_003_r24_separator_shows_routine_name`
+- `test_br_tui_003_r24_separator_shows_progress`
+- `test_br_tui_003_r24_progress_color_by_threshold`
+- `test_br_tui_003_r24_no_routine_shows_placeholder`
+
+---
+
+### BR-TUI-003-R25: Timer Card Compacto
+
+**Descrição:** O card Timer no dashboard ocupa 2 linhas de conteúdo (sem ASCII art). ASCII art fica exclusivamente na TimerScreen dedicada.
+
+**Regras:**
+
+1. Card ocupa 4 linhas totais (borda + 2 conteúdo + borda)
+2. Sem ASCII art no dashboard
+3. Estado running: ícone ▶ + nome + sessão X/Y + elapsed (Mauve #CBA6F7, 1s update)
+4. Estado paused: ícone ⏸ + nome + sessão X/Y + elapsed piscando (Yellow #F9E2AF)
+5. Estado idle: última sessão (nome + duração + hora) + resumo do dia
+6. Border_title direita: `▶ ativo` (Mauve) / `⏸ paused` (Yellow) / `⏹ idle` (Overlay0)
+7. Linha 2 sempre: resumo do dia `Hoje: N sessões · XhYYm total`
+
+**Testes:**
+
+- `test_br_tui_003_r25_running_shows_elapsed`
+- `test_br_tui_003_r25_running_session_count`
+- `test_br_tui_003_r25_paused_shows_yellow`
+- `test_br_tui_003_r25_idle_shows_last_session`
+- `test_br_tui_003_r25_idle_shows_day_summary`
+- `test_br_tui_003_r25_no_ascii_art`
+- `test_br_tui_003_r25_border_title_reflects_state`
+
+---
+
+### BR-TUI-003-R26: Cores Temporais na Régua
+
+**Descrição:** Os horários na régua da agenda usam cores que indicam contexto temporal.
+
+**Regras:**
+
+1. Horários passados: Subtext0 #A6ADC8 (dim)
+2. Horário atual: Mauve #CBA6F7, bold
+3. Horários futuros: Text #CDD6F4 (normal)
+4. "Atual" = slot de 30min que contém datetime.now()
+5. Atualização: a cada 30 minutos (quando slot muda)
+
+**Testes:**
+
+- `test_br_tui_003_r26_past_hours_subtext0`
+- `test_br_tui_003_r26_current_hour_mauve_bold`
+- `test_br_tui_003_r26_future_hours_text`
+
+---
+
+### BR-TUI-003-R27: Herança de Cor por Status
+
+**Descrição:** Em todos os cards, o campo nome herda a cor do status do item. Mapeamento definido em `color-system.md` (SSOT para cores).
+
+**Mapeamento:** done/full=Green #A6E3A1, done/partial=Rosewater #F5E0DC, done/overdone=Flamingo #F2CDCD, done/excessive=Peach #FAB387, not_done/justified=Yellow #F9E2AF, not_done/unjustified=Red #F38BA8, not_done/ignored=Maroon #EBA0AC, running=Mauve #CBA6F7, paused=Yellow #F9E2AF, pending=Overlay0 #6C7086, cancelled=Overlay0 #6C7086
+
+**Regras:**
+
+1. Campo nome em todos os cards herda cor do status/substatus
+2. Nome bold se running ou paused
+3. Nome strikethrough se done ou cancelled (apenas tarefas, ver R22)
+4. Aplicável a: card Agenda, card Hábitos, card Tarefas
+
+**Testes:**
+
+- `test_br_tui_003_r27_done_name_green`
+- `test_br_tui_003_r27_running_name_mauve_bold`
+- `test_br_tui_003_r27_pending_name_overlay0`
+- `test_br_tui_003_r27_not_done_unjustified_name_red`
+
+---
+
+### BR-TUI-003-R28: Mock Data como Fixture
+
+**Descrição:** Dados de demonstração não são fallback do dashboard. Mock data existe apenas em fixtures de teste e no comando `atomvs demo`. Dashboard com banco vazio exibe estado vazio com orientação ao usuário.
+
+**Regras:**
+
+1. Dashboard com banco vazio exibe mensagem de orientação por card
+2. Mock data hardcoded removido do `dashboard.py`
+3. Mock data migrado para `tests/unit/test_tui/conftest.py` como fixtures
+4. Comando `atomvs demo` cria rotina demo no banco (feature separada)
+5. Mensagem de orientação indica ação concreta (keybinding ou comando CLI)
+6. Cor da mensagem: Subtext0 #A6ADC8
+7. Texto centralizado verticalmente no card
+
+**Testes:**
+
+- `test_br_tui_003_r28_empty_db_shows_orientation`
+- `test_br_tui_003_r28_habits_empty_message`
+- `test_br_tui_003_r28_tasks_empty_message`
+- `test_br_tui_003_r28_timer_empty_message`
+- `test_br_tui_003_r28_no_hardcoded_mock_data`
+
+---
+
+### BR-TUI-008: Visual Consistency (Material-like)
+
+**Descrição:** A TUI segue design system Material-like com paleta de cores definida, cards com bordas, spacing consistente, hierarquia visual clara e layout responsivo com três breakpoints.
+
+**Regras:**
+
+1. Paleta definida em theme.tcss (single source of truth para cores)
+2. Cards: borda arredondada, padding 1x2, margin 1
+3. Status colors: verde/`$success` (done), amarelo/`$warning` (pending/skipped), vermelho/`$error` (missed/overdue), purple/`$primary-light` (running)
+4. Texto primário: alto contraste sobre superfície (`$on-surface` sobre `$surface`)
+5. Texto secundário: cor `$muted` para labels e metadados
+6. Sidebar: largura fixa 22 caracteres, fundo `$surface-alt`
+7. Tipografia: bold para títulos, normal para conteúdo, dim para metadados
+8. Breakpoint completo (≥ 120 colunas): layout 3 colunas (sidebar + agenda + cards), timeline vertical completa, todos os cards visíveis, métricas com histórico semanal + dot matrix
+9. Breakpoint compacto (80–119 colunas): agenda com menos horas visíveis, cards com conteúdo truncado (nomes até 10 chars), métricas reduzidas (3 dias de histórico)
+10. Breakpoint minimal (< 80 colunas): layout 1 coluna (cards empilhados verticalmente), agenda oculta (substituída por barra de progresso simples no header), métricas apenas streak + completude 7d
+11. Barras de progresso seguem esquema de cores por faixa: verde (`$success`) para ≥ 80%, amarelo (`$warning`) para 50–79%, vermelho (`$error`) para < 50%
+12. Indicadores ASCII consistentes em toda a TUI: ✓ (done), ✗ (skip), ! (alta/missed), ▪ (média), · (baixa/pending), ▶ (running), ◼ (sparkline esforço)
+
+**Paleta de referência:**
+
+| Variável TCSS    | Cor     | Uso                         |
+| ---------------- | ------- | --------------------------- |
+| `$primary`       | #7C4DFF | Bordas, elementos de ênfase |
+| `$primary-light` | #B388FF | Timer running, destaques    |
+| `$surface`       | #1E1E2E | Fundo principal             |
+| `$surface-alt`   | #2A2A3E | Cards, sidebar, elevação    |
+| `$on-surface`    | #CDD6F4 | Texto principal             |
+| `$success`       | #A6E3A1 | Done, concluído             |
+| `$warning`       | #F9E2AF | Pending, skipped            |
+| `$error`         | #F38BA8 | Missed, overdue, alta       |
+| `$muted`         | #6C7086 | Labels, metadados, vazio    |
+
+**Testes:**
+
+- `test_br_tui_008_theme_file_exists`
+- `test_br_tui_008_cards_have_consistent_style`
+- `test_br_tui_008_status_colors_applied`
+- `test_br_tui_008_progress_bar_color_thresholds`
+- `test_br_tui_008_responsive_breakpoint_compact`
+- `test_br_tui_008_responsive_breakpoint_minimal`
+- `test_br_tui_008_ascii_indicators_consistent`
+
+---
+
+### BR-TUI-009: Service Layer Sharing
+
+**Descrição:** A TUI consome os mesmos services que a CLI. Nenhuma lógica de negócio é duplicada na camada TUI. A TUI é exclusivamente UI: captura input, chama service, exibe resultado.
+
+**Regras:**
+
+1. TUI importa de `timeblock.services` (mesmo pacote que CLI)
+2. TUI NUNCA acessa models/ORM diretamente (sempre via service)
+3. Session criada por operação (session-per-action pattern)
+4. Erros de service propagados e exibidos como notificação
+5. Validações de negócio permanecem nos services (não na TUI)
+
+**Testes:**
+
+- `test_br_tui_009_uses_routine_service`
+- `test_br_tui_009_uses_habit_service`
+- `test_br_tui_009_uses_task_service`
+- `test_br_tui_009_uses_timer_service`
+- `test_br_tui_009_no_direct_model_access`
+
+---
+
+### BR-TUI-010: Habit Instance Actions
+
+**Descrição:** A tela de Hábitos permite marcar instâncias como done ou skip com substatus, integrando com BR-HABITINSTANCE-001 e BR-SKIP-001.
+
+**Regras:**
+
+1. Lista instâncias do dia agrupadas por hábito
+2. `enter` em instância pendente → Menu de ação (Done/Skip)
+3. Done solicita duração real (minutos) para cálculo de substatus
+4. Skip solicita categoria (SkipReason) e justificativa opcional
+5. Instâncias já finalizadas (done/not_done) exibem status com cor
+6. Substatus calculado automaticamente pelo HabitInstanceService (BR-HABITINSTANCE-002/003)
+
+**Testes:**
+
+- `test_br_tui_010_lists_today_instances`
+- `test_br_tui_010_mark_done_asks_duration`
+- `test_br_tui_010_mark_skip_asks_reason`
+- `test_br_tui_010_shows_substatus_color`
+- `test_br_tui_010_completed_instances_readonly`
+
+### BR-TUI-011: Routines Screen
+
+**Descrição:** A tela de Rotinas exibe a semana completa em formato de grade temporal (estilo Google Calendar weekly view), representando o plano ideal do usuário. Enquanto o Dashboard mostra o dia real com status de execução, a tela de Rotinas mostra a intenção: os templates de hábitos distribuídos na semana conforme sua recorrência. A grade permite visualizar, criar, editar e deletar hábitos diretamente no contexto temporal, além de gerenciar múltiplas rotinas.
+
+**Referências:** ADR-031 seção 4, BR-TUI-005 (CRUD pattern), BR-TUI-008 (visual), BR-ROUTINE-001 (single active), BR-HABIT-001/002 (estrutura e recorrência)
+
+**Regras:**
+
+1. **Header Bar:** barra compacta exibe lista horizontal de rotinas com contagem de hábitos por rotina, indicador `▸` e `(ativa)` na rotina ativa, ação `+ Nova rotina` à direita e período da semana exibida (`Sem DD─DD Mês AAAA`). `Tab`/`Shift+Tab` navega entre rotinas no header; a grade atualiza para exibir os hábitos da rotina focada
+2. **Grade Semanal:** ocupa toda a largura após a sidebar. 7 colunas (Seg─Dom) distribuídas horizontalmente com largura igual. Régua de horas (06:00─22:00) à esquerda, vertical. Cada hábito posicionado como bloco no dia e horário correspondentes à sua recorrência (BR-HABIT-002)
+3. **Rendering de blocos:** cada hora = 2 linhas na grade. Blocos com duração ≤ 30min = 1 linha. Blocos com duração > 30min = múltiplas linhas, label na primeira. Nome truncado conforme largura da coluna. Cada hábito usa preenchimento distinto (████, ▒▒▒▒, ░░░░, ▓▓▓▓) como canal redundante de acessibilidade, combinado com a cor do hábito (`color`) em terminais que suportam
+4. **Navegação na grade:** `←`/`→` navega entre dias (colunas), `↑`/`↓` ou `j`/`k` navega entre blocos no mesmo dia (pula para próximo hábito). `[`/`]` alterna semana anterior/próxima. `T` retorna à semana atual
+5. **Painel de detalhes:** quando o cursor está sobre um bloco, ele ganha borda `$primary` e um painel lateral fixo exibe: nome, horário início─fim, duração, recorrência, cor, contagem de instâncias (pendentes/concluídas), streak atual e keybindings contextuais (`[e]` editar, `[x]` deletar, `[g]` ver instâncias). Painel atualiza em tempo real conforme o cursor se move
+6. **CRUD contextual:** keybindings `n`/`e`/`x` operam sobre rotinas quando o foco está no header, e sobre hábitos quando o foco está na grade. Novo hábito abre formulário modal (título, horário, recorrência, cor). Após criar, o hábito aparece imediatamente na grade nos dias correspondentes. Segue padrões de BR-TUI-005 (confirmação em delete, refresh após operação, erros inline)
+7. **Ativação de rotina:** `a` com foco em rotina no header ativa a rotina selecionada (BR-ROUTINE-001: desativa todas as outras). Mudança refletida no header (indicador `▸` move), na status bar e no dashboard
+8. **Conflitos:** dois hábitos no mesmo horário/dia renderizam lado a lado na mesma célula, separados por `│`, com borda `$error`. Conflitos são exibidos mas nunca bloqueados (consistente com BR-REORDER-001)
+9. **Rotina sem hábitos:** grade vazia com mensagem centralizada "Nenhum hábito nesta rotina. Pressione [n] para criar o primeiro."
+10. **Responsividade:** ≥ 120 colunas: 7 dias visíveis simultaneamente, labels completos. 80─119 colunas: 5 dias visíveis (Seg─Sex), Sáb/Dom com scroll horizontal, nomes truncados em 6 chars. < 80 colunas: 3 dias visíveis, scroll horizontal, blocos sem label (apenas preenchimento + cor), painel de detalhes como overlay (ativado com `enter`, fechado com `escape`)
+11. **Refresh:** dados atualizados ao entrar na screen (on_focus) e após qualquer operação CRUD. Troca de rotina no header recarrega a grade com os hábitos da rotina focada
+12. **Navegação cross-screen:** `g` com bloco selecionado navega para a screen Habits com filtro no hábito selecionado (visão de instâncias). Keybinding de navegação global (`3`/`h`) vai para Habits sem filtro
+
+**Mockup de referência:** `docs/tui/routines-weekly-mockup.md`
+
+**Testes:**
+
+- `test_br_tui_011_header_shows_routines_list`
+- `test_br_tui_011_header_shows_active_indicator`
+- `test_br_tui_011_header_shows_habit_count`
+- `test_br_tui_011_header_shows_week_period`
+- `test_br_tui_011_tab_switches_routine_in_header`
+- `test_br_tui_011_grade_renders_seven_columns`
+- `test_br_tui_011_grade_renders_hour_ruler`
+- `test_br_tui_011_grade_places_habit_by_recurrence`
+- `test_br_tui_011_grade_block_duration_proportional`
+- `test_br_tui_011_grade_block_fill_patterns`
+- `test_br_tui_011_grade_block_uses_habit_color`
+- `test_br_tui_011_grade_truncates_long_names`
+- `test_br_tui_011_navigate_days_left_right`
+- `test_br_tui_011_navigate_blocks_up_down`
+- `test_br_tui_011_navigate_week_prev_next`
+- `test_br_tui_011_navigate_week_today`
+- `test_br_tui_011_detail_panel_shows_on_focus`
+- `test_br_tui_011_detail_panel_shows_habit_info`
+- `test_br_tui_011_detail_panel_shows_instance_stats`
+- `test_br_tui_011_detail_panel_shows_streak`
+- `test_br_tui_011_detail_panel_updates_on_cursor_move`
+- `test_br_tui_011_crud_context_header_operates_routine`
+- `test_br_tui_011_crud_context_grade_operates_habit`
+- `test_br_tui_011_create_habit_modal`
+- `test_br_tui_011_create_habit_appears_in_grade`
+- `test_br_tui_011_edit_habit_prefilled`
+- `test_br_tui_011_delete_habit_confirmation`
+- `test_br_tui_011_activate_routine_updates_indicator`
+- `test_br_tui_011_conflict_renders_side_by_side`
+- `test_br_tui_011_conflict_uses_error_color`
+- `test_br_tui_011_empty_routine_message`
+- `test_br_tui_011_responsive_compact_five_days`
+- `test_br_tui_011_responsive_minimal_three_days`
+- `test_br_tui_011_responsive_minimal_overlay_panel`
+- `test_br_tui_011_refreshes_on_focus`
+- `test_br_tui_011_refreshes_after_crud`
+- `test_br_tui_011_go_to_habits_screen`
+
+---
+
 ## Referências
 
 - **ADRs:** `docs/decisions/`
 - **Livro:** "Atomic Habits" - James Clear
-- **Service Layer:** `cli/src/timeblock/services/`
-- **Models:** `cli/src/timeblock/models/`
-- **Enums:** `cli/src/timeblock/models/enums.py`
+- **Service Layer:** `src/timeblock/services/`
+- **Models:** `src/timeblock/models/`
+- **Enums:** `src/timeblock/models/enums.py`
 
 ---
 
-**Documento consolidado em:** 28 de Novembro de 2025
+**Última atualização em:** 25 de Fevereiro de 2026
 
-**Total de regras:** 50 BRs
+**Total de regras:** 81 BRs

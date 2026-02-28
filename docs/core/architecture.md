@@ -1,6 +1,6 @@
 # Arquitetura TimeBlock Organizer
 
-**Versão:** 2.0.0
+**Versão:** 2.2.0
 
 **Data:** 28 de Novembro de 2025
 
@@ -8,7 +8,7 @@
 
 ---
 
-## Índice
+## Sumário
 
 1. [Visão Geral](#1-visão-geral)
 2. [Filosofia de Controle do Usuário](#2-filosofia-de-controle-do-usuário)
@@ -19,6 +19,10 @@
 7. [Decisões Arquiteturais](#7-decisões-arquiteturais)
 8. [Padrões e Convenções](#8-padrões-e-convenções)
 9. [Evolução Futura](#9-evolução-futura)
+10. [Deployment Options](#10-deployment-options)
+11. [Processo de Desenvolvimento](#11-processo-de-desenvolvimento)
+12. [CI/CD e Branch Protection](#12-cicd-e-branch-protection)
+13. [Arquitetura Multi-Plataforma](#13-arquitetura-multi-plataforma-v20)
 
 ---
 
@@ -44,6 +48,8 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada n
 - **Logging Estruturado**: Observabilidade desde o início
 
 ### 1.3. Diagrama de Alto Nível
+
+O diagrama abaixo representa a arquitetura em camadas do sistema, desde a interface de usuário (CLI/TUI) até a persistência (SQLite), com a service layer como barreira que isola lógica de negócio das camadas de apresentação e dados.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -78,6 +84,8 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada n
 ---
 
 ## 2. Filosofia de Controle do Usuário
+
+A filosofia de controle do usuário permeia todas as decisões de design do sistema. O TimeBlock existe para informar e facilitar, não para restringir ou decidir. Esta seção formaliza os princípios que guiam como o sistema interage com a agenda do usuário, desde detecção de conflitos até sugestões de reorganização.
 
 ### 2.1. Princípio Fundamental
 
@@ -114,6 +122,8 @@ Muitos sistemas de produtividade tentam ser "inteligentes" tomando decisões aut
 - Apresenta eventos e permite usuário escolher
 
 ### 2.4. Routine como Norte Verdadeiro
+
+A Routine funciona como norte verdadeiro do sistema: define a intenção do usuário para a semana e serve como referência contra a qual o dia real é comparado. Desvios são detectados e informados, mas nunca corrigidos automaticamente.
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -193,6 +203,8 @@ if conflicts_detected:
 
 ## 3. Stack Tecnológica
 
+A stack tecnológica foi selecionada priorizando produtividade do desenvolvedor, type safety e facilidade de manutenção. Python 3.13+ como runtime permite uso de features modernas, SQLModel unifica validação e ORM em definições únicas, e Rich/Textual fornecem capacidades de terminal avançadas para CLI e TUI respectivamente.
+
 ### 3.1. Core
 
 | Componente | Tecnologia | Versão | Razão                     |
@@ -215,6 +227,8 @@ if conflicts_detected:
 
 ### 3.3. Dependências Principais
 
+As dependências são declaradas no pyproject.toml com versões mínimas pinadas. O core mantém apenas três dependências diretas (SQLModel, Typer, Rich), enquanto ferramentas de desenvolvimento e a TUI são gerenciadas como dependency groups opcionais.
+
 ```
 sqlmodel>=0.0.14
 typer>=0.9.0
@@ -228,9 +242,11 @@ python-dateutil>=2.8.0
 
 ## 4. Camadas da Aplicação
 
+A aplicação segue o padrão de camadas com separação rigorosa de responsabilidades. A camada de apresentação (CLI e TUI) comunica-se exclusivamente com a camada de services, que encapsula toda a lógica de negócio. Models gerenciam persistência via SQLModel, e utils fornecem funções transversais de validação e formatação. Nenhuma camada acessa diretamente camadas não adjacentes.
+
 ### 4.1. CLI Commands Layer
 
-**Localização:** `cli/src/timeblock/commands/`
+**Localização:** `src/timeblock/commands/`
 
 **Responsabilidade:** Interface com usuário, parsing de argumentos.
 
@@ -279,7 +295,7 @@ def create(
 
 ### 4.2. Services Layer
 
-**Localização:** `cli/src/timeblock/services/`
+**Localização:** `src/timeblock/services/`
 
 **Responsabilidade:** Lógica de negócio, orquestração.
 
@@ -426,7 +442,7 @@ class HabitInstanceService:
 
 ### 4.3. Models Layer
 
-**Localização:** `cli/src/timeblock/models/`
+**Localização:** `src/timeblock/models/`
 
 **Responsabilidade:** Estrutura de dados, relacionamentos.
 
@@ -484,7 +500,7 @@ class HabitInstance(SQLModel, table=True):
 
 ### 4.4. Database Layer
 
-**Localização:** `cli/src/timeblock/database/`
+**Localização:** `src/timeblock/database/`
 
 **Responsabilidade:** Gerenciamento de conexões, configuração e migrations.
 
@@ -509,13 +525,13 @@ O path do banco de dados é configurado via environment variable `TIMEBLOCK_DB_P
 
 ```
 1. TIMEBLOCK_DB_PATH (environment variable) - se definida
-2. cli/data/timeblock.db (default relativo ao código)
+2. data/timeblock.db (default relativo ao código)
 ```
 
 **Implementação (Single Source of Truth):**
 
 ```python
-# cli/src/timeblock/database/engine.py
+# src/timeblock/database/engine.py
 
 import os
 from pathlib import Path
@@ -529,7 +545,7 @@ def get_db_path() -> str:
 
     Ordem de precedência:
     1. Environment variable TIMEBLOCK_DB_PATH
-    2. Default: cli/data/timeblock.db
+    2. Default: data/timeblock.db
 
     Returns:
         Caminho absoluto do arquivo SQLite
@@ -644,7 +660,7 @@ def test_task_create_cli(cli_runner: CliRunner, isolated_db: Path):
 
 ### 4.5. Utils Layer
 
-**Localização:** `cli/src/timeblock/utils/`
+**Localização:** `src/timeblock/utils/`
 
 **Responsabilidade:** Funcionalidades transversais.
 
@@ -670,6 +686,8 @@ utils/
 ---
 
 ## 5. Modelos de Dados
+
+Os modelos de dados representam as entidades do domínio e seus relacionamentos usando SQLModel, que combina definições Pydantic (validação) com mapeamento SQLAlchemy (persistência) em classes únicas. O diagrama ER e as definições de entidade refletem o modelo conceitual descrito nas Business Rules, mantendo rastreabilidade direta entre especificação e implementação.
 
 ### 5.1. Diagrama ER
 
@@ -977,6 +995,8 @@ class ChangeType(str, Enum):
 
 ## 6. Fluxos Principais
 
+Os fluxos principais documentam as interações mais críticas do sistema: criação de hábitos com geração de instâncias, detecção de conflitos entre eventos, e operação completa do timer. Cada fluxo atravessa todas as camadas da aplicação e é validado por testes de integração e E2E.
+
 ### 6.1. Criação e Geração de Instâncias
 
 ```
@@ -1079,6 +1099,7 @@ As decisões arquiteturais são documentadas como ADRs (Architecture Decision Re
 | [ADR-002](../decisions/ADR-002-typer-cli.md)           | Typer CLI           | Typer ao invés de Click puro         |
 | [ADR-005](../decisions/ADR-005-resource-first-cli.md)  | Resource-First CLI  | Padrão `resource action` na CLI      |
 | [ADR-006](../decisions/ADR-006-textual-tui.md)         | Textual TUI         | Textual para interface TUI futura    |
+| [ADR-031](../decisions/ADR-031-tui-implementation.md)  | TUI Implementation  | Detalhes de implementação TUI v1.7.0 |
 | [ADR-011](../decisions/ADR-011-conflict-philosophy.md) | Conflict Philosophy | Sistema informa, usuário decide      |
 
 ### 7.2. ADRs de Arquitetura e Dados
@@ -1104,48 +1125,52 @@ As decisões arquiteturais são documentadas como ADRs (Architecture Decision Re
 
 ### 7.4. ADRs de Infraestrutura
 
-| ADR                                                        | Título                  | Decisão                      |
-| ---------------------------------------------------------- | ----------------------- | ---------------------------- |
-| [ADR-016](../decisions/ADR-016-alembic-timing.md)          | Alembic Timing          | Quando introduzir migrations |
-| [ADR-017](../decisions/ADR-017-environment-strategy.md)    | Environment Strategy    | Estratégia de ambientes      |
-| [ADR-023](../decisions/ADR-023-microservices-ecosystem.md) | Microservices Ecosystem | Arquitetura de microserviços |
-| [ADR-024](../decisions/ADR-024-homelab-infrastructure.md)  | Homelab Infrastructure  | Raspberry Pi como servidor   |
+| ADR                                                           | Título                  | Decisão                      |
+| ------------------------------------------------------------- | ----------------------- | ---------------------------- |
+| [ADR-016](../decisions/ADR-016-alembic-timing.md)             | Alembic Timing          | Quando introduzir migrations |
+| [ADR-017](../decisions/ADR-017-environment-strategy.md)       | Environment Strategy    | Estratégia de ambientes      |
+| [ADR-023](../decisions/ADR-023-microservices-ecosystem.md)    | Microservices Ecosystem | Arquitetura de microserviços |
+| [ADR-024](../decisions/ADR-024-homelab-infrastructure.md)     | Homelab Infrastructure  | Raspberry Pi como servidor   |
+| [ADR-032](../decisions/ADR-032-branding-repository-naming.md) | Branding & Repos        | ATOMVS + atomvs-timeblock-\* |
 
 ### 7.5. ADRs de Padrões e Qualidade
 
-| ADR                                                            | Título                  | Decisão                       |
-| -------------------------------------------------------------- | ----------------------- | ----------------------------- |
-| [ADR-009](../decisions/ADR-009-flags-consolidation.md)         | Flags Consolidation     | Consolidação de flags CLI     |
-| [ADR-018](../decisions/ADR-018-language-standards.md)          | Language Standards      | Português agora, inglês v2.0+ |
-| [ADR-019](../decisions/ADR-019-test-naming-convention.md)      | Test Naming             | Padrão test*br*\*             |
-| [ADR-020](../decisions/ADR-020-business-rules-nomenclature.md) | BR Nomenclature         | Formato BR-DOMAIN-XXX         |
-| [ADR-025](../decisions/ADR-025-development-methodology.md)     | Development Methodology | Docs > BDD > TDD > Code       |
-| [ADR-026](../decisions/ADR-026-test-database-isolation.md)     | Test DB Isolation       | Isolamento via env var        |
-| [ADR-027](../decisions/ADR-027-documentation-tooling.md)       | Documentation Tooling   | MkDocs + mkdocstrings         |
+| ADR                                                            | Título                   | Decisão                       |
+| -------------------------------------------------------------- | ------------------------ | ----------------------------- |
+| [ADR-009](../decisions/ADR-009-flags-consolidation.md)         | Flags Consolidation      | Consolidação de flags CLI     |
+| [ADR-018](../decisions/ADR-018-language-standards.md)          | Language Standards       | Português agora, inglês v2.0+ |
+| [ADR-019](../decisions/ADR-019-test-naming-convention.md)      | Test Naming              | Padrão test*br*\*             |
+| [ADR-020](../decisions/ADR-020-business-rules-nomenclature.md) | BR Nomenclature          | Formato BR-DOMAIN-XXX         |
+| [ADR-025](../decisions/ADR-025-development-methodology.md)     | Engenharia de Requisitos | ISO/IEC/IEEE 29148:2018       |
+| [ADR-026](../decisions/ADR-026-test-database-isolation.md)     | Test DB Isolation        | Isolamento via env var        |
+| [ADR-027](../decisions/ADR-027-documentation-tooling.md)       | Documentation Tooling    | MkDocs + mkdocstrings         |
+| [ADR-028](../decisions/ADR-028-remove-legacy-commands.md)      | Remove Legacy Commands   | Remoção de add/list legados   |
+| [ADR-029](../decisions/ADR-029-package-by-feature.md)          | Package by Feature       | Organização por domínio       |
+| [ADR-030](../decisions/ADR-030-multiplatform-architecture.md)  | Multiplatform Arch       | BFF, multi-repo, IaC          |
 
 ---
 
 ## 8. Padrões e Convenções
 
+Esta seção define os padrões de codificação e convenções que mantêm consistência no projeto. Cobre estrutura de diretórios, naming conventions para código e testes, organização de imports, uso de type hints, formato de docstrings e workflow Git. Todos os padrões são verificados automaticamente via ruff, mypy e hooks de pre-commit.
+
 ### 8.1. Estrutura de Diretórios
 
 ```
-cli/
-├── src/
-│   └── timeblock/
-│       ├── commands/      # CLI commands
-│       ├── services/      # Business logic
-│       ├── models/        # Data models
-│       ├── database/      # DB management
-│       └── utils/         # Helpers
-├── tests/
-│   ├── unit/              # Testes unitários
-│   ├── integration/       # Testes integração
-│   └── e2e/               # Testes end-to-end
-└── docs/                  # Documentação
-```
+src/timeblock/
+├── commands/ # CLI commands
+├── services/ # Business logic
+├── models/ # Data models
+├── database/ # DB management
+└── utils/ # Helpers
 
-### 8.2. Naming Conventions
+tests/
+├── unit/ # Testes unitários
+├── integration/ # Testes integração
+├── bdd/ # Cenários Gherkin
+├── e2e/ # Fluxos completos
+└── factories/ # Test factories
+```
 
 **Arquivos:**
 
@@ -1220,15 +1245,11 @@ def calculate_streak(habit_id: int) -> int:
 
 ```
 tests/
-├── unit/
-│   ├── test_models/
-│   ├── test_services/
-│   ├── test_business_rules/
-│   └── test_utils/
-├── integration/
-│   └── test_flows/
-└── e2e/
-    └── test_cli/
+├── unit/              # Testes unitários por módulo
+├── integration/       # Testes de integração
+├── bdd/               # Cenários Gherkin
+├── e2e/               # Fluxos completos CLI
+└── factories/         # Test factories
 ```
 
 **Naming:**
@@ -1278,6 +1299,8 @@ Footer opcional
 ---
 
 ## 9. Evolução Futura
+
+O roadmap técnico organiza a evolução do sistema em releases incrementais, cada uma construindo sobre a anterior. A v1.x consolida a CLI local e introduz a TUI, a v2.0 expande para API REST com observabilidade, a v3.0 evolui para microserviços com event sourcing, e a v4.0 adiciona o cliente Android nativo.
 
 ### v1.4.0 - MVP Event Reordering (Atual)
 
@@ -1548,24 +1571,24 @@ $ timeblock connect       # Funciona direto (Pi rodando 24/7)
 
 ### 11.1. Visão Geral
 
-O projeto adota **Vertical Slicing** com práticas de Docs-First, BDD e Strict TDD.
+O projeto adota técnicas de **Engenharia de Requisitos** (ISO/IEC/IEEE 29148:2018, SWEBOK v4.0) com **Vertical Slicing**, BDD e Strict TDD. O ciclo mapeia para o ciclo clássico da disciplina: especificação, validação, verificação e implementação.
 
-**Hierarquia obrigatória:**
+**Ciclo de Engenharia de Requisitos:**
 
 ```
-DOCS ──> BDD ──> TDD ──> CODE
+Especificação --> Validação (BDD) --> Verificação (TDD) --> Implementação
 ```
 
 ### 11.2. Práticas Adotadas
 
-| Prática          | Origem                   | Aplicação               |
-| ---------------- | ------------------------ | ----------------------- |
-| Vertical Slicing | Agile                    | Uma BR completa por vez |
-| Docs-First       | Specification by Example | BR documentada primeiro |
-| BDD              | Dan North (2006)         | pytest-bdd com Gherkin  |
-| Strict TDD       | Robert Martin (2003)     | 3 Leis rigorosas        |
-| Sprints          | Scrum                    | Iterações 1-2 semanas   |
-| WIP Limits       | Kanban/Lean              | Max 2 itens In Progress |
+| Prática           | Origem                  | Aplicação               |
+| ----------------- | ----------------------- | ----------------------- |
+| Vertical Slicing  | Agile                   | Uma BR completa por vez |
+| Especificação     | ISO/IEC/IEEE 29148:2018 | BRs formalizadas        |
+| Validação (BDD)   | Dan North (2006)        | pytest-bdd com Gherkin  |
+| Verificação (TDD) | Robert Martin (2003)    | 3 Leis rigorosas        |
+| Sprints           | Scrum                   | Iterações 1-2 semanas   |
+| WIP Limits        | Kanban/Lean             | Max 2 itens In Progress |
 
 ### 11.3. Fluxo por Business Rule
 
@@ -1573,10 +1596,10 @@ DOCS ──> BDD ──> TDD ──> CODE
 ┌─────────────────────────────────────────────────────────────┐
 │                  VERTICAL SLICE (1 BR)                      │
 ├─────────────────────────────────────────────────────────────┤
-│  1. Documentar BR (docs/core/business-rules.md)             │
-│  2. Escrever cenário BDD (.feature)                         │
+│  1. Especificar BR (docs/core/business-rules.md)            │
+│  2. Escrever cenário de validação (.feature)                │
 │  3. Implementar steps (step_defs/)                          │
-│  4. Criar teste unitário (RED)                              │
+│  4. Criar teste de verificação (RED)                        │
 │  5. Implementar código (GREEN)                              │
 │  6. Refatorar                                               │
 │  7. Commit                                                  │
@@ -1594,13 +1617,13 @@ DOCS ──> BDD ──> TDD ──> CODE
 ### 11.5. Estrutura de Testes
 
 ```
-cli/tests/
+tests/
 ├── bdd/
 │   ├── features/        # .feature (Gherkin)
 │   └── step_defs/       # Steps Python
-├── unit/                # ~70% (BR isolada)
-├── integration/         # ~25% (Service + DB)
-└── e2e/                 # ~5% (CLI completa)
+├── unit/                # ~70% (verificação isolada)
+├── integration/         # ~20% (Service + DB)
+└── e2e/                 # ~5% (CLI/TUI completa)
 ```
 
 **Status BDD:** 8 testes passando com pytest-bdd.
@@ -1623,7 +1646,247 @@ cli/tests/
 - **Review:** Fim (validar entregas)
 - **Retro:** Fim (identificar melhorias)
 
-Ver também: [ADR-025: Processo de Desenvolvimento](../decisions/ADR-025-development-methodology.md)
+**SSOT de Processo:** [development.md](development.md)
+
+Ver também: [ADR-025: Engenharia de Requisitos](../decisions/ADR-025-development-methodology.md)
+
+---
+
+## 12. CI/CD e Branch Protection
+
+### 12.1. Visão Geral
+
+A automação de qualidade opera em três camadas complementares, garantindo que código problemático não entre no repositório nem nas branches protegidas.
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│                    CAMADAS DE PROTEÇÃO                        │
+├───────────────────────────────────────────────────────────────┤
+│  1. Pre-commit Hooks (LOCAL)                                  │
+│     git commit ──> ruff + mypy + pytest-all                   │
+│     Bloqueia: commit local se falhar                          │
+│                                                               │
+│  2. CI/CD Pipeline (SERVIDOR)                                 │
+│     git push ──> GitLab CI / GitHub Actions                   │
+│     Marca: commit como passed/failed                          │
+│                                                               │
+│  3. Branch Protection (SERVIDOR)                              │
+│     merge request ──> status checks obrigatórios              │
+│     Bloqueia: merge em develop/main se CI falhar              │
+└───────────────────────────────────────────────────────────────┘
+```
+
+### 12.2. Pre-commit Hooks
+
+Executados localmente em cada `git commit` via `pre-commit` framework.
+
+| Hook        | Ferramenta | Tempo | Bloqueante |
+| ----------- | ---------- | ----- | ---------- |
+| ruff format | ruff       | 1.2s  | Sim        |
+| ruff check  | ruff       | 0.8s  | Sim        |
+| mypy        | mypy       | 3.5s  | Não        |
+| pytest-all  | pytest     | ~30s  | Sim        |
+
+**Total:** ~35s por commit.
+
+**Referência:** `.pre-commit-config.yaml`
+
+`pytest-all` executa a suite completa (unit + integration + BDD + e2e), garantindo que cada commit é funcional.
+
+### 12.3. GitLab CI/CD Pipeline
+
+Pipeline declarado em `.gitlab-ci.yml`, executado em cada push e merge request.
+
+**Imagem base:** `python:3.13`
+
+**Jobs paralelos no stage `test`:**
+
+| Job              | Comando                    | Bloqueante | Artefatos    |
+| ---------------- | -------------------------- | ---------- | ------------ |
+| test:unit        | pytest tests/unit/ --cov   | Sim        | coverage.xml |
+| test:integration | pytest tests/integration/  | Sim        | -            |
+| test:bdd         | pytest tests/bdd/          | Sim        | -            |
+| test:e2e         | pytest tests/e2e/          | Sim        | -            |
+| test:lint        | ruff check src/timeblock   | Sim        | -            |
+| test:typecheck   | mypy (allow_failure: true) | Não        | -            |
+
+**Stages:**
+
+```
+test ──> build ──> deploy
+
+test:     1 job consolidado (test:all)
+build:    mkdocs build [develop, main]
+deploy:   GitLab Pages [main]
+```
+
+### 12.4. GitHub Actions
+
+Pipeline declarado em `.github/workflows/ci.yml`, executado em push e pull requests.
+
+**Matrix strategy para testes:**
+
+| Job       | Matrix                      | Bloqueante |
+| --------- | --------------------------- | ---------- |
+| lint      | ruff check                  | Sim        |
+| typecheck | mypy (continue-on-error)    | Não        |
+| test      | unit, integration, bdd, e2e | Sim        |
+
+### 12.5. Branch Protection Rules
+
+Configuradas via CLI (`gh api` e `glab api`) para garantir que merges em branches protegidas exigem CI verde.
+
+**GitHub:**
+
+| Branch  | Status Checks Obrigatórios                                    | Enforce Admins |
+| ------- | ------------------------------------------------------------- | -------------- |
+| develop | test (unit), test (integration), test (bdd), test (e2e), lint | Sim            |
+| main    | test (unit), test (integration), test (bdd), test (e2e), lint | Sim            |
+
+**GitLab:**
+
+| Branch  | Push Access | Merge Access | Pipeline Must Succeed |
+| ------- | ----------- | ------------ | --------------------- |
+| develop | Maintainers | Maintainers  | Sim                   |
+| main    | Maintainers | Maintainers  | Sim                   |
+
+**Configuração `only_allow_merge_if_pipeline_succeeds: true`** ativada a nível de projeto.
+
+### 12.6. Fluxo Completo
+
+```
+developer
+    │
+    ├── git commit
+    │   └── pre-commit hooks (ruff, mypy, pytest-all)
+    │       ├── [FAIL] ──> commit bloqueado
+    │       └── [PASS] ──> commit local criado
+    │
+    ├── git push origin develop
+    │   └── CI/CD pipeline (GitLab CI + GitHub Actions)
+    │       ├── [FAIL] ──> commit marcado como failed
+    │       └── [PASS] ──> commit marcado como passed
+    │
+    └── merge request (develop ──> main)
+        └── branch protection rules
+            ├── [CI FAIL] ──> merge bloqueado
+            └── [CI PASS] ──> merge permitido
+```
+
+---
+
+## 13. Arquitetura Multi-Plataforma (v2.0+)
+
+A partir da v2.0, o TimeBlock evolui de CLI local para ecossistema multi-plataforma com Terminal (Python), Web (Angular), Mobile (Kotlin) e Desktop (Tauri/Rust). Cada plataforma tem requisitos específicos de UX, performance e stack tecnológica, exigindo backends especializados.
+
+### 13.1. Organização de Repositórios
+
+O projeto adota GitHub Organization com um repositório por serviço, seguindo padrões de microsserviços. Essa estrutura permite ciclos de deploy independentes e evolução paralela de componentes.
+
+```
+atomvs-timeblock/               # GitHub Organization
+│
+├── atomvs-timeblock-contracts       # OpenAPI, Protobuf, AsyncAPI
+│
+├── # ─── BACKEND CORE ────────────────────────────
+├── atomvs-timeblock-api             # Spring Boot (BRs, auth, CRUD)
+├── atomvs-timeblock-gateway         # Spring Cloud Gateway
+├── atomvs-timeblock-sync            # Go + Kafka
+├── atomvs-timeblock-notifications   # Spring Boot (email, push)
+│
+├── # ─── BFFs ────────────────────────────────────
+├── atomvs-timeblock-bff-web         # Spring Boot
+├── atomvs-timeblock-bff-terminal    # Go ou Python
+│
+├── # ─── CLIENTS ─────────────────────────────────
+├── atomvs-timeblock-terminal        # Python (CLI + TUI)
+├── atomvs-timeblock-web             # Angular + TypeScript
+├── atomvs-timeblock-mobile          # Kotlin Full-Stack
+├── atomvs-timeblock-desktop         # Tauri (Rust + Svelte/Angular)
+│
+└── # ─── INFRA ───────────────────────────────────
+    └── atomvs-timeblock-infra       # Docker, K8s, Terraform, Ansible
+```
+
+### 13.2. Padrão BFF (Backend For Frontend)
+
+O padrão BFF cria backends dedicados por plataforma, otimizando payloads e comportamentos para cada tipo de cliente. Netflix, Uber e Spotify utilizam essa arquitetura.
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                         CLIENTS                                │
+├──────────┬──────────┬──────────┬──────────┬────────────────────┤
+│   Web    │  Mobile  │   CLI    │   TUI    │      Desktop       │
+└────┬─────┴────┬─────┴────┬─────┴──────┬───┴──────────┬─────────┘
+     │          │          └──────┬─────┘              │
+     ↓          ↓                 ↓                    ↓
+┌──────────┐ ┌────────────┐ ┌──────────────┐     ┌─────────────┐
+│ BFF Web  │ │ BFF Mobile │ │ BFF Terminal │     │ BFF Desktop │
+│ Spring   │ │   Kotlin   │ │   Go/Python  │     │    Go       │
+└────┬─────┘ └────┬───────┘ └─────┬────────┘     └─────┬───────┘
+     └────────────┴───────────────┴────────────────────┘
+                          │
+                          ↓
+              ┌─────────────────────────┐
+              │      API GATEWAY        │
+              │  Spring Cloud Gateway   │
+              └───────────┬─────────────┘
+                          │
+     ┌────────────────────┼────────────────────┐
+     ↓                    ↓                    ↓
+┌──────────┐         ┌──────────┐        ┌──────────┐
+│ API Core │         │   Sync   │        │  Notif   │
+│  Spring  │         │   Go     │        │  Spring  │
+└──────────┘         └──────────┘        └──────────┘
+```
+
+### 13.3. Stacks por Componente
+
+| Componente        | Stack                    | Justificativa                                   |
+| ----------------- | ------------------------ | ----------------------------------------------- |
+| **API Core**      | Java/Spring Boot         | Regras complexas, ecossistema enterprise maduro |
+| **Gateway**       | Spring Cloud Gateway     | Consistência com API, features enterprise       |
+| **Sync**          | Go + Kafka               | Performance, concorrência, padrão cloud-native  |
+| **Notifications** | Spring Boot              | Compartilha libs com API                        |
+| **BFF Web**       | Spring Boot              | Alinha com backend Java                         |
+| **BFF Terminal**  | Go ou Python             | Leve, alinha com clients                        |
+| **Terminal**      | Python (Typer + Textual) | Projeto atual                                   |
+| **Web**           | Angular + TypeScript     | Framework enterprise                            |
+| **Mobile**        | Kotlin Full-Stack        | Kotlin Multiplatform (app + backend)            |
+| **Desktop**       | Tauri + Rust             | Binário nativo, baixo consumo de recursos       |
+
+### 13.4. Infrastructure as Code
+
+O repositório `timeblock-infra` centraliza configuração de infraestrutura como código, garantindo ambientes reproduzíveis e versionados.
+
+```
+timeblock-infra/
+├── terraform/                # Provisioning cloud
+│   ├── modules/
+│   └── environments/
+├── ansible/                  # Configuration management
+│   ├── playbooks/
+│   └── roles/
+├── kubernetes/               # Orquestração (v3.0+)
+│   ├── base/
+│   └── overlays/
+├── docker/                   # Compose para dev/homelab
+└── scripts/                  # Automação
+```
+
+**Progressão IaC:**
+
+| Versão | Ferramenta               | Uso                            |
+| ------ | ------------------------ | ------------------------------ |
+| v1.5.0 | Docker Compose           | Dev local, CI/CD               |
+| v2.0.0 | Docker Compose + Ansible | Raspberry Pi homelab           |
+| v3.0.0 | Kubernetes + Helm        | Orquestração de microsserviços |
+
+### 13.5. Contratos Compartilhados
+
+O repositório `atomvs-timeblock-contracts` define interfaces entre serviços usando OpenAPI (REST), Protobuf (gRPC), AsyncAPI (Kafka) e JSON Schema (validação). Essa abordagem contract-first garante compatibilidade antes do deploy.
+
+Ver também: [ADR-030: Arquitetura Multi-Plataforma](../decisions/ADR-030-multiplatform-architecture.md)
 
 ## Referências
 
@@ -1636,4 +1899,4 @@ Ver também: [ADR-025: Processo de Desenvolvimento](../decisions/ADR-025-develop
 
 ---
 
-**Última atualização:** 17 de Janeiro de 2026
+**Última atualização:** 13 de Fevereiro de 2026

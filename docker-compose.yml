@@ -1,0 +1,22 @@
+services:
+  timeblock:
+    build: .
+    container_name: timeblock-cli
+    volumes:
+      - timeblock-data:/data
+    environment:
+      - TIMEBLOCK_DB_PATH=/data/timeblock.db
+    stdin_open: true
+    tty: true
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: timeblock-test
+    volumes:
+      - ./cli:/app/cli:ro
+    command: pytest tests/ -v
+
+volumes:
+  timeblock-data:

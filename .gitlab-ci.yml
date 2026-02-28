@@ -1,91 +1,108 @@
-# GitLab CI/CD Pipeline - TimeBlock Organizer
-image: python:3.13
+stages:
+  - quality
+  - test
+  - coverage
+  - security
+  - sync
+
+default:
+  timeout: 10m
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - scheduler_failure
 
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  CI_IMAGE: $CI_REGISTRY_IMAGE/ci:latest
 
-cache:
-  paths:
-    - .cache/pip
-    - cli/venv/
-
-stages:
-  - test
-  - build
-  - deploy
-
-before_script:
-  - pip install --upgrade pip
-  - pip install -r requirements.txt
-  - cd cli
-  - pip install -e .
-  - python -c "from timeblock.database.engine import create_db_and_tables; create_db_and_tables()"
-
-test:unit:
-  stage: test
+lint:
+  stage: quality
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
   script:
-    - python -m pytest tests/unit/ -v --cov=src/timeblock --cov-report=xml --cov-report=term
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+    - ruff check src/ tests/
+    - ruff format --check src/ tests/
+
+test:all:
+  timeout: 45m
+  stage: test
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+  script:
+    - coverage run -m pytest tests/ -v --tb=short
+  artifacts:
+    paths:
+      - .coverage
+      - .coverage.*
+    expire_in: 1 hour
+
+test:typecheck:
+  stage: test
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+  script:
+    - mypy src/timeblock --check-untyped-defs
+  timeout: 10m
+
+coverage:report:
+  stage: coverage
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+  needs:
+    - job: test:all
+      artifacts: true
+  script:
+    - ls -la .coverage* || echo "No coverage files found"
+    - coverage report --fail-under=85
+    - coverage xml -o coverage.xml
   artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: cli/coverage.xml
-    expire_in: 1 week
-  only:
-    - branches
-    - merge_requests
+        path: coverage.xml
 
-test:integration:
-  stage: test
+security:bandit:
+  stage: security
+  image: $CI_IMAGE
+  needs: []
+  before_script: []
   script:
-    - python -m pytest tests/integration/ -v
-  only:
-    - branches
-    - merge_requests
-
-test:lint:
-  stage: test
-  script:
-    - ruff check src/timeblock
-  only:
-    - branches
-    - merge_requests
-
-test:typecheck:
-  stage: test
-  script:
-    - mypy src/timeblock --check-untyped-defs
-  allow_failure: true
-  only:
-    - branches
-    - merge_requests
-
-build:docs:
-  stage: build
-  before_script:
-    - pip install --upgrade pip
-    - pip install mkdocs mkdocs-material
-  script:
-    - mkdocs build
+    - bandit -r src/timeblock -f json -o bandit-report.json || true
+    - bandit -r src/timeblock -ll
   artifacts:
     paths:
-      - site/
-    expire_in: 1 week
-  only:
-    - develop
-    - main
+      - bandit-report.json
+    when: always
 
-pages:
-  stage: deploy
-  before_script:
-    - pip install --upgrade pip
-    - pip install mkdocs mkdocs-material
+security:deps:
+  stage: security
+  image: $CI_IMAGE
+  needs: []
+  before_script: []
   script:
-    - mkdocs build
-    - mv site public
+    - pip-audit --format json --output pip-audit-report.json
+    - pip-audit
+  timeout: 10m
   artifacts:
     paths:
-      - public
-  only:
-    - main
+      - pip-audit-report.json
+    when: always
+
+sync:github:
+  stage: sync
+  before_script: []
+  script:
+    - git remote add github https://x-access-token:${GITHUB_TOKEN}@github.com/fabiodelllima/atomvs-timeblock-terminal.git
+    - git push github HEAD:${CI_COMMIT_REF_NAME} --force
+    - git push github --tags --force
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: on_success
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
+      when: on_success

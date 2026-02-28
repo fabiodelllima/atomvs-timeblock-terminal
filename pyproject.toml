@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atomvs-timeblock-terminal"
+version = "1.7.0-dev"
+description = "Terminal-based time management with CLI and TUI interfaces"
+requires-python = ">=3.13"
+license = {text = "MIT"}
+
+dependencies = [
+    "typer>=0.19.0",
+    "rich>=14.0.0",
+    "sqlmodel>=0.0.24",
+    "python-dateutil>=2.9.0",
+]
+
+[project.optional-dependencies]
+tui = [
+    "textual>=0.89.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=7.0",
+    "pytest-bdd>=8.0",
+    "pytest-asyncio>=0.24.0",
+    "freezegun>=1.5.0",
+    "coverage>=7.0",
+    "ruff>=0.14.0",
+    "mypy>=1.18.0",
+    "types-python-dateutil>=2.9.0",
+    "textual-dev>=1.7.0",
+]
+
+[project.scripts]
+atomvs = "timeblock.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers"
+filterwarnings = [
+    "ignore::DeprecationWarning:sqlmodel",
+    "ignore::DeprecationWarning:pydantic",
+]
+
+[tool.coverage.run]
+source = ["src/timeblock"]
+omit = ["tests/*", "*/venv/*"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true

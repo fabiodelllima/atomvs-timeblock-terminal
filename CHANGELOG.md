@@ -1,356 +1,322 @@
-# Histórico de Mudanças
+# Changelog
 
-Todas as mudanças importantes do TimeBlock Organizer serão documentadas neste arquivo.
+All notable changes to TimeBlock Organizer will be documented in this file.
 
-O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Não Lançado]
+## [Unreleased]
+
+### Added
+
+- TUI: Complete Phase 1 implementation with Textual framework (ADR-031)
+  - Dashboard screen with 6 interactive panels (agenda, habits, tasks, metrics, timer, header)
+  - Screen navigation: Dashboard, Routines, Habits, Tasks, Timer
+  - Widget system: NavBar, CommandBar, HelpOverlay, StatusBar, TimeblockGrid
+  - Color system with semantic tokens and WCAG-compliant palette
+  - Session management for TUI state persistence
+  - Formatters module for consistent data presentation
+  - CSS-like styling via Textual stylesheets
+  - Card/Panel base widget for uniform panel layout
+  - CRUD screen pattern for reusable list/detail views
+- TUI: Empty state handling with placeholder guidance in all panels
+  - Header: "[Sem rotina]" with zeroed metrics
+  - Habits panel: "--- . --:-- . --min" orientation
+  - Tasks panel: "--- . --/-- . --:--" orientation
+  - Metrics panel: streak 0, completude 0%
+  - Timer panel: idle 00:00 default state
+- CLI: `atomvs demo create` command with 3 mock routines and 8 tasks (BR-TUI-003-R28)
+  - "Semanal Mock" (WEEKDAYS, 8 habits)
+  - "Fim de Semana Mock" (WEEKENDS, 6 habits)
+  - "Ferias Mock" (EVERYDAY, 5 habits)
+  - 8 tasks with relative dates (overdue, today, future)
+- CLI: `atomvs demo clear` command to remove demo data (respects FK constraints)
+- BDD: TUI scenarios in Gherkin format
+  - tui_status_bar.feature (8 scenarios)
+  - tui_timer_screen.feature (10 scenarios)
+  - tui_crud_pattern.feature (8 scenarios)
+  - tui_screen_navigation.feature (8 scenarios)
+  - tui_visual_consistency.feature (9 scenarios)
+  - tui_habit_actions.feature (9 scenarios)
+  - tui_service_layer.feature (6 scenarios)
+  - tui_routines_screen.feature (11 scenarios)
+- ADR-031: TUI Implementation with horizontal navigation and proportional timeblocks
+- ADR-032: Branding and Repository Naming (atomvs-timeblock-terminal)
+
+### Changed
+
+- CLI: Entry point changed from `timeblock.main:app` to `timeblock.main:main` (TUI opens with `atomvs` without args)
+- CI/CD: Consolidated test jobs into single test:all (4 jobs to 1)
+- CI/CD: Optimized pipeline from 10 to 6 jobs
+- CI/CD: Aligned GitHub Actions with GitLab consolidation
+- CI/CD: Expanded sync:github to all branches (contribution graph)
+- CI/CD: Removed parallel=true from coverage (incompatible with test:all)
+- CI/CD: sync:github restricted to develop/main/tags
+- CI/CD: Test timeout increased to 45min for test:all
+- CI/CD: CodeQL manual workflow removed (default setup active)
+- refactor: Mock fallbacks removed from all dashboard panels, replaced with zero-state placeholders
+- Presentation layer: `commands/` updated to include `demo` subcommand group
+
+### Fixed
+
+- CI/CD: GitHub remote added dynamically in CI container
+- CI/CD: Fixed GITHUB_TOKEN variable escaping in sync job
+- CI/CD: Full refspec (refs/heads/) for GitHub sync push
+- CLI: Entry point `app` vs `main` causing "Missing command" error when invoking `atomvs` without args
+
+### Metrics
+
+- Total tests: 1071 (+293 since v1.6.0)
+- Distribution: Unit ~814 (76.0%), Integration ~118 (11.0%), BDD ~109 (10.2%), E2E ~30 (2.8%)
+- Global coverage: 87% (threshold 85%)
+- TUI coverage: 30%
+- BRs formalized: 81 (+14 TUI-specific)
+- ADRs: 32 documented
+- Source files: 60 Python modules (23 TUI-specific)
+- Pipeline: 6 jobs (~4min local, ~33min CI)
+
+## [1.6.0] - 2026-02-12
+
+### Added
+
+- CI/CD: Docker image with pre-installed dependencies (Dockerfile.ci)
+- CI/CD: DevSecOps with Bandit (SAST) and pip-audit (SCA)
+- CI/CD: Combined coverage from 4 suites via coverage run
+- CI/CD: Updated pre-commit hooks (ruff on commit, full suite on push)
+
+### Changed
+
+- refactor: Flattened structure from cli/ to project root
+- CI/CD: Pipeline migrated to Docker (eliminates pip install overhead)
+- CI/CD: Removed build:docs from pipeline (manual validation)
+- CI/CD: GitHub Actions aligned with GitLab CI
+
+### Fixed
+
+- fix: CVE-2026-1703 in pip 25.3 (updated to pip>=26.0)
+- fix: pytest-cov auto-combined partials (migrated to coverage run)
+- fix: Partial threshold blocked individual jobs (--cov-fail-under=0)
+
+### Metrics
+
+- Total tests: 778 (576 unit, 116 integration, 56 bdd, 30 e2e)
+- Global coverage: 87% (threshold 85%)
+- Pipeline: 9 jobs (quality + test + coverage + security + sync)
+- ADRs: 32 documented
+
+## [1.5.0] - 2026-02-03
+
+### Added
+
+- CI/CD: Automatic sync GitLab => GitHub via sync:github job
+- CI/CD: GitHub Merge Queue support (merge_group event)
+- CI/CD: Sync stage in GitLab pipeline
+- docs: cicd-flow.md v2.0 with complete dual-repo architecture
+
+### Changed
+
+- CI/CD: GitLab defined as source of truth
+- CI/CD: GitHub configured as public showcase
+- CI/CD: Branch protection adjusted for automatic sync
+
+### Fixed
+
+- CI/CD: Divergent histories between GitLab and GitHub
+- CI/CD: Token scope workflow for GitHub Actions updates
+
+### Metrics
+
+- Total tests: 873 (+188 since v1.4.1)
+- Global coverage: 76% (+5pp since v1.4.1)
+- Distribution: Unit 696 (79.7%), Integration 83 (9.5%), BDD 52 (6.0%), E2E 42 (4.8%)
+- GitLab CI: 8 jobs (6 test + 1 build + 1 sync)
+- Pipeline time: ~3min (local => GitHub sync)
+
+## [1.4.1] - 2026-01-30
+
+### Added
+
+- test(e2e): 16 E2E tests for task lifecycle (BR-TASK-001 to 005)
+- test(e2e): 12 E2E tests for list command filters
+- docs: ATOMVS logo and expanded table of contents in README
+- docs: Updated quality-metrics.md with v2.0.0 metrics
+- docs: Updated references (SWEBOK v4.0, ISO/IEC/IEEE 29148:2018)
+
+### Metrics
+
+- Total tests: 685 (+172 since v1.4.0)
+- Global coverage: 71% (+27pp since v1.4.0)
+- E2E tests: 42 (+28)
+- Distribution: Unit 513 (75%), Integration 83 (12%), E2E 42 (6%), BDD 7 (1%)
 
 ## [1.4.0] - 2026-01-28
 
-### Adicionado
+### Added
 
 - ADR-027: Documentation Tooling (MkDocs + mkdocstrings)
-- Seção 5 do architecture.md com models reais (Event, PauseLog, ChangeLog)
-- Documentação de enums: TimerStatus, EventStatus, ChangeType
-- Seção 7 do architecture.md com 27 ADRs categorizados
-- glab CLI para monitoramento de pipelines GitLab
+- BR-CLI-002: Multi-format datetime parser (ISO 8601, DD-MM-YYYY, DD/MM/YYYY)
+- Section 5 in architecture.md with actual models (Event, PauseLog, ChangeLog)
+- Enum documentation: TimerStatus, EventStatus, ChangeType
+- Section 7 in architecture.md with 27 categorized ADRs
+- glab CLI for GitLab pipeline monitoring
 
-### Corrigido
+### Fixed
 
-- CI GitLab/GitHub: adicionado `pip install -e .` para resolver ModuleNotFoundError
-- mkdocs.yml alinhado com estrutura consolidada de docs/
-- Links quebrados em ADRs e diagramas (DT-009)
+- GitLab/GitHub CI: added `pip install -e .` to resolve ModuleNotFoundError
+- mkdocs.yml aligned with consolidated docs/ structure
+- Broken links in ADRs and diagrams (DT-009)
 
-### Atualizado
+### Updated
 
-- Dependências: sqlmodel 0.0.31, typer 0.21.1, SQLAlchemy 2.0.46, ruff 0.14.14
+- Dependencies: sqlmodel 0.0.31, typer 0.21.1, SQLAlchemy 2.0.46, ruff 0.14.14
 - pytest 9.0.2, mypy 1.19.1, rich 14.3.1, coverage 7.13.2
 
-### Métricas
+### Metrics
 
-- Testes: 513 passando
-- Cobertura: 44% (unit)
-- ADRs: 27 documentados
-- BRs: 67 formalizadas
-- Mypy: 0 erros
+- Tests: 513 passing
+- Coverage: 44% (unit)
+- ADRs: 27 documented
+- BRs: 67 formalized
+- Mypy: 0 errors
 
-## [1.3.3] - 2026-01-22
+## [1.3.2] - 2026-01-22
 
-### Adicionado
+### Added
 
-- BR-CLI-002: Date parser multi-formato (ISO 8601, DD-MM-YYYY, DD/MM/YYYY)
-- 25 novos testes para date parser (8 BDD + 17 unit)
-- Configuração pyright no pyproject.toml
+- BR-VAL-001: Time Validation (20 unit tests)
+- BR-VAL-002: Date Validation (35 unit tests)
+- BDD structure for date validation feature
+- pyright configuration in pyproject.toml
 
-### Corrigido
+### Fixed
 
-- Ativados BDD steps de date_validation (BR-VAL-002)
-- Import de validate_date nos step definitions
+- Enabled BDD steps for date_validation (BR-VAL-002)
+- validate_date import in step definitions
 
-### Métricas
+### Metrics
 
-- Testes: 466 → 558 (+92)
-- Cobertura: 65% → 67% (+2pp)
-- Mypy: 0 erros mantido
-
-### Alterado (Documentação)
-
-- **(2026-01-15)** Padronização de Import Paths
-  - Corrigido imports de `src.timeblock.*` para `timeblock.*` em todo codebase
-  - Atualizado mock/monkeypatch paths em 45+ arquivos de teste
-  - Resolvido isolamento de sessão em testes (session injection)
-  - Corrigido conftest.py truncado da sessão anterior
-  - Métricas atualizadas: 454 testes passando, 61% cobertura
-
-- **(2025-01-11)** Housekeeping e correção de métricas
-  - Deletadas 15 branches obsoletas (feat/_, fix/ci-_, refactor/\*)
-  - README atualizado com métricas reais:
-    - Versão: v2.0.0 => v1.3.0
-    - Testes: 492 => 441 (377 unit + 64 integration)
-    - Cobertura: 99% => 39%
-  - Mantida estrutura visual e diagramas do README
-
-- **(2025-12-22)** Processo de Desenvolvimento e ADR-025
-  - Nova seção 11 em architecture.md: Processo de Desenvolvimento
-  - ADR-025: Development Methodology (Vertical Slicing + Strict TDD)
-  - Documentado: Docs-First, BDD, Strict TDD, Sprints, WIP Limits
-  - Atualizado índice de ADRs: 24 => 25 (23 aceitas, 2 propostas)
-
-- **(2025-12-21)** Deployment Options e ADR-024
-  - Nova seção 10 em architecture.md: Deployment Options
-  - Documentado Raspberry Pi homelab como servidor recomendado
-  - Comparativo: Pi vs VPS vs Desktop
-  - ADR-024: Homelab Infrastructure Strategy
-  - Atualizado índice de ADRs: 23 => 24 (2 propostas)
-
-- **(2025-12-21)** Roadmap v1.5-v4.0 e ADR-023
-  - Adicionada ADR-023: Microservices Ecosystem (Kafka, CloudEvents)
-  - Documentado roadmap completo em architecture.md:
-    - v1.5.0: Infra Foundation (Docker, CI/CD)
-    - v2.0.0: FastAPI REST API + Observabilidade (Prometheus, Grafana, Loki)
-    - v3.0.0: Microservices Ecosystem (Apache Kafka)
-    - v4.0.0: Android App (Kotlin)
-  - Atualizado índice de ADRs: 22 => 23
-
-- **(2025-12-01)** Reorganização completa de docs/
-  - Consolidado 4 documentos principais em `docs/core/`:
-    - architecture.md (v2.0.0)
-    - business-rules.md (v3.0.0, 50 BRs)
-    - cli-reference.md (v1.4.0)
-    - workflows.md (v2.1.0)
-  - Padronizado 22 ADRs em `docs/decisions/` (formato ADR-XXX)
-  - Corrigido ADR-021 duplicado para ADR-022
-  - Movido 130+ docs obsoletos para `docs/archived/`
-  - Renomeado: 02-diagrams para diagrams, 07-testing para testing
-  - Atualizado links quebrados em ADRs e README
-
-### BREAKING CHANGES
-
-- **(2025-11-19)** Refatoração Status+Substatus em HabitInstance (BR-HABIT-INSTANCE-STATUS-001)
-  - Campo `status` mudou de `HabitInstanceStatus` (5 valores) para `Status` (3 valores)
-  - Valores antigos: PLANNED, IN_PROGRESS, PAUSED, COMPLETED, SKIPPED
-  - Valores novos: PENDING, DONE, NOT_DONE
-  - Mapeamento automático na migração:
-    - PLANNED/IN_PROGRESS/PAUSED => PENDING
-    - COMPLETED => DONE + done_substatus=FULL
-    - SKIPPED => NOT_DONE + not_done_substatus=SKIPPED_UNJUSTIFIED
-  - **Ação necessária:** Rodar migration_001_status_substatus.py
-  - **Rollback disponível:** função downgrade() (perda de dados novos)
-  - **Compatibilidade:** HabitInstanceStatus mantido como alias temporário (DEPRECATED)
-
-### Adicionado
-
-- **(2025-11-19)** Enums para rastreamento detalhado (BR-HABIT-INSTANCE-STATUS-001)
-  - `Status`: PENDING, DONE, NOT_DONE
-  - `DoneSubstatus`: FULL (90-110%), PARTIAL (<90%), OVERDONE (110-150%), EXCESSIVE (>150%)
-  - `NotDoneSubstatus`: SKIPPED_JUSTIFIED, SKIPPED_UNJUSTIFIED, IGNORED
-  - `SkipReason`: HEALTH, WORK, FAMILY, TRAVEL, WEATHER, LACK_RESOURCES, EMERGENCY, OTHER
-
-- **(2025-11-19)** Novos campos em HabitInstance
-  - `done_substatus`: DoneSubstatus (calculado baseado em completion %)
-  - `not_done_substatus`: NotDoneSubstatus (categorização de skip/ignore)
-  - `skip_reason`: SkipReason (categoria do skip justificado)
-  - `skip_note`: str (nota adicional do usuário)
-  - `completion_percentage`: int (% de completion persistido)
-
-- **(2025-11-19)** Validações de consistência Status+Substatus
-  - DONE requer done_substatus obrigatório
-  - NOT_DONE requer not_done_substatus obrigatório
-  - PENDING não pode ter substatus
-  - Substatus são mutuamente exclusivos
-  - SKIPPED_JUSTIFIED requer skip_reason obrigatório
-  - skip_reason só permitido com SKIPPED_JUSTIFIED
-  - Método `validate_status_consistency()` implementado
-
-- **(2025-11-19)** Migração SQL (migration_001_status_substatus.py)
-  - Adiciona 5 colunas: done_substatus, not_done_substatus, skip_reason, skip_note, completion_percentage
-  - Migra dados automaticamente preservando informação
-  - Função upgrade() e downgrade() para rollback
-  - Metadata: version=001, name=status_substatus_refactoring
-
-- **(2025-11-19)** Documentação completa (BR-HABIT-INSTANCE-STATUS-001)
-  - BR-HABIT-INSTANCE-STATUS-001: Especificação detalhada
-  - 18 cenários BDD (Gherkin DADO/QUANDO/ENTÃO)
-  - ADR-021: Decisão arquitetural documentada
-  - 14 testes unitários (100% passando)
-  - Cobertura: 84% (habit_instance.py)
-
-- **(2025-11-17)** Fixtures de integração para testes
-  - `test_db` - Session com FK habilitado
-  - `sample_routine` - Routine pré-criada
-  - `sample_habits` - 3 Habits com recorrências diferentes
-  - `sample_task` - Task padrão
-  - PRAGMA foreign_keys=ON no integration_engine
-
-- **(2025-11-17)** Validação BR-HABIT-004: Recurrence Pattern
-  - Model `habit.py` valida recurrence via **init** override
-  - 10 padrões suportados (MONDAY-SUNDAY, WEEKDAYS, WEEKENDS, EVERYDAY)
-  - Mensagens de erro claras listando valores válidos
-
-- **(2025-11-17)** Business Rules HABIT implementadas
-  - BR-HABIT-001: Title Validation (não vazio, max 200 chars, trim)
-  - BR-HABIT-002: Time Range Validation (start < end)
-  - BR-HABIT-003: Routine Association (FK constraint, delete RESTRICT)
-  - BR-HABIT-004: Recurrence Pattern (enum validado)
-  - BR-HABIT-005: Color Validation (hex format opcional)
-
-### Modificado
-
-- **(2025-11-19)** HabitInstance model refatorado
-  - Status simplificado: 3 valores ao invés de 5
-  - Sistema Status+Substatus para granularidade
-  - Property `is_overdue` preservada (compatível)
-  - Exports atualizados em `models/__init__.py`
-
-- **(2025-11-17)** Services refatorados com Dependency Injection
-  - `task_service.py` - Todos métodos aceitam session opcional
-  - `timer_service.py` - start_timer, stop_timer, etc. com session
-  - `event_reordering_service.py` - detect_conflicts com session
-  - `habit_service.py` - CRUD completo com session opcional
-  - `habit_instance_service.py` - Geração e marcação com session
-  - Padrão: if session => usar injetada, else => criar própria
-
-- **(2025-11-17)** Database engine com FK habilitado
-  - `engine.py` - PRAGMA foreign_keys=ON no SQLite
-
-- **(2025-11-17)** Imports refatorados
-  - `routine_service.py` - Importa de src.timeblock.models
-  - `conftest.py` - sqlalchemy.orm.Session => sqlmodel.Session
-
-### Corrigido
-
-- **(2025-11-17)** Testes de integração com Dependency Injection
-  - 6 testes de timer integration corrigidos (FK constraints resolvidos)
-  - 4 testes de fixtures validation corrigidos
-  - Services agora aceitam session opcional: `session: Session | None = None`
-  - Testes isolados com transações compartilhadas
-  - Código produção mantém compatibilidade (backward compatible)
-
----
+- Tests: 466 → 558 (+92)
+- Coverage: 42% (+26pp from v1.3.1)
+- Mypy: 0 errors
 
 ## [1.3.1] - 2026-01-19
 
-### Adicionado
+### Added
 
 - **ADR-026: Test Database Isolation Strategy**
-  - Estratégia híbrida: DI para unit, env var para integration
-  - Fixtures padronizadas em conftest.py
-  - Documentação em architecture.md seção 4.4
+  - Hybrid strategy: DI for unit, env var for integration
+  - Standardized fixtures in conftest.py
+  - Documentation in architecture.md section 4.4
 
-- **Análise de Cobertura BR → Testes**
-  - Matriz completa em quality-metrics.md seção 6.1
-  - 52 BRs documentadas, 35 com testes (67%)
-  - 17 BRs identificadas sem cobertura
-  - Roadmap atualizado com plano de implementação
+- **BR → Tests Coverage Analysis**
+  - Complete matrix in quality-metrics.md section 6.1
+  - 52 BRs documented, 35 with tests (67%)
+  - 17 BRs identified without coverage
+  - Updated roadmap with implementation plan
 
-### Alterado
+### Changed
 
-- **SSOT para database path**
-  - Centralizado em `engine.get_db_path()`
-  - Removido `DATABASE_PATH` de config.py
-  - Eliminados hacks de `sys.modules` em testes
+- **SSOT for database path**
+  - Centralized in `engine.get_db_path()`
+  - Removed `DATABASE_PATH` from config.py
+  - Eliminated `sys.modules` hacks in tests
 
-- **Fixtures de integração simplificadas**
-  - `isolated_db` usa apenas env var (ADR-026)
-  - Removidas fixtures locais duplicadas
-  - `test_init.py` usa `empty_db_path` específica
+- **Simplified integration fixtures**
+  - `isolated_db` uses only env var (ADR-026)
+  - Removed duplicate local fixtures
+  - `test_init.py` uses specific `empty_db_path`
 
-### Corrigido
+### Fixed
 
-- **BR-SKIP-003:** IGNORED pode receber justificativa retroativa (recuperação)
+- **BR-SKIP-003:** IGNORED can receive retroactive justification (recovery)
 
-### Métricas
+### Metrics
 
-- 466 testes passando
-- 65% cobertura global
-- 0 erros mypy
-- 26 testes skipped (análise documentada)
-
----
+- 466 tests passing
+- 65% global coverage
+- 0 mypy errors
+- 26 skipped tests (documented analysis)
 
 ## [1.3.0] - 2025-11-08
 
-### Adicionado em 2025-11-08
+### Added
 
-#### **Consolidação de Testing e Qualidade**
+#### Testing and Quality Consolidation
 
-**Estrutura de Testing:**
+**Testing Structure:**
 
-- Consolidada estrutura em `05-testing/` (removido `07-testing/` duplicado)
-- Adicionados documentos navegáveis:
-  - `testing-philosophy.md` - Filosofia de testes do projeto
-  - `requirements-traceability-matrix.md` - RTM completo com rastreabilidade BR => Test => Code
-  - `test-strategy.md` - Estratégia consolidada de testes
-- 5 scenarios de teste agora acessíveis:
+- Consolidated structure in `05-testing/` (removed duplicate `07-testing/`)
+- Added navigable documents:
+  - `testing-philosophy.md` - Project testing philosophy
+  - `requirements-traceability-matrix.md` - Complete RTM with BR => Test => Code traceability
+  - `test-strategy.md` - Consolidated test strategy
+- 5 test scenarios now accessible:
   - event-creation
   - conflict-detection
   - event-reordering
   - habit-generation
   - timer-lifecycle
 
-**Glossário Completo:**
+**Complete Glossary:**
 
-- Glossário expandido para 298 linhas em `01-architecture/12-glossary.md`
-- Todos termos principais definidos (TimeBlock, Habit, HabitInstance, Event, etc)
-- HabitAtom marcado como DEPRECATED (apenas marketing)
-- Relacionamentos entre conceitos documentados
+- Glossary expanded to 298 lines in `01-architecture/12-glossary.md`
+- All main terms defined (TimeBlock, Habit, HabitInstance, Event, etc)
+- HabitAtom marked as DEPRECATED (marketing only)
+- Relationships between concepts documented
 
-**Business Rules Formalizadas:**
+**Formalized Business Rules:**
 
-- `event-reordering.md` - Especificação formal completa (222 linhas)
-- Princípios fundamentais: Controle Explícito do Usuário, Informação sem Imposição
-- BR-EVENT-001 a BR-EVENT-007 documentadas
-- Mudança de propósito: Sistema apenas DETECTA conflitos, não propõe reordenamento automático
+- `event-reordering.md` - Complete formal specification (222 lines)
+- Fundamental principles: Explicit User Control, Information Without Imposition
+- BR-EVENT-001 to BR-EVENT-007 documented
+- Purpose change: System only DETECTS conflicts, doesn't propose automatic reordering
 
-**Impacto:**
+**Impact:**
 
-- Testing structure consolidada e sem duplicações
-- Glossário completo e preciso
-- Business Rules formalmente especificadas
-- Alinhamento filosofia: usuário sempre no controle
+- Consolidated testing structure without duplications
+- Complete and precise glossary
+- Formally specified Business Rules
+- Philosophy alignment: user always in control
 
-**Commits:**
+## [1.2.2-logging] - 2025-11-10
 
-- docs: Consolida testing em 05-testing/
-- docs(glossary): Expande glossário com todos termos
-- docs(specs): Formaliza Business Rules event-reordering
+### Added
 
----
+#### Structured Logging System - Sprint 1.3
 
-## [1.2.2] - 2025-11-10
+**Logging Module:**
 
-### Adicionado em 2025-11-10
+- `cli/src/timeblock/utils/logger.py` (118 lines)
+  - `setup_logger()` with rotating file handler
+  - `get_logger()` helper to obtain configured logger
+  - `disable_logging()` / `enable_logging()` for tests
+  - Structured format: `[timestamp] [level] [module] message`
+  - Console and file support with automatic rotation (10MB, 5 backups)
 
-#### **Sistema de Logging Estruturado - Sprint 1.3**
+**Tests:**
 
-**Módulo de Logging:**
+- test_habit_lifecycle.py: E2E test
+- test_logging_integration.py: Integration
+- test_logger.py: Unit tests
+- test_habit_instance_service_extended.py
+- Test coverage: 43% -> 83%
 
-- `cli/src/timeblock/utils/logger.py` (118 linhas)
-  - `setup_logger()` com rotating file handler
-  - `get_logger()` helper para obter logger configurado
-  - `disable_logging()` / `enable_logging()` para testes
-  - Formato estruturado: `[timestamp] [level] [module] message`
-  - Suporte a console e arquivo com rotação automática (10MB, 5 backups)
+**Documentation:**
 
-**Testes de Logging:**
+- PHILOSOPHY.md, ARCHITECTURE.md
+- ADRs 015-018 (HabitAtom refactor)
+- logging-strategy.md
+- HabitAtom Sprints docs
 
-- `cli/tests/unit/test_utils/test_logger.py` (277 linhas)
-- TestSetupLogger: 6+ testes de configuração
-- TestGetLogger: testes de obtenção de logger
-- TestDisableEnableLogging: testes de controle
-- 100% cobertura do módulo logger
+## [1.2.1-docs] - 2025-11-11
 
-**Integração:**
+### Added
 
-- Logs estruturados em services principais
-- Níveis configuráveis: DEBUG, INFO, WARNING, ERROR
-- Log rotation automática para evitar crescimento descontrolado
+#### Documentation Reorganization and Consolidation
 
-**Métricas:**
+**Documentation Structure:**
 
-- 6+ novos testes (todos passando)
-- Módulo completo e documentado
-- Pronto para uso em produção
-
-**Commits:**
-
-- feat(logging): Implementa sistema de logging estruturado
-- test(logging): Adiciona 6 testes para logger.py
-- docs(logging): Documenta uso e configuração
-
----
-
-## [1.2.1] - 2025-11-11
-
-### Adicionado em 2025-11-11
-
-#### **Reorganização e Consolidação da Documentação**
-
-**Estrutura de Documentação:**
-
-- 9 ADRs agora navegáveis no mkdocs (ADR-012 a ADR-020)
+- 9 ADRs now navigable in mkdocs (ADR-012 to ADR-020)
   - ADR-012: Sync Strategy
   - ADR-013: Offline-First Schema
   - ADR-014: Sync UX Flow
@@ -361,120 +327,110 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.
   - ADR-019: Test Naming Convention
   - ADR-020: Business Rules Nomenclature
 
-**Consolidação de Arquitetura:**
+**Architecture Consolidation:**
 
-- Unificada estrutura em `01-architecture/` (removidos `02-architecture/` e `01-guides/`)
-- Adicionados documentos navegáveis:
-  - `00-architecture-overview.md` - Visão geral consolidada (20KB)
-  - `16-sync-architecture-v2.md` - Arquitetura de sincronização v2.0
-  - `17-user-control-philosophy.md` - Filosofia de controle do usuário (15KB)
-  - `18-project-philosophy.md` - Filosofia de hábitos atômicos (12KB)
+- Unified structure in `01-architecture/` (removed `02-architecture/` and `01-guides/`)
+- Added navigable documents:
+  - `00-architecture-overview.md` - Consolidated overview (20KB)
+  - `16-sync-architecture-v2.md` - Sync architecture v2.0
+  - `17-user-control-philosophy.md` - User control philosophy (15KB)
+  - `18-project-philosophy.md` - Atomic habits philosophy (12KB)
 
-**Impacto:**
+**Impact:**
 
-- 20 ADRs navegáveis (vs 11 anteriormente) = +82%
-- Estrutura de docs/ organizada e sem duplicações
-- Melhor navegabilidade do site de documentação
-- Documentação de filosofia e princípios do projeto
-
-**Commits:**
-
-- docs(mkdocs): Adiciona 9 ADRs faltantes na navegação (8b88b7b)
-- docs: Consolida arquitetura em 01-architecture/ (f3fcb5f)
-- docs: Remove duplicações e organiza estrutura
-
----
+- 20 navigable ADRs (vs 11 previously) = +82%
+- Organized docs/ structure without duplications
+- Project philosophy and principles documented
 
 ## [1.1.0] - 2025-11-01
 
-### Adicionado em 2025-11-01
+### Added
 
-#### **Sistema de Reordenamento de Eventos - Implementação Completa**
+#### Event Reordering System - Complete Implementation
 
-- Detecção automática de conflitos entre eventos agendados
-- Cálculo de prioridades baseado em status e prazos (CRITICAL, HIGH, NORMAL, LOW)
-- Algoritmo de reordenamento sequencial que respeita prioridades
-- Confirmação interativa antes de aplicar mudanças
-- Novo comando CLI: `timeblock reschedule [preview] [--auto-approve]`
+- Automatic conflict detection between scheduled events
+- Priority calculation based on status and deadlines (CRITICAL, HIGH, NORMAL, LOW)
+- Sequential reordering algorithm respecting priorities
+- Interactive confirmation before applying changes
+- New CLI command: `timeblock reschedule [preview] [--auto-approve]`
 
-**Services Aprimorados:**
+**Enhanced Services:**
 
-- `TaskService.update_task()` agora retorna tupla com ReorderingProposal opcional
-- `HabitInstanceService.adjust_instance_time()` integrado com detecção de conflitos
-- `TimerService.start_timer()` detecta conflitos ao iniciar timers
+- `TaskService.update_task()` now returns tuple with optional ReorderingProposal
+- `HabitInstanceService.adjust_instance_time()` integrated with conflict detection
+- `TimerService.start_timer()` detects conflicts when starting timers
 
-**Novos Componentes:**
+**New Components:**
 
-- `EventReorderingService` - Lógica central de reordenamento (90% cobertura de testes)
-- `event_reordering_models.py` - Estruturas de dados (EventPriority, Conflict, ProposedChange, ReorderingProposal)
-- `proposal_display.py` - Saída CLI formatada com Rich para propostas
-- `reschedule.py` - Implementação do comando CLI
+- `EventReorderingService` - Central reordering logic (90% test coverage)
+- `event_reordering_models.py` - Data structures (EventPriority, Conflict, ProposedChange, ReorderingProposal)
+- `proposal_display.py` - Rich formatted CLI output for proposals
+- `reschedule.py` - CLI command implementation
 
-**Testes:**
+**Tests:**
 
-- 78 novos testes (219 total, +55% de aumento)
-- 100% cobertura em event_reordering_models
-- 90% cobertura em event_reordering_service
-- Testes de integração para todos os services afetados
+- 78 new tests (219 total, +55% increase)
+- 100% coverage in event_reordering_models
+- 90% coverage in event_reordering_service
+- Integration tests for all affected services
 
-**Documentação:**
+**Documentation:**
 
-- Documentação técnica completa em `docs/10-meta/event-reordering-completed.md`
-- Retrospectiva de sprints em `docs/10-meta/sprints-v2.md`
-- Arquitetura e documentação de API atualizadas
+- Complete technical documentation in `docs/10-meta/event-reordering-completed.md`
+- Sprint retrospective in `docs/10-meta/sprints-v2.md`
+- Architecture and API documentation updated
 
-### Alterado
+### Changed
 
-- Services agora retornam tuplas onde apropriado para incluir propostas de reordenamento
-- Mensagens de erro aprimoradas com informações de conflito
+- Services now return tuples where appropriate to include reordering proposals
+- Enhanced error messages with conflict information
 
-### Corrigido
+### Breaking Changes
 
-- Nenhum (sem bugs corrigidos, este é um release puramente de features)
-
-### Mudanças Incompatíveis
-
-- Nenhuma
+- None
 
 ### Performance
 
-- Detecção de conflitos otimizada para complexidade O(n log n)
-- Consultas eficientes de eventos em intervalos de datas
-
-### Guia de Migração
-
-Nenhuma migração necessária. Todas as mudanças são retrocompatíveis.
-
----
+- Conflict detection optimized for O(n log n) complexity
+- Efficient event queries in date ranges
 
 ## [1.0.0] - 2025-10-16
 
-### Adicionado em 2025-10-16
+### Added
 
-- Release baseline inicial
-- Inicialização do banco de dados SQLite
-- Operações CRUD básicas para eventos
-- Listagem de eventos com filtros (dia, semana)
-- Suporte a formato brasileiro de tempo (7h, 14h30)
-- Detecção básica de conflitos (apenas aviso, não bloqueante)
-- Suporte para eventos que cruzam meia-noite
-- 141 testes com 99% de cobertura
+- Initial baseline release
+- SQLite database initialization
+- Basic CRUD operations for events
+- Event listing with filters (day, week)
+- Brazilian time format support (7h, 14h30)
+- Basic conflict detection (warning only, non-blocking)
+- Support for events crossing midnight
+- 141 tests with 99% coverage
 
-**Comandos CLI:**
+**CLI Commands:**
 
-- `timeblock init` - Inicializar banco de dados
-- `timeblock add` - Criar eventos
-- `timeblock list` - Listar eventos com filtros
+- `timeblock init` - Initialize database
+- `timeblock add` - Create events
+- `timeblock list` - List events with filters
 
-### Limitações Conhecidas
+### Known Limitations
 
-- Sem hábitos recorrentes
-- Sem reordenamento automático
-- Sem relatórios ou analytics
-- CLI básica (sem TUI)
+- No recurring habits
+- No automatic reordering
+- No reports or analytics
+- Basic CLI (no TUI)
 
 ---
 
-[Não Lançado]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/fabiodelllima/timeblock-organizer/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/fabiodelllima/timeblock-organizer/releases/tag/v1.0.0
+[Unreleased]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.4.1...v1.5.0
+[1.4.1]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.3.2...v1.4.0
+[1.3.2]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.3.1...v1.3.2
+[1.3.1]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.2.2-logging...v1.3.0
+[1.2.2-logging]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.2.1-docs...v1.2.2-logging
+[1.2.1-docs]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.1.0...v1.2.1-docs
+[1.1.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/releases/tag/v1.0.0

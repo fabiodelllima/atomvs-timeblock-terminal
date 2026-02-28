@@ -1,22 +1,26 @@
-# Roadmap - TimeBlock Organizer
+# Roadmap
 
-**Versão:** 2.1.0
+**Versão:** 6.0.0
 
 **Status:** Single Source of Truth (SSOT)
 
-**Documentos Relacionados:** architecture.md, business-rules.md, quality-metrics.md
+**Documentos relacionados:** architecture.md, business-rules.md, quality-metrics.md, technical-debt.md
 
 ---
 
 ## Sumário Executivo
 
-TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada em Time Blocking e nos princípios de Atomic Habits. Arquitetura offline-first com evolução planejada para API REST (v2.x), sincronização distribuída (v3.x) e mobile Android (v4.x).
+ATOMVS TimeBlock é uma aplicação CLI/TUI para gerenciamento de tempo baseada em Time Blocking e nos princípios de Atomic Habits. A arquitetura segue o modelo offline-first, priorizando funcionalidade completa sem dependência de rede, com evolução planejada para API REST (v2.x), sincronização distribuída (v3.x) e mobile Android (v4.x).
 
-**Estado Atual (16/01/2026):**
+O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 7 jobs com Docker e DevSecOps. Cobertura atingiu 87% (threshold 85%). O foco atual é a implementação da TUI com Textual (v1.7.0), com o sistema de cores semânticas Catppuccin Mocha (ADR-021) integrado ao dashboard e 1071 testes passando.
 
-- Versão: v1.3.3 (produção) / v1.4.0 (desenvolvimento)
-- Qualidade: 68% cobertura, 0 erros mypy, 15 testes skipped
-- Funcionalidade: 40% comandos CLI operacionais
+**Estado Atual (23/02/2026):**
+
+- Versão: v1.7.0-dev (branch `feat/tui-phase1`)
+- Qualidade: 87% cobertura, 0 erros mypy, 1071 testes
+- Funcionalidade: 85% comandos CLI operacionais, TUI dashboard funcional com cores semânticas
+- Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 7 jobs
+- Documentação: 81 BRs formalizadas, 32 ADRs, color-system.md, mockups v4
 
 ---
 
@@ -24,103 +28,157 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada e
 
 ### 1.1. Evolução Arquitetural
 
-```
-v1.x CLI => v2.x API => v3.x Sync => v4.x Mobile
+A estratégia de evolução do TimeBlock Organizer segue um modelo incremental onde cada versão major adiciona uma camada de capacidade sem descartar as anteriores. A CLI permanece funcional mesmo após a introdução da TUI e da API, garantindo que automações e scripts existentes não sejam quebrados. Essa coexistência de interfaces não é acidental — reflete a filosofia de que diferentes contextos de uso demandam diferentes modalidades de interação: scripts e pipelines usam a CLI, o trabalho diário interativo usa a TUI, e integrações externas usarão a API.
+
+```plaintext
+v1.5 CI/CD => v1.6 Docker/DevSecOps => v1.7 TUI => v2.x API => v3.x Sync => v4.x Mobile
 ```
 
-Detalhes em: `architecture.md` seção 9 (Evolução Futura)
+A decisão de introduzir TUI ainda dentro da v1.x, antes da API, reflete a prioridade de manter a experiência do usuário local rica enquanto a camada de serviços amadurece. A TUI consome os mesmos services que a CLI — nenhuma lógica de negócio é duplicada — o que valida a arquitetura de camadas antes de expô-la via API REST. Detalhes em: `architecture.md` seção 9 (Evolução Futura).
+
+O projeto adota o branding ATOMVS com namespace `atomvs-timeblock-*` para o ecossistema multi-repo. Detalhes em: ADR-032.
 
 ### 1.2. Princípios de Desenvolvimento
 
+Estes princípios guiam todas as decisões técnicas e de produto. Não são aspiracionais -- são critérios de aceite aplicados em cada commit, verificados automaticamente pelo pipeline CI/CD e pelos pre-commit hooks.
+
 1. **Offline-First:** Funcionalidade completa sem rede
 2. **User Control:** Sistema propõe, usuário decide
-3. **Quality First:** 80% cobertura, zero erros mypy em produção
-4. **DOCS => CODE:** Documentação precede implementação
+3. **Quality First:** 85% cobertura, zero erros mypy em produção
+4. **Engenharia de Requisitos:** BRs formalizadas antes da implementação (ISO/IEC/IEEE 29148:2018, SWEBOK v4.0)
 
 ---
 
 ## 2. Releases Entregues
 
-| Versão | Data     | Escopo                     | Detalhes     |
-| ------ | -------- | -------------------------- | ------------ |
-| v1.0.0 | Out/2025 | Foundation                 | CHANGELOG.md |
-| v1.1.0 | Nov/2025 | Core Features              | CHANGELOG.md |
-| v1.2.0 | Nov/2025 | Status Refactoring         | CHANGELOG.md |
-| v1.3.0 | Dez/2025 | Event Reordering (Parcial) | CHANGELOG.md |
+O histórico de releases mostra uma progressão consistente: cada versão expandiu funcionalidade enquanto manteve ou melhorou métricas de qualidade. A trajetória de v1.0.0 até v1.6.0 demonstra um padrão disciplinado: fundação sólida primeiro (models, services, testes), infraestrutura robusta depois (CI/CD, Docker, DevSecOps), e só então interfaces ricas (TUI). Essa sequência não foi arbitrária — cada camada dependia da estabilidade da anterior para evoluir com segurança.
 
-**Métricas Históricas:** Ver `docs/core/quality-metrics.md`
+| Versão | Data     | Escopo                       | Detalhes     |
+| ------ | -------- | ---------------------------- | ------------ |
+| v1.0.0 | Out/2025 | Foundation                   | CHANGELOG.md |
+| v1.1.0 | Nov/2025 | Core Features                | CHANGELOG.md |
+| v1.2.0 | Nov/2025 | Status Refactoring           | CHANGELOG.md |
+| v1.3.0 | Dez/2025 | Event Reordering (Parcial)   | CHANGELOG.md |
+| v1.4.0 | Jan/2026 | Mypy Zero, Services Complete | CHANGELOG.md |
+| v1.4.1 | Jan/2026 | E2E Tests, Quality Metrics   | CHANGELOG.md |
+| v1.5.0 | Fev/2026 | CI/CD Dual-Repo, i18n        | CHANGELOG.md |
+| v1.6.0 | Fev/2026 | Docker, DevSecOps, 87% cob.  | CHANGELOG.md |
+
+O detalhamento de métricas por release está disponível em `docs/core/quality-metrics.md`.
 
 ---
 
 ## 3. Estado Atual
 
-- **Versão:** v1.3.3 (produção), v1.4.0 (desenvolvimento)
-- **Branch:** `refactor/service-dependency-injection`
-- **Data:** 22 de Janeiro de 2026
+A versão v1.6.0 representou um ponto de inflexão na maturidade do projeto. A cobertura de testes saltou de 76% para 87%, superando o threshold de 85% configurado no pipeline. A introdução de Docker e DevSecOps (bandit, pip-audit) trouxe segurança automatizada. Com essa base consolidada, o projeto está preparado para adicionar complexidade na camada de apresentação sem risco de regressões silenciosas.
+
+A branch `feat/tui-phase1` contém a implementação progressiva da TUI: estrutura de pacotes, theme CSS, NavBar, TimeBlockApp com navegação, DashboardScreen com grade temporal, keybindings globais, e mais recentemente o sistema de cores semânticas Catppuccin Mocha (ADR-021) com suporte completo a substatus (DONE: full/partial/overdone/excessive; NOT_DONE: justified/unjustified/ignored) e background colorido nos timeblocks da agenda.
+
+- **Versão:** v1.7.0-dev
+- **Branch:** `feat/tui-phase1`
+- **Data:** 23 de Fevereiro de 2026
 
 ### 3.1. Métricas Principais
 
-| Métrica        | Atual | Meta v1.4 | Status      |
-| -------------- | ----- | --------- | ----------- |
-| Cobertura      | 68%   | 80%       | [BLOQUEADO] |
-| Erros mypy     | 0     | 0         | [DONE]      |
-| Testes skipped | 15    | 0         | [BLOQUEADO] |
-| CLI funcional  | 40%   | 100%      | [BLOQUEADO] |
+As métricas atuais refletem medições reais executadas em 26/02/2026. Os testes saltaram de 778 para 1071, um aumento de 38% motivado pela implementação completa do dashboard com substatus, cores semânticas, mock data, e refactor SOLID em 9 módulos. A formalização de BRs cresceu de 63 para 81 com 17 novas regras do dashboard (R12-R28) e revisão de BR-TUI-004 e BR-TUI-007.
 
-**Detalhamento:** Ver `docs/core/quality-metrics.md`
+| Métrica       | Atual | Meta v1.7.0 | Status     |
+| ------------- | ----- | ----------- | ---------- |
+| Cobertura     | 87%   | 85%         | [OK]       |
+| Erros mypy    | 0     | 0           | [OK]       |
+| Testes total  | 1071  | 850+        | [OK]       |
+| BRs totais    | 81    | 70+         | [OK]       |
+| CLI funcional | 85%   | 100%        | [PENDENTE] |
+| BRs cobertas  | 83%   | 95%         | [PENDENTE] |
 
-### 3.2. Problemas Críticos
+### 3.2. Distribuição de Testes
 
-| ID  | Descrição                | Severidade | Sprint    |
-| --- | ------------------------ | ---------- | --------- |
-| P1  | Service Layer incompleto | CRÍTICA    | v1.4.0 S2 |
-| P2  | Commands layer quebrado  | ALTA       | v1.4.0 S3 |
-| P3  | Cobertura inadequada     | MÉDIA      | v1.4.0 S4 |
+A pirâmide de testes cresceu significativamente com a implementação da TUI. Os 293 testes novos cobrem: dashboard (formatação, cores, mock data, panels), navegação entre screens, CRUD pattern, keybindings globais, service layer, status bar, timer screen, routines screen, habit actions e consistência visual.
 
-**Detalhamento P1:** Ver seção 5 (Débito Técnico)
+```
+Unit:        869 (81.1%)
+Integration: 116 (10.8%)
+BDD:          56 (5.2%)
+E2E:          30 (2.8%)
+─────────────────────────
+TOTAL:      1071 testes
+```
+
+### 3.3. Infraestrutura CI/CD
+
+A infraestrutura de CI/CD opera em duas camadas complementares. O GitLab é a fonte de verdade com pipeline completo de 7 jobs. O sync:github foi corrigido (escape de variável e restrição a branches protegidas) e o CodeQL duplicado removido do GitHub Actions (default setup ativo no repo).
+
+```plaintext
+GitLab CI: 7 jobs (test:all + lint + typecheck + coverage + 2 security + sync)
+GitHub Actions: 5 checks (sem CodeQL duplicado, default setup ativo)
+Sync automático: GitLab => GitHub (develop/main/tags apenas)
+Pipeline time: ~33min CI, ~29s local
+```
+
+### 3.4. Progresso TUI (v1.7.0)
+
+A implementação da TUI segue o ADR-031 com sprints incrementais. A fase 1 cobriu infraestrutura base, dashboard completo com sistema de cores Catppuccin Mocha, e refactor SOLID extraindo 1023 linhas em 9 módulos especializados (todos < 175 linhas). Foram formalizadas 17 BRs novas (R12-R28) cobrindo truncation, effort bar, ordenação, períodos, timer compacto e mock data. As decisões D-009 a D-014 e D-023 a D-024 foram registradas.
+
+| Componente                                      | Status     | Commits             |
+| ----------------------------------------------- | ---------- | ------------------- |
+| Estrutura de pacotes, entry point (BR-TUI-001)  | [DONE]     | `7d4b0be`           |
+| theme.tcss, paleta Material-like                | [DONE]     | `d94dda0`           |
+| NavBar com navegação horizontal                 | [DONE]     | `fce818f`           |
+| TimeBlockApp com navegação (BR-TUI-002)         | [DONE]     | `cacac32`           |
+| DashboardScreen com grade temporal (BR-TUI-003) | [DONE]     | `3c29802`           |
+| Global keybindings, help overlay (BR-TUI-004)   | [DONE]     | `4b74b90`           |
+| color-system.md + showcase HTML (ADR-021)       | [DONE]     | `1e9772b`           |
+| Migração cores Catppuccin Mocha                 | [DONE]     | `9733624`           |
+| Substatus + backgrounds + ASCII timer           | [DONE]     | `81ea2df`           |
+| Refactor SOLID dashboard (9 módulos)            | [DONE]     | `81ea2df`           |
+| 17 BRs novas R12-R28 formalizadas               | [DONE]     | `81ea2df`           |
+| CI/CD: sync:github fix + CodeQL cleanup         | [DONE]     | `81ea2df`           |
+| Routines Screen (BR-TUI-011)                    | [PENDENTE] | Documentação pronta |
+| CRUD pattern (BR-TUI-005)                       | [PENDENTE] | -                   |
+| Timer live display (BR-TUI-006)                 | [PENDENTE] | -                   |
+| Habit instance actions (BR-TUI-010)             | [PENDENTE] | -                   |
+
+**Documentação TUI:**
+
+- Mockups: `docs/tui/dashboard-mockup-v4.md`, `docs/tui/routines-weekly-mockup.md`
+- Color System: `docs/tui/color-system.md` (ADR-021, 550 linhas)
+- Showcase: `docs/html/themes/catppuccin-mocha.html`
+- BRs: BR-TUI-001 a BR-TUI-011 (seção 14 do business-rules.md)
+- ADR: ADR-031 com 7 widgets e plano de sprints
+
+**Mock Data (Rotina Demo):**
+
+O dashboard utiliza mock data para renderização quando o banco está vazio. Os mocks simulam uma rotina completa ("Rotina Demo") com 9 hábitos exercitando todos os status (done, not_done, running, paused, pending) e substatus (full, partial, overdone, excessive, unjustified, ignored), 9 tasks cobrindo os 4 estados (pending, completed, cancelled, overdue) com heat de proximidade, e timer ativo. O mock data serve como rotina de referência visual durante desenvolvimento e será extraído para `mock_data.py` no refactor SOLID.
 
 ---
 
 ## 4. Roadmap Futuro
 
-### v1.4.0 - MVP Funcional (Fevereiro 2026)
+### v1.7.0 - TUI + Produção (Fevereiro-Março 2026)
 
-**Objetivo:** CLI 100% operacional, zero erros mypy
+A introdução da TUI com Textual marca a transição do TimeBlock de ferramenta de linha de comando pura para uma aplicação interativa completa. A TUI e a CLI coexistem: a CLI permanece como interface para automação e scripts, enquanto a TUI oferece navegação visual para uso interativo. O design segue a paleta Catppuccin Mocha com sistema de cores semânticas (ADR-021) fundamentado em ISO 3864 e ANSI Z535, keybindings padronizados e responsividade para diferentes tamanhos de terminal (80, 120, 160+ colunas).
 
-**Duração:** 16 horas (2 semanas)
+A estratégia de implementação prioriza as telas de maior impacto no uso diário: Dashboard (visão do dia), Routines (planejamento semanal) e Timer (execução em tempo real). As telas de CRUD (Habits, Tasks) são construídas sobre um pattern reutilizável que reduz duplicação e mantém consistência visual.
 
-| Sprint | Objetivo               | Duração | Entregável                      |
-| ------ | ---------------------- | ------- | ------------------------------- |
-| S1     | Infraestrutura mypy    | 2h      | -40 erros mypy                  |
-| S2     | Completar services     | 4h      | -31 erros mypy, timer funcional |
-| S3     | Atualizar commands     | 6h      | -85 erros mypy (zero total)     |
-| S4     | Resolver skipped tests | 4h      | 480+ testes, zero skipped       |
+| Feature            | Estimativa | Status     |
+| ------------------ | ---------- | ---------- |
+| TUI com Textual    | 16h        | [WIP]      |
+| MkDocs publicado   | 4h         | [PENDENTE] |
+| Release automation | 4h         | [PENDENTE] |
+| PyPI publish       | 2h         | [PENDENTE] |
 
-**Critérios de Conclusão:**
+**Próximos passos imediatos (Dashboard):**
 
-- [ ] Zero erros mypy
-- [ ] Zero testes skipped
-- [ ] 80%+ cobertura global
-- [ ] 100% comandos CLI funcionais
-
-**Detalhamento:** Ver seção 4.1 (Sprints v1.4.0)
-
----
-
-### v1.5.0 - Production Ready (Março 2026)
-
-**Objetivo:** Infraestrutura para produção
-
-| Feature            | Estimativa |
-| ------------------ | ---------- |
-| Docker + CI/CD     | 10h        |
-| MkDocs publicado   | 8h         |
-| Pre-commit hooks   | 2h         |
-| Release automation | 4h         |
+1. Commit visual: substatus + backgrounds + ASCII timer + nome herda cor
+2. Refactor SOLID: extrair `colors.py`, `formatters.py`, `mock_data.py`
+3. Documentar BRs novas (substatus DONE, substatus NOT_DONE, heat de proximidade, bold exclusivo, formatos de duração)
+4. Fechar pendências do dashboard-sprint-notes.md
 
 ---
 
 ### v2.0.0 - REST API (Q2 2026)
+
+A migração para API REST representa a mudança arquitetural mais significativa do projeto: separação entre frontend e backend, autenticação, e persistência em banco de dados relacional. A camada de services já existente — validada por 1071 testes e consumida tanto pela CLI quanto pela TUI — será exposta via endpoints RESTful, minimizando o risco de regressão na lógica de negócio.
 
 **Stack:** FastAPI + PostgreSQL + JWT + Prometheus
 
@@ -130,6 +188,8 @@ Ver: `architecture.md` seção 9.2
 
 ### v3.0.0 - Sync (Q3 2026)
 
+A camada de sincronização resolve o problema de múltiplos dispositivos acessando os mesmos dados. O modelo event-driven com resolução de conflitos garante que mudanças offline sejam integradas de forma consistente. A decisão de manter o modelo offline-first como fundação significa que o sync é uma camada adicional — o aplicativo permanece funcional sem conectividade.
+
 **Stack:** Kafka + CloudEvents + Conflict Resolution
 
 Ver: `architecture.md` seção 9.3
@@ -138,228 +198,51 @@ Ver: `architecture.md` seção 9.3
 
 ### v4.0.0 - Mobile (Q4 2026)
 
+O cliente Android é o objetivo final da evolução arquitetural, tornando o TimeBlock acessível no dispositivo que o usuário mais carrega consigo. A aplicação mobile consumirá a mesma API REST e participará do mesmo protocolo de sync, compartilhando regras de negócio via contrato de API.
+
 **Stack:** Kotlin + Jetpack Compose + Room
 
 Ver: `architecture.md` seção 9.4
 
 ---
 
-## 4.1. Detalhamento v1.4.0
-
-### Sprint 1: Infraestrutura Mypy (2h)
-
-| Task                | Descrição                  | Tempo |
-| ------------------- | -------------------------- | ----- |
-| Instalar stubs      | types-python-dateutil      | 15min |
-| Corrigir migrations | Session.exec => execute    | 45min |
-| Corrigir SQLAlchemy | datetime.is\_() => == None | 1h    |
-
-**Entregável:** -40 erros (156 => 116)
-
----
-
-### Sprint 2: Completar Service Layer (4h)
-
-**Contexto:** Commands referenciam métodos inexistentes em services.
-
-**Impacto:** 31 erros mypy, timer não funcional.
-
-**Resolução:**
-
-| Service              | Métodos Necessários                                     | Tempo |
-| -------------------- | ------------------------------------------------------- | ----- |
-| TimerService         | get_timelog(), get_active_timer(), start_timer(task_id) | 90min |
-| HabitInstanceService | get_instance()                                          | 30min |
-| Stubs MVP            | list*instances(), get_timelogs_by*\*()                  | 45min |
-| Commands update      | timer.py refactor                                       | 60min |
-| Validação            | E2E manual                                              | 30min |
-
-**Entregável:**
-
-- +7 métodos em services
-- Timer funcional (start/stop/pause/resume/status)
-- -31 erros mypy (116 => 85)
-
-**Detalhamento Técnico:**
-
-- Análise completa: Seção 5 (Débito Técnico => Service Layer Gap)
-- Signatures: ADR-007 (será atualizado)
-- Implementação: GitHub Issue #TBD
-
----
-
-### Sprint 3: Commands Layer (6h)
-
-| Command     | Ação                      | Tempo |
-| ----------- | ------------------------- | ----- |
-| timer.py    | Refatorar para API nova   | 90min |
-| task.py     | Null checks               | 60min |
-| habit.py    | Type fixes                | 30min |
-| schedule.py | Align com services        | 60min |
-| report.py   | Verificar compatibilidade | 90min |
-| Validação   | E2E workflows             | 30min |
-
-**Entregável:** Zero erros mypy
-
----
-
-### Sprint 4: Cobertura de BRs (6h)
-
-**Análise (2026-01-19):** 17 BRs sem cobertura de testes
-
-| Prioridade | BRs                                                  | Testes Estimados | Tempo |
-| ---------- | ---------------------------------------------------- | ---------------- | ----- |
-| Alta       | BR-HABITINSTANCE-002/003, BR-VAL-001/002/003         | 15               | 2h    |
-| Média      | BR-SKIP-002/003/004, BR-TASK-004/005, BR-TAG-001/002 | 20               | 3h    |
-| Baixa      | BR-ROUTINE-006, BR-TIMER-007, BR-CLI-001/002         | 10               | 1h    |
-
-**Testes Skipped (15):**
-
-| Categoria                  | Quantidade | Ação                    |
-| -------------------------- | ---------- | ----------------------- |
-| Stubs vazios (integration) | 11         | Implementar ou deletar  |
-| Timer API v1               | 6          | Atualizar para v2       |
-| Migrations                 | 6          | Aguarda migrate_v2()    |
-| Outros                     | 3          | Avaliar individualmente |
-
-**Entregável:** 80% BRs cobertas, <10 skipped
-
----
-
 ## 5. Débito Técnico
 
-### 5.1. Inventário
+O inventário completo está em `docs/core/technical-debt.md`. A situação de débito técnico melhorou significativamente: dos 7 itens registrados, 6 estão resolvidos. O único item remanescente (DT-007, migration_001) é aceito como decisão consciente — a migração inicial é monolítica por design e será substituída por migrações incrementais na v2.0.0 quando o schema evoluir para PostgreSQL.
 
-| ID     | Descrição                | Severidade | Esforço | Sprint       |
-| ------ | ------------------------ | ---------- | ------- | ------------ |
-| DT-001 | 156 erros mypy           | CRÍTICA    | 16h     | v1.4.0       |
-| DT-002 | 15 testes skipped        | ALTA       | 8h      | v1.4.0 S4    |
-| DT-003 | Cobertura 65%            | ALTA       | 8h      | v1.4.0 S3-S4 |
-| DT-004 | EventReordering parcial  | MÉDIA      | 12h     | v1.5.0       |
-| DT-005 | Código morto             | BAIXA      | 2h      | v1.5.0       |
-| DT-006 | Inconsistência de idioma | MÉDIA      | 4h      | v1.5.0       |
+Um novo item de débito técnico foi identificado: o `dashboard.py` com 973 linhas viola SRP e deve ser refatorado em módulos separados (`colors.py`, `formatters.py`, `mock_data.py`). Este refactor está planejado como próximo commit após o fechamento visual.
 
-### 5.2. Service Layer Gap (DT-001 Parcial)
+| Status    | Quantidade | Itens                                          |
+| --------- | ---------- | ---------------------------------------------- |
+| Resolvido | 6          | DT-001, DT-002, DT-003, DT-004, DT-005, DT-006 |
+| Aceito    | 1          | DT-007 (migration_001)                         |
+| Planejado | 1          | DT-008 (dashboard.py SRP - refactor SOLID)     |
 
-- **Descoberto:** 16/01/2026
-- **Severidade:** CRÍTICA
-- **Impacto:** 31 erros mypy (20% do total), timer não funcional
-
-#### Problema
-
-Commands referenciam métodos inexistentes:
-
-- `TimerService.get_timelog()` - chamado em timer.py:43
-- `HabitInstanceService.get_instance()` - chamado em 4 locais
-- `TimerService.start_timer(task_id=X)` - signature incompatível
-
-**Causa Raiz:** ADR-007 define padrão, mas implementação incompleta.
-
-#### Impacto Quantificado
-
-| Arquivo  | Erros | Categoria        |
-| -------- | ----- | ---------------- |
-| timer.py | 23    | Métodos ausentes |
-| task.py  | 7     | Null checks      |
-| habit.py | 1     | Type mismatch    |
-
-**Comandos Afetados:** timer start/stop/pause/resume/status (100% quebrados)
-
-#### Resolução Planejada
-
-- **Sprint:** v1.4.0 Sprint 2
-- **Duração:** 4 horas
-- **Responsável:** Service Layer Team
-
-**Fases:**
-
-1. Implementar métodos críticos (2h)
-2. Implementar stubs MVP (45min)
-3. Atualizar commands (90min)
-
-**Critérios de Sucesso:**
-
-- [ ] +7 métodos em services
-- [ ] Timer 100% funcional
-- [ ] Zero erros mypy em timer.py, task.py, habit.py
-- [ ] ADR-007 atualizado com API obrigatória
-
-**Documentação Técnica:**
-
-- **Signatures Obrigatórias:** ADR-007 (atualização pendente)
-- **Testes:** test_timer_service.py, test_habit_instance_service.py
-
-### 5.3. Inconsistência de Idioma (DT-006)
-
-- **Descoberto:** 24/01/2026
-- **Severidade:** MÉDIA
-- **Impacto:** UX inconsistente, confusão para usuário
-
-#### Problema
-
-Arquivos CLI com idioma misto (inglês/português) violando ADR-018:
-
-| Arquivo  | Problema                          | ADR-018 diz |
-| -------- | --------------------------------- | ----------- |
-| add.py   | Mensagens, helps, docstrings (EN) | PT-BR       |
-| list.py  | Mensagens de erro (EN)            | PT-BR       |
-| init.py  | Docstrings (EN)                   | PT-BR       |
-| timer.py | Helps parcialmente (EN)           | PT-BR       |
-
-**Exemplos:**
-
-```python
-# INCORRETO (atual)
-console.print(f"[red]Error creating event: {e}")
-help="Event title"
-
-# CORRETO (ADR-018)
-console.print(f"[red]Erro ao criar evento: {e}")
-help="Título do evento"
-```
-
-#### Impacto UX
-
-- Usuário vê "Error" em alguns comandos e "Erro" em outros
-- Helps misturados dificultam compreensão
-- Experiência fragmentada
-
-#### Resolução Planejada
-
-- **Sprint:** v1.5.0
-- **Duração:** 4 horas
-- **Referência:** ADR-018-language-standards.md
-
-**Arquivos a Corrigir:**
-
-1. `commands/add.py` - Traduzir mensagens, helps, docstrings
-2. `commands/list.py` - Traduzir mensagens de erro
-3. `commands/init.py` - Traduzir docstrings
-4. `commands/timer.py` - Revisar helps
-
-**Critérios de Sucesso:**
-
-- [ ] 100% mensagens CLI em português
-- [ ] 100% helps em português
-- [ ] 100% docstrings de commands em português
-- [ ] Zero inconsistências detectadas por grep
+Nota: DT-003 (cobertura) resolvido — 87% supera a meta original de 80% e o threshold atual de 85%.
 
 ---
 
 ## 6. Política de Governança
+
+A governança documental segue o princípio de Single Source of Truth (SSOT): cada tipo de informação tem exatamente um documento autoritativo. Quando há contradição entre documentos, o SSOT do domínio prevalece. ADRs são imutáveis após aceitas — novas decisões que alteram ADRs anteriores referenciam o superseded. Os documentos de TUI Design foram introduzidos como categoria própria para separar artefatos de design visual (mockups, wireframes) da especificação formal (business rules) e das decisões técnicas (ADRs).
 
 ### 6.1. Hierarquia de Documentos
 
 ```
 SSOT Documents:
 ├── roadmap.md           => Estado e planejamento
-├── business-rules.md    => Regras de negócio
+├── business-rules.md    => Regras de negócio (81 BRs)
 ├── architecture.md      => Decisões técnicas
 ├── quality-metrics.md   => Métricas operacionais
+├── technical-debt.md    => Inventário de débito técnico
 └── CHANGELOG.md         => Histórico de releases
 
 ADRs (Imutáveis):
-└── docs/decisions/      => Decisões arquiteturais
+└── docs/decisions/      => 32 decisões arquiteturais
+
+TUI Design:
+├── docs/tui/            => Mockups de telas, color-system.md
+└── docs/html/           => Showcases visuais (HTML)
 
 Working Documents:
 └── docs/testing/        => Estratégias de teste
@@ -369,14 +252,18 @@ Working Documents:
 
 ## 7. Changelog do Documento
 
-| Data       | Versão | Mudanças                                            |
-| ---------- | ------ | --------------------------------------------------- |
-| 2026-01-14 | 1.0.0  | Criação inicial                                     |
-| 2026-01-16 | 2.0.0  | Reformulação profissional                           |
-| 2026-01-16 | 2.1.0  | Remoção de duplicações, referências a docs externos |
+| Data       | Versão | Mudanças                                                   |
+| ---------- | ------ | ---------------------------------------------------------- |
+| 2026-01-14 | 1.0.0  | Criação inicial                                            |
+| 2026-01-16 | 2.0.0  | Reformulação profissional                                  |
+| 2026-01-16 | 2.1.0  | Remoção de duplicações, referências a docs externos        |
+| 2026-02-01 | 3.0.0  | Atualização com dados reais, retrospectiva v1.4.0          |
+| 2026-02-03 | 4.0.0  | v1.5.0 entregue, replanejar v1.6.0 cobertura, v1.7.0 TUI   |
+| 2026-02-20 | 5.0.0  | v1.6.0 entregue, v1.7.0 TUI em desenvolvimento             |
+| 2026-02-23 | 6.0.0  | ADR-021 integrado, 1071 testes, mock data, próximos passos |
 
 ---
 
-**Próxima Revisão:** Fim v1.4.0 Sprint 4
+**Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 22 de Janeiro de 2026
+**Última atualização:** 26 de Fevereiro de 2026
