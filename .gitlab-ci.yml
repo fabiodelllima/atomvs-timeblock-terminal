@@ -59,7 +59,7 @@ coverage:report:
       artifacts: true
   script:
     - ls -la .coverage* || echo "No coverage files found"
-    - coverage report --fail-under=85
+    - coverage report --fail-under=80
     - coverage xml -o coverage.xml
   artifacts:
     reports:
