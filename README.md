@@ -14,8 +14,8 @@
 ╚══════════════════════════════════════════════╝
 ```
 
-[![Python](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-797%20passing-success.svg)](tests/)
+[![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/tests-1071%20passing-success.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-87%25-green.svg)](tests/)
 
 ---
@@ -100,7 +100,7 @@ O fluxo de dados segue uma direção unidirecional clara, desde a entrada do usu
 ╔═══════════════════════════════════════════════════════════════════╗
 ║ PRESENTATION                                                      ║
 ║ ┌───────────────────────────────────────────────────────────────┐ ║
-║ │ commands/  │ routine, habit, task, timer, tag, list           │ ║
+║ │ commands/  │ routine, habit, task, timer, tag, list, demo     │ ║
 ║ │ tui/       │ app, screens, widgets (Textual)                  │ ║
 ║ └───────────────────────────────────────────────────────────────┘ ║
 ╠═══════════════════════════════════════════════════════════════════╣
@@ -186,34 +186,34 @@ O projeto segue uma estrutura modular que facilita navegação e manutenção. O
 ```
 atomvs-timeblock-terminal/
 ├── src/timeblock/
-│   ├── commands/          # Comandos CLI (routine, habit, task, timer)
-│   ├── services/          # Lógica de negócio
-│   ├── models/            # Modelos SQLModel
-│   ├── database/          # Engine e migrations
-│   ├── tui/               # Interface terminal (Textual)
-│   │   ├── screens/       # Dashboard, Routines, Habits, Tasks, Timer
-│   │   └── widgets/       # NavBar, Grid, CommandBar, HelpOverlay
-│   └── utils/             # Helpers e validadores
+│   ├── commands/       # Comandos CLI (routine, habit, task, timer, demo)
+│   ├── services/       # Lógica de negócio
+│   ├── models/         # Modelos SQLModel
+│   ├── database/       # Engine e migrations
+│   ├── tui/            # Interface terminal (Textual)
+│   │   ├── screens/    # Dashboard, Routines, Habits, Tasks, Timer
+│   │   └── widgets/    # NavBar, Grid, Panels, CommandBar, HelpOverlay
+│   └── utils/          # Helpers e validadores
 │
-├── tests/                 # 797 testes
-│   ├── unit/              #   595 (74.7%)
-│   ├── integration/       #   116 (14.6%)
-│   ├── bdd/               #    56 (7.0%)
-│   └── e2e/               #    30 (3.8%)
+├── tests/              # 1071 testes
+│   ├── unit/           #   ~814 (76.0%)
+│   ├── integration/    #   ~118 (11.0%)
+│   ├── bdd/            #   ~109 (10.2%)
+│   └── e2e/            #    ~30 (2.8%)
 │
 ├── docs/
-│   ├── core/              # Documentação principal
-│   ├── decisions/         # 32 ADRs
-│   └── tui/               # Mockups de telas TUI
+│   ├── core/           # Documentação principal
+│   ├── decisions/      # 32 ADRs
+│   └── tui/            # Mockups e specs de telas TUI
 │
-└── scripts/               # Automação
+└── scripts/            # Automação
 ```
 
 ---
 
 ## Instalação
 
-A instalação é simples e requer apenas Python 3.14 ou superior. O projeto utiliza um ambiente virtual isolado para gerenciar dependências, evitando conflitos com outras aplicações Python no sistema.
+A instalação requer Python 3.13 ou superior. O projeto utiliza um ambiente virtual isolado para gerenciar dependências, evitando conflitos com outras aplicações Python no sistema.
 
 ```bash
 git clone https://github.com/fabiodelllima/atomvs-timeblock-terminal.git
@@ -222,7 +222,7 @@ cd atomvs-timeblock-terminal
 python -m venv venv
 source venv/bin/activate
 
-pip install -e .
+pip install -e ".[tui]"
 ```
 
 ---
@@ -233,86 +233,97 @@ A interface de linha de comando foi projetada para ser intuitiva e consistente. 
 
 ### Visão Geral
 
-| Recurso | Descrição                                |
-| ------- | ---------------------------------------- |
-| routine | Gerencia rotinas (coleções de hábitos)   |
-| habit   | Gerencia hábitos (templates recorrentes) |
-| task    | Gerencia tarefas (eventos únicos)        |
-| timer   | Controla cronômetro                      |
-| list    | Lista eventos com filtros temporais      |
-| tag     | Gerencia categorias (cor + título)       |
+| Recurso | Descrição                                   |
+| ------- | ------------------------------------------- |
+| routine | Gerencia rotinas (coleções de hábitos)      |
+| habit   | Gerencia hábitos (templates recorrentes)    |
+| task    | Gerencia tarefas (eventos únicos)           |
+| timer   | Controla cronômetro                         |
+| list    | Lista eventos com filtros temporais         |
+| tag     | Gerencia categorias (cor + título)          |
+| demo    | Popula/limpa banco com dados demonstrativos |
+| init    | Inicializa banco de dados                   |
 
 ### Exemplos
 
 ```bash
 # Rotinas
-timeblock routine create "Rotina Matinal"
-timeblock routine activate 1
-timeblock routine list
+atomvs routine create "Rotina Matinal"
+atomvs routine activate 1
+atomvs routine list
 
 # Hábitos
-timeblock habit create --title "Academia" --start 07:00 --end 08:30 --repeat weekdays
-timeblock habit list
+atomvs habit create --title "Academia" --start 07:00 --end 08:30 --repeat weekdays
+atomvs habit list
 
 # Timer
-timeblock timer start --schedule 1
-timeblock timer pause
-timeblock timer resume
-timeblock timer stop
+atomvs timer start --schedule 1
+atomvs timer pause
+atomvs timer resume
+atomvs timer stop
 
 # Tarefas
-timeblock task create --title "Dentista" --datetime "2025-12-01 14:30"
-timeblock task list --pending
-timeblock task check 1
+atomvs task create --title "Dentista" --datetime "2026-03-15 14:30"
+atomvs task list --pending
+atomvs task check 1
 
 # Listagem com filtros
-timeblock list --day 0        # Hoje
-timeblock list --week 0       # Esta semana
-timeblock list --month +1     # Próximo mês
-timeblock list --all          # Todos os eventos
+atomvs list --day 0        # Hoje
+atomvs list --week 0       # Esta semana
+atomvs list --month +1     # Próximo mês
+atomvs list --all          # Todos os eventos
+
+# Demo (dados demonstrativos)
+atomvs demo create          # 3 rotinas + 8 tasks
+atomvs demo clear           # Remove dados demo
 
 # TUI (interface visual)
-timeblock                     # Sem argumentos abre a TUI
+atomvs                      # Sem argumentos abre a TUI
 ```
 
 ---
 
 ## Stack Tecnológica
 
-A stack foi escolhida priorizando produtividade do desenvolvedor, type safety e facilidade de manutenção. Python 3.14 permite uso de features modernas como pattern matching e improved generics. SQLModel combina validação Pydantic com ORM SQLAlchemy em uma única definição de modelo. Textual fornece a TUI com widgets ricos e CSS-like styling.
+A stack foi escolhida priorizando produtividade do desenvolvedor, type safety e facilidade de manutenção. SQLModel combina validação Pydantic com ORM SQLAlchemy em uma única definição de modelo. Textual fornece a TUI com widgets ricos e CSS-like styling.
 
-| Componente    | Tecnologia          | Versão   |
-| ------------- | ------------------- | -------- |
-| Runtime       | Python              | 3.14+    |
-| ORM           | SQLModel            | 0.0.31+  |
-| CLI Framework | Typer               | 0.21.1+  |
-| TUI Framework | Textual             | 1.0.0+   |
-| Terminal UI   | Rich                | 14.3.1+  |
-| Database      | SQLite              | 3.x      |
-| Testing       | pytest + pytest-cov | 9.0.2+   |
-| Linting       | ruff                | 0.14.14+ |
-| Type Checking | mypy                | 1.19.1+  |
+| Componente    | Tecnologia          | Versão  |
+| ------------- | ------------------- | ------- |
+| Runtime       | Python              | 3.13+   |
+| ORM           | SQLModel            | 0.0.24+ |
+| CLI Framework | Typer               | 0.19.0+ |
+| TUI Framework | Textual             | 0.89.0+ |
+| Terminal UI   | Rich                | 14.0.0+ |
+| Database      | SQLite              | 3.x     |
+| Testing       | pytest + pytest-cov | 8.0+    |
+| Linting       | ruff                | 0.14.0+ |
+| Type Checking | mypy                | 1.18.0+ |
 
 ---
 
 ## Documentação
 
-A documentação técnica está organizada em níveis de detalhe. O diretório `core/` contém documentos de referência essenciais, `decisions/` preserva o histórico de decisões arquiteturais através de ADRs (Architecture Decision Records), e `tui/` contém mockups de design das telas da interface terminal.
+A documentação técnica está organizada em níveis de detalhe. O diretório `core/` contém documentos de referência essenciais, `decisions/` preserva o histórico de decisões arquiteturais através de ADRs (Architecture Decision Records), e `tui/` contém mockups de design e especificações das telas da interface terminal.
 
 ```
 docs/
 ├── core/
 │   ├── architecture.md     # Design e princípios
-│   ├── business-rules.md   # 51 BRs formalizadas
+│   ├── business-rules.md   # 81 BRs formalizadas
 │   ├── cli-reference.md    # Referência completa CLI
+│   ├── development.md      # Guia de desenvolvimento
 │   ├── quality-metrics.md  # Métricas de qualidade
 │   ├── roadmap.md          # Estado e planejamento
+│   ├── sprints.md          # Planejamento de sprints
+│   ├── technical-debt.md   # Dívida técnica rastreada
 │   └── workflows.md        # Fluxos e estados
 │
 ├── decisions/              # 32 ADRs documentadas
 │
-└── tui/                    # Mockups de telas TUI
-    ├── dashboard-mockup-v3.md
+└── tui/                    # Mockups e specs TUI
+    ├── dashboard-mockup-v4.md
+    ├── dashboard-cards-spec.md
+    ├── color-system.md
     └── routines-weekly-mockup.md
 ```
 
@@ -346,7 +357,7 @@ Referências:
 
 ### Implementação
 
-Código é desenvolvido seguindo Test-Driven Development. Testes referenciam BRs pela nomenclatura (test_br_xxx), mantendo rastreabilidade bidirecional entre requisitos, testes e implementação. A pirâmide de testes distribui validações em quatro níveis: unitário (74.7%), integração (14.6%), BDD (7.0%) e end-to-end (3.8%).
+Código é desenvolvido seguindo Test-Driven Development. Testes referenciam BRs pela nomenclatura (test_br_xxx), mantendo rastreabilidade bidirecional entre requisitos, testes e implementação. A pirâmide de testes distribui validações em quatro níveis: unitário (76.0%), integração (11.0%), BDD (10.2%) e end-to-end (2.8%).
 
 Referências:
 
@@ -373,21 +384,21 @@ mypy src/
 
 ## Roadmap
 
-O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão v1.6.0 consolidou a infraestrutura com Docker, DevSecOps e cobertura a 87%. A versão atual (v1.7.0) introduz a TUI com Textual como interface visual complementar à CLI.
+O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão v1.6.0 consolidou a infraestrutura com Docker, DevSecOps e cobertura a 87%. A versão atual (v1.7.0) introduz a TUI com Textual como interface visual complementar à CLI, incluindo dashboard interativo com 6 painéis, navegação por telas e comando demo para showcase.
 
-| Versão | Status    | Features                             |
-| ------ | --------- | ------------------------------------ |
-| v1.0.0 | [DONE]    | CLI básica, CRUD eventos             |
-| v1.1.0 | [DONE]    | Event reordering                     |
-| v1.2.x | [DONE]    | Logging, docs consolidados           |
-| v1.3.x | [DONE]    | Date parser, BDD tests, DI refactor  |
-| v1.4.0 | [DONE]    | Business rules formalizadas, 32 ADRs |
-| v1.5.0 | [DONE]    | CI/CD dual-repo, i18n, 873 testes    |
-| v1.6.0 | [DONE]    | Docker, DevSecOps, 87% cobertura     |
-| v1.7.0 | [CURRENT] | TUI com Textual (ADR-031)            |
-| v2.0.0 | [PLANNED] | FastAPI REST API + Observabilidade   |
-| v3.0.0 | [FUTURE]  | Microservices Ecosystem (Kafka)      |
-| v4.0.0 | [FUTURE]  | Android App (Kotlin)                 |
+| Versão | Status    | Features                                  |
+| ------ | --------- | ----------------------------------------- |
+| v1.0.0 | [DONE]    | CLI básica, CRUD eventos                  |
+| v1.1.0 | [DONE]    | Event reordering                          |
+| v1.2.x | [DONE]    | Logging, docs consolidados                |
+| v1.3.x | [DONE]    | Date parser, BDD tests, DI refactor       |
+| v1.4.0 | [DONE]    | Business rules formalizadas, 32 ADRs      |
+| v1.5.0 | [DONE]    | CI/CD dual-repo, i18n, 873 testes         |
+| v1.6.0 | [DONE]    | Docker, DevSecOps, 87% cobertura          |
+| v1.7.0 | [CURRENT] | TUI Textual, dashboard, demo, 1071 testes |
+| v2.0.0 | [PLANNED] | FastAPI REST API + Observabilidade        |
+| v3.0.0 | [FUTURE]  | Microservices Ecosystem (Kafka)           |
+| v4.0.0 | [FUTURE]  | Android App (Kotlin)                      |
 
 ---
 
