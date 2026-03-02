@@ -12,14 +12,14 @@
 
 ATOMVS TimeBlock é uma aplicação CLI/TUI para gerenciamento de tempo baseada em Time Blocking e nos princípios de Atomic Habits. A arquitetura segue o modelo offline-first, priorizando funcionalidade completa sem dependência de rede, com evolução planejada para API REST (v2.x), sincronização distribuída (v3.x) e mobile Android (v4.x).
 
-O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 7 jobs com Docker e DevSecOps. Cobertura atingiu 87% (threshold 85%). O foco atual é a implementação da TUI com Textual (v1.7.0), com o sistema de cores semânticas Catppuccin Mocha (ADR-021) integrado ao dashboard e 1071 testes passando.
+O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 8 jobs paralelos com Docker e DevSecOps. Cobertura em ~82% (threshold 80%). O foco atual é a implementação da TUI com Textual (v1.7.0), com o sistema de cores semânticas Catppuccin Mocha (ADR-021) integrado ao dashboard e ~1058 testes passando.
 
 **Estado Atual (23/02/2026):**
 
 - Versão: v1.7.0-dev (branch `feat/tui-phase1`)
-- Qualidade: 87% cobertura, 0 erros mypy, 1071 testes
+- Qualidade: ~82% cobertura (threshold 80%), 0 erros mypy, ~1058 testes
 - Funcionalidade: 85% comandos CLI operacionais, TUI dashboard funcional com cores semânticas
-- Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 7 jobs
+- Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 8 jobs paralelos
 - Documentação: 81 BRs formalizadas, 32 ADRs, color-system.md, mockups v4
 
 ---
@@ -80,13 +80,13 @@ A branch `feat/tui-phase1` contém a implementação progressiva da TUI: estrutu
 
 ### 3.1. Métricas Principais
 
-As métricas atuais refletem medições reais executadas em 23/02/2026. Os testes saltaram de 797 para 1071, um aumento de 34% motivado pela expansão do dashboard com substatus, cores semânticas e mock data abrangente. Cobertura se mantém em 87%.
+As métricas atuais refletem medições reais executadas em 23/02/2026. As métricas refletem o estado pós-MR #25 (02/03/2026). Testes reduziram de 1071 para ~1058 após remoção de 13 testes demo redundantes. Cobertura global em ~82% com threshold ajustado para 80% (widgets TUI sem cobertura unitária). Pipeline CI refatorado em 3 jobs paralelos.
 
 | Métrica       | Atual | Meta v1.7.0 | Status     |
 | ------------- | ----- | ----------- | ---------- |
-| Cobertura     | 87%   | 85%         | [OK]       |
+| Cobertura     | ~82%  | 80%         | [OK]       |
 | Erros mypy    | 0     | 0           | [OK]       |
-| Testes total  | 1071  | 850+        | [OK]       |
+| Testes total  | ~1058 | 850+        | [OK]       |
 | CLI funcional | 85%   | 100%        | [PENDENTE] |
 | BRs cobertas  | 83%   | 95%         | [PENDENTE] |
 
@@ -105,10 +105,10 @@ TOTAL:      1071 testes
 
 ### 3.3. Infraestrutura CI/CD
 
-A infraestrutura de CI/CD opera em duas camadas complementares. O GitLab é a fonte de verdade com pipeline completo de 7 jobs, incluindo testes, linting, typecheck, cobertura com threshold, auditoria de segurança e build de documentação. O GitHub recebe sincronização automática após pipeline verde e executa validação espelho para garantir que o repositório de showcase permaneça íntegro.
+A infraestrutura de CI/CD opera em duas camadas complementares. O GitLab é a fonte de verdade com pipeline de 8 jobs em 5 stages paralelos: 3 jobs de teste (unit, integration, e2e) com coverage combine, lint, typecheck, 2 jobs de segurança (bandit, pip-audit) e sync automático. O GitHub recebe sincronização automática após pipeline verde e executa validação espelho para garantir que o repositório de showcase permaneça íntegro.
 
 ```plaintext
-GitLab CI: 7 jobs (test:all + lint + typecheck + coverage + 2 security + sync)
+GitLab CI: 8 jobs (test:unit + test:integration + test:e2e + coverage:report + lint + typecheck + 2 security + sync)
 GitHub Actions: 6 checks + CodeQL
 Sync automático: GitLab => GitHub (após pipeline verde)
 Pipeline time: ~3min (local => GitHub sync)
@@ -216,7 +216,7 @@ Um novo item de débito técnico foi identificado: o `dashboard.py` com 973 linh
 | Aceito    | 1          | DT-007 (migration_001)                         |
 | Planejado | 1          | DT-008 (dashboard.py SRP - refactor SOLID)     |
 
-Nota: DT-003 (cobertura) resolvido — 87% supera a meta original de 80% e o threshold atual de 85%.
+Nota: DT-003 (cobertura) resolvido — ~82% supera o threshold atual de 80%. Meta será elevada para 85% após Sprint 3.2 expandir cobertura TUI.
 
 ---
 
@@ -264,4 +264,4 @@ Working Documents:
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 25 de Fevereiro de 2026
+**Última atualização:** 2 de Março de 2026
