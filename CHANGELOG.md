@@ -9,22 +9,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- TUI: Updated ADR-031 with horizontal navigation layout and proportional timeblocks
-- TUI: Planned screens - Dashboard, Routines, Habits, Tasks, Timer, Analytics, Habit Detail
+- TUI: Complete Phase 1 implementation with Textual framework (ADR-031)
+  - Dashboard screen with 6 interactive panels (agenda, habits, tasks, metrics, timer, header)
+  - Screen navigation: Dashboard, Routines, Habits, Tasks, Timer
+  - Widget system: NavBar, CommandBar, HelpOverlay, StatusBar, TimeblockGrid
+  - Color system with semantic tokens and WCAG-compliant palette
+  - Session management for TUI state persistence
+  - Formatters module for consistent data presentation
+  - CSS-like styling via Textual stylesheets
+  - Card/Panel base widget for uniform panel layout
+  - CRUD screen pattern for reusable list/detail views
+- TUI: Empty state handling with placeholder guidance in all panels
+  - Header: "[Sem rotina]" with zeroed metrics
+  - Habits panel: "--- . --:-- . --min" orientation
+  - Tasks panel: "--- . --/-- . --:--" orientation
+  - Metrics panel: streak 0, completude 0%
+  - Timer panel: idle 00:00 default state
+- CLI: `atomvs demo create` command with 3 mock routines and 8 tasks (BR-TUI-003-R28)
+  - "Semanal Mock" (WEEKDAYS, 8 habits)
+  - "Fim de Semana Mock" (WEEKENDS, 6 habits)
+  - "Ferias Mock" (EVERYDAY, 5 habits)
+  - 8 tasks with relative dates (overdue, today, future)
+- CLI: `atomvs demo clear` command to remove demo data (respects FK constraints)
+- BDD: TUI scenarios in Gherkin format
+  - tui_status_bar.feature (8 scenarios)
+  - tui_timer_screen.feature (10 scenarios)
+  - tui_crud_pattern.feature (8 scenarios)
+  - tui_screen_navigation.feature (8 scenarios)
+  - tui_visual_consistency.feature (9 scenarios)
+  - tui_habit_actions.feature (9 scenarios)
+  - tui_service_layer.feature (6 scenarios)
+  - tui_routines_screen.feature (11 scenarios)
+- ADR-031: TUI Implementation with horizontal navigation and proportional timeblocks
+- ADR-032: Branding and Repository Naming (atomvs-timeblock-terminal)
 
 ### Changed
 
+- CLI: Entry point changed from `timeblock.main:app` to `timeblock.main:main` (TUI opens with `atomvs` without args)
 - CI/CD: Consolidated test jobs into single test:all (4 jobs to 1)
 - CI/CD: Optimized pipeline from 10 to 6 jobs
 - CI/CD: Aligned GitHub Actions with GitLab consolidation
 - CI/CD: Expanded sync:github to all branches (contribution graph)
 - CI/CD: Removed parallel=true from coverage (incompatible with test:all)
+- CI/CD: sync:github restricted to develop/main/tags
+- CI/CD: Test timeout increased to 45min for test:all
+- CI/CD: CodeQL manual workflow removed (default setup active)
+- refactor: Mock fallbacks removed from all dashboard panels, replaced with zero-state placeholders
+- Presentation layer: `commands/` updated to include `demo` subcommand group
 
 ### Fixed
 
 - CI/CD: GitHub remote added dynamically in CI container
 - CI/CD: Fixed GITHUB_TOKEN variable escaping in sync job
 - CI/CD: Full refspec (refs/heads/) for GitHub sync push
+- CLI: Entry point `app` vs `main` causing "Missing command" error when invoking `atomvs` without args
+
+### Metrics
+
+- Total tests: 1071 (+293 since v1.6.0)
+- Distribution: Unit ~814 (76.0%), Integration ~118 (11.0%), BDD ~109 (10.2%), E2E ~30 (2.8%)
+- Global coverage: 87% (threshold 85%)
+- TUI coverage: 30%
+- BRs formalized: 81 (+14 TUI-specific)
+- ADRs: 32 documented
+- Source files: 60 Python modules (23 TUI-specific)
+- Pipeline: 6 jobs (~4min local, ~33min CI)
 
 ## [1.6.0] - 2026-02-12
 
