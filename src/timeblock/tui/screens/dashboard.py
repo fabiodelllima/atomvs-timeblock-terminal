@@ -5,11 +5,15 @@ e distribuição para os 5 panels especializados. Nenhuma lógica de
 renderização — cada panel encapsula sua própria apresentação.
 """
 
-from datetime import date
+from datetime import date, datetime
 
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Static
 
+from timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.services.routine_service import RoutineService
+from timeblock.services.task_service import TaskService
+from timeblock.services.timer_service import TimerService
 from timeblock.tui.session import service_action
 from timeblock.tui.widgets.agenda_panel import AgendaPanel
 from timeblock.tui.widgets.habits_panel import HabitsPanel
@@ -68,8 +72,6 @@ class DashboardScreen(Static):
     def _get_routine_name() -> str:
         """Obtém nome da rotina ativa."""
         try:
-            from timeblock.services.routine_service import RoutineService
-
             result, error = service_action(lambda s: RoutineService(s).get_active_routine())
             if error or not result:
                 return "Rotina Demo"
@@ -81,8 +83,6 @@ class DashboardScreen(Static):
     def _load_instances() -> list[dict]:
         """Carrega instâncias do dia. Usa mock se banco vazio."""
         try:
-            from timeblock.services.habit_instance_service import HabitInstanceService
-
             today = date.today()
             result, error = service_action(
                 lambda s: HabitInstanceService().list_instances(
@@ -125,8 +125,6 @@ class DashboardScreen(Static):
     def _load_tasks() -> list[dict]:
         """Carrega tasks pendentes. Usa mock se banco vazio."""
         try:
-            from timeblock.services.task_service import TaskService
-
             result, error = service_action(lambda s: TaskService.list_pending_tasks(session=s))
             if error or not result:
                 return []
@@ -148,10 +146,24 @@ class DashboardScreen(Static):
             return []
 
     @staticmethod
+    @staticmethod
     def _get_active_timer() -> dict | None:
-        """Obtém informação do timer ativo.
-
-        TODO: Integrar com TimerService quando dashboard tiver
-        contexto de habit_instance_id ativo.
-        """
-        return None
+        """Obtém informação do timer ativo (BR-TIMER-001)."""
+        try:
+            result, error = service_action(lambda s: TimerService.get_any_active_timer(session=s))
+            if error or not result:
+                return None
+            elapsed = (datetime.now() - result.start_time).total_seconds() - (
+                result.paused_duration or 0
+            )
+            timer_status = result.status
+            if timer_status is None:
+                return None
+            return {
+                "id": result.id,
+                "status": timer_status.value,
+                "elapsed_seconds": int(elapsed),
+                "habit_instance_id": result.habit_instance_id,
+            }
+        except Exception:
+            return None
