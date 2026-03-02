@@ -47,6 +47,10 @@ class DashboardScreen(Static):
             )
 
     def on_mount(self) -> None:
+        """Inicializa o dashboard."""
+        self.refresh_data()
+
+    def refresh_data(self) -> None:
         """Carrega dados e distribui para os panels."""
         instances = self._load_instances()
         tasks = self._load_tasks()
