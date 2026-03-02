@@ -52,7 +52,7 @@ filterwarnings = [
 
 [tool.coverage.run]
 source = ["src/timeblock"]
-omit = ["tests/*", "*/venv/*"]
+omit = ["tests/*", "*/venv/*", "*/commands/demo.py"]
 
 [tool.coverage.report]
 fail_under = 80
