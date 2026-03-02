@@ -12,14 +12,14 @@
 
 ATOMVS TimeBlock é uma aplicação CLI/TUI para gerenciamento de tempo baseada em Time Blocking e nos princípios de Atomic Habits. A arquitetura segue o modelo offline-first, priorizando funcionalidade completa sem dependência de rede, com evolução planejada para API REST (v2.x), sincronização distribuída (v3.x) e mobile Android (v4.x).
 
-O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 7 jobs com Docker e DevSecOps. Cobertura atingiu 87% (threshold 85%). O foco atual é a implementação da TUI com Textual (v1.7.0), com o sistema de cores semânticas Catppuccin Mocha (ADR-021) integrado ao dashboard e 1071 testes passando.
+O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 8 jobs paralelos com Docker e DevSecOps. Cobertura em ~82% (threshold 80%). O foco atual é a implementação da TUI com Textual (v1.7.0), com o sistema de cores semânticas Catppuccin Mocha (ADR-021) integrado ao dashboard e ~1058 testes passando.
 
 **Estado Atual (23/02/2026):**
 
 - Versão: v1.7.0-dev (branch `feat/tui-phase1`)
-- Qualidade: 87% cobertura, 0 erros mypy, 1071 testes
+- Qualidade: ~82% cobertura (threshold 80%), 0 erros mypy, ~1058 testes
 - Funcionalidade: 85% comandos CLI operacionais, TUI dashboard funcional com cores semânticas
-- Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 7 jobs
+- Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 8 jobs paralelos
 - Documentação: 81 BRs formalizadas, 32 ADRs, color-system.md, mockups v4
 
 ---
@@ -80,20 +80,19 @@ A branch `feat/tui-phase1` contém a implementação progressiva da TUI: estrutu
 
 ### 3.1. Métricas Principais
 
-As métricas atuais refletem medições reais executadas em 26/02/2026. Os testes saltaram de 778 para 1071, um aumento de 38% motivado pela implementação completa do dashboard com substatus, cores semânticas, mock data, e refactor SOLID em 9 módulos. A formalização de BRs cresceu de 63 para 81 com 17 novas regras do dashboard (R12-R28) e revisão de BR-TUI-004 e BR-TUI-007.
+As métricas atuais refletem medições reais executadas em 23/02/2026. As métricas refletem o estado pós-MR #25 (02/03/2026). Testes reduziram de 1071 para ~1058 após remoção de 13 testes demo redundantes. Cobertura global em ~82% com threshold ajustado para 80% (widgets TUI sem cobertura unitária). Pipeline CI refatorado em 3 jobs paralelos.
 
 | Métrica       | Atual | Meta v1.7.0 | Status     |
 | ------------- | ----- | ----------- | ---------- |
-| Cobertura     | 87%   | 85%         | [OK]       |
+| Cobertura     | ~82%  | 80%         | [OK]       |
 | Erros mypy    | 0     | 0           | [OK]       |
-| Testes total  | 1071  | 850+        | [OK]       |
-| BRs totais    | 81    | 70+         | [OK]       |
+| Testes total  | ~1058 | 850+        | [OK]       |
 | CLI funcional | 85%   | 100%        | [PENDENTE] |
 | BRs cobertas  | 83%   | 95%         | [PENDENTE] |
 
 ### 3.2. Distribuição de Testes
 
-A pirâmide de testes cresceu significativamente com a implementação da TUI. Os 293 testes novos cobrem: dashboard (formatação, cores, mock data, panels), navegação entre screens, CRUD pattern, keybindings globais, service layer, status bar, timer screen, routines screen, habit actions e consistência visual.
+A pirâmide de testes cresceu significativamente com a implementação do dashboard. Os 104 testes do dashboard cobrem: formatação de duração (2 formatos), localização de blocos, mapeamento status/substatus para cores/ícones/bold/fill/background, heat de proximidade para tasks, renderização ASCII art do timer, e validação estrutural de mock data.
 
 ```
 Unit:        869 (81.1%)
@@ -106,18 +105,18 @@ TOTAL:      1071 testes
 
 ### 3.3. Infraestrutura CI/CD
 
-A infraestrutura de CI/CD opera em duas camadas complementares. O GitLab é a fonte de verdade com pipeline completo de 7 jobs. O sync:github foi corrigido (escape de variável e restrição a branches protegidas) e o CodeQL duplicado removido do GitHub Actions (default setup ativo no repo).
+A infraestrutura de CI/CD opera em duas camadas complementares. O GitLab é a fonte de verdade com pipeline de 8 jobs em 5 stages paralelos: 3 jobs de teste (unit, integration, e2e) com coverage combine, lint, typecheck, 2 jobs de segurança (bandit, pip-audit) e sync automático. O GitHub recebe sincronização automática após pipeline verde e executa validação espelho para garantir que o repositório de showcase permaneça íntegro.
 
 ```plaintext
-GitLab CI: 7 jobs (test:all + lint + typecheck + coverage + 2 security + sync)
-GitHub Actions: 5 checks (sem CodeQL duplicado, default setup ativo)
-Sync automático: GitLab => GitHub (develop/main/tags apenas)
-Pipeline time: ~33min CI, ~29s local
+GitLab CI: 8 jobs (test:unit + test:integration + test:e2e + coverage:report + lint + typecheck + 2 security + sync)
+GitHub Actions: 6 checks + CodeQL
+Sync automático: GitLab => GitHub (após pipeline verde)
+Pipeline time: ~3min (local => GitHub sync)
 ```
 
 ### 3.4. Progresso TUI (v1.7.0)
 
-A implementação da TUI segue o ADR-031 com sprints incrementais. A fase 1 cobriu infraestrutura base, dashboard completo com sistema de cores Catppuccin Mocha, e refactor SOLID extraindo 1023 linhas em 9 módulos especializados (todos < 175 linhas). Foram formalizadas 17 BRs novas (R12-R28) cobrindo truncation, effort bar, ordenação, períodos, timer compacto e mock data. As decisões D-009 a D-014 e D-023 a D-024 foram registradas.
+A implementação da TUI segue o ADR-031 com sprints incrementais. A fase 1 cobriu a infraestrutura base (entry point, theme, navegação) e evoluiu para o dashboard com sistema de cores semânticas completo (ADR-021). A integração com a paleta Catppuccin Mocha foi documentada em `docs/tui/color-system.md` (550 linhas) com showcase visual em HTML. A fase 2 focará nas telas de conteúdo (Routines, Habits, Tasks) com CRUD contextual.
 
 | Componente                                      | Status     | Commits             |
 | ----------------------------------------------- | ---------- | ------------------- |
@@ -129,10 +128,9 @@ A implementação da TUI segue o ADR-031 com sprints incrementais. A fase 1 cobr
 | Global keybindings, help overlay (BR-TUI-004)   | [DONE]     | `4b74b90`           |
 | color-system.md + showcase HTML (ADR-021)       | [DONE]     | `1e9772b`           |
 | Migração cores Catppuccin Mocha                 | [DONE]     | `9733624`           |
-| Substatus + backgrounds + ASCII timer           | [DONE]     | `81ea2df`           |
-| Refactor SOLID dashboard (9 módulos)            | [DONE]     | `81ea2df`           |
-| 17 BRs novas R12-R28 formalizadas               | [DONE]     | `81ea2df`           |
-| CI/CD: sync:github fix + CodeQL cleanup         | [DONE]     | `81ea2df`           |
+| Substatus + backgrounds + ASCII timer           | [DONE]     | pendente commit     |
+| Refactor SOLID (colors.py, mock_data.py)        | [PENDENTE] | próximo commit      |
+| Documentação BRs novas (substatus, heat, etc.)  | [PENDENTE] | após refactor       |
 | Routines Screen (BR-TUI-011)                    | [PENDENTE] | Documentação pronta |
 | CRUD pattern (BR-TUI-005)                       | [PENDENTE] | -                   |
 | Timer live display (BR-TUI-006)                 | [PENDENTE] | -                   |
@@ -218,7 +216,7 @@ Um novo item de débito técnico foi identificado: o `dashboard.py` com 973 linh
 | Aceito    | 1          | DT-007 (migration_001)                         |
 | Planejado | 1          | DT-008 (dashboard.py SRP - refactor SOLID)     |
 
-Nota: DT-003 (cobertura) resolvido — 87% supera a meta original de 80% e o threshold atual de 85%.
+Nota: DT-003 (cobertura) resolvido — ~82% supera o threshold atual de 80%. Meta será elevada para 85% após Sprint 3.2 expandir cobertura TUI.
 
 ---
 
@@ -266,4 +264,4 @@ Working Documents:
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 26 de Fevereiro de 2026
+**Última atualização:** 2 de Março de 2026

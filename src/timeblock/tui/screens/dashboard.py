@@ -10,7 +10,6 @@ from datetime import date
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Static
 
-from timeblock.tui.mock_data import MOCK_INSTANCES, MOCK_TASKS, MOCK_TIMER
 from timeblock.tui.session import service_action
 from timeblock.tui.widgets.agenda_panel import AgendaPanel
 from timeblock.tui.widgets.habits_panel import HabitsPanel
@@ -91,7 +90,7 @@ class DashboardScreen(Static):
                 )
             )
             if error or not result:
-                return MOCK_INSTANCES
+                return []
 
             instances: list[dict] = []
             for inst in result:
@@ -120,20 +119,17 @@ class DashboardScreen(Static):
                 )
             return instances
         except Exception:
-            return MOCK_INSTANCES
+            return []
 
     @staticmethod
     def _load_tasks() -> list[dict]:
         """Carrega tasks pendentes. Usa mock se banco vazio."""
-        force_mock = True
-        if force_mock:
-            return MOCK_TASKS
         try:
             from timeblock.services.task_service import TaskService
 
             result, error = service_action(lambda s: TaskService.list_pending_tasks(session=s))
             if error or not result:
-                return MOCK_TASKS
+                return []
             tasks: list[dict] = []
             for task in result[:9]:
                 nm = task.title[:20] if hasattr(task, "title") else str(task)[:20]
@@ -149,7 +145,7 @@ class DashboardScreen(Static):
                 )
             return tasks
         except Exception:
-            return MOCK_TASKS
+            return []
 
     @staticmethod
     def _get_active_timer() -> dict | None:
@@ -158,4 +154,4 @@ class DashboardScreen(Static):
         TODO: Integrar com TimerService quando dashboard tiver
         contexto de habit_instance_id ativo.
         """
-        return MOCK_TIMER
+        return None

@@ -11,23 +11,6 @@ from textual.widgets import Static
 
 from timeblock.tui.session import service_action
 
-WEEKDAYS_PT = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
-MONTHS_PT = [
-    "",
-    "Jan",
-    "Fev",
-    "Mar",
-    "Abr",
-    "Mai",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Set",
-    "Out",
-    "Nov",
-    "Dez",
-]
-
 WEEKDAYS_FULL_PT = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
 MONTHS_FULL_PT = [
     "",
@@ -86,7 +69,6 @@ class HeaderBar(Static):
         month = MONTHS_FULL_PT[today.month]
         date_str = f"{weekday}, {today.day:02d} de {month} {today.year}"
 
-        # border_title com space-between
         try:
             available = self.size.width or 80
         except Exception:
@@ -94,7 +76,6 @@ class HeaderBar(Static):
         gap = max(2, available - len(screen_label) - len(date_str) - 2)
         self.border_title = f"{screen_label} [#45475A]{'─' * gap}[/#45475A] {date_str}"
 
-        # Conteúdo: rotina+tasks esquerda, timer direita
         routine = self._get_routine_info()
         tasks = self._get_task_info()
         timer = self._get_timer_info()
@@ -116,16 +97,20 @@ class HeaderBar(Static):
 
     @staticmethod
     def _get_routine_info() -> str:
-        """Obtém info da rotina ativa."""
+        """Obtém info da rotina ativa. Vazio se sem rotina."""
         try:
             from timeblock.services.routine_service import RoutineService
 
             result, error = service_action(lambda s: RoutineService(s).get_active_routine())
             if error or not result:
-                return "[bold]Rotina Demo[/bold]  [dim]│[/dim]  6/10 [#A6E3A1]▪▪▪▪▪▪[/#A6E3A1][#45475A]░░░░[/#45475A]  60%"
-            return f"[bold]{result.name}[/bold]  [dim]│[/dim]  4/8 [#A6E3A1]▪▪▪▪[/#A6E3A1][#45475A]░░░░[/#45475A]  50%"
+                return (
+                    "[dim][Sem rotina][/dim]  [dim]│[/dim]  0/0 [#45475A]░░░░░░░░░░[/#45475A]  0%"
+                )
+            return (
+                f"[bold]{result.name}[/bold]  [dim]│[/dim]  0/0 [#45475A]░░░░░░░░░░[/#45475A]  0%"
+            )
         except Exception:
-            return "[bold]Rotina Demo[/bold]  [dim]│[/dim]  6/10 [#A6E3A1]▪▪▪▪▪▪[/#A6E3A1][#45475A]░░░░[/#45475A]  60%"
+            return "[dim][Sem rotina][/dim]  [dim]│[/dim]  0/0 [#45475A]░░░░░░░░░░[/#45475A]  0%"
 
     @staticmethod
     def _get_task_info() -> str:
@@ -135,19 +120,16 @@ class HeaderBar(Static):
 
             result, error = service_action(lambda s: TaskService.list_pending_tasks(session=s))
             if error or not result:
-                return "3 tasks pendentes"
+                return "[dim]0 tasks[/dim]"
             return f"{len(result)} tasks pendentes"
         except Exception:
-            return "3 tasks pendentes"
+            return "[dim]0 tasks[/dim]"
 
     @staticmethod
     def _get_timer_info() -> str:
-        """Obtém info do timer ativo."""
+        """Obtém info do timer ativo. Vazio se sem timer."""
         try:
             # TODO: Integrar com TimerService (requer habit_instance_id)
-            result, error = None, True
-            if error or not result:
-                return "[#CBA6F7]▶ Deep Work  25:43[/#CBA6F7]"
-            return "[#CBA6F7]▶ ativo[/#CBA6F7]"
+            return "[dim]⏹ --:--[/dim]"
         except Exception:
-            return "[#CBA6F7]▶ Deep Work  25:43[/#CBA6F7]"
+            return "[dim]⏹ --:--[/dim]"

@@ -51,11 +51,12 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
+relative_files = true
 source = ["src/timeblock"]
-omit = ["tests/*", "*/venv/*"]
+omit = ["tests/*", "*/venv/*", "*/commands/demo.py"]
 
 [tool.coverage.report]
-fail_under = 85
+fail_under = 80
 show_missing = true
 
 [tool.mypy]

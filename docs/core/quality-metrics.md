@@ -15,13 +15,13 @@ Este documento consolida as métricas de qualidade do ATOMVS TimeBlock Terminal,
 
 ### 1.1. Visão Geral
 
-O projeto atingiu um patamar de estabilidade técnica onde todas as métricas obrigatórias estão em conformidade. Cobertura de 87% supera o threshold de 85% configurado no pipeline, zero erros mypy em 54 arquivos fonte garante type safety, e a suite de 797 testes executa em menos de 19 segundos. Os dois gaps remanescentes — CLI funcional em 85% e cobertura de BRs em 83% — são priorizados para fechamento durante a v1.7.0.
+O projeto atingiu um patamar de estabilidade técnica onde todas as métricas obrigatórias estão em conformidade. Cobertura de ~82% supera o threshold de 80% configurado no pipeline (reduzido de 85% para acomodar widgets TUI sem cobertura unitária). Zero erros mypy garante type safety, e a suite de ~1058 testes executa em 3 jobs paralelos no CI. Os dois gaps remanescentes — CLI funcional em 85% e cobertura de BRs em 83% — são priorizados para fechamento durante a v1.7.0.
 
 | Categoria           | Valor Atual | Meta v1.7.0 | Status     |
 | ------------------- | ----------- | ----------- | ---------- |
-| Testes Passando     | 797         | 850+        | [OK]       |
+| Testes Passando     | ~1058       | 850+        | [OK]       |
 | Testes Skipped      | 0           | 0           | [OK]       |
-| Cobertura Global    | 87%         | 85%         | [OK]       |
+| Cobertura Global    | ~82%        | 80%         | [OK]       |
 | Erros Mypy          | 0           | 0           | [OK]       |
 | Commands Funcionais | 85%         | 100%        | [PENDENTE] |
 

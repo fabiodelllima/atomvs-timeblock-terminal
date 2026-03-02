@@ -2,8 +2,6 @@
 
 **Versão:** 3.0.0
 
-**Data:** 28 de Novembro de 2025
-
 **Status:** Consolidado (SSOT)
 
 ---
@@ -110,7 +108,7 @@ TimeBlock torna essa matemática visível e acionável.
 
 **Implementação:**
 
-```
+```plaintext
 ┌──────────────────────────────────┐
 │  HOJE - 03 Nov 2025              │
 ├──────────────────────────────────┤
@@ -134,14 +132,14 @@ TimeBlock torna essa matemática visível e acionável.
 
 **1. Progresso Visível:**
 
-```
+```plaintext
 Exercício Matinal:
 ████████████████░░░░  15/20 dias este mês (75%)
 ```
 
 **2. Streak Tracking:**
 
-```
+```plaintext
 Sequência atual: 7 dias
 Melhor sequência: 23 dias
 ```
@@ -179,7 +177,7 @@ habit = Habit(
 
 Quando conflito surge, sistema detecta e informa:
 
-```
+```plaintext
 CONFLITO DETECTADO:
 ┌─────────────────────────────────────┐
 │ 09:00  Reunião inesperada (nova)    │
@@ -197,7 +195,7 @@ Sistema remove fricção: você decide, não precisa repensar toda agenda.
 
 **1. Gratificação Visual Instantânea:**
 
-```
+```plaintext
 [ ] Exercício 7:00-8:00
 
  ↓ (ao completar)
@@ -207,7 +205,7 @@ Sistema remove fricção: você decide, não precisa repensar toda agenda.
 
 **2. Relatórios de Progresso:**
 
-```
+```plaintext
 SEMANA 1: ███████ 7/7 dias (100%)
 SEMANA 2: ██████░ 6/7 dias (86%)
 SEMANA 3: ███████ 7/7 dias (100%)
@@ -219,7 +217,7 @@ Cada instância completada reforça: "Sou o tipo de pessoa que [FAZ ISSO]"
 
 #### Arquitetura Conceitual
 
-```
+```plaintext
 ┌──────────────────────────────────────────────┐
 │              ATOMIC HABITS                   │
 │                                              │
@@ -232,7 +230,7 @@ Cada instância completada reforça: "Sou o tipo de pessoa que [FAZ ISSO]"
 │             TIMEBLOCK SYSTEM                 │
 │                                              │
 │  Habit → HabitInstance → Completion →        │
-│           (scheduled)      (tracked)         │
+│           (scheduled)     (tracked)          │
 │                ↓                             │
 │        EventReordering                       │
 │       (remove friction)                      │
@@ -318,7 +316,7 @@ Marca concluído, vê progresso visual.
 
 **Resultado após 30 dias:**
 
-```
+```plaintext
 Leitura Diária:
 ███████████████████████████░░░ 27/30 dias (90%)
 Sequência atual: 12 dias
@@ -351,7 +349,7 @@ O modelo de domínio organiza o gerenciamento de tempo em torno de três conceit
 
 ### 2.2. Diagrama Conceitual
 
-```
+```plaintext
 Routine (Morning Routine)
 ├── Habit (Meditation 7:00-7:30 Daily)
 │   ├── HabitInstance (21/10 - DONE)
@@ -447,7 +445,7 @@ class Habit(SQLModel, table=True):
 
 **Relacionamento:**
 
-```
+```plaintext
 Routine (1) ----< Habits (N)
 ```
 
@@ -958,8 +956,6 @@ habit edit INSTANCE_ID --start 08:00 --end 09:30
 
 ---
 
----
-
 ## 6. Skip
 
 O Skip é o mecanismo que transforma ausência em informação. Na maioria dos sistemas de rastreamento de hábitos, não fazer algo é simplesmente um vazio — um dia sem marcação que pode significar esquecimento, preguiça, doença ou uma decisão racional. O TimeBlock Organizer distingue entre "não fiz porque escolhi não fazer" (Skip) e "não fiz porque ignorei" (Ignored), e dentro do Skip, diferencia _por que_ o usuário optou por pular.
@@ -1355,7 +1351,7 @@ task reopen ID
 
 **Erro ao Editar Concluída:**
 
-```
+```plaintext
 [ERROR] Tarefa já concluída. Use --status pending para reabrir antes de editar.
 ```
 
@@ -1445,7 +1441,7 @@ Opções:
 
 **Máquina de Estados:**
 
-```
+```plaintext
 [NO TIMER]
   │
   └─> start → RUNNING
@@ -1600,7 +1596,7 @@ completion = (total_actual / expected_duration) * 100
 
 **Fluxo:**
 
-```
+```plaintext
 10:00 - start_timer()
 10:30 - pause_timer()
 10:45 - resume_timer()  # paused_duration = 15min
@@ -1686,7 +1682,7 @@ Conflitos são calculados dinamicamente por comparação temporal entre eventos,
 
 **Detecção:**
 
-```
+```plaintext
 Evento A: [T1, T2]
 Evento B: [T3, T4]
 Conflito se: (T1 < T4) AND (T3 < T2)
@@ -1729,7 +1725,7 @@ Conflito se: (T1 < T4) AND (T3 < T2)
 
 **Formato:**
 
-```
+```plaintext
 Conflito detectado:
   - Academia: 07:00-08:00
   - Reuniao: 07:30-08:30
@@ -2010,7 +2006,7 @@ class Tag(SQLModel, table=True):
 
 **Relacionamento:**
 
-```
+```plaintext
 Tag (1) ----< Habits (N)
 Tag (1) ----< Tasks (N)
 ```
@@ -2180,7 +2176,7 @@ class DashboardScreen(Screen):
 
 ---
 
-### BR-TUI-004: Global Keybindings (REVISADA 25/02/2026)
+### BR-TUI-004: Global Keybindings (REVISADA 02/03/2026)
 
 **Descrição:** Keybindings globais funcionam em qualquer screen. Ações exigem modificador Ctrl. Navegação pura não exige modificador. Ações destrutivas e irreversíveis exigem modal de confirmação.
 
@@ -2188,23 +2184,28 @@ class DashboardScreen(Screen):
 
 ```plaintext
 SEM modificador (navegação pura, sem risco):
-  Tab / Shift+Tab ...... navegar entre zonas/cards
-  1-5 .................. trocar screen (numérico)
-  d/r/h/t/m ............ trocar screen (mnemônico)
-  Setas / j/k .......... navegar dentro do card
+  Tab .................. avançar entre panels/cards
+  Ctrl+Tab ............. voltar entre panels/cards
+  1-4 .................. focar panel diretamente (dentro da screen)
+  Setas / j/k .......... navegar itens dentro do panel focado
+  Enter ................ editar item selecionado ou placeholder
   ? .................... help overlay (leitura)
   Escape ............... fechar modal / voltar ao Dashboard
 
-COM Ctrl (todas as ações):
+COM Ctrl (ações e navegação entre screens):
+  Ctrl+1..5 ............ trocar screen (1=Dash, 2=Rotin, 3=Habit, 4=Tasks, 5=Timer)
   Ctrl+Q ............... sair da TUI [MODAL]
   Ctrl+Enter ........... confirmar / mark done [MODAL se irreversível]
   Ctrl+S ............... skip (hábito) / start (timer)
   Ctrl+P ............... pause/resume (timer)
   Ctrl+X ............... deletar item selecionado [MODAL]
-  Ctrl+N ............... novo item (abre formulário)
-  Ctrl+E ............... editar item selecionado
+  Ctrl+E ............... editar item selecionado (abre modal)
   Ctrl+K ............... complete task [MODAL]
   Ctrl+W ............... cancel timer [MODAL]
+
+CRIAÇÃO (duas vias):
+  N .................... abre modal com campos (formulário guiado, contextual ao panel)
+  : .................... abre barra de comando (power user)
 
 PROIBIDOS (reservados pelo OS):
   Ctrl+C ............... SIGINT (nunca capturar)
@@ -2223,14 +2224,19 @@ PROIBIDOS (reservados pelo OS):
 **Regras:**
 
 1. Todas as ações exigem modificador Ctrl
-2. Navegação pura (Tab, setas, números, ?, Escape) sem modificador
-3. Ações destrutivas/irreversíveis exigem modal de confirmação
-4. Modal exibe nome do item afetado e ação a ser executada
-5. Modal responde apenas a Enter (confirmar) e Escape (cancelar)
-6. Ctrl+C, Ctrl+Z, Ctrl+D nunca são capturados pela TUI
-7. Se timer ativo e Ctrl+Q, modal informa que sessão será perdida
-8. Keybindings de screen (CRUD) só funcionam na screen/zona ativa
-9. Help overlay (?) lista todos os keybindings com modificadores
+2. Navegação pura (Tab, Ctrl+Tab, setas, números, ?, Escape, Enter) sem modificador
+3. Ctrl+1..5 troca screen; números 1..4 focam panel dentro da screen ativa
+4. Tab avança entre panels, Ctrl+Tab volta (ciclo circular)
+5. Setas e j/k navegam itens dentro do panel focado
+6. Enter edita item selecionado (existente ou placeholder)
+7. N abre modal com campos contextual ao panel focado; : abre barra de comando
+8. Ações destrutivas/irreversíveis exigem modal de confirmação
+9. Modal exibe nome do item afetado e ação a ser executada
+10. Modal responde apenas a Enter (confirmar) e Escape (cancelar)
+11. Ctrl+C, Ctrl+Z, Ctrl+D nunca são capturados pela TUI
+12. Se timer ativo e Ctrl+Q, modal informa que sessão será perdida
+13. Keybindings de ação só funcionam na screen/zona ativa
+14. Help overlay (?) lista todos os keybindings com modificadores
 
 **Testes:**
 
@@ -2243,8 +2249,12 @@ PROIBIDOS (reservados pelo OS):
 - `test_br_tui_004_escape_closes_modal`
 - `test_br_tui_004_escape_returns_to_dashboard`
 - `test_br_tui_004_ctrl_c_not_captured`
-
----
+- `test_br_tui_004_ctrl_tab_navigates_backwards`
+- `test_br_tui_004_ctrl_1_to_5_switches_screen`
+- `test_br_tui_004_numbers_focus_panel`
+- `test_br_tui_004_enter_edits_placeholder`
+- `test_br_tui_004_n_opens_contextual_modal`
+- `test_br_tui_004_colon_opens_command_bar`
 
 ### BR-TUI-005: CRUD Operations Pattern
 
@@ -2303,9 +2313,9 @@ PROIBIDOS (reservados pelo OS):
 
 **Layout:**
 
-```
+```plaintext
 ┌────────────────────────────────────────────────────────────────────────────┐
-│ Rotina Matinal     │  Ctrl+Enter done  Ctrl+S skip    │ ▶ 47:23    14:32 │
+│ Rotina Matinal     │  Ctrl+Enter done  Ctrl+S skip    │ ▶ 47:23      14:32 │
 └────────────────────────────────────────────────────────────────────────────┘
   c_left (1fr)         c_center (1fr)                     c_right (auto)
 ```
@@ -2550,8 +2560,6 @@ PROIBIDOS (reservados pelo OS):
 **Regras:** Ver BR-TUI-003-R12 (Viewport-Aware Truncation).
 
 **Testes:** Mesmos de BR-TUI-003-R12.
-
----
 
 ---
 
@@ -2872,6 +2880,135 @@ PROIBIDOS (reservados pelo OS):
 
 ---
 
+### BR-TUI-012: Panel Navigation (NOVA 02/03/2026)
+
+**Descrição:** Navegação entre panels (cards) dentro de uma screen. Cada panel é uma zona focável independente com cursor interno para seus itens. O panel focado recebe destaque visual e o footer atualiza seus keybindings.
+
+**Regras:**
+
+1. Tab avança para o próximo panel (ciclo: Agenda → Hábitos → Tarefas → Timer → Agenda)
+2. Ctrl+Tab volta para o panel anterior (ciclo reverso)
+3. Números 1-4 focam panel diretamente (1=Agenda, 2=Hábitos, 3=Tarefas, 4=Timer)
+4. Panel focado recebe borda `$primary` (#CBA6F7 Mauve)
+5. Panels não focados mantêm borda `$surface` (#313244)
+6. Setas ↑/↓ ou j/k navegam itens dentro do panel focado
+7. Item selecionado (cursor) indicado por fundo Surface0 #313244
+8. Se panel tem overflow, scroll interno acompanha cursor (auto-scroll)
+9. Ao trocar de panel, cursor do panel anterior é preservado (retorna na mesma posição)
+10. Footer central atualiza keybindings conforme panel focado (BR-TUI-007)
+
+**Testes:**
+
+- `test_br_tui_012_tab_advances_panel`
+- `test_br_tui_012_ctrl_tab_reverses_panel`
+- `test_br_tui_012_number_focuses_panel_directly`
+- `test_br_tui_012_focused_panel_has_primary_border`
+- `test_br_tui_012_unfocused_panel_has_surface_border`
+- `test_br_tui_012_arrows_navigate_items_in_panel`
+- `test_br_tui_012_cursor_preserved_on_panel_switch`
+- `test_br_tui_012_overflow_scrolls_with_cursor`
+- `test_br_tui_012_footer_updates_on_panel_focus`
+
+---
+
+### BR-TUI-013: Placeholders Editáveis (NOVA 02/03/2026)
+
+**Descrição:** Quando o banco está vazio ou um card tem menos itens que o viewport, placeholders (linhas com `---`) são exibidos. Estes placeholders são navegáveis e editáveis: o usuário pode selecionar um placeholder e transformá-lo em item real via Enter (edição inline) ou N (modal com campos).
+
+**Regras:**
+
+1. Placeholders exibidos quando card tem menos itens que slots visuais disponíveis
+2. Placeholders são navegáveis com setas/j/k como itens normais
+3. Enter em placeholder abre edição inline: cursor transforma `---` em input de texto
+4. Tipo do item criado é determinado pelo panel (Hábitos → habit, Tarefas → task)
+5. Após confirmar (Enter no input), item é criado via service e placeholder substituído
+6. Escape cancela edição inline, restaura placeholder
+7. N em placeholder abre modal com campos completo (nome, duração, recorrência, etc.)
+8. : abre barra de comando independente do que está selecionado (power user)
+9. Barra de comando aceita sintaxe CLI: `habit add "Leitura" --duration 30 --recurrence daily`
+10. Após criação, lista atualiza e cursor posiciona no novo item
+
+**Testes:**
+
+- `test_br_tui_013_placeholder_shown_when_empty`
+- `test_br_tui_013_placeholder_is_navigable`
+- `test_br_tui_013_enter_on_placeholder_opens_inline_edit`
+- `test_br_tui_013_inline_edit_creates_item`
+- `test_br_tui_013_escape_cancels_inline_edit`
+- `test_br_tui_013_n_opens_modal_on_placeholder`
+- `test_br_tui_013_colon_opens_command_bar`
+- `test_br_tui_013_command_bar_accepts_cli_syntax`
+- `test_br_tui_013_list_refreshes_after_creation`
+
+---
+
+### BR-TUI-014: TCSS Modularização (NOVA 02/03/2026)
+
+**Descrição:** O arquivo theme.tcss (479+ linhas) deve ser decomposto em módulos por responsabilidade. O Textual suporta múltiplos arquivos TCSS via `CSS_PATH` como lista. A decomposição melhora manutenibilidade e reduz conflitos em merges.
+
+**Estrutura alvo:**
+
+```plaintext
+src/timeblock/tui/styles/
+├── base.tcss          # Reset, variáveis, tipografia
+├── layout.tcss        # Grid, sidebar, content area
+├── panels.tcss        # Panel widget, bordas, padding
+├── dashboard.tcss     # Agenda, header bar, panels específicos
+├── forms.tcss         # Inputs, modais, confirmação
+└── theme.tcss         # Import agregador (ou app.CSS_PATH lista todos)
+```
+
+**Regras:**
+
+1. Nenhum arquivo TCSS deve exceder 150 linhas
+2. Variáveis de cor definidas exclusivamente em base.tcss
+3. Cada screen pode ter TCSS próprio se necessário
+4. Ordem de carregamento: base → layout → panels → screen-specific → forms
+5. Refatoração não pode alterar comportamento visual (zero regressão)
+
+**Testes:**
+
+- `test_br_tui_014_app_loads_all_tcss_files`
+- `test_br_tui_014_no_tcss_file_exceeds_150_lines`
+- `test_br_tui_014_visual_regression_after_split` (manual/screenshot)
+
+---
+
+### BR-TUI-015: Revisão de Código e Qualidade (NOVA 02/03/2026)
+
+**Descrição:** Revisão completa do codebase usando frameworks industriais de qualidade de software como referência. Objetivo: identificar oportunidades de refatoração, eliminar code smells, e alinhar com princípios SOLID, Clean Code e padrões de manutenibilidade.
+
+**Escopo da revisão:**
+
+1. **SOLID:** Verificar SRP em services e widgets, DIP na integração TUI→services
+2. **Clean Code:** Nomes expressivos, funções curtas (≤50 linhas), sem magic numbers
+3. **Complexidade ciclomática:** Identificar métodos com CC > 10 para decomposição
+4. **Duplicação:** Detectar padrões repetidos entre screens/widgets para extração
+5. **Coesão:** Cada módulo faz uma coisa bem; módulos com múltiplas responsabilidades são candidatos a split
+6. **Acoplamento:** Services não devem conhecer detalhes de TUI/CLI; widgets não devem acessar banco diretamente
+7. **Testabilidade:** Todo código novo deve ser testável em isolamento (DI, session injection)
+
+**Critérios de avaliação por arquivo:**
+
+| Critério          | Severidade | Limiar                   |
+| ----------------- | ---------- | ------------------------ |
+| Arquivo > 300 LOC | WARNING    | Avaliar decomposição     |
+| Arquivo > 500 LOC | CRITICAL   | Decomposição obrigatória |
+| Função > 50 LOC   | WARNING    | Avaliar extração         |
+| Função > 100 LOC  | CRITICAL   | Extração obrigatória     |
+| CC > 10           | WARNING    | Simplificar lógica       |
+| CC > 15           | CRITICAL   | Decomposição obrigatória |
+| Duplicação > 10L  | WARNING    | Extrair helper/mixin     |
+
+**Referências:**
+
+- Martin, R. C. (2008). _Clean Code_. Prentice Hall.
+- Martin, R. C. (2017). _Clean Architecture_. Prentice Hall.
+- Fowler, M. (2018). _Refactoring_. Addison-Wesley, 2nd ed.
+- IEEE 730-2014 (Software Quality Assurance)
+
+**Entregável:** Relatório com findings por severidade (CRITICAL/WARNING/INFO), arquivo, linha e sugestão de correção.
+
 ## Referências
 
 - **ADRs:** `docs/decisions/`
@@ -2882,6 +3019,6 @@ PROIBIDOS (reservados pelo OS):
 
 ---
 
-**Última atualização em:** 25 de Fevereiro de 2026
+**Última atualização em:** 2 de Março de 2026
 
-**Total de regras:** 81 BRs
+**Total de regras:** 85 BRs
