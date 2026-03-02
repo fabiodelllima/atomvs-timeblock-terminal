@@ -11,6 +11,7 @@ from timeblock.tui.formatters import render_ascii_time, spaced_title
 
 
 class TimerPanel(Static):
+    can_focus = True
     """Card do timer com elapsed em ASCII art grande."""
 
     def __init__(self, **kwargs) -> None:

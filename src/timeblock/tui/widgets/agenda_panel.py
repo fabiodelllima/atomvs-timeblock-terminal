@@ -24,6 +24,7 @@ from timeblock.tui.formatters import format_duration
 
 
 class AgendaPanel(Static):
+    can_focus = True
     """Agenda vertical com régua de 30min e blocos proporcionais."""
 
     def __init__(self, **kwargs) -> None:

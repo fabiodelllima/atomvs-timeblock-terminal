@@ -13,6 +13,7 @@ from timeblock.tui.formatters import spaced_title
 
 
 class MetricsPanel(Static):
+    can_focus = True
     """Card de métricas com streak, completude e heatmap semanal."""
 
     def __init__(self, **kwargs) -> None:
