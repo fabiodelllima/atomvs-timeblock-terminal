@@ -51,6 +51,7 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
+relative_files = true
 source = ["src/timeblock"]
 omit = ["tests/*", "*/venv/*", "*/commands/demo.py"]
 
