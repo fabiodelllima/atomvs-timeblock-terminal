@@ -5,7 +5,10 @@ BR-TUI-003-R22: Strikethrough em done/cancelled.
 BR-TUI-003-R23: Subtítulo com contadores por status.
 BR-TUI-003-R27: Nome herda cor do status.
 BR-TUI-012: Navegação vertical com setas/j/k e highlight.
+BR-TUI-004: Quick actions — Ctrl+K completa task.
 """
+
+from textual.events import Key
 
 from timeblock.tui.colors import (
     C_ERROR,
@@ -33,6 +36,33 @@ class TasksPanel(FocusablePanel):
         self._order_tasks()
         self._set_item_count(len(self._ordered))
         self._refresh_content()
+
+    def get_selected_item(self) -> dict | None:
+        """Retorna task sob o cursor ou None."""
+        if not self._ordered or self._cursor_index >= len(self._ordered):
+            return None
+        return self._ordered[self._cursor_index]
+
+    def on_key(self, event: Key) -> None:
+        """Captura navegação e quick actions."""
+        if event.key == "ctrl+k":
+            self._action_complete()
+            event.stop()
+        else:
+            super().on_key(event)
+
+    def _action_complete(self) -> None:
+        """Completa task selecionada (BR-TUI-004)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        from timeblock.services.task_service import TaskService
+        from timeblock.tui.session import service_action
+
+        result, error = service_action(lambda s: TaskService.complete_task(item["id"], session=s))
+        if not error and result:
+            item["status"] = "completed"
+            self._refresh_content()
 
     def _order_tasks(self) -> None:
         """Ordena: overdue > pending > completed > cancelled."""
