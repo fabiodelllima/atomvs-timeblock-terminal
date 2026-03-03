@@ -5,7 +5,10 @@ BR-TUI-003-R18: Effort bar proporcional.
 BR-TUI-003-R19: Ordenação por start_time.
 BR-TUI-003-R27: Nome herda cor do status.
 BR-TUI-012: Navegação vertical com setas/j/k e highlight.
+BR-TUI-004: Quick actions — Ctrl+Enter done, Ctrl+S skip.
 """
+
+from textual.events import Key
 
 from timeblock.tui.colors import (
     is_bold_status,
@@ -30,6 +33,55 @@ class HabitsPanel(FocusablePanel):
         self._instances = instances
         self._set_item_count(len(instances))
         self._refresh_content()
+
+    def get_selected_item(self) -> dict | None:
+        """Retorna item sob o cursor ou None."""
+        if not self._instances or self._cursor_index >= len(self._instances):
+            return None
+        return self._instances[self._cursor_index]
+
+    def on_key(self, event: Key) -> None:
+        """Captura navegação e quick actions."""
+        if event.key == "ctrl+s":
+            self._action_skip()
+            event.stop()
+        elif event.key == "ctrl+enter":
+            self._action_done()
+            event.stop()
+        else:
+            super().on_key(event)
+
+    def _action_done(self) -> None:
+        """Marca hábito selecionado como done (BR-TUI-004)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        from timeblock.services.habit_instance_service import HabitInstanceService
+        from timeblock.tui.session import service_action
+
+        result, error = service_action(
+            lambda s: HabitInstanceService.mark_completed(item["id"], session=s)
+        )
+        if not error and result:
+            item["status"] = "done"
+            item["substatus"] = "full"
+            self._refresh_content()
+
+    def _action_skip(self) -> None:
+        """Marca hábito selecionado como skipped (BR-TUI-004)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        from timeblock.services.habit_instance_service import HabitInstanceService
+        from timeblock.tui.session import service_action
+
+        result, error = service_action(
+            lambda s: HabitInstanceService.mark_skipped(item["id"], session=s)
+        )
+        if not error and result:
+            item["status"] = "not_done"
+            item["substatus"] = "skipped"
+            self._refresh_content()
 
     def _refresh_content(self) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
