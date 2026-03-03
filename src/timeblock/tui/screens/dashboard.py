@@ -113,6 +113,7 @@ class DashboardScreen(Static):
                     substatus = inst.not_done_substatus.value
                 instances.append(
                     {
+                        "id": inst.id,
                         "name": name,
                         "start_hour": start_h,
                         "end_hour": end_h,
@@ -137,6 +138,7 @@ class DashboardScreen(Static):
                 nm = task.title[:20] if hasattr(task, "title") else str(task)[:20]
                 tasks.append(
                     {
+                        "id": task.id,
                         "name": nm,
                         "proximity": "",
                         "date": "",
