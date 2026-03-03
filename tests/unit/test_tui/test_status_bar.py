@@ -112,43 +112,38 @@ class TestBRTUI007R07NoRoutinePlaceholder:
 # ============================================================
 
 
-class TestBRTUI007R03ActiveTimer:
-    """BR-TUI-007 R03: Exibe timer ativo com tempo decorrido."""
+class TestBRTUI007R03FooterContextual:
+    """BR-TUI-007 R03: Centro exibe keybindings do panel focado."""
 
-    def test_br_tui_007_r03_shows_timer_habit(self) -> None:
-        """Exibe nome do habit no timer."""
+    def test_br_tui_007_r03_habits_keybindings(self) -> None:
+        """Panel hábitos mostra keybindings de done/skip."""
         bar = StatusBar()
-        bar.timer_habit = "Academia"
-        bar.timer_elapsed = "00:45:30"
+        bar.focused_panel = "panel-habits"
         rendered = bar._build_center_section()
-        assert "Academia" in rendered
+        assert "done" in rendered
+        assert "skip" in rendered
 
-    def test_br_tui_007_r03_shows_timer_elapsed(self) -> None:
-        """Exibe tempo decorrido."""
+    def test_br_tui_007_r03_tasks_keybindings(self) -> None:
+        """Panel tarefas mostra keybinding de concluir."""
         bar = StatusBar()
-        bar.timer_habit = "Academia"
-        bar.timer_elapsed = "00:45:30"
+        bar.focused_panel = "panel-tasks"
         rendered = bar._build_center_section()
+        assert "concluir" in rendered
+
+    def test_br_tui_007_r03_default_keybindings(self) -> None:
+        """Sem panel focado, mostra keybindings padrão."""
+        bar = StatusBar()
+        bar.focused_panel = ""
+        rendered = bar._build_center_section()
+        assert "ajuda" in rendered
+
+    def test_br_tui_007_r03_timer_in_right_section(self) -> None:
+        """Timer ativo aparece na seção direita."""
+        bar = StatusBar()
+        bar.timer_elapsed = "00:45:30"
+        bar.timer_status = "running"
+        rendered = bar._build_right_section()
         assert "00:45:30" in rendered
-
-    def test_br_tui_007_r03_no_timer_returns_empty(self) -> None:
-        """Sem timer, seção central vazia."""
-        bar = StatusBar()
-        bar.timer_habit = ""
-        bar.timer_elapsed = ""
-        rendered = bar._build_center_section()
-        assert rendered == ""
-
-    def test_br_tui_007_r03_timer_default_is_empty(self) -> None:
-        """Timer padrão é vazio."""
-        bar = StatusBar()
-        assert bar.timer_habit == ""
-        assert bar.timer_elapsed == ""
-
-
-# ============================================================
-# BR-TUI-007 R04: Seção direita - hora atual
-# ============================================================
 
 
 class TestBRTUI007R04CurrentTime:
