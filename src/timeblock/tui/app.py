@@ -1,10 +1,11 @@
-"""TimeBlockApp - Aplicação TUI principal."""
+"""AtomvsApp - Aplicação TUI principal."""
 
 from typing import ClassVar
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
+from textual.events import Focus
 
 from timeblock.tui.screens.dashboard import DashboardScreen
 from timeblock.tui.screens.habits import HabitsScreen
@@ -95,6 +96,15 @@ class TimeBlockApp(App):
 
         self.query_one(HeaderBar).update_screen(screen_name)
         self.query_one(NavBar).update_active(screen_name)
+
+    def on_focus(self, event: Focus) -> None:
+        """Atualiza footer quando foco muda entre panels."""
+        focused = self.focused
+        if focused and focused.id:
+            try:
+                self.query_one(StatusBar).update_focused_panel(focused.id)
+            except Exception:
+                pass
 
     async def action_toggle_help(self) -> None:
         """Exibe ou fecha o overlay de ajuda."""
