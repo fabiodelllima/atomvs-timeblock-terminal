@@ -155,7 +155,7 @@ O Sprint 2 implementou a estrutura de navegação completa da TUI: sidebar com i
 - [x] Teste: `test_br_tui_007_shows_current_time`
 - [x] Validar: status bar exibe hora
 
-**Nota:** BR-TUI-007 foi revisada em 02/03/2026 para Footer Contextual com 3 seções (rotina, keybindings por panel, timer+hora). A implementação completa está planejada para Sprint 3.2c.
+**Nota:** BR-TUI-007 revisada em 02/03/2026. Footer contextual implementado em Sprint 3.2c com on_descendant_focus. BR-DATA-001 adicionada em Sprint 3.2g.
 
 ---
 
@@ -371,4 +371,4 @@ O Sprint 6 fecha a v1.7.0 com revisão de cobertura, audit de qualidade de códi
 
 **Próxima revisão:** Após Sprint 3.2 concluído
 
-**Última atualização:** 2 de Março de 2026
+**Última atualização:** 4 de Março de 2026
