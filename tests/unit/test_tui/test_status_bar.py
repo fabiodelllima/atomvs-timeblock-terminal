@@ -27,22 +27,16 @@ class TestBRTUI007R01StatusBarWidget:
         """StatusBar tem ID padrão para seleção CSS."""
         bar = StatusBar()
         assert bar.id == "status-bar"
-
     def test_br_tui_007_r01_docked_bottom_in_theme(self) -> None:
-        """StatusBar tem dock: bottom no theme.tcss."""
+        """StatusBar tem dock: bottom nos módulos TCSS."""
         from pathlib import Path
 
-        theme_path = (
+        styles_dir = (
             Path(__file__).resolve().parents[3]
-            / "src"
-            / "timeblock"
-            / "tui"
-            / "styles"
-            / "theme.tcss"
+            / "src" / "timeblock" / "tui" / "styles"
         )
-        css = theme_path.read_text()
+        css = "\n".join(p.read_text() for p in sorted(styles_dir.glob("*.tcss")))
         assert "#status-bar" in css, "StatusBar deve ter regra CSS no tema"
-        # Verifica dock bottom
         in_block = False
         for line in css.splitlines():
             if "#status-bar" in line and "{" in line:
@@ -53,7 +47,7 @@ class TestBRTUI007R01StatusBarWidget:
                 if "}" in line:
                     in_block = False
         else:
-            pytest.fail("StatusBar deve ter dock: bottom no theme.tcss")
+            pytest.fail("StatusBar deve ter dock: bottom nos módulos TCSS")
 
 
 # ============================================================
