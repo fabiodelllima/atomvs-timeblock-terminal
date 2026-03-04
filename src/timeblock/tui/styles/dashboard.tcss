@@ -69,7 +69,7 @@ DashboardScreen {
     height: 100%;                        /* Altura total */
     padding: 0 1;                        /* Padding horizontal */
     overflow-y: auto;                    /* Scroll vertical para cards */
-    scrollbar-size-vertical: 1;          /* Scrollbar fina */
+    scrollbar-size-vertical: 1;          /* Scrollbar fina (1 caractere) */
     scrollbar-color: #45475A;          /* Surface1: thumb */
     scrollbar-background: #1E1E2E;     /* Base: fundo */
     scrollbar-color-hover: #585B70;    /* Surface2: hover */
@@ -119,3 +119,20 @@ DashboardScreen {
     background: #1E1E2E;             /* Fundo Base (último card) */
 }
 
+
+/* Focus indicator — borda accent quando panel recebe foco (BR-TUI-012) */
+#panel-habits:focus,
+#panel-tasks:focus,
+#panel-timer:focus,
+#panel-metrics:focus {
+    border: round #CDD6F4;           /* Text color indica foco */
+    border-title-color: #CDD6F4;     /* Título em Text */
+    border-subtitle-color: #CDD6F4;  /* Subtítulo em Text */
+}
+
+/* Agenda usa focus-within porque o foco fica no content, não na column */
+#agenda-column:focus-within {
+    border: round #CDD6F4;           /* Text color indica foco */
+    border-title-color: #CDD6F4;     /* Título em Text */
+    border-subtitle-color: #CDD6F4;  /* Subtítulo em Text */
+}
