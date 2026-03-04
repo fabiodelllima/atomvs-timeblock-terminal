@@ -1,5 +1,6 @@
 """AtomvsApp - Aplicação TUI principal."""
 
+from pathlib import PurePath
 from typing import ClassVar
 
 from textual.app import App, ComposeResult
@@ -38,7 +39,15 @@ SCREEN_IDS = {
 class TimeBlockApp(App):
     """ATOMVS TimeBlock - TUI Interface."""
 
-    CSS_PATH = "styles/theme.tcss"
+    CSS_PATH: ClassVar[str | PurePath | list[str | PurePath] | None] = [
+        "styles/base.tcss",
+        "styles/layout.tcss",
+        "styles/cards.tcss",
+        "styles/dashboard.tcss",
+        "styles/statusbar.tcss",
+        "styles/timer.tcss",
+        "styles/forms.tcss",
+    ]
     TITLE = "ATOMVS"
 
     BINDINGS: ClassVar[list[Binding | tuple[str, str] | tuple[str, str, str]]] = [
