@@ -3019,14 +3019,13 @@ src/timeblock/tui/styles/
 
 **Requisitos:**
 
-1. Backup criado automaticamente no startup da TUI (label: startup)
-2. Backup criado automaticamente no shutdown da TUI (label: shutdown)
-3. Backups armazenados em diretório `backups/` ao lado do banco principal
-4. Formato do nome: `timeblock-YYYYMMDD-HHMMSS-{label}.db`
-5. Rotação automática mantém no máximo 10 cópias (MAX_BACKUPS = 10)
-6. Backups mais antigos removidos automaticamente ao exceder limite
-7. Função `restore_backup(path)` cria backup de segurança (label: pre-restore) antes de restaurar
-8. Banco inexistente no startup não gera erro — backup silenciosamente ignorado
+1. Backup criado automaticamente no shutdown da TUI (label: shutdown)
+2. Backups armazenados em diretório `backups/` ao lado do banco principal
+3. Formato do nome: `timeblock-YYYYMMDD-HHMMSS-{label}.db`
+4. Rotação automática mantém no máximo 10 cópias (MAX_BACKUPS = 10)
+5. Backups mais antigos removidos automaticamente ao exceder limite
+6. Função `restore_backup(path)` cria backup de segurança (label: pre-restore) antes de restaurar
+7. Banco inexistente no startup não gera erro — backup silenciosamente ignorado
 
 **Testes esperados:** 8
 
@@ -3049,6 +3048,6 @@ src/timeblock/tui/styles/
 
 ---
 
-**Última atualização em:** 2 de Março de 2026
+**Última atualização em:** 03 de Março de 2026
 
 **Total de regras:** 86 BRs

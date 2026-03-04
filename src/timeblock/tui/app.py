@@ -76,8 +76,7 @@ class TimeBlockApp(App):
         yield StatusBar()
 
     def on_mount(self) -> None:
-        """Oculta todas as screens exceto Dashboard e faz backup."""
-        create_backup(label="startup")
+        """Oculta todas as screens exceto Dashboard."""
         for name, screen_id in SCREEN_IDS.items():
             self.query_one(f"#{screen_id}").display = name == "dashboard"
 
