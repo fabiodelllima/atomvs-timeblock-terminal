@@ -81,7 +81,8 @@ DashboardScreen {
 /* padding 1, sem margin-bottom (colados verticalmente).            */
 
 #panel-habits {
-    border-title-color: #CDD6F4;     /* Título em Text */
+    border-title-color: #CDD6F4;
+    border-subtitle-color: #CDD6F4;     /* Título em Text */
     width: 100%;                       /* Largura total da coluna */
     height: auto;                      /* Altura adapta ao conteúdo */
     border: round #45475A;           /* Borda arredondada Surface1 */
@@ -91,7 +92,8 @@ DashboardScreen {
 }
 
 #panel-tasks {
-    border-title-color: #CDD6F4;     /* Título em Text */
+    border-title-color: #CDD6F4;
+    border-subtitle-color: #CDD6F4;     /* Título em Text */
     width: 100%;                       /* Largura total da coluna */
     height: auto;                      /* Altura adapta ao conteúdo */
     border: round #45475A;           /* Borda arredondada Surface1 */
@@ -101,7 +103,8 @@ DashboardScreen {
 }
 
 #panel-timer {
-    border-title-color: #CDD6F4;     /* Título em Text */
+    border-title-color: #CDD6F4;
+    border-subtitle-color: #CDD6F4;     /* Título em Text */
     width: 100%;                       /* Largura total da coluna */
     height: auto;                      /* Altura adapta ao conteúdo */
     border: round #45475A;           /* Borda arredondada Surface1 */
@@ -111,7 +114,8 @@ DashboardScreen {
 }
 
 #panel-metrics {
-    border-title-color: #CDD6F4;     /* Título em Text */
+    border-title-color: #CDD6F4;
+    border-subtitle-color: #CDD6F4;     /* Título em Text */
     width: 100%;                       /* Largura total da coluna */
     height: auto;                      /* Altura adapta ao conteúdo */
     border: round #45475A;           /* Borda arredondada Surface1 */

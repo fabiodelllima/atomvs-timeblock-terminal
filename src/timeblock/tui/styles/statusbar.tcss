@@ -42,12 +42,14 @@ TimerScreen {
 }
 
 #status-left {
-    width: 1fr;                        /* Expande para preencher */
+    width: auto;                       /* Largura do conteúdo */
+    min-width: 12;                     /* Mínimo para rotina */
     content-align: left middle;        /* Alinha à esquerda, vertical center */
+    padding: 0 1;                      /* Padding horizontal */
 }
 
 #status-center {
-    width: 1fr;                        /* Expande para preencher */
+    width: 1fr;                        /* Expande para preencher restante */
     content-align: center middle;      /* Centralizado */
     color: #CBA6F7;                  /* Mauve: destaque accent */
 }
