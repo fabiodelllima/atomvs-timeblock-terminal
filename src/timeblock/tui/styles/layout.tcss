@@ -1,0 +1,79 @@
+/* ==========================================================================
+   Header - Barra superior customizada (HeaderBar widget)
+   Header nativo do Textual desabilitado; usamos widget customizado
+   com borda arredondada Surface1 e espaçamento inferior.
+   ========================================================================== */
+
+HeaderBar {
+    width: 100%;                       /* Ocupa largura total */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    border: round #45475A;           /* Borda arredondada Surface1 */
+    border-title-color: #CDD6F4;     /* Título da borda em Text */
+    background: #1E1E2E;             /* Fundo Base (transparente ao screen) */
+    padding: 0 1;                      /* Padding horizontal 1 char */
+    margin-bottom: 1;                  /* Separação do conteúdo abaixo */
+}
+
+/* ==========================================================================
+   Content Area - Região principal de conteúdo
+   Largura fixa de 122 chars com máximo 140 para terminais largos.
+   ========================================================================== */
+
+#content-area {
+    width: 122;                        /* Largura fixa: 122 caracteres */
+    max-width: 140;                    /* Máximo para terminais ultra-wide */
+    height: 100%;                      /* Ocupa altura total disponível */
+    padding: 1 2;                      /* Padding vertical 1, horizontal 2 */
+}
+
+/* ==========================================================================
+   Main Layout - Container horizontal centralizado
+   Alinha conteúdo no topo centralizado horizontalmente.
+   ========================================================================== */
+
+#main-layout {
+    align: center top;                 /* Centraliza horizontalmente, topo */
+    width: 100%;                       /* Largura total */
+    height: 1fr;                       /* Preenche espaço restante */
+}
+
+/* ==========================================================================
+   Sidebar - Navegação vertical lateral (20 chars)
+   Estrutura: logo (topo) + nav (meio) + footer (dock bottom).
+   ========================================================================== */
+
+#sidebar {
+    width: 20;                         /* Largura fixa: 20 caracteres */
+    height: 100%;                      /* Altura total */
+    background: #1E1E2E;             /* Fundo Base */
+    padding: 1 1;                      /* Padding uniforme 1 char */
+}
+
+#sidebar-inner {
+    width: 100%;                       /* Preenche sidebar */
+    height: 100%;                      /* Preenche sidebar */
+}
+
+#sidebar-logo {
+    width: 100%;                       /* Largura total da sidebar */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    margin-bottom: 1;                  /* Separação do nav */
+}
+
+#sidebar-nav {
+    width: 100%;                       /* Largura total da sidebar */
+    height: auto;                      /* Altura adapta ao conteúdo */
+}
+
+#sidebar-footer {
+    width: 100%;                       /* Largura total da sidebar */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    dock: bottom;                      /* Fixo no rodapé da sidebar */
+}
+
+NavBar {
+    width: 22;                         /* Widget de navegação: 22 chars */
+    height: 100%;                      /* Altura total */
+    background: #1E1E2E;             /* Fundo Base */
+}
+

@@ -1,0 +1,45 @@
+/* ==========================================================================
+   Timer Screen (BR-TUI-006)
+   Tela dedicada do timer com display ASCII art centralizado.
+   Borda Mauve ao redor do display, fundo Surface0.
+   ========================================================================== */
+
+#timer-content {
+    width: 100%;                       /* Largura total */
+    height: 100%;                      /* Altura total */
+    align: center middle;              /* Centralizado em ambos os eixos */
+    padding: 2 4;                      /* Padding generoso */
+}
+
+#timer-header {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha */
+    text-align: center;                /* Texto centralizado */
+    color: #CBA6F7;                  /* Mauve: destaque accent */
+}
+
+#timer-display {
+    width: 100%;                       /* Largura total */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    min-height: 5;                     /* Mínimo para ASCII art */
+    text-align: center;                /* Texto centralizado */
+    padding: 1 2;                      /* Padding interno */
+    margin: 1 0;                       /* Margem vertical */
+    border: round #CBA6F7;           /* Borda Mauve arredondada */
+    background: #313244;             /* Surface0: fundo do display */
+}
+
+#timer-status {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha */
+    text-align: center;                /* Texto centralizado */
+}
+
+#timer-actions {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha */
+    text-align: center;                /* Texto centralizado */
+    color: #6C7086;                  /* Overlay0: ações muted */
+    margin-top: 1;                     /* Separação do status */
+}
+

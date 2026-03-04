@@ -1,0 +1,61 @@
+/* ==========================================================================
+   RoutinesScreen
+   ========================================================================== */
+
+RoutinesScreen {
+    width: 100%;                       /* Tela cheia */
+    height: 100%;                      /* Tela cheia */
+}
+
+/* ==========================================================================
+   Placeholder Screens (futuras telas dedicadas)
+   ========================================================================== */
+
+HabitsScreen {
+    width: 100%;                       /* Tela cheia */
+    height: 100%;                      /* Tela cheia */
+}
+
+TasksScreen {
+    width: 100%;                       /* Tela cheia */
+    height: 100%;                      /* Tela cheia */
+}
+
+TimerScreen {
+    width: 100%;                       /* Tela cheia */
+    height: 100%;                      /* Tela cheia */
+}
+
+/* ==========================================================================
+   Status Bar (BR-TUI-007)
+   Barra inferior com 3 regiões: left (contexto), center (accent),
+   right (relógio/info). Fundo Surface0, docked no bottom.
+   ========================================================================== */
+
+#status-bar {
+    dock: bottom;                      /* Fixo no rodapé da aplicação */
+    height: 1;                         /* 1 linha */
+    width: 100%;                       /* Largura total */
+    background: #313244;             /* Surface0: fundo elevado */
+    color: #CDD6F4;                  /* Text: cor padrão */
+    layout: horizontal;                /* Filhos lado a lado */
+}
+
+#status-left {
+    width: 1fr;                        /* Expande para preencher */
+    content-align: left middle;        /* Alinha à esquerda, vertical center */
+}
+
+#status-center {
+    width: 1fr;                        /* Expande para preencher */
+    content-align: center middle;      /* Centralizado */
+    color: #CBA6F7;                  /* Mauve: destaque accent */
+}
+
+#status-right {
+    width: auto;                       /* Largura do conteúdo */
+    min-width: 8;                      /* Mínimo para "HH:MM" */
+    content-align: right middle;       /* Alinha à direita */
+    color: #6C7086;                  /* Overlay0: info secundária */
+}
+
