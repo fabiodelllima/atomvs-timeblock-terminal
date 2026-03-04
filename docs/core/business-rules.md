@@ -3048,6 +3048,6 @@ src/timeblock/tui/styles/
 
 ---
 
-**Última atualização em:** 03 de Março de 2026
+**Última atualização em:** 04 de Março de 2026
 
-**Total de regras:** 86 BRs
+**Total de regras:** 98 BRs
