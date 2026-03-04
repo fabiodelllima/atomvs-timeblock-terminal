@@ -49,6 +49,7 @@ class DashboardScreen(Static):
     def on_mount(self) -> None:
         """Inicializa o dashboard."""
         self.refresh_data()
+        self.app.set_focus(None)
 
     def refresh_data(self) -> None:
         """Carrega dados e distribui para os panels."""
