@@ -7,6 +7,7 @@ from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
 from textual.events import Focus
 
+from timeblock.services.backup_service import create_backup
 from timeblock.tui.screens.dashboard import DashboardScreen
 from timeblock.tui.screens.habits import HabitsScreen
 from timeblock.tui.screens.routines import RoutinesScreen
@@ -75,7 +76,8 @@ class TimeBlockApp(App):
         yield StatusBar()
 
     def on_mount(self) -> None:
-        """Oculta todas as screens exceto Dashboard."""
+        """Oculta todas as screens exceto Dashboard e faz backup."""
+        create_backup(label="startup")
         for name, screen_id in SCREEN_IDS.items():
             self.query_one(f"#{screen_id}").display = name == "dashboard"
 
@@ -121,3 +123,8 @@ class TimeBlockApp(App):
             help_overlay.first().remove()
         elif self.active_screen != "dashboard":
             await self.action_switch_screen("dashboard")
+
+    async def action_quit(self) -> None:
+        """Faz backup e encerra a aplicação."""
+        create_backup(label="shutdown")
+        self.exit()
