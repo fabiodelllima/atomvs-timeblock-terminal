@@ -34,19 +34,19 @@ test:unit:
       - .coverage.unit
     expire_in: 1 hour
 test:integration:
-  timeout: 30m
+  timeout: 60m
   stage: test
   image: $CI_IMAGE
   before_script:
     - pip install --no-deps -e .
   script:
-    - coverage run --data-file=.coverage.integration -m pytest tests/integration/ tests/bdd/ -v --tb=short
+    - COVERAGE_FILE=.coverage.integration python -m pytest tests/integration/ tests/bdd/ -v --tb=short -n auto --cov=timeblock --cov-report=term --cov-config=pyproject.toml --dist=loadfile
   artifacts:
     paths:
       - .coverage.integration
     expire_in: 1 hour
 test:e2e:
-  timeout: 30m
+  timeout: 60m
   stage: test
   image: $CI_IMAGE
   before_script:
