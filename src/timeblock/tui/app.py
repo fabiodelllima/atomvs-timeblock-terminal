@@ -124,12 +124,14 @@ class TimeBlockApp(App):
             await self.mount(HelpOverlay())
 
     async def action_handle_escape(self) -> None:
-        """Fecha modal aberto ou volta ao Dashboard."""
+        """Fecha modal, deseleciona panels ou volta ao Dashboard."""
         help_overlay = self.query("#help-overlay")
         if help_overlay:
             help_overlay.first().remove()
         elif self.active_screen != "dashboard":
             await self.action_switch_screen("dashboard")
+        else:
+            self.set_focus(None)
 
     async def action_quit(self) -> None:
         """Faz backup e encerra a aplicação."""
