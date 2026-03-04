@@ -12,15 +12,15 @@
 
 ATOMVS TimeBlock é uma aplicação CLI/TUI para gerenciamento de tempo baseada em Time Blocking e nos princípios de Atomic Habits. A arquitetura segue o modelo offline-first, priorizando funcionalidade completa sem dependência de rede, com evolução planejada para API REST (v2.x), sincronização distribuída (v3.x) e mobile Android (v4.x).
 
-O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 8 jobs paralelos com Docker e DevSecOps. Cobertura em ~82% (threshold 80%). O foco atual é a implementação da TUI com Textual (v1.7.0), com o sistema de cores semânticas Catppuccin Mocha (ADR-021) integrado ao dashboard e ~1058 testes passando.
+O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 8 jobs paralelos com Docker e DevSecOps. Cobertura em ~81% (threshold 80%). O foco atual é a Sprint 3.2 — dashboard interativo com dados reais, quick actions, backup automático (BR-DATA-001), TCSS modularizado e 1079 testes passando.
 
-**Estado Atual (23/02/2026):**
+**Estado Atual (04/03/2026):**
 
-- Versão: v1.7.0-dev (branch `feat/tui-phase1`)
-- Qualidade: ~82% cobertura (threshold 80%), 0 erros mypy, ~1058 testes
-- Funcionalidade: 85% comandos CLI operacionais, TUI dashboard funcional com cores semânticas
+- Versão: v1.7.0-dev (branch `feat/tui-dashboard-interactive`)
+- Qualidade: ~81% cobertura (threshold 80%), 0 erros mypy, 1079 testes
+- Funcionalidade: 85% CLI, TUI dashboard interativo com dados reais, quick actions, backup automático
 - Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 8 jobs paralelos
-- Documentação: 81 BRs formalizadas, 32 ADRs, color-system.md, mockups v4
+- Documentação: 98 BRs formalizadas, 33 ADRs, TCSS modularizado (7 módulos)
 
 ---
 
@@ -75,18 +75,18 @@ A versão v1.6.0 representou um ponto de inflexão na maturidade do projeto. A c
 A branch `feat/tui-phase1` contém a implementação progressiva da TUI: estrutura de pacotes, theme CSS, NavBar, TimeBlockApp com navegação, DashboardScreen com grade temporal, keybindings globais, e mais recentemente o sistema de cores semânticas Catppuccin Mocha (ADR-021) com suporte completo a substatus (DONE: full/partial/overdone/excessive; NOT_DONE: justified/unjustified/ignored) e background colorido nos timeblocks da agenda.
 
 - **Versão:** v1.7.0-dev
-- **Branch:** `feat/tui-phase1`
-- **Data:** 23 de Fevereiro de 2026
+- **Branch:** `feat/tui-dashboard-interactive`
+- **Data:** 4 de Março de 2026
 
 ### 3.1. Métricas Principais
 
-As métricas atuais refletem medições reais executadas em 23/02/2026. As métricas refletem o estado pós-MR #25 (02/03/2026). Testes reduziram de 1071 para ~1058 após remoção de 13 testes demo redundantes. Cobertura global em ~82% com threshold ajustado para 80% (widgets TUI sem cobertura unitária). Pipeline CI refatorado em 3 jobs paralelos.
+As métricas atuais refletem medições reais executadas em 04/03/2026 (branch `feat/tui-dashboard-interactive`). Sprint 3.2 adicionou 21 testes (1058 → 1079). Cobertura global em ~81% com threshold 80%. Dashboard agora funcional com dados reais, quick actions e backup automático.
 
 | Métrica       | Atual | Meta v1.7.0 | Status     |
 | ------------- | ----- | ----------- | ---------- |
-| Cobertura     | ~82%  | 80%         | [OK]       |
+| Cobertura     | ~81%  | 80%         | [OK]       |
 | Erros mypy    | 0     | 0           | [OK]       |
-| Testes total  | ~1058 | 850+        | [OK]       |
+| Testes total  | 1079  | 850+        | [OK]       |
 | CLI funcional | 85%   | 100%        | [PENDENTE] |
 | BRs cobertas  | 83%   | 95%         | [PENDENTE] |
 
@@ -264,4 +264,4 @@ Working Documents:
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 2 de Março de 2026
+**Última atualização:** 4 de Março de 2026
