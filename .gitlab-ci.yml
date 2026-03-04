@@ -39,6 +39,7 @@ test:integration:
   image: $CI_IMAGE
   before_script:
     - pip install --no-deps -e .
+    - pip install pytest-xdist
   script:
     - COVERAGE_FILE=.coverage.integration python -m pytest tests/integration/ tests/bdd/ -v --tb=short -n auto --cov=timeblock --cov-report=term --cov-config=pyproject.toml --dist=loadfile
   artifacts:
