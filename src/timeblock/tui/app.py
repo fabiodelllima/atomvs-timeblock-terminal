@@ -6,7 +6,6 @@ from typing import ClassVar
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
-from textual.events import Focus
 
 from timeblock.services.backup_service import create_backup
 from timeblock.tui.screens.dashboard import DashboardScreen
@@ -107,12 +106,12 @@ class TimeBlockApp(App):
         self.query_one(HeaderBar).update_screen(screen_name)
         self.query_one(NavBar).update_active(screen_name)
 
-    def on_focus(self, event: Focus) -> None:
+    def on_descendant_focus(self, event) -> None:
         """Atualiza footer quando foco muda entre panels."""
-        focused = self.focused
-        if focused and focused.id:
+        widget = event.widget
+        if widget and widget.id:
             try:
-                self.query_one(StatusBar).update_focused_panel(focused.id)
+                self.query_one(StatusBar).update_focused_panel(widget.id)
             except Exception:
                 pass
 
