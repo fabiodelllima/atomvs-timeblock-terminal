@@ -27,14 +27,12 @@ class TestBRTUI007R01StatusBarWidget:
         """StatusBar tem ID padrão para seleção CSS."""
         bar = StatusBar()
         assert bar.id == "status-bar"
+
     def test_br_tui_007_r01_docked_bottom_in_theme(self) -> None:
         """StatusBar tem dock: bottom nos módulos TCSS."""
         from pathlib import Path
 
-        styles_dir = (
-            Path(__file__).resolve().parents[3]
-            / "src" / "timeblock" / "tui" / "styles"
-        )
+        styles_dir = Path(__file__).resolve().parents[3] / "src" / "timeblock" / "tui" / "styles"
         css = "\n".join(p.read_text() for p in sorted(styles_dir.glob("*.tcss")))
         assert "#status-bar" in css, "StatusBar deve ter regra CSS no tema"
         in_block = False
