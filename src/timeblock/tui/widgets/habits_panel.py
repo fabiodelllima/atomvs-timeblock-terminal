@@ -15,7 +15,7 @@ from timeblock.tui.colors import (
     status_color,
     status_icon,
 )
-from timeblock.tui.formatters import format_duration_card, spaced_title
+from timeblock.tui.formatters import format_duration_card
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
 
 C_HIGHLIGHT = "#313244"  # Surface0 — cursor background
@@ -91,9 +91,11 @@ class HabitsPanel(FocusablePanel):
         if total > 0:
             pct = int((done / total) * 100)
             dots = "●" * done + "○" * (total - done)
-            self.border_title = spaced_title("Hábitos", f"{dots} {done}/{total} {pct}%")
+            self.border_title = "Hábitos"
+            self.border_subtitle = f"{dots} {done}/{total} {pct}%"
         else:
-            self.border_title = spaced_title("Hábitos", "0/0")
+            self.border_title = "Hábitos"
+            self.border_subtitle = "0/0"
         self.update("\n".join(self._build_lines()))
 
     def _build_lines(self) -> list[str]:

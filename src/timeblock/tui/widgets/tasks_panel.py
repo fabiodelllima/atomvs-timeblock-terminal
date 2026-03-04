@@ -16,7 +16,6 @@ from timeblock.tui.colors import (
     C_SUCCESS,
     task_proximity_color,
 )
-from timeblock.tui.formatters import spaced_title
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
 
 C_HIGHLIGHT = "#313244"  # Surface0 — cursor background
@@ -83,7 +82,8 @@ class TasksPanel(FocusablePanel):
             counts += f" {len(cancelled)} canc."
         if overdue:
             counts += f" {len(overdue)} over."
-        self.border_title = spaced_title("Tarefas", counts)
+        self.border_title = "Tarefas"
+        self.border_subtitle = counts
         self.update("\n".join(self._build_lines()))
 
     def _build_lines(self) -> list[str]:

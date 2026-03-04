@@ -9,7 +9,6 @@ from datetime import datetime
 from textual.widgets import Static
 
 from timeblock.tui.colors import C_ERROR, C_MUTED, C_SUCCESS, C_SURFACE, C_WARNING
-from timeblock.tui.formatters import spaced_title
 
 
 class MetricsPanel(Static):
@@ -32,7 +31,8 @@ class MetricsPanel(Static):
         best_streak = data.get("best_streak", 0)
         week_data = data.get("week_data", [])
 
-        self.border_title = spaced_title("Métricas", now.strftime("%H:%M"))
+        self.border_title = "Métricas"
+        self.border_subtitle = now.strftime("%H:%M")
 
         lines = [
             (
