@@ -6,7 +6,7 @@
 
 ## Contexto
 
-O TimeBlock Organizer v1.2.0 é uma aplicação CLI local que opera exclusivamente em SQLite. Com a evolução para v2.0, precisamos sincronizar dados entre dois dispositivos:
+O TimeBlock Planner v1.2.0 é uma aplicação CLI local que opera exclusivamente em SQLite. Com a evolução para v2.0, precisamos sincronizar dados entre dois dispositivos:
 
 - **Linux Desktop** (Fedora): Dispositivo primário de trabalho
 - **Android Mobile** (Termux): Dispositivo móvel para consultas/updates rápidos

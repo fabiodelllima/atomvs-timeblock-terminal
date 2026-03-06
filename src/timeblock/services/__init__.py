@@ -1,4 +1,4 @@
-"""Services do TimeBlock Organizer."""
+"""Services do TimeBlock Planner."""
 
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService

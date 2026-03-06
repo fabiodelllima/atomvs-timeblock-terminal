@@ -1,4 +1,4 @@
-"""Entry point do TimeBlock Organizer CLI/TUI."""
+"""Entry point do TimeBlock Planner CLI/TUI."""
 
 import sys
 
@@ -17,7 +17,7 @@ from timeblock.commands import (
 
 app = typer.Typer(
     name="timeblock",
-    help="TimeBlock Organizer - Gerenciador de tempo via CLI",
+    help="TimeBlock Planner - Gerenciador de tempo via CLI",
     add_completion=False,
 )
 

@@ -30,7 +30,7 @@ Essa abordagem causa frustração quando:
 
 ## Decisão
 
-**O TimeBlock Organizer NÃO bloqueia eventos sobrepostos.**
+**O TimeBlock Planner NÃO bloqueia eventos sobrepostos.**
 
 Sistema detecta conflitos, propõe reorganização, mas **sempre permite** criação do evento. Decisão final é do usuário.
 
