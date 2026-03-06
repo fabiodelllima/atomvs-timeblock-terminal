@@ -18,13 +18,13 @@ from timeblock.tui.widgets.card import (
     format_title,
 )
 
-# Caminho do theme.tcss relativo ao pacote
-THEME_PATH = Path(__file__).parents[3] / "src" / "timeblock" / "tui" / "styles" / "theme.tcss"
+# Diretório de estilos TCSS modularizado (BR-TUI-014)
+STYLES_DIR = Path(__file__).parents[3] / "src" / "timeblock" / "tui" / "styles"
 
 
 def _theme_content() -> str:
-    """Lê conteúdo do theme.tcss."""
-    return THEME_PATH.read_text()
+    """Lê conteúdo concatenado de todos os módulos TCSS."""
+    return "\n".join(p.read_text() for p in sorted(STYLES_DIR.glob("*.tcss")))
 
 
 def _css_block(selector: str) -> str:
@@ -36,16 +36,17 @@ def _css_block(selector: str) -> str:
 
 
 # =============================================================================
-# BR-TUI-008-R01: Paleta centralizada em theme.tcss
+# BR-TUI-008-R01: Paleta centralizada nos módulos TCSS
 # =============================================================================
 
 
 class TestBRTUI008R01ThemePalette:
-    """BR-TUI-008-R01: Paleta definida em theme.tcss (SSOT)."""
+    """BR-TUI-008-R01: Paleta definida nos módulos TCSS (SSOT)."""
 
     def test_br_tui_008_r01_theme_file_exists(self):
-        """Arquivo theme.tcss existe."""
-        assert THEME_PATH.exists()
+        """Diretório de estilos TCSS existe com módulos."""
+        assert STYLES_DIR.exists()
+        assert len(list(STYLES_DIR.glob("*.tcss"))) >= 5
 
     def test_br_tui_008_r01_defines_background(self):
         """Theme define cor de fundo (background)."""
@@ -81,7 +82,7 @@ class TestBRTUI008R01ThemePalette:
             "RoutinesScreen",
         ]
         for comp in components:
-            assert comp in content, f"Componente {comp} ausente do theme.tcss"
+            assert comp in content, f"Componente {comp} ausente dos módulos TCSS"
 
 
 # =============================================================================
@@ -217,7 +218,7 @@ class TestBRTUI008R05Layout:
         assert "#CBA6F7" in content
 
     async def test_br_tui_008_r05_help_overlay_styled_in_theme(self):
-        """HelpOverlay estilizado no theme.tcss (SSOT)."""
+        """HelpOverlay estilizado nos módulos TCSS (SSOT)."""
         block = _css_block("HelpOverlay")
         assert "background" in block
         assert "border" in block

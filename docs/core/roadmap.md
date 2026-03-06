@@ -1,6 +1,6 @@
 # Roadmap
 
-**Versão:** 6.0.0
+**Versão:** 7.0.0
 
 **Status:** Single Source of Truth (SSOT)
 
@@ -12,15 +12,15 @@
 
 ATOMVS TimeBlock é uma aplicação CLI/TUI para gerenciamento de tempo baseada em Time Blocking e nos princípios de Atomic Habits. A arquitetura segue o modelo offline-first, priorizando funcionalidade completa sem dependência de rede, com evolução planejada para API REST (v2.x), sincronização distribuída (v3.x) e mobile Android (v4.x).
 
-O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 8 jobs paralelos com Docker e DevSecOps. Cobertura em ~82% (threshold 80%). O foco atual é a implementação da TUI com Textual (v1.7.0), com o sistema de cores semânticas Catppuccin Mocha (ADR-021) integrado ao dashboard e ~1058 testes passando.
+O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (GitLab fonte de verdade + GitHub showcase), sincronização automática, branch protection, pre-commit hooks, typecheck bloqueante e pipeline de 8 jobs paralelos com Docker e DevSecOps. Cobertura em ~81% (threshold 80%). O foco atual é a Sprint 4 — Dashboard-first CRUD com modais contextuais (ADR-034), fixture optimization (ADR-033), e refatorações fundamentadas em Fowler (2002) e Humble & Farley (2010).
 
-**Estado Atual (23/02/2026):**
+**Estado Atual (05/03/2026):**
 
-- Versão: v1.7.0-dev (branch `feat/tui-phase1`)
-- Qualidade: ~82% cobertura (threshold 80%), 0 erros mypy, ~1058 testes
-- Funcionalidade: 85% comandos CLI operacionais, TUI dashboard funcional com cores semânticas
+- Versão: v1.7.0-dev (branch `feat/tui-crud-dashboard`)
+- Qualidade: ~81% cobertura (threshold 80%), 0 erros mypy, 1079 testes
+- Funcionalidade: 85% CLI, TUI dashboard interativo com dados reais, quick actions, backup automático
 - Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 8 jobs paralelos
-- Documentação: 81 BRs formalizadas, 32 ADRs, color-system.md, mockups v4
+- Documentação: 104 BRs formalizadas, 35 ADRs, TCSS modularizado (7 módulos)
 
 ---
 
@@ -28,7 +28,7 @@ O projeto atingiu maturidade significativa em infraestrutura: CI/CD dual-repo (G
 
 ### 1.1. Evolução Arquitetural
 
-A estratégia de evolução do TimeBlock Organizer segue um modelo incremental onde cada versão major adiciona uma camada de capacidade sem descartar as anteriores. A CLI permanece funcional mesmo após a introdução da TUI e da API, garantindo que automações e scripts existentes não sejam quebrados. Essa coexistência de interfaces não é acidental — reflete a filosofia de que diferentes contextos de uso demandam diferentes modalidades de interação: scripts e pipelines usam a CLI, o trabalho diário interativo usa a TUI, e integrações externas usarão a API.
+A estratégia de evolução do TimeBlock Planner segue um modelo incremental onde cada versão major adiciona uma camada de capacidade sem descartar as anteriores. A CLI permanece funcional mesmo após a introdução da TUI e da API, garantindo que automações e scripts existentes não sejam quebrados. Essa coexistência de interfaces não é acidental — reflete a filosofia de que diferentes contextos de uso demandam diferentes modalidades de interação: scripts e pipelines usam a CLI, o trabalho diário interativo usa a TUI, e integrações externas usarão a API.
 
 ```plaintext
 v1.5 CI/CD => v1.6 Docker/DevSecOps => v1.7 TUI => v2.x API => v3.x Sync => v4.x Mobile
@@ -72,29 +72,30 @@ O detalhamento de métricas por release está disponível em `docs/core/quality-
 
 A versão v1.6.0 representou um ponto de inflexão na maturidade do projeto. A cobertura de testes saltou de 76% para 87%, superando o threshold de 85% configurado no pipeline. A introdução de Docker e DevSecOps (bandit, pip-audit) trouxe segurança automatizada. Com essa base consolidada, o projeto está preparado para adicionar complexidade na camada de apresentação sem risco de regressões silenciosas.
 
-A branch `feat/tui-phase1` contém a implementação progressiva da TUI: estrutura de pacotes, theme CSS, NavBar, TimeBlockApp com navegação, DashboardScreen com grade temporal, keybindings globais, e mais recentemente o sistema de cores semânticas Catppuccin Mocha (ADR-021) com suporte completo a substatus (DONE: full/partial/overdone/excessive; NOT_DONE: justified/unjustified/ignored) e background colorido nos timeblocks da agenda.
+A Sprint 3.2 concluiu o dashboard interativo com dados reais, quick actions, navegação entre panels, footer contextual, backup automático e TCSS modularizado. O foco agora é a Sprint 4: CRUD via dashboard com modais contextuais (ADR-034), precedido por otimização de fixtures de integração (ADR-033). As refatorações durante a Sprint 4 seguem padrões documentados por Fowler (2002) e Humble & Farley (2010), incluindo Dependency Injection nos widgets, mock services nos testes TUI, e Service Layer como boundary formal.
 
 - **Versão:** v1.7.0-dev
-- **Branch:** `feat/tui-phase1`
-- **Data:** 23 de Fevereiro de 2026
+- **Branch:** `feat/tui-crud-dashboard`
+- **Data:** 5 de Março de 2026
 
 ### 3.1. Métricas Principais
 
-As métricas atuais refletem medições reais executadas em 23/02/2026. As métricas refletem o estado pós-MR #25 (02/03/2026). Testes reduziram de 1071 para ~1058 após remoção de 13 testes demo redundantes. Cobertura global em ~82% com threshold ajustado para 80% (widgets TUI sem cobertura unitária). Pipeline CI refatorado em 3 jobs paralelos.
+As métricas atuais refletem medições reais executadas em 05/03/2026 (branch `feat/tui-dashboard-interactive` pronta para MR → develop). Sprint 3.2 concluída com 1079 testes. Próxima branch: `feat/tui-crud-dashboard`.
 
 | Métrica       | Atual | Meta v1.7.0 | Status     |
 | ------------- | ----- | ----------- | ---------- |
-| Cobertura     | ~82%  | 80%         | [OK]       |
+| Cobertura     | ~81%  | 80%         | [OK]       |
 | Erros mypy    | 0     | 0           | [OK]       |
-| Testes total  | ~1058 | 850+        | [OK]       |
+| Testes total  | 1079  | 1200+       | [OK]       |
+| BRs cobertas  | 104   | 110+        | [OK]       |
+| ADRs          | 35    | 35+         | [OK]       |
 | CLI funcional | 85%   | 100%        | [PENDENTE] |
-| BRs cobertas  | 83%   | 95%         | [PENDENTE] |
 
 ### 3.2. Distribuição de Testes
 
 A pirâmide de testes cresceu significativamente com a implementação do dashboard. Os 104 testes do dashboard cobrem: formatação de duração (2 formatos), localização de blocos, mapeamento status/substatus para cores/ícones/bold/fill/background, heat de proximidade para tasks, renderização ASCII art do timer, e validação estrutural de mock data.
 
-```
+```plaintext
 Unit:        869 (81.1%)
 Integration: 116 (10.8%)
 BDD:          56 (5.2%)
@@ -141,8 +142,8 @@ A implementação da TUI segue o ADR-031 com sprints incrementais. A fase 1 cobr
 - Mockups: `docs/tui/dashboard-mockup-v4.md`, `docs/tui/routines-weekly-mockup.md`
 - Color System: `docs/tui/color-system.md` (ADR-021, 550 linhas)
 - Showcase: `docs/html/themes/catppuccin-mocha.html`
-- BRs: BR-TUI-001 a BR-TUI-011 (seção 14 do business-rules.md)
-- ADR: ADR-031 com 7 widgets e plano de sprints
+- BRs: BR-TUI-001 a BR-TUI-020, BR-TEST-001 (seção 14 e 16 do business-rules.md)
+- ADRs: ADR-031 (TUI), ADR-033 (Fixture), ADR-034 (Dashboard-first CRUD)
 
 **Mock Data (Rotina Demo):**
 
@@ -165,12 +166,27 @@ A estratégia de implementação prioriza as telas de maior impacto no uso diár
 | Release automation | 4h         | [PENDENTE] |
 | PyPI publish       | 2h         | [PENDENTE] |
 
-**Próximos passos imediatos (Dashboard):**
+**Próximos passos imediatos (Sprint 4 — Dashboard-first CRUD):**
 
-1. Commit visual: substatus + backgrounds + ASCII timer + nome herda cor
-2. Refactor SOLID: extrair `colors.py`, `formatters.py`, `mock_data.py`
-3. Documentar BRs novas (substatus DONE, substatus NOT_DONE, heat de proximidade, bold exclusivo, formatos de duração)
-4. Fechar pendências do dashboard-sprint-notes.md
+1. MR `feat/tui-dashboard-interactive` → develop (--no-ff)
+2. Criar branch `feat/tui-crud-dashboard`
+3. Fixture optimization: scope="session" + rollback transacional (ADR-033, BR-TEST-001)
+4. Widgets base: ConfirmDialog (BR-TUI-019) + FormModal (BR-TUI-020)
+5. CRUD Rotinas via dashboard (BR-TUI-016), Hábitos (BR-TUI-017), Tarefas (BR-TUI-018)
+6. Refatorações R1-R5 aplicadas incrementalmente durante cada entrega
+
+**Refatorações em andamento (fundamentadas em literatura):**
+
+| ID  | Refatoração                  | Referência                       | Sprint |
+| --- | ---------------------------- | -------------------------------- | ------ |
+| R1  | DI nos widgets TUI           | HUMBLE; FARLEY, 2010, p. 179     | 4      |
+| R2  | Mock services nos testes TUI | HUMBLE; FARLEY, 2010, p. 180-183 | 4      |
+| R3  | Minimizar estado nos testes  | HUMBLE; FARLEY, 2010, p. 183-184 | 4      |
+| R5  | Service Layer como boundary  | FOWLER, 2002, p. 133             | 4      |
+| R7  | Rollback transacional        | HUMBLE; FARLEY, 2010, p. 375     | 4.0    |
+| R8  | Pipeline < 10min             | HUMBLE; FARLEY, 2010, p. 185     | Monit. |
+| R4  | Abstração de tempo           | HUMBLE; FARLEY, 2010, p. 184     | 5      |
+| R6  | Repository pattern           | FOWLER, 2002, p. 322             | v2.0   |
 
 ---
 
@@ -226,17 +242,17 @@ A governança documental segue o princípio de Single Source of Truth (SSOT): ca
 
 ### 6.1. Hierarquia de Documentos
 
-```
+```plaintext
 SSOT Documents:
 ├── roadmap.md           => Estado e planejamento
-├── business-rules.md    => Regras de negócio (81 BRs)
+├── business-rules.md    => Regras de negócio (104 BRs)
 ├── architecture.md      => Decisões técnicas
 ├── quality-metrics.md   => Métricas operacionais
 ├── technical-debt.md    => Inventário de débito técnico
 └── CHANGELOG.md         => Histórico de releases
 
 ADRs (Imutáveis):
-└── docs/decisions/      => 32 decisões arquiteturais
+└── docs/decisions/      => 35 decisões arquiteturais
 
 TUI Design:
 ├── docs/tui/            => Mockups de telas, color-system.md
@@ -259,9 +275,12 @@ Working Documents:
 | 2026-02-03 | 4.0.0  | v1.5.0 entregue, replanejar v1.6.0 cobertura, v1.7.0 TUI   |
 | 2026-02-20 | 5.0.0  | v1.6.0 entregue, v1.7.0 TUI em desenvolvimento             |
 | 2026-02-23 | 6.0.0  | ADR-021 integrado, 1071 testes, mock data, próximos passos |
+| 2026-03-05 | 7.0.0  | Sprint 3.2 DONE, Sprint 4 dashboard-first CRUD (ADR-034),  |
+|            |        | 104 BRs, 35 ADRs, refatorações R1-R8 fundamentadas em      |
+|            |        | Fowler (2002) e Humble & Farley (2010)                     |
 
 ---
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 2 de Março de 2026
+**Última atualização:** 5 de Março de 2026

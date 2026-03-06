@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to TimeBlock Organizer will be documented in this file.
+All notable changes to TimeBlock Planner will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CSS-like styling via Textual stylesheets
   - Card/Panel base widget for uniform panel layout
   - CRUD screen pattern for reusable list/detail views
+- TUI: Sprint 3.2 — Dashboard interativo com dados reais
+  - Real data via session-per-action (RoutineService, HabitInstanceService, TaskService, TimerService)
+  - Panel navigation with Tab/Shift+Tab and FocusablePanel with internal cursor (j/k)
+  - Contextual footer with dynamic keybindings per focused panel (on_descendant_focus)
+  - Quick actions: Ctrl+Enter (done), Ctrl+S (skip), Ctrl+K (complete task)
+  - TCSS modularization: theme.tcss decomposed into 7 modules (base, layout, cards, dashboard, statusbar, timer, forms)
+  - BackupService with rotation (MAX_BACKUPS=10) on TUI shutdown (BR-DATA-001)
 - TUI: Empty state handling with placeholder guidance in all panels
   - Header: "[Sem rotina]" with zeroed metrics
   - Habits panel: "--- . --:-- . --min" orientation
@@ -42,6 +49,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - tui_routines_screen.feature (11 scenarios)
 - ADR-031: TUI Implementation with horizontal navigation and proportional timeblocks
 - ADR-032: Branding and Repository Naming (atomvs-timeblock-terminal)
+- ADR-033: Fixture scope="session" with transactional rollback (HUMBLE; FARLEY, 2010, p. 375)
+- ADR-034: Dashboard-first CRUD with contextual modals (FOWLER, 2002, p. 133)
+- docs: BR-TUI-016 to BR-TUI-020 (Dashboard CRUD), BR-TEST-001 (fixture optimization)
+- docs: Refactoring plan R1-R8 based on Fowler (2002) and Humble & Farley (2010)
 
 ### Changed
 
@@ -52,9 +63,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI/CD: Expanded sync:github to all branches (contribution graph)
 - CI/CD: Removed parallel=true from coverage (incompatible with test:all)
 - CI/CD: sync:github restricted to develop/main/tags
-- CI/CD: Test timeout increased to 45min for test:all
+- CI/CD: Test timeout increased to 45min for test:all, 60min for integration
+- CI/CD: pytest-xdist added for parallel integration tests (-n auto --dist=loadfile)
 - CI/CD: CodeQL manual workflow removed (default setup active)
 - refactor: Mock fallbacks removed from all dashboard panels, replaced with zero-state placeholders
+- refactor: TCSS decomposed from single theme.tcss (479 lines) into 7 modular files
 - Presentation layer: `commands/` updated to include `demo` subcommand group
 
 ### Fixed
@@ -66,14 +79,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Metrics
 
-- Total tests: 1071 (+293 since v1.6.0)
-- Distribution: Unit ~814 (76.0%), Integration ~118 (11.0%), BDD ~109 (10.2%), E2E ~30 (2.8%)
-- Global coverage: 87% (threshold 85%)
-- TUI coverage: 30%
-- BRs formalized: 81 (+14 TUI-specific)
-- ADRs: 32 documented
-- Source files: 60 Python modules (23 TUI-specific)
-- Pipeline: 6 jobs (~4min local, ~33min CI)
+- Total tests: 1079 (+301 since v1.6.0)
+- Distribution: Unit ~869 (81%), Integration ~116 (11%), BDD ~56 (5%), E2E ~30 (3%)
+- Global coverage: ~81% (threshold 80%)
+- TUI coverage: ~60%
+- BRs formalized: 104 (+23 since v1.6.0, including 20 TUI-specific + BR-TEST-001)
+- ADRs: 35 documented (+3: ADR-033, ADR-034)
+- Source files: 60+ Python modules (23 TUI-specific)
+- Pipeline: 8 jobs (~3min local, ~10min CI)
 
 ## [1.6.0] - 2026-02-12
 

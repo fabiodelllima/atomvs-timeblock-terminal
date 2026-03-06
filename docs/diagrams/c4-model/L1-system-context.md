@@ -4,7 +4,7 @@
 graph TB
     User([Usuário<br/>Gerencia tempo e hábitos])
 
-    TimeBlock[TimeBlock Organizer<br/>CLI para hábitos e agenda]
+    TimeBlock[TimeBlock Planner<br/>CLI para hábitos e agenda]
 
     Calendar[Calendário Externo<br/>Google Calendar, Outlook]
     Notification[Sistema de Notificações<br/>OS Native]
@@ -23,7 +23,7 @@ graph TB
 
 **Usuário:** Pessoa organizando tempo e cultivando hábitos
 
-**TimeBlock Organizer:** Sistema core (SQLite local-first)
+**TimeBlock Planner:** Sistema core (SQLite local-first)
 
 **Calendário Externo:** Sincronização futura com Google Calendar/Outlook via CalDAV
 

@@ -7,7 +7,7 @@
 
 ## Visão Geral
 
-Detalha componentes internos do sistema TimeBlock Organizer.
+Detalha componentes internos do sistema TimeBlock Planner.
 
 ---
 

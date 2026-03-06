@@ -1,5 +1,5 @@
 #!/bin/bash
-# Demo completa do TimeBlock Organizer
+# Demo completa do TimeBlock Planner
 # Demonstra todas as funcionalidades do sistema
 
 set -e
@@ -29,7 +29,7 @@ cmd() {
 
 echo -e "${GREEN}"
 echo "╔═══════════════════════════════════════════════════════════╗"
-echo "║       TimeBlock Organizer - Demo Completa                 ║"
+echo "║       TimeBlock Planner - Demo Completa                 ║"
 echo "║       Sistema de Gerenciamento de Tempo via CLI           ║"
 echo "╚═══════════════════════════════════════════════════════════╝"
 echo -e "${NC}"

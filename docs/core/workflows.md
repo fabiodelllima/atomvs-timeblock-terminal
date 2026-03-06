@@ -37,7 +37,7 @@
 
 ### 1.1 Propósito do Sistema
 
-O TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada nos princípios de:
+O TimeBlock Planner é uma aplicação CLI para gerenciamento de tempo baseada nos princípios de:
 
 - **Time Blocking:** Alocação de blocos de tempo para atividades específicas
 - **Atomic Habits (James Clear):** Pequenas ações consistentes geram grandes resultados
@@ -1895,7 +1895,7 @@ Funcionalidade: Cálculo de Streak
 
 ### Visão Geral
 
-O TimeBlock Organizer mantém dois repositórios Git sincronizados com propósitos distintos:
+O TimeBlock Planner mantém dois repositórios Git sincronizados com propósitos distintos:
 
 #### **GitLab (origin) - Repositório de Desenvolvimento**
 

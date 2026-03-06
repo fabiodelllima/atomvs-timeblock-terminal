@@ -7,10 +7,11 @@ BR-TUI-003-R27: Cores por estado (Mauve running, Yellow paused, Overlay0 idle).
 from textual.widgets import Static
 
 from timeblock.tui.colors import C_ACCENT, C_MUTED, C_WARNING
-from timeblock.tui.formatters import render_ascii_time, spaced_title
+from timeblock.tui.formatters import render_ascii_time
 
 
 class TimerPanel(Static):
+    can_focus = True
     """Card do timer com elapsed em ASCII art grande."""
 
     def __init__(self, **kwargs) -> None:
@@ -42,12 +43,14 @@ class TimerPanel(Static):
             color = C_WARNING
             icon = "⏸"
             label = "pausado"
-            self.border_title = spaced_title("Timer", "⏸ paused")
+            self.border_title = "Timer"
+            self.border_subtitle = "⏸ paused"
         else:
             color = C_ACCENT
             icon = "▶"
             label = "em andamento"
-            self.border_title = spaced_title("Timer", "▶ ativo")
+            self.border_title = "Timer"
+            self.border_subtitle = "▶ ativo"
 
         art = render_ascii_time(elapsed)
         lines = [""]
@@ -61,7 +64,8 @@ class TimerPanel(Static):
 
     def _build_idle_lines(self) -> list[str]:
         """Monta linhas para timer idle."""
-        self.border_title = spaced_title("Timer", "idle")
+        self.border_title = "Timer"
+        self.border_subtitle = "idle"
         art = render_ascii_time("00:00")
         lines = [""]
         for row in art:

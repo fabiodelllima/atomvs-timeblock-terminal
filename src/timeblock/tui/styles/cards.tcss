@@ -1,0 +1,85 @@
+/* ==========================================================================
+   Card - Componente reutilizável (BR-TUI-008-R02)
+   Borda arredondada Surface1, fundo Surface0 (#313244).
+   Padding 1x2, margin 1 para espaçamento entre cards.
+   ========================================================================== */
+
+Card {
+    border: round #45475A;  /* Borda arredondada Surface1 */
+    padding: 1 2;             /* Padding vertical 1, horizontal 2 */
+    margin: 1;                /* Margem uniforme entre cards */
+    width: 100%;              /* Largura total do container */
+    height: auto;             /* Altura adapta ao conteúdo */
+    background: #313244;    /* Surface0: fundo elevado do card */
+}
+
+.card-title {
+    text-style: bold;         /* Título do card em negrito */
+    margin-bottom: 1;         /* Separação do conteúdo */
+}
+
+.card-content {
+    color: #CDD6F4;         /* Text: conteúdo padrão do card */
+}
+
+/* ==========================================================================
+   Status Colors (BR-TUI-008-R03, color-system.md)
+   10 cores semânticas Catppuccin Mocha para classes CSS reutilizáveis.
+   Usadas em labels, ícones e indicadores de status.
+   ========================================================================== */
+
+.success {
+    color: #A6E3A1;                    /* Green: done/full, completed */
+}
+
+.below-target {
+    color: #F5E0DC;                    /* Rosewater: done/partial (<90%) */
+}
+
+.above-target {
+    color: #F2CDCD;                    /* Flamingo: done/overdone (110-150%) */
+}
+
+.over-limit {
+    color: #FAB387;                    /* Peach: done/excessive (>150%) */
+}
+
+.warning {
+    color: #F9E2AF;                    /* Yellow: paused, skip justified, hoje */
+}
+
+.error {
+    color: #F38BA8;                    /* Red: NOT_DONE, skip unjustified */
+}
+
+.passive-fail {
+    color: #EBA0AC;                    /* Maroon: ignored (omissão passiva) */
+}
+
+.info {
+    color: #89B4FA;                    /* Blue: rescheduled, links */
+}
+
+.accent {
+    color: #CBA6F7;                    /* Mauve: running, timer, foco ativo */
+}
+
+.muted {
+    color: #6C7086;                    /* Overlay0: pending, cancelled */
+}
+
+/* ==========================================================================
+   Tipografia (BR-TUI-008-R04)
+   bold = títulos e destaques, normal = conteúdo, dim = metadados.
+   ========================================================================== */
+
+.title {
+    text-style: bold;                  /* Títulos de seção e cards */
+    color: #CDD6F4;                  /* Text: máximo contraste */
+}
+
+.metadata {
+    text-style: none;                  /* Metadados sem estilo extra */
+    color: #6C7086;                  /* Overlay0: baixo contraste */
+}
+

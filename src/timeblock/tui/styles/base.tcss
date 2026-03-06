@@ -1,0 +1,47 @@
+/* ATOMVS TimeBlock - Material-like Theme
+ *
+ * BR-TUI-008: Visual Consistency
+ * Paleta Catppuccin Mocha como base, adaptada para Material Design 3.
+ * Este arquivo é SSOT (Single Source of Truth) para cores da TUI.
+ *
+ * Variáveis semânticas (color-system.md):
+/*   $success:      #a6e3a1  (done/full, completed, salvo)
+/*   $below-target: #f5e0dc  (done/partial <90%)
+/*   $above-target: #f2cdcd  (done/overdone 110-150%)
+/*   $over-limit:   #fab387  (done/excessive >150%)
+/*   $warning:      #f9e2af  (paused, skip justificado, hoje)
+/*   $error:        #f38ba8  (NOT_DONE, skip unjustified, overdue)
+/*   $passive-fail: #eba0ac  (ignored, omissão passiva)
+/*   $info:         #89b4fa  (rescheduled, links, tooltips)
+/*   $accent:       #cba6f7  (running, timer, foco ativo)
+/*   $muted:        #6c7086  (pending, cancelled, futuro)
+ *
+ * Hierarquia de cores:
+ *   - Primary: ações principais, header, destaque ativo
+ *   - Surface: fundos de cards, painéis, overlays
+ *   - Status: success (verde), warning (amarelo), error (vermelho)
+ *   - Text: primário (alto contraste), secundário (muted), metadados (dim)
+ *
+ * Referências:
+ *   - Paleta: docs/tui/color-system.md
+ *   - Substatus: docs/architecture/adr-021-status-substatus-refactor.md
+ *   - Mockup: docs/tui/dashboard-mockup-v4.md
+ */
+
+/* ==========================================================================
+   Base - Screen e fundo global
+   Catppuccin Mocha Base (#1E1E2E) como cor de fundo principal.
+   Text (#CDD6F4) como cor padrão para todo texto.
+   Scrollbar mínima (1 char) usando Surface0/Surface1/Overlay0.
+   ========================================================================== */
+
+Screen {
+    background: #1E1E2E;              /* Mocha Base: fundo principal da aplicação */
+    color: #CDD6F4;                   /* Mocha Text: cor padrão de texto */
+    scrollbar-size-vertical: 1;         /* Scrollbar fina (1 caractere) */
+    scrollbar-color: #45475A;         /* Surface1: thumb da scrollbar (idle) */
+    scrollbar-background: #1E1E2E;    /* Base: fundo da scrollbar */
+    scrollbar-color-hover: #585B70;   /* Surface2: thumb da scrollbar (hover) */
+    scrollbar-color-active: #7F849C;  /* Overlay1: thumb da scrollbar (ativo) */
+}
+

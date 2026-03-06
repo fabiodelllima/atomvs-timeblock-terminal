@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O sistema de CI/CD do TimeBlock Organizer implementa uma estratégia de proteção em múltiplas camadas, projetada para detectar problemas de qualidade o mais cedo possível no ciclo de desenvolvimento. Esta abordagem shift-left, originária das práticas de DevSecOps, garante que código quebrado seja bloqueado antes de chegar aos repositórios remotos, economizando tempo de desenvolvimento e mantendo os branches principais sempre em estado deployável. A filosofia central é simples: quanto mais cedo um problema é detectado, menor o custo de correção. Um bug encontrado no pre-commit hook custa segundos para corrigir; o mesmo bug descoberto em produção pode custar horas ou dias.
+O sistema de CI/CD do TimeBlock Planner implementa uma estratégia de proteção em múltiplas camadas, projetada para detectar problemas de qualidade o mais cedo possível no ciclo de desenvolvimento. Esta abordagem shift-left, originária das práticas de DevSecOps, garante que código quebrado seja bloqueado antes de chegar aos repositórios remotos, economizando tempo de desenvolvimento e mantendo os branches principais sempre em estado deployável. A filosofia central é simples: quanto mais cedo um problema é detectado, menor o custo de correção. Um bug encontrado no pre-commit hook custa segundos para corrigir; o mesmo bug descoberto em produção pode custar horas ou dias.
 
 ## Arquitetura Dual-Repo
 

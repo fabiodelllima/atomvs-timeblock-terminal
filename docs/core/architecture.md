@@ -1,4 +1,4 @@
-# Arquitetura TimeBlock Organizer
+# Arquitetura
 
 **Versão:** 2.2.0
 
@@ -26,7 +26,7 @@
 
 ## 1. Visão Geral
 
-TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada nos princípios de "Atomic Habits" de James Clear.
+TimeBlock Planner é uma aplicação CLI para gerenciamento de tempo baseada nos princípios de "Atomic Habits" de James Clear.
 
 ### 1.1. Princípios Arquiteturais
 
