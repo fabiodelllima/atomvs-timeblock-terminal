@@ -153,7 +153,6 @@ class DashboardScreen(Static):
             return []
 
     @staticmethod
-    @staticmethod
     def _get_active_timer() -> dict | None:
         """Obtém informação do timer ativo (BR-TIMER-001)."""
         try:
