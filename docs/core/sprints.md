@@ -1,6 +1,6 @@
 # Sprints
 
-**Versão:** 2.0.0
+**Versão:** 3.0.0
 
 **Status:** Single Source of Truth (SSOT)
 
@@ -20,14 +20,14 @@ A v1.7.0 marca a transição do ATOMVS TimeBlock de ferramenta CLI pura para uma
 
 **Métricas de acompanhamento:**
 
-| Métrica               | Início (v1.6.0) | Atual (02/03)   | Meta v1.7.0 |
+| Métrica               | Início (v1.6.0) | Atual (05/03)   | Meta v1.7.0 |
 | --------------------- | --------------- | --------------- | ----------- |
-| Cobertura global      | 87%             | ~82%            | >= 80%      |
+| Cobertura global      | 87%             | ~81%            | >= 80%      |
 | Cobertura tui/        | 0%              | ~60% (parcial)  | >= 80%      |
-| Testes totais         | 778             | ~1058           | 1000+       |
+| Testes totais         | 778             | 1079            | 1000+       |
 | Erros mypy            | 0               | 0               | 0           |
-| BRs TUI especificadas | 0               | 15              | 15/15       |
-| BRs TUI implementadas | 0               | 4 (001-004)     | 15/15       |
+| BRs TUI especificadas | 0               | 20              | 20/20       |
+| BRs TUI implementadas | 0               | 4 (001-004)     | 20/20       |
 | Screens funcionais    | 0/5             | 1/5 (Dashboard) | 5/5         |
 
 ---
@@ -180,9 +180,11 @@ O Sprint 3.1 implementou o Dashboard visual com mock data, layout duas colunas (
 
 ---
 
-### Sprint 3.2 — Dashboard Interativo + Dados Reais
+### Sprint 3.2 — Dashboard Interativo + Dados Reais [DONE]
 
-O Sprint 3.2 transforma o dashboard de showcase visual para ferramenta funcional. Conecta os cards a dados reais via services, implementa navegação entre panels com Tab, footer contextual com keybindings, quick actions com Ctrl+tecla, e placeholders editáveis. Ao final desta sprint, o usuário consegue gerenciar seu dia inteiro sem sair do dashboard.
+O Sprint 3.2 transformou o dashboard de showcase visual para ferramenta funcional. Conectou cards a dados reais via services, implementou navegação entre panels com Tab/Shift+Tab, footer contextual com keybindings dinâmicos, quick actions (Ctrl+Enter done, Ctrl+S skip, Ctrl+K complete), backup automático no shutdown (BR-DATA-001), e TCSS modularizado em 7 arquivos. Entregue em `feat/tui-dashboard-interactive`.
+
+BR-TUI-013 (Placeholders editáveis) movida para Sprint 4 — depende de CRUD.
 
 **Branch:** `feat/tui-dashboard-interactive`
 
@@ -190,115 +192,184 @@ O Sprint 3.2 transforma o dashboard de showcase visual para ferramenta funcional
 
 **3.2a — Dados reais (BR-TUI-009)**
 
-- [ ] Substituir mock data por chamadas reais via session-per-action
-- [ ] RoutineService.get_active() → header + agenda
-- [ ] HabitInstanceService.get_today_instances() → card hábitos
-- [ ] TaskService.get_pending() → card tarefas
-- [ ] TimerService.get_any_active_timer() → card timer
-- [ ] Refresh on focus (dados atualizados ao entrar na screen)
-- [ ] Testes de integração: dashboard com banco real
+- [x] Substituir mock data por chamadas reais via session-per-action
+- [x] RoutineService, HabitInstanceService, TaskService, TimerService integrados
+- [x] Refresh on focus (dados atualizados ao entrar na screen)
 
 **3.2b — Navegação entre panels (BR-TUI-012)**
 
-- [ ] Tab avança entre panels (Agenda → Hábitos → Tarefas → Timer → Agenda)
-- [ ] Ctrl+Tab volta (ciclo reverso)
-- [ ] Números 1-4 focam panel diretamente
-- [ ] Setas / j/k navegam itens dentro do panel focado
-- [ ] Item selecionado com fundo Surface0 #313244
-- [ ] Scroll interno com j/k quando panel tem overflow
-- [ ] Testes: test_br_tui_012_tab_cycles_panels
-- [ ] Testes: test_br_tui_012_ctrl_tab_reverses
-- [ ] Testes: test_br_tui_012_numbers_focus_panel
-- [ ] Testes: test_br_tui_012_arrows_navigate_items
+- [x] Tab avança, Shift+Tab volta (nativo Textual)
+- [x] FocusablePanel com cursor interno (setas/j/k)
+- [x] Item selecionado com fundo Surface0 (#313244)
+- [x] Focus indicator: borda Text (#CDD6F4) no panel ativo
+- [x] `border_subtitle` nativo do Textual
+- [x] Esc deseleciona todos os panels
+- [x] Inicia sem panel selecionado
 
 **3.2c — Footer contextual (BR-TUI-007 revisada)**
 
-- [ ] Footer com 3 seções: rotina (esq), keybindings (centro), timer+hora (dir)
-- [ ] Keybindings mudam conforme panel focado
-- [ ] Timer elapsed atualiza a cada segundo quando ativo
-- [ ] Hora HH:MM atualiza a cada minuto
-- [ ] Testes: test_br_tui_007_footer_keybindings_change_on_focus
+- [x] Footer com 3 seções: rotina (esq), keybindings (centro), timer+hora (dir)
+- [x] Keybindings mudam conforme panel focado via `on_descendant_focus`
+- [x] Layout: left auto, center 1fr, right auto
 
 **3.2d — Quick actions (BR-TUI-004 revisada)**
 
-- [ ] Ctrl+Enter → mark done (hábito, solicita duração)
-- [ ] Ctrl+S → skip (hábito, solicita razão)
-- [ ] Ctrl+K → complete task
-- [ ] Ctrl+S → start timer / Ctrl+P → pause/resume
-- [ ] Refresh automático após quick action
-- [ ] Testes: test_br_tui_004_ctrl_enter_marks_done
-- [ ] Testes: test_br_tui_004_ctrl_s_skips_habit
-- [ ] Testes: test_br_tui_004_ctrl_k_completes_task
+- [x] Ctrl+Enter marca hábito como done
+- [x] Ctrl+S marca hábito como skip
+- [x] Ctrl+K completa task
+- [x] Refresh automático após quick action
 
 **3.2e — Placeholders editáveis (BR-TUI-013)**
 
-- [ ] Enter em placeholder `---` abre edição inline
-- [ ] Tipo do item determinado pelo panel (hábito, task)
-- [ ] Placeholder transformado em item real ao confirmar
-- [ ] N abre modal com campos completo (contextual ao panel)
-- [ ] : abre barra de comando (power user)
-- [ ] Testes: test_br_tui_013_enter_on_placeholder_edits
-- [ ] Testes: test_br_tui_013_n_opens_contextual_modal
-- [ ] Testes: test_br_tui_013_colon_opens_command_bar
+- [ ] Movido para Sprint 4 (depende de CRUD)
 
-**3.2f — Refatoração visual (BR-TUI-014)**
+**3.2f — TCSS Modularização (BR-TUI-014)**
 
-- [ ] Quebrar theme.tcss (479 linhas) em múltiplos arquivos por screen/widget
-- [ ] Extrair constantes restantes em constants.py (D-005 pendente)
-- [ ] Validar: zero regressão visual após split
+- [x] theme.tcss (479 linhas) decomposto em 7 módulos
+- [x] CSS_PATH como lista tipada (ClassVar) em app.py
+- [x] Testes visual_consistency e status_bar adaptados
+
+**3.2g — Backup automático (BR-DATA-001)**
+
+- [x] BackupService com rotação (MAX_BACKUPS = 10)
+- [x] Formato: timeblock-YYYYMMDD-HHMMSS-{label}.db
+- [x] Backup no shutdown da TUI
+
+**Otimização CI/CD**
+
+- [x] Timeout integration: 30m → 60m
+- [x] pytest-xdist adicionado (pyproject.toml + CI)
+- [x] Integration job usa `-n auto --dist=loadfile`
 
 ---
 
-### Sprint 4 — CRUD Screens
+### Sprint 4 — Dashboard-first CRUD
 
-O Sprint 4 implementa as três screens de dados com operações CRUD completas: Routines, Habits e Tasks. Todas seguem o padrão consistente definido pela BR-TUI-005, com keybindings Ctrl+ para ações e formulários para criação/edição. A HabitsScreen tem complexidade adicional por incluir ações de instância (done/skip com substatus).
+O Sprint 4 implementa CRUD diretamente no dashboard via modais contextuais. O usuário cria, edita e deleta rotinas, hábitos e tarefas sem sair do dashboard — o panel focado determina o contexto da operação. Decisão formalizada em ADR-034. Screens dedicadas permanecem como visão expandida para sprints futuras.
 
-A RoutinesScreen é implementada primeiro porque é a mais simples e valida o padrão CRUD. A HabitsScreen vem em duas entregas (instâncias + CRUD do hábito) por ser a screen mais complexa. A TasksScreen fecha o sprint.
+O primeiro commit é infraestrutural: otimização das fixtures de integração com scope="session" e rollback transacional (ADR-033, BR-TEST-001), necessária para suportar o crescimento da suíte de testes sem estourar o limite de 10 minutos no pipeline.
 
-**Branch:** `feat/tui-crud-screens`
+**Branch:** `feat/tui-crud-dashboard`
 
-**Critério de conclusão:** CRUD completo em Routines, Habits e Tasks funcional via TUI, com validações e confirmações.
+**Critério de conclusão:** CRUD completo de rotinas, hábitos e tarefas funcional via dashboard com modais, dados persistidos, panels atualizados após cada operação.
 
-**BR-TUI-005 + RoutinesScreen**
+**4.0 — Fixture Optimization (BR-TEST-001) [PRÉ-REQUISITO]**
+
+- [ ] Criar ADR-033 em `docs/decisions/`
+- [ ] Implementar `integration_engine` com `scope="session"`
+- [ ] Implementar `integration_session` com rollback transacional
+- [ ] Converter testes existentes: `commit()` → `flush()`
+- [ ] Validar: todos os testes de integração passam com novo conftest
+- [ ] CI: adicionar check de ausência de `session.commit()` em testes de integração
+- [ ] Teste: `test_br_test_001_rollback_isolates_tests`
+- [ ] Teste: `test_br_test_001_flush_materializes_data`
+
+**4a — ConfirmDialog + FormModal (BR-TUI-019, BR-TUI-020)**
 
 - [ ] Criar `src/timeblock/tui/widgets/confirm_dialog.py`
-- [ ] Implementar RoutinesScreen com lista, create, edit, delete, activate
-- [ ] Keybindings: `N`=nova (modal), `Ctrl+E`=editar, `Ctrl+X`=deletar [MODAL], `Enter`=ativar
-- [ ] Criar `tests/unit/test_tui/test_screens/test_routines.py`
-- [ ] Teste: `test_br_tui_005_n_opens_create_modal`
-- [ ] Teste: `test_br_tui_005_ctrl_x_requires_confirmation`
-- [ ] Teste: `test_br_tui_005_successful_operation_refreshes_list`
-- [ ] Validar: CRUD de rotinas funcional, confirmação de delete
+- [ ] Criar `src/timeblock/tui/widgets/form_modal.py`
+- [ ] ConfirmDialog: Enter confirma, Esc cancela, modal trap, foco retorna
+- [ ] FormModal: campos tipados (text, time, number, select), Tab navega, validação inline
+- [ ] Visual Catppuccin: ConfirmDialog borda Red, FormModal borda Blue, fundo Mantle
+- [ ] Criar `tests/unit/test_tui/test_confirm_dialog.py`
+- [ ] Criar `tests/unit/test_tui/test_form_modal.py`
+- [ ] Teste: `test_br_tui_019_enter_triggers_confirm`
+- [ ] Teste: `test_br_tui_019_esc_triggers_cancel`
+- [ ] Teste: `test_br_tui_019_modal_traps_focus`
+- [ ] Teste: `test_br_tui_020_tab_navigates_fields`
+- [ ] Teste: `test_br_tui_020_enter_submits_form`
+- [ ] Teste: `test_br_tui_020_required_field_validation`
+- [ ] Teste: `test_br_tui_020_edit_mode_prefilled`
+- [ ] Validar: modais funcionais em isolamento com foco correto
 
-**BR-TUI-010: HabitsScreen — Ações de Instância**
+**4b — CRUD Rotinas via Dashboard (BR-TUI-016)**
 
-- [ ] Implementar HabitsScreen com lista de hábitos e instâncias do dia
-- [ ] Exibir instâncias com status colorido (pending/done/not_done)
-- [ ] Implementar ação Ctrl+Enter (done, solicita duração) e Ctrl+S (skip, solicita razão)
-- [ ] Criar `tests/unit/test_tui/test_screens/test_habits.py`
-- [ ] Teste: `test_br_tui_010_lists_today_instances`
-- [ ] Teste: `test_br_tui_010_ctrl_enter_marks_done_asks_duration`
-- [ ] Teste: `test_br_tui_010_ctrl_s_marks_skip_asks_reason`
-- [ ] Teste: `test_br_tui_010_shows_substatus_color`
-- [ ] Validar: instâncias marcáveis como done/skip com substatus
+- [ ] DashboardScreen intercepta `n`/`e`/`x` quando header focado
+- [ ] `n` abre FormModal (campo: nome) → RoutineService.create
+- [ ] Rotina criada torna-se ativa automaticamente
+- [ ] `e` abre FormModal preenchido → RoutineService.update
+- [ ] `x` abre ConfirmDialog → RoutineService.delete
+- [ ] Sem rotina → header exibe hint `[Sem rotina] n criar`
+- [ ] `refresh_data()` após cada operação CRUD
+- [ ] Criar `tests/unit/test_tui/test_dashboard_crud_routines.py`
+- [ ] Teste: `test_br_tui_016_n_on_header_opens_routine_form`
+- [ ] Teste: `test_br_tui_016_created_routine_becomes_active`
+- [ ] Teste: `test_br_tui_016_x_on_header_opens_confirm_dialog`
+- [ ] Teste: `test_br_tui_016_no_routine_shows_hint`
+- [ ] Validar: CRUD de rotinas funcional via dashboard
 
-**HabitsScreen — CRUD de Hábitos**
+**4c — CRUD Hábitos via Dashboard (BR-TUI-017)**
 
-- [ ] Adicionar create/edit/delete de hábitos na HabitsScreen
-- [ ] N abre modal com campos (nome, duração, recorrência)
-- [ ] Ctrl+E edita, Ctrl+X deleta com confirmação
-- [ ] Integrar com HabitService
-- [ ] Testes de CRUD para hábitos
-- [ ] Validar: CRUD completo de hábitos funcional
+- [ ] DashboardScreen intercepta `n`/`e`/`x` quando panel hábitos focado
+- [ ] `n` abre FormModal (campos: título, horário, duração, recorrência) → HabitService.create
+- [ ] Requer rotina ativa (mensagem de erro se nenhuma)
+- [ ] `e` abre FormModal preenchido → HabitService.update
+- [ ] `x` abre ConfirmDialog → HabitService.delete
+- [ ] Hábito criado aparece imediatamente no panel
+- [ ] Quick actions coexistem (Ctrl+Enter done, Ctrl+S skip)
+- [ ] Criar `tests/unit/test_tui/test_dashboard_crud_habits.py`
+- [ ] Teste: `test_br_tui_017_n_on_habits_opens_form`
+- [ ] Teste: `test_br_tui_017_n_without_routine_shows_error`
+- [ ] Teste: `test_br_tui_017_created_habit_appears_in_panel`
+- [ ] Teste: `test_br_tui_017_validation_title_required`
+- [ ] Teste: `test_br_tui_017_coexists_with_quick_actions`
+- [ ] Validar: CRUD de hábitos funcional via dashboard
 
-**TasksScreen**
+**4d — CRUD Tarefas via Dashboard (BR-TUI-018)**
 
-- [ ] Implementar TasksScreen com lista, create, edit, delete, marcar completa
-- [ ] N abre modal, Ctrl+E edita, Ctrl+X deleta, Ctrl+K completa
-- [ ] Integrar com TaskService
-- [ ] Criar `tests/unit/test_tui/test_screens/test_tasks.py`
-- [ ] Testes de CRUD para tarefas
-- [ ] Validar: CRUD completo de tarefas funcional
+- [ ] DashboardScreen intercepta `n`/`e`/`x` quando panel tarefas focado
+- [ ] `n` abre FormModal (campos: título, data, horário, prioridade) → TaskService.create
+- [ ] `e` abre FormModal preenchido → TaskService.update
+- [ ] `x` abre ConfirmDialog → TaskService.delete
+- [ ] Task criada aparece na posição correta (ordenação por proximidade)
+- [ ] Ctrl+K complete coexiste
+- [ ] Criar `tests/unit/test_tui/test_dashboard_crud_tasks.py`
+- [ ] Teste: `test_br_tui_018_n_on_tasks_opens_form`
+- [ ] Teste: `test_br_tui_018_created_task_appears_in_panel`
+- [ ] Teste: `test_br_tui_018_task_ordered_by_proximity`
+- [ ] Teste: `test_br_tui_018_validation_title_required`
+- [ ] Teste: `test_br_tui_018_coexists_with_ctrl_k`
+- [ ] Validar: CRUD de tarefas funcional via dashboard
+
+**4e — Placeholders editáveis (BR-TUI-013)**
+
+- [ ] Enter em placeholder `---` abre FormModal contextual (tipo determinado pelo panel)
+- [ ] Placeholder transformado em item real ao confirmar
+- [ ] Teste: `test_br_tui_013_enter_on_placeholder_opens_form`
+- [ ] Teste: `test_br_tui_013_placeholder_becomes_real_item`
+- [ ] Validar: placeholders funcionais em todos os panels
+
+**Refatorações fundamentadas em literatura (durante Sprint 4)**
+
+As refatorações abaixo são derivadas de Fowler (2002) e Humble & Farley (2010), categorizadas por momento de aplicação. Cada item inclui referência bibliográfica específica e estado atual no projeto.
+
+_Pré-requisito (4.0):_
+
+- [x] R7. Isolamento de testes via rollback transacional (HUMBLE; FARLEY, 2010, p. 375) → BR-TEST-001, ADR-033
+
+_Durante Sprint 4 (aplicar em cada arquivo tocado):_
+
+- [ ] R1. Dependency Injection nos widgets TUI (HUMBLE; FARLEY, 2010, p. 179) — widgets recebem dados prontos (listas de dicts), DashboardScreen orquestra, widgets renderizam. Formalizar para CRUD
+- [ ] R2. Mock services nos testes unitários TUI (HUMBLE; FARLEY, 2010, p. 180-183) — testes unitários de CRUD TUI devem mockar services. Testes de integração (TUI → service → DB) em tests/integration/
+- [ ] R3. Minimizar estado nos testes (HUMBLE; FARLEY, 2010, p. 183-184) — categorizar dados: test-specific (inline), test reference (fixtures), application reference (conftest). Reutilizar fixtures de referência
+- [ ] R5. Service Layer como boundary (FOWLER, 2002, p. 133) — TUI nunca acessa models diretamente (BR-TUI-009). DashboardScreen é a boundary para CRUD
+
+_Monitoramento (durante Sprint 4):_
+
+- [ ] R8. Commit stage abaixo de 10 minutos (HUMBLE; FARLEY, 2010, p. 185) — monitorar tempo de pipeline. Se ultrapassar 10min, aplicar GitLab parallel: 2
+
+_Sprint 5+ / v2.0 (futuro):_
+
+- [ ] R4. Abstração de tempo (HUMBLE; FARLEY, 2010, p. 184) — TimerPanel e StatusBar usam datetime.now() diretamente. Para timer live (Sprint 5), extrair wrapper injetável
+- [ ] R6. Repository como abstração de queries (FOWLER, 2002, p. 322) — centralizar queries duplicadas entre services. Avaliar Repository formal na v2.0 com Django ORM
+
+**Refatoração incremental (código)**
+
+- [ ] Extrair constantes em constants.py (D-005 pendente)
+- [ ] Remover `spaced_title` não utilizado nos panels
+- [ ] Corrigir `@staticmethod` duplicado em dashboard.py (linhas 155-156)
+- [ ] Documentar itens em technical-debt.md
+- [ ] Manter funções <= 50 linhas, classes <= 300 linhas (BR-TUI-015)
 
 ---
 
@@ -366,9 +437,12 @@ O Sprint 6 fecha a v1.7.0 com revisão de cobertura, audit de qualidade de códi
 | 2026-03-02 | 2.0.0  | Sprint 0/1/2 marcados DONE, Sprint 3.1 DONE, 3.2 detalhado, |
 |            |        | keybindings atualizados para Ctrl+, métricas atualizadas,   |
 |            |        | BRs 012-015 adicionadas, footer contextual documentado      |
+| 2026-03-05 | 3.0.0  | Sprint 3.2 marcada DONE, Sprint 4 reescrita para            |
+|            |        | dashboard-first CRUD (ADR-034), Sprint 4 CRUD Screens       |
+|            |        | removida, BRs 016-020 + BR-TEST-001, métricas 1079 testes   |
 
 ---
 
-**Próxima revisão:** Após Sprint 3.2 concluído
+**Próxima revisão:** Após Sprint 4 concluída
 
-**Última atualização:** 4 de Março de 2026
+**Última atualização:** 5 de Março de 2026
