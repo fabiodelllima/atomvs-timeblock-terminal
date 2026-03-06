@@ -1,4 +1,4 @@
-# Business Rules - TimeBlock Organizer
+# Business Rules
 
 **Versão:** 3.0.0
 
@@ -22,6 +22,8 @@
 12. [CLI](#12-cli)
 13. [Tag](#13-tag)
 14. [TUI](#14-tui)
+15. [Data](#15-data)
+16. [Testing](#16-testing)
 
 ---
 
@@ -379,7 +381,7 @@ Task (Dentista 14:30 - independente de routine)
 
 ## 3. Routine
 
-A Routine é a unidade organizacional de mais alto nível no TimeBlock Organizer. Ela representa o plano ideal de uma semana — o desenho intencional de como o usuário quer distribuir seu tempo entre os hábitos que compõem sua identidade. No vocabulário do Atomic Habits, criar uma rotina é um ato de _environment design_: ao posicionar blocos de tempo fixos para exercício, estudo, trabalho profundo e descanso, o usuário está construindo o ambiente temporal onde bons hábitos se tornam o caminho de menor resistência.
+A Routine é a unidade organizacional de mais alto nível no TimeBlock Planner. Ela representa o plano ideal de uma semana — o desenho intencional de como o usuário quer distribuir seu tempo entre os hábitos que compõem sua identidade. No vocabulário do Atomic Habits, criar uma rotina é um ato de _environment design_: ao posicionar blocos de tempo fixos para exercício, estudo, trabalho profundo e descanso, o usuário está construindo o ambiente temporal onde bons hábitos se tornam o caminho de menor resistência.
 
 Cada rotina agrupa um conjunto de hábitos recorrentes e define o contexto operacional do sistema. Apenas uma rotina pode estar ativa por vez, funcionando como um "modo" que determina quais hábitos aparecem na agenda diária e na TUI. Trocar de rotina é trocar de contexto de vida: a rotina de dias úteis cede lugar à rotina de férias, que por sua vez pode dar espaço a uma rotina de preparação para provas. Essa troca é sempre explícita e consciente — o sistema nunca altera a rotina ativa automaticamente.
 
@@ -763,7 +765,7 @@ instances: list[HabitInstance] = Relationship(
 
 ## 5. HabitInstance
 
-A HabitInstance é o átomo do TimeBlock Organizer — a menor unidade acionável do sistema. Cada instância representa uma oportunidade concreta e específica de executar um hábito: "Leitura, dia 20 de fevereiro, das 21:00 às 22:00". Enquanto o Habit expressa a intenção recorrente, a HabitInstance captura a realidade de um único dia. É nela que o ciclo de feedback se completa: o usuário planeja (Habit), executa (HabitInstance), mede (Timer/TimeLog) e avalia (substatus).
+A HabitInstance é o átomo do TimeBlock Planner — a menor unidade acionável do sistema. Cada instância representa uma oportunidade concreta e específica de executar um hábito: "Leitura, dia 20 de fevereiro, das 21:00 às 22:00". Enquanto o Habit expressa a intenção recorrente, a HabitInstance captura a realidade de um único dia. É nela que o ciclo de feedback se completa: o usuário planeja (Habit), executa (HabitInstance), mede (Timer/TimeLog) e avalia (substatus).
 
 O ciclo de vida de uma instância segue três estados principais: PENDING (aguardando execução), DONE (concluída) e NOT*DONE (não realizada). Mas a riqueza do modelo está nos substatus que qualificam \_como* cada transição aconteceu. Uma instância DONE pode ser FULL (tempo completo), PARTIAL (tempo reduzido), OVERDONE (ligeiramente acima) ou EXCESSIVE (muito acima do planejado). Uma instância NOT_DONE pode ser SKIPPED (pulada conscientemente, com justificativa) ou IGNORED (expirou sem ação). Essa granularidade transforma um simples checkbox em um registro nuanceado que permite ao usuário identificar padrões e ajustar sua rotina com dados reais.
 
@@ -958,7 +960,7 @@ habit edit INSTANCE_ID --start 08:00 --end 09:30
 
 ## 6. Skip
 
-O Skip é o mecanismo que transforma ausência em informação. Na maioria dos sistemas de rastreamento de hábitos, não fazer algo é simplesmente um vazio — um dia sem marcação que pode significar esquecimento, preguiça, doença ou uma decisão racional. O TimeBlock Organizer distingue entre "não fiz porque escolhi não fazer" (Skip) e "não fiz porque ignorei" (Ignored), e dentro do Skip, diferencia _por que_ o usuário optou por pular.
+O Skip é o mecanismo que transforma ausência em informação. Na maioria dos sistemas de rastreamento de hábitos, não fazer algo é simplesmente um vazio — um dia sem marcação que pode significar esquecimento, preguiça, doença ou uma decisão racional. O TimeBlock Planner distingue entre "não fiz porque escolhi não fazer" (Skip) e "não fiz porque ignorei" (Ignored), e dentro do Skip, diferencia _por que_ o usuário optou por pular.
 
 As categorias de SkipReason cobrem os motivos mais comuns: saúde, trabalho, família, viagem, clima, falta de recursos, emergência e outros. Quando o usuário pula um hábito conscientemente e registra o motivo, está gerando dados que o sistema pode usar para identificar padrões. Se toda segunda-feira o hábito "Corrida" é skipado com motivo "Trabalho", talvez a segunda não seja o melhor dia para correr — e a rotina deveria ser ajustada. Uma nota opcional permite contexto adicional: "Reunião de emergência" ou "Gripe, repouso médico".
 
@@ -1088,7 +1090,7 @@ Escolha [1-9]: _
 
 ## 7. Streak
 
-O Streak é a métrica motivacional central do TimeBlock Organizer. Ele conta dias consecutivos em que o hábito foi executado (status DONE), e sua simples existência cria um poderoso incentivo psicológico: quanto maior a sequência, maior o custo percebido de quebrá-la. Jerry Seinfeld popularizou esse conceito como "don't break the chain" — marque um X no calendário todo dia, e a corrente de Xs se torna a motivação.
+O Streak é a métrica motivacional central do TimeBlock Planner. Ele conta dias consecutivos em que o hábito foi executado (status DONE), e sua simples existência cria um poderoso incentivo psicológico: quanto maior a sequência, maior o custo percebido de quebrá-la. Jerry Seinfeld popularizou esse conceito como "don't break the chain" — marque um X no calendário todo dia, e a corrente de Xs se torna a motivação.
 
 O cálculo de streak no TimeBlock é intencionalmente justo com o usuário. A contagem só considera dias em que o hábito tinha instância agendada: se o hábito é WEEKDAYS e hoje é sábado, a ausência de execução no fim de semana não quebra a cadeia. Da mesma forma, instâncias SKIPPED com justificativa são tratadas como neutras — o dia não conta como executado, mas também não interrompe a sequência. Apenas instâncias com status NOT_DONE e substatus IGNORED (o usuário simplesmente não apareceu) quebram o streak. Essa lógica reflete a filosofia de que a vida acontece e adaptações conscientes não deveriam ser punidas.
 
@@ -1205,7 +1207,7 @@ A Task é o complemento pontual dos Habits recorrentes. Enquanto hábitos repres
 
 A independência estrutural da Task em relação à Routine é uma decisão deliberada de design. Uma tarefa de trabalho não pertence à "Rotina Matinal" nem à "Rotina Noturna" — ela existe por si só, visível independente de qual rotina está ativa. Trocar de rotina não esconde tarefas pendentes. Deletar uma rotina não afeta tarefas. Essa separação garante que compromissos pontuais nunca desapareçam acidentalmente ao reorganizar hábitos recorrentes.
 
-O modelo de Task é intencionalmente simples: título, data/hora, descrição opcional e um estado binário derivado (pendente se `completed_datetime` é nulo, concluída se preenchido). Não há prioridade, não há subtarefas, não há dependências. Essa simplicidade é proposital: o TimeBlock Organizer não é um gerenciador de projetos. Tasks existem para que eventos pontuais possam ser posicionados na linha do tempo ao lado dos hábitos, criando uma visão completa do dia — e para que o sistema possa detectar conflitos entre tasks e hábitos da rotina.
+O modelo de Task é intencionalmente simples: título, data/hora, descrição opcional e um estado binário derivado (pendente se `completed_datetime` é nulo, concluída se preenchido). Não há prioridade, não há subtarefas, não há dependências. Essa simplicidade é proposital: o TimeBlock Planner não é um gerenciador de projetos. Tasks existem para que eventos pontuais possam ser posicionados na linha do tempo ao lado dos hábitos, criando uma visão completa do dia — e para que o sistema possa detectar conflitos entre tasks e hábitos da rotina.
 
 ### BR-TASK-001: Estrutura de Task
 
@@ -1670,7 +1672,7 @@ habit log INSTANCE_ID --duration 90
 
 ## 10. Event Reordering
 
-O Event Reordering trata do problema mais frequente no uso diário de time blocking: o que acontece quando a realidade diverge do plano. Um hábito atrasou quinze minutos, uma reunião invadiu o horário da leitura, o almoço se estendeu. Em um sistema rígido, esses desvios gerariam erros ou bloqueios. O TimeBlock Organizer adota a abordagem oposta: conflitos são permitidos, detectados, apresentados e — crucialmente — nunca resolvidos automaticamente.
+O Event Reordering trata do problema mais frequente no uso diário de time blocking: o que acontece quando a realidade diverge do plano. Um hábito atrasou quinze minutos, uma reunião invadiu o horário da leitura, o almoço se estendeu. Em um sistema rígido, esses desvios gerariam erros ou bloqueios. O TimeBlock Planner adota a abordagem oposta: conflitos são permitidos, detectados, apresentados e — crucialmente — nunca resolvidos automaticamente.
 
 Essa filosofia reflete o princípio de Controle do Usuário: o sistema informa, o usuário decide. Quando dois eventos ocupam o mesmo intervalo de tempo, o sistema detecta a sobreposição e a apresenta visualmente (blocos lado a lado na timeline, borda vermelha), mas não move nenhum evento. Não sugere novos horários. Não aplica regras de prioridade. A razão é simples: o sistema não tem informação suficiente para tomar essa decisão. Só o usuário sabe se a reunião que invadiu o horário de leitura é mais importante que a leitura, ou se prefere encurtar ambas, ou se vai compensar no dia seguinte.
 
@@ -1848,7 +1850,7 @@ Essas validações operam na camada de services (antes de chegar ao banco) e na 
 
 ## 12. CLI
 
-A CLI (Command Line Interface) é a interface primária do TimeBlock Organizer e a única que existia antes da TUI. Toda funcionalidade do sistema é acessível via comandos no terminal, seguindo o padrão resource-first definido no ADR-005: o substantivo vem antes do verbo (`habit create`, `routine activate`, `task list`). Esse padrão torna os comandos previsíveis e autodescritivos — um usuário que sabe usar `habit create` adivinha corretamente que `habit list`, `habit edit` e `habit delete` existem.
+A CLI (Command Line Interface) é a interface primária do TimeBlock Planner e a única que existia antes da TUI. Toda funcionalidade do sistema é acessível via comandos no terminal, seguindo o padrão resource-first definido no ADR-005: o substantivo vem antes do verbo (`habit create`, `routine activate`, `task list`). Esse padrão torna os comandos previsíveis e autodescritivos — um usuário que sabe usar `habit create` adivinha corretamente que `habit list`, `habit edit` e `habit delete` existem.
 
 A CLI serve dois públicos com necessidades distintas. Para uso interativo diário, ela oferece atalhos, flags curtas e outputs formatados com Rich. Para automação e scripts, ela garante códigos de saída consistentes, outputs parseáveis e comportamento determinístico (sem prompts interativos quando o input é completo). As regras desta seção formalizam comportamentos que cruzam domínios: validação de flags dependentes (se informou `--start`, deve informar `--end`), formatos de data/hora aceitos e padrões de output entre comandos.
 
@@ -2028,7 +2030,7 @@ Tag (1) ----< Tasks (N)
 
 ## 14. TUI
 
-A TUI (Terminal User Interface) é a segunda interface do TimeBlock Organizer, projetada para o uso interativo diário que a CLI, por sua natureza sequencial, não consegue atender com a mesma fluidez. Consultar a agenda, marcar hábitos como concluídos, iniciar um timer e verificar métricas são operações que no CLI exigem múltiplos comandos separados; na TUI, estão a um ou dois keybindings de distância, visíveis simultaneamente na mesma tela.
+A TUI (Terminal User Interface) é a segunda interface do TimeBlock Planner, projetada para o uso interativo diário que a CLI, por sua natureza sequencial, não consegue atender com a mesma fluidez. Consultar a agenda, marcar hábitos como concluídos, iniciar um timer e verificar métricas são operações que no CLI exigem múltiplos comandos separados; na TUI, estão a um ou dois keybindings de distância, visíveis simultaneamente na mesma tela.
 
 A TUI foi implementada com o framework Textual (ADR-031), que utiliza Rich internamente — uma dependência que o projeto já possui para a formatação do output da CLI. A decisão arquitetural mais importante é que a TUI compartilha 100% da camada de services com a CLI: nenhuma lógica de negócio é duplicada. A TUI é exclusivamente interface — captura input do usuário, chama o service apropriado com uma session de banco de dados efêmera (session-per-action), e exibe o resultado com widgets estilizados. Se um service funciona na CLI, funciona na TUI; se uma regra de negócio muda, muda em um único lugar.
 
@@ -3009,6 +3011,165 @@ src/timeblock/tui/styles/
 
 **Entregável:** Relatório com findings por severidade (CRITICAL/WARNING/INFO), arquivo, linha e sugestão de correção.
 
+### BR-TUI-016: Dashboard CRUD — Rotinas (NOVA 05/03/2026)
+
+**Descrição:** O dashboard permite criar, editar e deletar rotinas diretamente via modais contextuais, sem navegar para a RoutinesScreen. A operação é acionada quando o header bar está focado.
+
+**Regras:**
+
+1. `n` com header focado abre FormModal para criar rotina (campo: nome)
+2. `e` com header focado edita rotina ativa (nome)
+3. `x` com header focado abre ConfirmDialog para deletar rotina ativa
+4. Enter ou seleção ativa/desativa rotina (se múltiplas existirem)
+5. Sem rotina ativa → header exibe hint: `[Sem rotina] n criar`
+6. Criação de rotina a torna automaticamente ativa
+7. Deletar rotina ativa desativa e limpa todos os panels
+8. Operação usa `service_action()` (session-per-action)
+9. Após operação, `refresh_data()` atualiza todos os panels
+
+**Dependências:** BR-TUI-019 (ConfirmDialog), BR-TUI-020 (FormModal), BR-TUI-005 (CRUD Pattern)
+
+**Testes esperados:** 8
+
+- `test_br_tui_016_n_on_header_opens_routine_form`
+- `test_br_tui_016_created_routine_becomes_active`
+- `test_br_tui_016_e_on_header_edits_active_routine`
+- `test_br_tui_016_x_on_header_opens_confirm_dialog`
+- `test_br_tui_016_delete_clears_all_panels`
+- `test_br_tui_016_no_routine_shows_hint`
+- `test_br_tui_016_refresh_after_crud_operation`
+- `test_br_tui_016_switch_active_routine_updates_panels`
+
+---
+
+### BR-TUI-017: Dashboard CRUD — Hábitos (NOVA 05/03/2026)
+
+**Descrição:** O dashboard permite criar, editar e deletar hábitos diretamente via modais contextuais quando o panel de hábitos está focado. Requer rotina ativa.
+
+**Regras:**
+
+1. `n` com panel hábitos focado abre FormModal (campos: título, horário início, duração em minutos, recorrência)
+2. `e` edita hábito sob cursor (FormModal preenchido)
+3. `x` deleta hábito sob cursor com ConfirmDialog
+4. Requer rotina ativa — sem rotina, `n` exibe mensagem de erro inline
+5. Hábito criado gera HabitInstance para o dia atual automaticamente (via HabitInstanceService)
+6. Hábito criado aparece imediatamente no panel (refresh local + banco)
+7. Quick actions existentes coexistem: Ctrl+Enter done, Ctrl+S skip (BR-TUI-004)
+8. Campos obrigatórios: título, horário início, duração. Recorrência default: EVERYDAY
+9. Validação inline: título não vazio, duração > 0, horário no formato HH:MM
+
+**Dependências:** BR-TUI-019, BR-TUI-020, BR-TUI-016 (rotina ativa), BR-HABIT-001
+
+**Testes esperados:** 10
+
+- `test_br_tui_017_n_on_habits_opens_form`
+- `test_br_tui_017_n_without_routine_shows_error`
+- `test_br_tui_017_created_habit_appears_in_panel`
+- `test_br_tui_017_e_opens_prefilled_form`
+- `test_br_tui_017_x_opens_confirm_dialog`
+- `test_br_tui_017_delete_removes_from_panel`
+- `test_br_tui_017_validation_title_required`
+- `test_br_tui_017_validation_duration_positive`
+- `test_br_tui_017_default_recurrence_everyday`
+- `test_br_tui_017_coexists_with_quick_actions`
+
+---
+
+### BR-TUI-018: Dashboard CRUD — Tarefas (NOVA 05/03/2026)
+
+**Descrição:** O dashboard permite criar, editar e deletar tarefas diretamente via modais contextuais quando o panel de tarefas está focado.
+
+**Regras:**
+
+1. `n` com panel tarefas focado abre FormModal (campos: título, data, horário, prioridade)
+2. `e` edita task sob cursor (FormModal preenchido)
+3. `x` deleta task sob cursor com ConfirmDialog
+4. Task criada aparece na posição correta (ordenação por proximidade temporal)
+5. Ctrl+K complete coexiste (BR-TUI-004)
+6. Campos obrigatórios: título. Data, horário e prioridade são opcionais
+7. Prioridade: low, medium, high (default: medium)
+8. Data default: hoje. Horário default: vazio (sem horário)
+9. Validação inline: título não vazio
+
+**Dependências:** BR-TUI-019, BR-TUI-020, BR-TASK-001
+
+**Testes esperados:** 8
+
+- `test_br_tui_018_n_on_tasks_opens_form`
+- `test_br_tui_018_created_task_appears_in_panel`
+- `test_br_tui_018_task_ordered_by_proximity`
+- `test_br_tui_018_e_opens_prefilled_form`
+- `test_br_tui_018_x_opens_confirm_dialog`
+- `test_br_tui_018_delete_removes_from_panel`
+- `test_br_tui_018_validation_title_required`
+- `test_br_tui_018_coexists_with_ctrl_k`
+
+---
+
+### BR-TUI-019: ConfirmDialog (NOVA 05/03/2026)
+
+**Descrição:** Widget modal genérico de confirmação reutilizável por qualquer operação destrutiva no sistema. Overlay sobre o conteúdo atual com foco exclusivo (modal trap).
+
+**Regras:**
+
+1. Exibe título, mensagem descritiva e botões Confirm/Cancel
+2. Enter confirma a operação
+3. Esc cancela e fecha o modal
+4. Foco exclusivo: nenhum widget atrás do modal recebe input (modal trap)
+5. Callback `on_confirm` e `on_cancel` configuráveis pelo chamador
+6. Mensagem inclui nome do item sendo deletado (contextual)
+7. Visual: borda Red (#F38BA8), fundo Mantle (#181825), texto em Text (#CDD6F4)
+8. Ao fechar, foco retorna ao widget que abriu o modal
+
+**Dependências:** Nenhuma (widget primitivo)
+
+**Testes esperados:** 6
+
+- `test_br_tui_019_enter_triggers_confirm`
+- `test_br_tui_019_esc_triggers_cancel`
+- `test_br_tui_019_displays_item_name`
+- `test_br_tui_019_modal_traps_focus`
+- `test_br_tui_019_focus_returns_on_close`
+- `test_br_tui_019_custom_callbacks`
+
+---
+
+### BR-TUI-020: FormModal (NOVA 05/03/2026)
+
+**Descrição:** Widget modal genérico de formulário reutilizável para operações de criação e edição. Suporta campos tipados com validação inline.
+
+**Regras:**
+
+1. Exibe título, lista de campos com labels e input, botões Save/Cancel
+2. Tab navega entre campos sequencialmente
+3. Shift+Tab navega para campo anterior
+4. Enter no último campo ou no botão Save submete o formulário
+5. Esc cancela e fecha o modal sem salvar
+6. Validação inline: campo obrigatório vazio exibe mensagem de erro abaixo do campo
+7. Campos suportados: text (string), time (HH:MM), number (int), select (enum com opções)
+8. Modo edit: campos preenchidos com valores atuais do item
+9. Modo create: campos vazios com placeholder indicando formato esperado
+10. Visual: borda Blue (#89B4FA), fundo Mantle (#181825), campos com borda Surface2 (#585B70)
+11. Foco exclusivo (modal trap) enquanto aberto
+12. Callback `on_submit(data: dict)` e `on_cancel()` configuráveis
+
+**Dependências:** Nenhuma (widget primitivo)
+
+**Testes esperados:** 10
+
+- `test_br_tui_020_tab_navigates_fields`
+- `test_br_tui_020_shift_tab_reverse_navigation`
+- `test_br_tui_020_enter_submits_form`
+- `test_br_tui_020_esc_cancels_form`
+- `test_br_tui_020_required_field_validation`
+- `test_br_tui_020_time_field_format_validation`
+- `test_br_tui_020_number_field_positive_validation`
+- `test_br_tui_020_edit_mode_prefilled`
+- `test_br_tui_020_create_mode_empty_with_placeholder`
+- `test_br_tui_020_modal_traps_focus`
+
+---
+
 ## 15. Data
 
 ### BR-DATA-001: Backup Automático do Banco de Dados (NOVA 02/03/2026)
@@ -3038,6 +3199,37 @@ src/timeblock/tui/styles/
 - Diretório de backups criado automaticamente
 - MAX_BACKUPS respeitado
 
+---
+
+## 16. Testing
+
+### BR-TEST-001: Fixture scope="session" com Rollback Transacional (NOVA 05/03/2026)
+
+**Regra:** Testes de integração compartilham engine e schema por sessão de teste. Cada teste individual roda em transação isolada com rollback automático ao final.
+
+**Motivação:** Criação de schema por teste (`scope="function"`) é O(N) e torna pipeline insustentável com crescimento da suíte. Rollback transacional reduz para O(1) mantendo isolamento. Referência: HUMBLE; FARLEY, 2010, p. 375; ADR-033.
+
+**Requisitos:**
+
+1. `integration_engine` com `scope="session"` — engine e `create_all` executados uma vez
+2. `integration_session` com `scope="function"` — cada teste recebe sessão em transação
+3. Transação revertida automaticamente ao final de cada teste (rollback)
+4. Testes **NÃO podem** chamar `session.commit()` — usar `session.flush()` para materializar dados
+5. Para testar constraints de unicidade, usar `session.begin_nested()` (savepoint)
+6. Compatível com `pytest-xdist` — cada worker recebe engine independente (session scope é por-worker)
+7. Foreign keys habilitadas via pragma (SQLite)
+8. CI valida ausência de `session.commit()` em arquivos de teste de integração
+
+**Testes esperados:** 5
+
+- `test_br_test_001_schema_created_once`
+- `test_br_test_001_rollback_isolates_tests`
+- `test_br_test_001_flush_materializes_data`
+- `test_br_test_001_commit_not_used_in_tests`
+- `test_br_test_001_foreign_keys_enforced`
+
+---
+
 ## Referências
 
 - **ADRs:** `docs/decisions/`
@@ -3048,6 +3240,6 @@ src/timeblock/tui/styles/
 
 ---
 
-**Última atualização em:** 04 de Março de 2026
+**Última atualização em:** 05 de Março de 2026
 
-**Total de regras:** 98 BRs
+**Total de regras:** 104 BRs
