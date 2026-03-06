@@ -2,21 +2,21 @@
 
 > Gerenciador de tempo CLI/TUI baseado em time blocking e hábitos atômicos
 
-```
+```plaintext
 ╔══════════════════════════════════════════════╗
 ║                                              ║
 ║      ◉        ▄▀█ ▀█▀ █▀█ █▀▄▀█ █░█ █▀       ║
 ║     ╱│╲       █▀█ ░█░ █▄█ █░▀░█ ▀▄▀ ▄█       ║
 ║    ○─┼─○      ─────────────────────────      ║
 ║     ╲│╱       TimeBlock  ░░░░░░░░░░░░░░      ║
-║      ◉          Terminal ▓▓▓▓▓▓▓▓▓▓▓▓▓▓      ║
+║      ◉         Terminal  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓      ║
 ║                                              ║
 ╚══════════════════════════════════════════════╝
 ```
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-1071%20passing-success.svg)](tests/)
-[![Coverage](https://img.shields.io/badge/coverage-87%25-green.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1079%20passing-success.svg)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-81%25-green.svg)](tests/)
 
 ---
 
@@ -52,36 +52,36 @@ A aplicação organiza o tempo através de três conceitos principais: Rotinas (
 
 A arquitetura do TimeBlock segue o padrão de camadas com separação clara de responsabilidades. A camada de apresentação (CLI e TUI) comunica-se exclusivamente com a camada de serviços, que encapsula toda a lógica de negócio. Os modelos de dados utilizam SQLModel para mapeamento objeto-relacional, combinando a expressividade do Pydantic com a robustez do SQLAlchemy. A TUI compartilha 100% da camada de services com a CLI — nenhuma lógica de negócio é duplicada.
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    ATOMVS TIMEBLOCK TERMINAL                        │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐              │
-│  │   ROUTINE   │───>│    HABIT    │───>│   HABIT     │              │
-│  │  (coleção)  │    │  (template) │    │  INSTANCE   │              │
-│  └─────────────┘    └─────────────┘    └─────────────┘              │
-│         │                  │                  │                     │
-│         │                  │                  v                     │
-│         │                  │           ┌─────────────┐              │
-│         │                  │           │    TIMER    │              │
-│         │                  │           │  (tracking) │              │
-│         │                  │           └─────────────┘              │
-│         │                  │                                        │
-│         v                  v                                        │
-│  ┌─────────────────────────────────────────────────────┐            │
-│  │                      TASK                           │            │
-│  │               (evento pontual)                      │            │
-│  └─────────────────────────────────────────────────────┘            │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+```plaintext
+┌─────────────────────────────────────────────────────────┐
+│                ATOMVS TIMEBLOCK TERMINAL                │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
+│  │   ROUTINE   │───>│    HABIT    │───>│   HABIT     │  │
+│  │  (coleção)  │    │  (template) │    │  INSTANCE   │  │
+│  └─────────────┘    └─────────────┘    └─────────────┘  │
+│         │                  │                  │         │
+│         │                  │                  v         │
+│         │                  │           ┌─────────────┐  │
+│         │                  │           │    TIMER    │  │
+│         │                  │           │  (tracking) │  │
+│         │                  │           └─────────────┘  │
+│         │                  │                            │
+│         v                  v                            │
+│  ┌───────────────────────────────────────────────────┐  │
+│  │                      TASK                         │  │
+│  │               (evento pontual)                    │  │
+│  └───────────────────────────────────────────────────┘  │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ### Fluxo de Dados
 
 O fluxo de dados segue uma direção unidirecional clara, desde a entrada do usuário até a persistência. CLI e TUI recebem input, delegam para services que aplicam regras de negócio, e finalmente models persistem no SQLite. Utilitários auxiliam em validações e formatações transversais.
 
-```
+```plaintext
 ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌────────────┐
 │ CLI/TUI  │────>│ COMMANDS │────>│ SERVICES │────>│   MODELS   │
 │ (Typer/  │     │          │     │          │     │ (SQLModel) │
@@ -96,7 +96,7 @@ O fluxo de dados segue uma direção unidirecional clara, desde a entrada do usu
 
 ### Camadas
 
-```
+```plaintext
 ╔═══════════════════════════════════════════════════════════════════╗
 ║ PRESENTATION                                                      ║
 ║ ┌───────────────────────────────────────────────────────────────┐ ║
@@ -125,7 +125,7 @@ O sistema de estados controla o ciclo de vida de cada entidade. HabitInstances t
 
 ### HabitInstance Status
 
-```
+```plaintext
                     ┌─────────────┐
                     │   PENDING   │
                     │  (aguarda)  │
@@ -154,7 +154,7 @@ O sistema de estados controla o ciclo de vida de cada entidade. HabitInstances t
 
 O timer implementa uma máquina de estados simples que permite rastrear tempo dedicado a cada atividade. Pausas são registradas separadamente, permitindo calcular tempo efetivo versus tempo total da sessão.
 
-```
+```plaintext
     ┌─────────────┐
     │    IDLE     │
     └──────┬──────┘
@@ -164,7 +164,7 @@ O timer implementa uma máquina de estados simples que permite rastrear tempo de
     │   RUNNING   │<────────┐
     └──────┬──────┘         │
            │                │
-     ┌─────┴─────┐      resume
+     ┌─────┴─────┐     resume
      │           │          │
      v           v          │
 ┌────────┐  ┌────────┐      │
@@ -183,7 +183,7 @@ O timer implementa uma máquina de estados simples que permite rastrear tempo de
 
 O projeto segue uma estrutura modular que facilita navegação e manutenção. O código fonte reside em `src/timeblock/`, testes em `tests/`, e documentação em `docs/`. Esta separação permite desenvolvimento independente de cada camada.
 
-```
+```plaintext
 atomvs-timeblock-terminal/
 ├── src/timeblock/
 │   ├── commands/       # Comandos CLI (routine, habit, task, timer, demo)
@@ -305,11 +305,11 @@ A stack foi escolhida priorizando produtividade do desenvolvedor, type safety e 
 
 A documentação técnica está organizada em níveis de detalhe. O diretório `core/` contém documentos de referência essenciais, `decisions/` preserva o histórico de decisões arquiteturais através de ADRs (Architecture Decision Records), e `tui/` contém mockups de design e especificações das telas da interface terminal.
 
-```
+```plaintext
 docs/
 ├── core/
 │   ├── architecture.md     # Design e princípios
-│   ├── business-rules.md   # 81 BRs formalizadas
+│   ├── business-rules.md   # 104 BRs formalizadas
 │   ├── cli-reference.md    # Referência completa CLI
 │   ├── development.md      # Guia de desenvolvimento
 │   ├── quality-metrics.md  # Métricas de qualidade
@@ -318,7 +318,7 @@ docs/
 │   ├── technical-debt.md   # Dívida técnica rastreada
 │   └── workflows.md        # Fluxos e estados
 │
-├── decisions/              # 32 ADRs documentadas
+├── decisions/              # 35 ADRs documentadas
 │
 └── tui/                    # Mockups e specs TUI
     ├── dashboard-mockup-v4.md
@@ -357,7 +357,7 @@ Referências:
 
 ### Implementação
 
-Código é desenvolvido seguindo Test-Driven Development. Testes referenciam BRs pela nomenclatura (test_br_xxx), mantendo rastreabilidade bidirecional entre requisitos, testes e implementação. A pirâmide de testes distribui validações em quatro níveis: unitário (76.0%), integração (11.0%), BDD (10.2%) e end-to-end (2.8%).
+Código é desenvolvido seguindo Test-Driven Development. Testes referenciam BRs pela nomenclatura (test_br_xxx), mantendo rastreabilidade bidirecional entre requisitos, testes e implementação. A pirâmide de testes distribui validações em quatro níveis: unitário (81%), integração (11%), BDD (5%) e end-to-end (3%).
 
 Referências:
 
@@ -386,23 +386,23 @@ mypy src/
 
 O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão v1.6.0 consolidou a infraestrutura com Docker, DevSecOps e cobertura a 87%. A versão atual (v1.7.0) introduz a TUI com Textual como interface visual complementar à CLI, incluindo dashboard interativo com 6 painéis, navegação por telas e comando demo para showcase.
 
-| Versão | Status    | Features                                  |
-| ------ | --------- | ----------------------------------------- |
-| v1.0.0 | [DONE]    | CLI básica, CRUD eventos                  |
-| v1.1.0 | [DONE]    | Event reordering                          |
-| v1.2.x | [DONE]    | Logging, docs consolidados                |
-| v1.3.x | [DONE]    | Date parser, BDD tests, DI refactor       |
-| v1.4.0 | [DONE]    | Business rules formalizadas, 32 ADRs      |
-| v1.5.0 | [DONE]    | CI/CD dual-repo, i18n, 873 testes         |
-| v1.6.0 | [DONE]    | Docker, DevSecOps, 87% cobertura          |
-| v1.7.0 | [CURRENT] | TUI Textual, dashboard, demo, 1071 testes |
-| v2.0.0 | [PLANNED] | FastAPI REST API + Observabilidade        |
-| v3.0.0 | [FUTURE]  | Microservices Ecosystem (Kafka)           |
-| v4.0.0 | [FUTURE]  | Android App (Kotlin)                      |
+| Versão | Status    | Features                                 |
+| ------ | --------- | ---------------------------------------- |
+| v1.0.0 | [DONE]    | CLI básica, CRUD eventos                 |
+| v1.1.0 | [DONE]    | Event reordering                         |
+| v1.2.x | [DONE]    | Logging, docs consolidados               |
+| v1.3.x | [DONE]    | Date parser, BDD tests, DI refactor      |
+| v1.4.0 | [DONE]    | Business rules formalizadas, 32 ADRs     |
+| v1.5.0 | [DONE]    | CI/CD dual-repo, i18n, 873 testes        |
+| v1.6.0 | [DONE]    | Docker, DevSecOps, 87% cobertura         |
+| v1.7.0 | [CURRENT] | TUI Textual, dashboard CRUD, 1079 testes |
+| v2.0.0 | [PLANNED] | FastAPI REST API + Observabilidade       |
+| v3.0.0 | [FUTURE]  | Microservices Ecosystem (Kafka)          |
+| v4.0.0 | [FUTURE]  | Android App (Kotlin)                     |
 
 ---
 
-```
+```plaintext
 ┌────────────┐
 │ ▓▓▓▓░░░░▓▓ │
 │ ░░▓▓▓▓▓░░░ │   A T O M V S

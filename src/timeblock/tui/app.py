@@ -1,11 +1,13 @@
-"""TimeBlockApp - Aplicação TUI principal."""
+"""AtomvsApp - Aplicação TUI principal."""
 
+from pathlib import PurePath
 from typing import ClassVar
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
 
+from timeblock.services.backup_service import create_backup
 from timeblock.tui.screens.dashboard import DashboardScreen
 from timeblock.tui.screens.habits import HabitsScreen
 from timeblock.tui.screens.routines import RoutinesScreen
@@ -36,7 +38,15 @@ SCREEN_IDS = {
 class TimeBlockApp(App):
     """ATOMVS TimeBlock - TUI Interface."""
 
-    CSS_PATH = "styles/theme.tcss"
+    CSS_PATH: ClassVar[str | PurePath | list[str | PurePath] | None] = [
+        "styles/base.tcss",
+        "styles/layout.tcss",
+        "styles/cards.tcss",
+        "styles/dashboard.tcss",
+        "styles/statusbar.tcss",
+        "styles/timer.tcss",
+        "styles/forms.tcss",
+    ]
     TITLE = "ATOMVS"
 
     BINDINGS: ClassVar[list[Binding | tuple[str, str] | tuple[str, str, str]]] = [
@@ -88,10 +98,22 @@ class TimeBlockApp(App):
         self.active_screen = screen_name
         new_screen = self.query_one(f"#{SCREEN_IDS[screen_name]}")
         new_screen.display = True
+
+        if hasattr(new_screen, "refresh_data"):
+            new_screen.refresh_data()
         new_screen.focus()
 
         self.query_one(HeaderBar).update_screen(screen_name)
         self.query_one(NavBar).update_active(screen_name)
+
+    def on_descendant_focus(self, event) -> None:
+        """Atualiza footer quando foco muda entre panels."""
+        widget = event.widget
+        if widget and widget.id:
+            try:
+                self.query_one(StatusBar).update_focused_panel(widget.id)
+            except Exception:
+                pass
 
     async def action_toggle_help(self) -> None:
         """Exibe ou fecha o overlay de ajuda."""
@@ -102,9 +124,16 @@ class TimeBlockApp(App):
             await self.mount(HelpOverlay())
 
     async def action_handle_escape(self) -> None:
-        """Fecha modal aberto ou volta ao Dashboard."""
+        """Fecha modal, deseleciona panels ou volta ao Dashboard."""
         help_overlay = self.query("#help-overlay")
         if help_overlay:
             help_overlay.first().remove()
         elif self.active_screen != "dashboard":
             await self.action_switch_screen("dashboard")
+        else:
+            self.set_focus(None)
+
+    async def action_quit(self) -> None:
+        """Faz backup e encerra a aplicação."""
+        create_backup(label="shutdown")
+        self.exit()

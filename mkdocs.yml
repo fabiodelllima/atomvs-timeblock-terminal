@@ -1,8 +1,8 @@
-# MkDocs Configuration - TimeBlock Organizer
+# MkDocs Configuration - TimeBlock Planner
 # Atualizado: 2026-01-28 (alinhado com estrutura consolidada)
 # Referência: ADR-027 (Documentation Tooling)
 
-site_name: TimeBlock Organizer
+site_name: ATOMVS TimeBlock Planner
 site_description: CLI para gerenciamento de tempo baseada em Time Blocking e Atomic Habits
 site_author: Fábio de Lima
 site_url: https://github.com/fabiodelllima/timeblock-organizer

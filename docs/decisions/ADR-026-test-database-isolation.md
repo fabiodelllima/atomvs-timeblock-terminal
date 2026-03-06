@@ -8,7 +8,7 @@
 
 ## Contexto
 
-TimeBlock Organizer possui três níveis de teste (Unit, Integration, E2E) que requerem isolamento de banco de dados. A estratégia atual apresenta inconsistências e fragilidades que dificultam manutenção e causam falhas intermitentes.
+TimeBlock Planner possui três níveis de teste (Unit, Integration, E2E) que requerem isolamento de banco de dados. A estratégia atual apresenta inconsistências e fragilidades que dificultam manutenção e causam falhas intermitentes.
 
 ### Problema Identificado
 

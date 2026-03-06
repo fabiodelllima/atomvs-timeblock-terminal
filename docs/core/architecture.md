@@ -1,8 +1,6 @@
-# Arquitetura TimeBlock Organizer
+# Arquitetura
 
 **Versão:** 2.2.0
-
-**Data:** 28 de Novembro de 2025
 
 **Status:** Consolidado (SSOT)
 
@@ -28,7 +26,7 @@
 
 ## 1. Visão Geral
 
-TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada nos princípios de "Atomic Habits" de James Clear.
+TimeBlock Planner é uma aplicação CLI para gerenciamento de tempo baseada nos princípios de "Atomic Habits" de James Clear.
 
 ### 1.1. Princípios Arquiteturais
 
@@ -51,7 +49,7 @@ TimeBlock Organizer é uma aplicação CLI para gerenciamento de tempo baseada n
 
 O diagrama abaixo representa a arquitetura em camadas do sistema, desde a interface de usuário (CLI/TUI) até a persistência (SQLite), com a service layer como barreira que isola lógica de negócio das camadas de apresentação e dados.
 
-```
+```plaintext
 ┌─────────────────────────────────────────────────────────────┐
 │                      Usuário (CLI)                          │
 └─────────────────────────┬───────────────────────────────────┘
@@ -125,7 +123,7 @@ Muitos sistemas de produtividade tentam ser "inteligentes" tomando decisões aut
 
 A Routine funciona como norte verdadeiro do sistema: define a intenção do usuário para a semana e serve como referência contra a qual o dia real é comparado. Desvios são detectados e informados, mas nunca corrigidos automaticamente.
 
-```
+```plaintext
 ┌─────────────────────────────────────────────────────┐
 │                    ROUTINE                          │
 │              (Plano Ideal - Imutável)               │
@@ -229,7 +227,7 @@ A stack tecnológica foi selecionada priorizando produtividade do desenvolvedor,
 
 As dependências são declaradas no pyproject.toml com versões mínimas pinadas. O core mantém apenas três dependências diretas (SQLModel, Typer, Rich), enquanto ferramentas de desenvolvimento e a TUI são gerenciadas como dependency groups opcionais.
 
-```
+```plaintext
 sqlmodel>=0.0.14
 typer>=0.9.0
 rich>=13.0.0
@@ -252,7 +250,7 @@ A aplicação segue o padrão de camadas com separação rigorosa de responsabil
 
 **Estrutura:**
 
-```
+```plaintext
 commands/
 ├── habit.py       # Comandos de hábitos
 ├── task.py        # Comandos de tarefas
@@ -301,7 +299,7 @@ def create(
 
 **Estrutura:**
 
-```
+```plaintext
 services/
 ├── habit_service.py             # CRUD hábitos
 ├── habit_instance_service.py    # Gestão de instancias
@@ -448,7 +446,7 @@ class HabitInstanceService:
 
 **Estrutura:**
 
-```
+```plaintext
 models/
 ├── __init__.py           # Exports
 ├── enums.py              # Status, Recurrence, etc
@@ -506,7 +504,7 @@ class HabitInstance(SQLModel, table=True):
 
 **Estrutura:**
 
-```
+```plaintext
 database/
 ├── __init__.py     # Exports (get_engine_context)
 ├── engine.py       # Engine management e configuração
@@ -1713,9 +1711,9 @@ Pipeline declarado em `.gitlab-ci.yml`, executado em cada push e merge request.
 **Stages:**
 
 ```
-test ──> build ──> deploy
+quality ──> test ──> coverage ──> security ──> sync
 
-test:     1 job consolidado (test:all)
+test:     3 jobs paralelos (test:unit + test:integration + test:e2e)
 build:    mkdocs build [develop, main]
 deploy:   GitLab Pages [main]
 ```
@@ -1812,7 +1810,7 @@ atomvs-timeblock/               # GitHub Organization
 
 O padrão BFF cria backends dedicados por plataforma, otimizando payloads e comportamentos para cada tipo de cliente. Netflix, Uber e Spotify utilizam essa arquitetura.
 
-```
+```plaintext
 ┌────────────────────────────────────────────────────────────────┐
 │                         CLIENTS                                │
 ├──────────┬──────────┬──────────┬──────────┬────────────────────┤
@@ -1824,7 +1822,7 @@ O padrão BFF cria backends dedicados por plataforma, otimizando payloads e comp
 │ BFF Web  │ │ BFF Mobile │ │ BFF Terminal │     │ BFF Desktop │
 │ Spring   │ │   Kotlin   │ │   Go/Python  │     │    Go       │
 └────┬─────┘ └────┬───────┘ └─────┬────────┘     └─────┬───────┘
-     └────────────┴───────────────┴────────────────────┘
+     └────────────┴───────┬───────┴────────────────────┘
                           │
                           ↓
               ┌─────────────────────────┐
@@ -1899,4 +1897,4 @@ Ver também: [ADR-030: Arquitetura Multi-Plataforma](../decisions/ADR-030-multip
 
 ---
 
-**Última atualização:** 13 de Fevereiro de 2026
+**Última atualização:** 2 de Março de 2026

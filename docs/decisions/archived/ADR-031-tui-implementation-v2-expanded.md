@@ -10,7 +10,7 @@
 
 ## Contexto
 
-O TimeBlock Organizer v1.6.0 possui CLI funcional com 95% dos comandos operacionais, 87% de cobertura e 778 testes. A interface CLI atende automação e uso pontual, mas a experiência interativa diária (consultar agenda, marcar hábitos, operar timer) requer navegação repetitiva entre comandos.
+O TimeBlock Planner v1.6.0 possui CLI funcional com 95% dos comandos operacionais, 87% de cobertura e 778 testes. A interface CLI atende automação e uso pontual, mas a experiência interativa diária (consultar agenda, marcar hábitos, operar timer) requer navegação repetitiva entre comandos.
 
 ADR-006 propôs Textual como framework TUI. Este ADR detalha a implementação concreta para v1.7.0.
 

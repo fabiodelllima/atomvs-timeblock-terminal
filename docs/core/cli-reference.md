@@ -1,4 +1,4 @@
-# CLI Reference - TimeBlock Organizer
+# CLI Reference - TimeBlock Planner
 
 **Versão:** 1.4.0
 
@@ -31,7 +31,7 @@
 
 TimeBlock usa semântica **resource-first**:
 
-```
+```plaintext
 timeblock <recurso> <ação> [argumentos] [opções]
 ```
 
@@ -323,7 +323,7 @@ timeblock routine delete <ROUTINE_ID> [--purge]
 
 **Fluxo interativo (--purge):**
 
-```
+```plaintext
 $ timeblock routine delete 1 --purge
 
 [WARN] Esta ação é irreversível!
@@ -373,7 +373,7 @@ timeblock routine list [--all] [--verbose]
 
 **Saída padrão:**
 
-```
+```plaintext
 Rotinas:
   * 1. Rotina Matinal (ativa)
     2. Rotina Trabalho (inativa)
@@ -381,7 +381,7 @@ Rotinas:
 
 **Saída com --verbose:**
 
-```
+```plaintext
 Rotinas:
   * 1. Rotina Matinal (ativa)
        Hábitos: 5 (3 ativos)
@@ -684,7 +684,7 @@ timeblock habit delete <HABIT_ID>
 
 **Fluxo interativo:**
 
-```
+```plaintext
 $ timeblock habit delete 1
 
 Hábito: Academia (ID: 1)

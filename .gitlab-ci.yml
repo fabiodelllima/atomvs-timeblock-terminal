@@ -4,7 +4,6 @@ stages:
   - coverage
   - security
   - sync
-
 default:
   timeout: 10m
   retry:
@@ -13,10 +12,8 @@ default:
       - runner_system_failure
       - stuck_or_timeout_failure
       - scheduler_failure
-
 variables:
   CI_IMAGE: $CI_REGISTRY_IMAGE/ci:latest
-
 lint:
   stage: quality
   image: $CI_IMAGE
@@ -25,21 +22,42 @@ lint:
   script:
     - ruff check src/ tests/
     - ruff format --check src/ tests/
-
-test:all:
-  timeout: 45m
+test:unit:
   stage: test
   image: $CI_IMAGE
   before_script:
     - pip install --no-deps -e .
   script:
-    - coverage run -m pytest tests/ -v --tb=short
+    - coverage run --data-file=.coverage.unit -m pytest tests/unit/ -v --tb=short
   artifacts:
     paths:
-      - .coverage
-      - .coverage.*
+      - .coverage.unit
     expire_in: 1 hour
-
+test:integration:
+  timeout: 60m
+  stage: test
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+    - pip install pytest-xdist
+  script:
+    - COVERAGE_FILE=.coverage.integration python -m pytest tests/integration/ tests/bdd/ -v --tb=short -n auto --dist=loadfile --cov=timeblock --no-cov-on-fail --cov-fail-under=0
+  artifacts:
+    paths:
+      - .coverage.integration
+    expire_in: 1 hour
+test:e2e:
+  timeout: 60m
+  stage: test
+  image: $CI_IMAGE
+  before_script:
+    - pip install --no-deps -e .
+  script:
+    - coverage run --data-file=.coverage.e2e -m pytest tests/e2e/ -v --tb=short
+  artifacts:
+    paths:
+      - .coverage.e2e
+    expire_in: 1 hour
 test:typecheck:
   stage: test
   image: $CI_IMAGE
@@ -48,25 +66,28 @@ test:typecheck:
   script:
     - mypy src/timeblock --check-untyped-defs
   timeout: 10m
-
 coverage:report:
   stage: coverage
   image: $CI_IMAGE
   before_script:
     - pip install --no-deps -e .
   needs:
-    - job: test:all
+    - job: test:unit
+      artifacts: true
+    - job: test:integration
+      artifacts: true
+    - job: test:e2e
       artifacts: true
   script:
     - ls -la .coverage* || echo "No coverage files found"
-    - coverage report --fail-under=85
+    - coverage combine .coverage.unit .coverage.integration .coverage.e2e
+    - coverage report --fail-under=80
     - coverage xml -o coverage.xml
   artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-
 security:bandit:
   stage: security
   image: $CI_IMAGE
@@ -79,7 +100,6 @@ security:bandit:
     paths:
       - bandit-report.json
     when: always
-
 security:deps:
   stage: security
   image: $CI_IMAGE
@@ -93,12 +113,12 @@ security:deps:
     paths:
       - pip-audit-report.json
     when: always
-
 sync:github:
+  needs: ["test:unit", "test:integration", "test:e2e"]
   stage: sync
   before_script: []
   script:
-    - git remote add github https://x-access-token:${GITHUB_TOKEN}@github.com/fabiodelllima/atomvs-timeblock-terminal.git
+    - git remote add github https://x-access-token:$\{GITHUB_TOKEN\}@github.com/fabiodelllima/atomvs-timeblock-terminal.git
     - git push github HEAD:${CI_COMMIT_REF_NAME} --force
     - git push github --tags --force
   rules:

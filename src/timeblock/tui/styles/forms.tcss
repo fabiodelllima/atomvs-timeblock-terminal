@@ -1,0 +1,41 @@
+/* ==========================================================================
+   CRUD Screen Pattern (BR-TUI-005)
+   Layout genérico para telas de CRUD: header + lista + form + actions.
+   ========================================================================== */
+
+#crud-content {
+    width: 100%;                       /* Largura total */
+    height: 100%;                      /* Altura total */
+    padding: 1 2;                      /* Padding padrão */
+}
+
+#crud-header {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha */
+    color: #CBA6F7;                  /* Mauve: título accent */
+}
+
+#crud-list {
+    width: 100%;                       /* Largura total */
+    height: 1fr;                       /* Preenche espaço restante */
+    padding: 1 0;                      /* Padding vertical */
+}
+
+#crud-form {
+    width: 100%;                       /* Largura total */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    padding: 1 2;                      /* Padding do formulário */
+}
+
+#crud-error {
+    width: 100%;                       /* Largura total */
+    height: auto;                      /* Altura adapta ao conteúdo */
+    color: #F38BA8;                    /* Red: mensagens de erro */
+}
+
+#crud-actions {
+    width: 100%;                       /* Largura total */
+    height: 1;                         /* 1 linha */
+    dock: bottom;                      /* Fixo no rodapé */
+    color: #6C7086;                  /* Overlay0: ações muted */
+}

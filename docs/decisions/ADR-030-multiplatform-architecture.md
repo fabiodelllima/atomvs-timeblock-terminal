@@ -10,7 +10,7 @@
 
 ## Contexto
 
-O TimeBlock Organizer precisa evoluir de CLI local para ecossistema multi-plataforma:
+O TimeBlock Planner precisa evoluir de CLI local para ecossistema multi-plataforma:
 
 - Terminal (CLI + TUI) - Python
 - Web - Angular + TypeScript
@@ -48,6 +48,7 @@ A decisão de usar uma GitHub Organization em vez de repositórios pessoais segu
 A estratégia de um repositório por serviço é o padrão estabelecido para arquiteturas de microsserviços. Cada serviço tem seu próprio ciclo de vida, pipeline de CI/CD, e pode ser deployado independentemente. Isso permite que diferentes componentes evoluam em paralelo sem conflitos de merge ou dependências de release.
 
 A estrutura proposta separa claramente backend core (lógica de negócio), BFFs (adaptadores por plataforma), clients (interfaces de usuário), e infraestrutura (IaC e configuração). Essa separação facilita a navegação e deixa explícita a responsabilidade de cada componente.
+
 ```
 timeblock-org/
 │
@@ -95,6 +96,7 @@ A escolha de stack para cada componente considera adequação técnica ao proble
 O padrão Backend For Frontend resolve um problema fundamental: diferentes tipos de clientes têm necessidades diferentes. Um app mobile em rede 3G precisa de payloads compactos e paginação agressiva. Uma SPA web pode carregar mais dados de uma vez. Um CLI precisa de respostas estruturadas para parsing.
 
 Netflix, Uber e Spotify adotaram BFF precisamente porque um único backend genérico força compromissos que prejudicam todas as plataformas. Com BFF, cada cliente tem um backend dedicado que entende suas necessidades específicas e otimiza as respostas adequadamente. O BFF também isola mudanças: atualizar a API do app mobile não afeta a web, permitindo evolução independente de cada plataforma.
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │                         CLIENTS                                │
@@ -128,6 +130,7 @@ Netflix, Uber e Spotify adotaram BFF precisamente porque um único backend gené
 O repositório mobile usa Kotlin Multiplatform para compartilhar código entre o app Android e seu BFF. Essa abordagem elimina divergências entre modelos de dados do cliente e servidor - um problema comum que causa bugs sutis em runtime.
 
 Ktor, o framework web da JetBrains, integra naturalmente com o ecossistema Kotlin. O resultado é type-safety end-to-end: se um campo muda no backend, o app não compila até ser atualizado, transformando erros de runtime em erros de compilação.
+
 ```
 timeblock-mobile/
 ├── app/                      # Android (Jetpack Compose)
@@ -153,6 +156,7 @@ Essa abordagem contract-first inverte o fluxo tradicional: em vez de implementar
 O repositório `timeblock-infra` centraliza toda configuração de infraestrutura como código. Isso garante que ambientes são reproduzíveis, versionados e auditáveis - eliminando configurações manuais não documentadas.
 
 Terraform provisiona recursos cloud (VMs, redes, databases) de forma declarativa. Ansible configura esses recursos após criados (instalar Docker, configurar firewall). Kubernetes orquestra containers em produção. Docker Compose simplifica desenvolvimento local e deployments em homelab.
+
 ```
 timeblock-infra/
 ├── terraform/                # Provisioning (cloud resources)
@@ -199,12 +203,12 @@ timeblock-infra/
 
 **Progressão de IaC por versão:**
 
-| Versão | Ferramenta               | Uso                                |
-| ------ | ------------------------ | ---------------------------------- |
-| v1.5.0 | Docker Compose           | Dev local, CI/CD                   |
-| v2.0.0 | Docker Compose + Ansible | Raspberry Pi homelab               |
-| v2.0.0 | Terraform (opcional)     | Cloud (DigitalOcean, AWS)          |
-| v3.0.0 | Kubernetes + Helm        | Orquestração de microsserviços     |
+| Versão | Ferramenta               | Uso                            |
+| ------ | ------------------------ | ------------------------------ |
+| v1.5.0 | Docker Compose           | Dev local, CI/CD               |
+| v2.0.0 | Docker Compose + Ansible | Raspberry Pi homelab           |
+| v2.0.0 | Terraform (opcional)     | Cloud (DigitalOcean, AWS)      |
+| v3.0.0 | Kubernetes + Helm        | Orquestração de microsserviços |
 
 ### 8. Estratégia de Migração
 

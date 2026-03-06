@@ -1,10 +1,11 @@
-"""Entry point do TimeBlock Organizer CLI/TUI."""
+"""Entry point do TimeBlock Planner CLI/TUI."""
 
 import sys
 
 import typer
 
 from timeblock.commands import (
+    demo,
     habit,
     init,
     reschedule,
@@ -16,7 +17,7 @@ from timeblock.commands import (
 
 app = typer.Typer(
     name="timeblock",
-    help="TimeBlock Organizer - Gerenciador de tempo via CLI",
+    help="TimeBlock Planner - Gerenciador de tempo via CLI",
     add_completion=False,
 )
 
@@ -30,6 +31,7 @@ app.add_typer(task.app, name="task")
 app.add_typer(timer.app, name="timer")
 app.add_typer(tag.app, name="tag")
 app.add_typer(reschedule.app, name="reschedule")
+app.add_typer(demo.app, name="demo")
 
 
 @app.command()

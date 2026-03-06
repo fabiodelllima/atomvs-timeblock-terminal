@@ -56,7 +56,7 @@ pip install mkdocs mkdocs-material mkdocstrings[python] mkdocs-mermaid2-plugin
 **mkdocs.yml:**
 
 ```yaml
-site_name: TimeBlock Organizer
+site_name: TimeBlock Planner
 theme:
   name: material
   palette:

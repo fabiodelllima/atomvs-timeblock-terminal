@@ -6,7 +6,7 @@
 
 ## Contexto
 
-O TimeBlock Organizer evoluiu de uma arquitetura de comandos genéricos (`add`, `list`) para comandos por recurso (`routine`, `habit`, `task`, `timer`, `tag`).
+O TimeBlock Planner evoluiu de uma arquitetura de comandos genéricos (`add`, `list`) para comandos por recurso (`routine`, `habit`, `task`, `timer`, `tag`).
 
 Os comandos legados operavam sobre a entidade `Event`, que foi substituída por entidades específicas:
 
