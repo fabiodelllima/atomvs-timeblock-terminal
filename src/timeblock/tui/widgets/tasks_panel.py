@@ -12,13 +12,12 @@ from textual.events import Key
 
 from timeblock.tui.colors import (
     C_ERROR,
+    C_HIGHLIGHT,
     C_MUTED,
     C_SUCCESS,
     task_proximity_color,
 )
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
-
-C_HIGHLIGHT = "#313244"  # Surface0 — cursor background
 
 
 class TasksPanel(FocusablePanel):

@@ -11,14 +11,13 @@ BR-TUI-004: Quick actions — Ctrl+Enter done, Ctrl+S skip.
 from textual.events import Key
 
 from timeblock.tui.colors import (
+    C_HIGHLIGHT,
     is_bold_status,
     status_color,
     status_icon,
 )
 from timeblock.tui.formatters import format_duration_card
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
-
-C_HIGHLIGHT = "#313244"  # Surface0 — cursor background
 
 
 class HabitsPanel(FocusablePanel):
