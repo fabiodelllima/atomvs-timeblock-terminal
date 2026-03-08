@@ -9,6 +9,7 @@ BR-TUI-004: Quick actions — Ctrl+K completa task.
 """
 
 from textual.events import Key
+from textual.message import Message
 
 from timeblock.tui.colors import (
     C_ERROR,
@@ -49,18 +50,19 @@ class TasksPanel(FocusablePanel):
         else:
             super().on_key(event)
 
+    class TaskCompleteRequest(Message):
+        """Solicita conclusão de task ao coordinator (RF-001)."""
+
+        def __init__(self, task_id: int) -> None:
+            self.task_id = task_id
+            super().__init__()
+
     def _action_complete(self) -> None:
-        """Completa task selecionada (BR-TUI-004)."""
+        """Emite TaskCompleteRequest para o coordinator (BR-TUI-004, RF-001)."""
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        from timeblock.services.task_service import TaskService
-        from timeblock.tui.session import service_action
-
-        result, error = service_action(lambda s: TaskService.complete_task(item["id"], session=s))
-        if not error and result:
-            item["status"] = "completed"
-            self._refresh_content()
+        self.post_message(self.TaskCompleteRequest(item["id"]))
 
     def _order_tasks(self) -> None:
         """Ordena: overdue > pending > completed > cancelled."""
