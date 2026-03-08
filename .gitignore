@@ -53,3 +53,7 @@ htmlcov/
 
 # Migration scripts (one-time use)
 migrate_*.py
+
+# Others
+docs/core/ci-optimization.md
+docs/sysdesign/

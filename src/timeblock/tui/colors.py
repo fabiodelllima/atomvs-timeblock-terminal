@@ -167,3 +167,6 @@ def task_proximity_color(days: int | None) -> str:
     if days <= 28:
         return C_SUBTEXT0
     return C_MUTED
+
+
+C_HIGHLIGHT = "#313244"  # Surface0: cursor background
