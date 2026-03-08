@@ -31,7 +31,12 @@ class HabitsPanel(FocusablePanel):
     def update_data(self, instances: list[dict]) -> None:
         """Recebe instâncias do coordinator e renderiza."""
         self._instances = instances
-        self._set_item_count(len(instances))
+        if instances:
+            self._showing_placeholders = False
+            self._set_item_count(len(instances))
+        else:
+            self._showing_placeholders = True
+            self._set_item_count(3)
         self._refresh_content()
 
     def get_selected_item(self) -> dict | None:
@@ -48,8 +53,6 @@ class HabitsPanel(FocusablePanel):
         elif event.key == "ctrl+enter":
             self._action_done()
             event.stop()
-        else:
-            super().on_key(event)
 
     class HabitDoneRequest(Message):
         """Solicita marcação de hábito como done ao coordinator (RF-001)."""
@@ -100,11 +103,10 @@ class HabitsPanel(FocusablePanel):
         lines: list[str] = []
         max_bars = 4
         if not instances:
-            lines.append("  [dim]---              · --:-- · --min[/dim]")
-            lines.append("  [dim]---              · --:-- · --min[/dim]")
-            lines.append("  [dim]---              · --:-- · --min[/dim]")
-            lines.append("")
-            lines.append("  [dim]Crie uma rotina: atomvs routine add[/dim]")
+            return self._build_empty_state(
+                "---              · --:-- · --min",
+                "Crie uma rotina: atomvs routine add",
+            )
         else:
             for idx, inst in enumerate(instances[:12]):
                 line = self._format_instance(inst, max_bars)
