@@ -19,6 +19,7 @@ from timeblock.services.task_service import TaskService
 from timeblock.tui.screens.dashboard import crud_habits, crud_routines, crud_tasks, loader
 from timeblock.tui.session import service_action
 from timeblock.tui.widgets.agenda_panel import AgendaPanel
+from timeblock.tui.widgets.focusable_panel import FocusablePanel
 from timeblock.tui.widgets.habits_panel import HabitsPanel
 from timeblock.tui.widgets.metrics_panel import MetricsPanel
 from timeblock.tui.widgets.tasks_panel import TasksPanel
@@ -165,6 +166,17 @@ class DashboardScreen(Static):
     # =========================================================================
     # Data Loading (delegado para loader.py)
     # =========================================================================
+
+    def on_focusable_panel_placeholder_activated(
+        self, message: FocusablePanel.PlaceholderActivated
+    ) -> None:
+        """Enter em placeholder despacha criação contextual (BR-TUI-013)."""
+        message.stop()
+        if message.panel_id == "panel-habits":
+            if self._active_routine_id:
+                crud_habits.open_create_habit(self.app, self._active_routine_id, self._on_crud_done)
+        elif message.panel_id == "panel-tasks":
+            crud_tasks.open_create_task(self.app, self._on_crud_done)
 
     def refresh_data(self) -> None:
         """Carrega dados via loader e distribui para panels."""
