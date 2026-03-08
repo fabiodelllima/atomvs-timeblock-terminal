@@ -33,7 +33,7 @@ class TestBRHabitInstanceReordering:
         """Cria rotina para testes."""
         routine = Routine(name="Test Routine", is_active=True)
         test_db.add(routine)
-        test_db.commit()
+        test_db.flush()
         test_db.refresh(routine)
         return routine
 
@@ -49,7 +49,7 @@ class TestBRHabitInstanceReordering:
             recurrence=Recurrence.EVERYDAY,
         )
         test_db.add(habit)
-        test_db.commit()
+        test_db.flush()
         test_db.refresh(habit)
         return habit
 
@@ -65,7 +65,7 @@ class TestBRHabitInstanceReordering:
             status=Status.PENDING,
         )
         test_db.add(instance)
-        test_db.commit()
+        test_db.flush()
         test_db.refresh(instance)
         return instance
 
@@ -138,7 +138,7 @@ class TestBRHabitInstanceReordering:
             scheduled_datetime=datetime.combine(date.today(), time(10, 30)),
         )
         test_db.add(task)
-        test_db.commit()
+        test_db.flush()
 
         assert instance.id is not None
 

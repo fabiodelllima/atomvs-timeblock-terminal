@@ -9,16 +9,16 @@ BR-TUI-004: Quick actions — Ctrl+Enter done, Ctrl+S skip.
 """
 
 from textual.events import Key
+from textual.message import Message
 
 from timeblock.tui.colors import (
+    C_HIGHLIGHT,
     is_bold_status,
     status_color,
     status_icon,
 )
 from timeblock.tui.formatters import format_duration_card
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
-
-C_HIGHLIGHT = "#313244"  # Surface0 — cursor background
 
 
 class HabitsPanel(FocusablePanel):
@@ -31,7 +31,12 @@ class HabitsPanel(FocusablePanel):
     def update_data(self, instances: list[dict]) -> None:
         """Recebe instâncias do coordinator e renderiza."""
         self._instances = instances
-        self._set_item_count(len(instances))
+        if instances:
+            self._showing_placeholders = False
+            self._set_item_count(len(instances))
+        else:
+            self._showing_placeholders = True
+            self._set_item_count(3)
         self._refresh_content()
 
     def get_selected_item(self) -> dict | None:
@@ -48,40 +53,34 @@ class HabitsPanel(FocusablePanel):
         elif event.key == "ctrl+enter":
             self._action_done()
             event.stop()
-        else:
-            super().on_key(event)
+
+    class HabitDoneRequest(Message):
+        """Solicita marcação de hábito como done ao coordinator (RF-001)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
+    class HabitSkipRequest(Message):
+        """Solicita marcação de hábito como skipped ao coordinator (RF-001)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
 
     def _action_done(self) -> None:
-        """Marca hábito selecionado como done (BR-TUI-004)."""
+        """Emite HabitDoneRequest para o coordinator (BR-TUI-004, RF-001)."""
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        from timeblock.services.habit_instance_service import HabitInstanceService
-        from timeblock.tui.session import service_action
-
-        result, error = service_action(
-            lambda s: HabitInstanceService.mark_completed(item["id"], session=s)
-        )
-        if not error and result:
-            item["status"] = "done"
-            item["substatus"] = "full"
-            self._refresh_content()
+        self.post_message(self.HabitDoneRequest(item["id"]))
 
     def _action_skip(self) -> None:
-        """Marca hábito selecionado como skipped (BR-TUI-004)."""
+        """Emite HabitSkipRequest para o coordinator (BR-TUI-004, RF-001)."""
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        from timeblock.services.habit_instance_service import HabitInstanceService
-        from timeblock.tui.session import service_action
-
-        result, error = service_action(
-            lambda s: HabitInstanceService.mark_skipped(item["id"], session=s)
-        )
-        if not error and result:
-            item["status"] = "not_done"
-            item["substatus"] = "skipped"
-            self._refresh_content()
+        self.post_message(self.HabitSkipRequest(item["id"]))
 
     def _refresh_content(self) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
@@ -104,11 +103,10 @@ class HabitsPanel(FocusablePanel):
         lines: list[str] = []
         max_bars = 4
         if not instances:
-            lines.append("  [dim]---              · --:-- · --min[/dim]")
-            lines.append("  [dim]---              · --:-- · --min[/dim]")
-            lines.append("  [dim]---              · --:-- · --min[/dim]")
-            lines.append("")
-            lines.append("  [dim]Crie uma rotina: atomvs routine add[/dim]")
+            return self._build_empty_state(
+                "---              · --:-- · --min",
+                "Crie uma rotina: atomvs routine add",
+            )
         else:
             for idx, inst in enumerate(instances[:12]):
                 line = self._format_instance(inst, max_bars)

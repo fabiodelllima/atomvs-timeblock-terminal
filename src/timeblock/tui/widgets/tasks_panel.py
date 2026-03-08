@@ -9,16 +9,16 @@ BR-TUI-004: Quick actions — Ctrl+K completa task.
 """
 
 from textual.events import Key
+from textual.message import Message
 
 from timeblock.tui.colors import (
     C_ERROR,
+    C_HIGHLIGHT,
     C_MUTED,
     C_SUCCESS,
     task_proximity_color,
 )
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
-
-C_HIGHLIGHT = "#313244"  # Surface0 — cursor background
 
 
 class TasksPanel(FocusablePanel):
@@ -33,7 +33,12 @@ class TasksPanel(FocusablePanel):
         """Recebe tasks do coordinator e renderiza."""
         self._tasks = tasks
         self._order_tasks()
-        self._set_item_count(len(self._ordered))
+        if self._ordered:
+            self._showing_placeholders = False
+            self._set_item_count(len(self._ordered))
+        else:
+            self._showing_placeholders = True
+            self._set_item_count(2)
         self._refresh_content()
 
     def get_selected_item(self) -> dict | None:
@@ -47,21 +52,20 @@ class TasksPanel(FocusablePanel):
         if event.key == "ctrl+k":
             self._action_complete()
             event.stop()
-        else:
-            super().on_key(event)
+
+    class TaskCompleteRequest(Message):
+        """Solicita conclusão de task ao coordinator (RF-001)."""
+
+        def __init__(self, task_id: int) -> None:
+            self.task_id = task_id
+            super().__init__()
 
     def _action_complete(self) -> None:
-        """Completa task selecionada (BR-TUI-004)."""
+        """Emite TaskCompleteRequest para o coordinator (BR-TUI-004, RF-001)."""
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        from timeblock.services.task_service import TaskService
-        from timeblock.tui.session import service_action
-
-        result, error = service_action(lambda s: TaskService.complete_task(item["id"], session=s))
-        if not error and result:
-            item["status"] = "completed"
-            self._refresh_content()
+        self.post_message(self.TaskCompleteRequest(item["id"]))
 
     def _order_tasks(self) -> None:
         """Ordena: overdue > pending > completed > cancelled."""
@@ -70,18 +74,18 @@ class TasksPanel(FocusablePanel):
 
     def _refresh_content(self) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
+        from collections import Counter
+
         tasks = self._tasks
-        pending = [t for t in tasks if t.get("status") == "pending"]
-        completed = [t for t in tasks if t.get("status") == "completed"]
-        cancelled = [t for t in tasks if t.get("status") == "cancelled"]
-        overdue = [t for t in tasks if t.get("status") == "overdue"]
-        counts = f"{len(pending)} pend."
-        if completed:
-            counts += f" {len(completed)} done"
-        if cancelled:
-            counts += f" {len(cancelled)} canc."
-        if overdue:
-            counts += f" {len(overdue)} over."
+        # Counter substitui 4 list comprehensions separadas (RF-008)
+        status_counts: Counter[str] = Counter(t.get("status", "pending") for t in tasks)
+        counts = f"{status_counts['pending']} pend."
+        if status_counts["completed"]:
+            counts += f" {status_counts['completed']} done"
+        if status_counts["cancelled"]:
+            counts += f" {status_counts['cancelled']} canc."
+        if status_counts["overdue"]:
+            counts += f" {status_counts['overdue']} over."
         self.border_title = "Tarefas"
         self.border_subtitle = counts
         self.update("\n".join(self._build_lines()))
@@ -90,10 +94,11 @@ class TasksPanel(FocusablePanel):
         """Monta linhas ordenadas com highlight no cursor."""
         lines: list[str] = []
         if not self._ordered:
-            lines.append("  [dim]---                --/--   --:--[/dim]")
-            lines.append("  [dim]---                --/--   --:--[/dim]")
-            lines.append("")
-            lines.append("  [dim]Crie uma task: atomvs task add[/dim]")
+            return self._build_empty_state(
+                "---                --/--   --:--",
+                "Crie uma task: atomvs task add",
+                count=2,
+            )
         else:
             for idx, task in enumerate(self._ordered):
                 line = self._format_task(task)
