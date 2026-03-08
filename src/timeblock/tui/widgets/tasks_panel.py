@@ -33,7 +33,12 @@ class TasksPanel(FocusablePanel):
         """Recebe tasks do coordinator e renderiza."""
         self._tasks = tasks
         self._order_tasks()
-        self._set_item_count(len(self._ordered))
+        if self._ordered:
+            self._showing_placeholders = False
+            self._set_item_count(len(self._ordered))
+        else:
+            self._showing_placeholders = True
+            self._set_item_count(2)
         self._refresh_content()
 
     def get_selected_item(self) -> dict | None:
@@ -47,8 +52,6 @@ class TasksPanel(FocusablePanel):
         if event.key == "ctrl+k":
             self._action_complete()
             event.stop()
-        else:
-            super().on_key(event)
 
     class TaskCompleteRequest(Message):
         """Solicita conclusão de task ao coordinator (RF-001)."""
@@ -91,10 +94,11 @@ class TasksPanel(FocusablePanel):
         """Monta linhas ordenadas com highlight no cursor."""
         lines: list[str] = []
         if not self._ordered:
-            lines.append("  [dim]---                --/--   --:--[/dim]")
-            lines.append("  [dim]---                --/--   --:--[/dim]")
-            lines.append("")
-            lines.append("  [dim]Crie uma task: atomvs task add[/dim]")
+            return self._build_empty_state(
+                "---                --/--   --:--",
+                "Crie uma task: atomvs task add",
+                count=2,
+            )
         else:
             for idx, task in enumerate(self._ordered):
                 line = self._format_task(task)
