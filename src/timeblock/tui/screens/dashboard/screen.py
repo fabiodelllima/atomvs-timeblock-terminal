@@ -14,7 +14,7 @@ from textual.containers import Horizontal, Vertical
 from textual.events import Key
 from textual.widgets import Static
 
-from timeblock.tui.screens.dashboard import crud_routines, loader
+from timeblock.tui.screens.dashboard import crud_habits, crud_routines, loader
 from timeblock.tui.widgets.agenda_panel import AgendaPanel
 from timeblock.tui.widgets.habits_panel import HabitsPanel
 from timeblock.tui.widgets.metrics_panel import MetricsPanel
@@ -83,7 +83,8 @@ class DashboardScreen(Static):
         if self._focused_panel in ("", "agenda-content"):
             crud_routines.open_create_routine(self.app, self._on_crud_done)
         elif self._focused_panel == "panel-habits":
-            pass  # Sprint 4c
+            if self._active_routine_id:
+                crud_habits.open_create_habit(self.app, self._active_routine_id, self._on_crud_done)
         elif self._focused_panel == "panel-tasks":
             pass  # Sprint 4d
 
@@ -97,7 +98,9 @@ class DashboardScreen(Static):
                 self._on_crud_done,
             )
         elif self._focused_panel == "panel-habits":
-            pass  # Sprint 4c
+            item = self.query_one(HabitsPanel).get_selected_item()
+            if item:
+                crud_habits.open_edit_habit(self.app, item, self._on_crud_done)
         elif self._focused_panel == "panel-tasks":
             pass  # Sprint 4d
 
@@ -111,7 +114,9 @@ class DashboardScreen(Static):
                 self._on_crud_done,
             )
         elif self._focused_panel == "panel-habits":
-            pass  # Sprint 4c
+            item = self.query_one(HabitsPanel).get_selected_item()
+            if item:
+                crud_habits.open_delete_habit(self.app, item, self._on_crud_done)
         elif self._focused_panel == "panel-tasks":
             pass  # Sprint 4d
 
