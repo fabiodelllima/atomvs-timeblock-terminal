@@ -9,6 +9,7 @@ BR-TUI-004: Quick actions — Ctrl+Enter done, Ctrl+S skip.
 """
 
 from textual.events import Key
+from textual.message import Message
 
 from timeblock.tui.colors import (
     C_HIGHLIGHT,
@@ -50,37 +51,33 @@ class HabitsPanel(FocusablePanel):
         else:
             super().on_key(event)
 
+    class HabitDoneRequest(Message):
+        """Solicita marcação de hábito como done ao coordinator (RF-001)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
+    class HabitSkipRequest(Message):
+        """Solicita marcação de hábito como skipped ao coordinator (RF-001)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
     def _action_done(self) -> None:
-        """Marca hábito selecionado como done (BR-TUI-004)."""
+        """Emite HabitDoneRequest para o coordinator (BR-TUI-004, RF-001)."""
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        from timeblock.services.habit_instance_service import HabitInstanceService
-        from timeblock.tui.session import service_action
-
-        result, error = service_action(
-            lambda s: HabitInstanceService.mark_completed(item["id"], session=s)
-        )
-        if not error and result:
-            item["status"] = "done"
-            item["substatus"] = "full"
-            self._refresh_content()
+        self.post_message(self.HabitDoneRequest(item["id"]))
 
     def _action_skip(self) -> None:
-        """Marca hábito selecionado como skipped (BR-TUI-004)."""
+        """Emite HabitSkipRequest para o coordinator (BR-TUI-004, RF-001)."""
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        from timeblock.services.habit_instance_service import HabitInstanceService
-        from timeblock.tui.session import service_action
-
-        result, error = service_action(
-            lambda s: HabitInstanceService.mark_skipped(item["id"], session=s)
-        )
-        if not error and result:
-            item["status"] = "not_done"
-            item["substatus"] = "skipped"
-            self._refresh_content()
+        self.post_message(self.HabitSkipRequest(item["id"]))
 
     def _refresh_content(self) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
