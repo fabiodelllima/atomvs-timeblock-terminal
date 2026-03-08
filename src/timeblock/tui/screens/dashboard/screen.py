@@ -14,7 +14,10 @@ from textual.containers import Horizontal, Vertical
 from textual.events import Key
 from textual.widgets import Static
 
+from timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.services.task_service import TaskService
 from timeblock.tui.screens.dashboard import crud_habits, crud_routines, crud_tasks, loader
+from timeblock.tui.session import service_action
 from timeblock.tui.widgets.agenda_panel import AgendaPanel
 from timeblock.tui.widgets.habits_panel import HabitsPanel
 from timeblock.tui.widgets.metrics_panel import MetricsPanel
@@ -128,6 +131,27 @@ class DashboardScreen(Static):
         """Callback universal: refresh após qualquer operação CRUD."""
         self.refresh_data()
         self._refresh_header()
+
+    # =========================================================================
+    # Quick Action Handlers — RF-001 (Extract Delegate)
+    # =========================================================================
+
+    def on_habits_panel_habit_done_request(self, message: HabitsPanel.HabitDoneRequest) -> None:
+        """Recebe HabitDoneRequest e executa mark_completed via service."""
+        service_action(
+            lambda s: HabitInstanceService.mark_completed(message.instance_id, session=s)
+        )
+        self._on_crud_done()
+
+    def on_habits_panel_habit_skip_request(self, message: HabitsPanel.HabitSkipRequest) -> None:
+        """Recebe HabitSkipRequest e executa mark_skipped via service."""
+        service_action(lambda s: HabitInstanceService.mark_skipped(message.instance_id, session=s))
+        self._on_crud_done()
+
+    def on_tasks_panel_task_complete_request(self, message: TasksPanel.TaskCompleteRequest) -> None:
+        """Recebe TaskCompleteRequest e executa complete_task via service."""
+        service_action(lambda s: TaskService.complete_task(message.task_id, session=s))
+        self._on_crud_done()
 
     def _refresh_header(self) -> None:
         """Atualiza header bar após operação CRUD."""
