@@ -69,18 +69,18 @@ class TasksPanel(FocusablePanel):
 
     def _refresh_content(self) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
+        from collections import Counter
+
         tasks = self._tasks
-        pending = [t for t in tasks if t.get("status") == "pending"]
-        completed = [t for t in tasks if t.get("status") == "completed"]
-        cancelled = [t for t in tasks if t.get("status") == "cancelled"]
-        overdue = [t for t in tasks if t.get("status") == "overdue"]
-        counts = f"{len(pending)} pend."
-        if completed:
-            counts += f" {len(completed)} done"
-        if cancelled:
-            counts += f" {len(cancelled)} canc."
-        if overdue:
-            counts += f" {len(overdue)} over."
+        # Counter substitui 4 list comprehensions separadas (RF-008)
+        status_counts: Counter[str] = Counter(t.get("status", "pending") for t in tasks)
+        counts = f"{status_counts['pending']} pend."
+        if status_counts["completed"]:
+            counts += f" {status_counts['completed']} done"
+        if status_counts["cancelled"]:
+            counts += f" {status_counts['cancelled']} canc."
+        if status_counts["overdue"]:
+            counts += f" {status_counts['overdue']} over."
         self.border_title = "Tarefas"
         self.border_subtitle = counts
         self.update("\n".join(self._build_lines()))
