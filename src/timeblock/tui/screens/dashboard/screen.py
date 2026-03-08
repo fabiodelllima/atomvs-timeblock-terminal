@@ -14,7 +14,7 @@ from textual.containers import Horizontal, Vertical
 from textual.events import Key
 from textual.widgets import Static
 
-from timeblock.tui.screens.dashboard import crud_habits, crud_routines, loader
+from timeblock.tui.screens.dashboard import crud_habits, crud_routines, crud_tasks, loader
 from timeblock.tui.widgets.agenda_panel import AgendaPanel
 from timeblock.tui.widgets.habits_panel import HabitsPanel
 from timeblock.tui.widgets.metrics_panel import MetricsPanel
@@ -86,7 +86,7 @@ class DashboardScreen(Static):
             if self._active_routine_id:
                 crud_habits.open_create_habit(self.app, self._active_routine_id, self._on_crud_done)
         elif self._focused_panel == "panel-tasks":
-            pass  # Sprint 4d
+            crud_tasks.open_create_task(self.app, self._on_crud_done)
 
     def _handle_edit(self) -> None:
         """Despacha edição conforme contexto."""
@@ -102,7 +102,9 @@ class DashboardScreen(Static):
             if item:
                 crud_habits.open_edit_habit(self.app, item, self._on_crud_done)
         elif self._focused_panel == "panel-tasks":
-            pass  # Sprint 4d
+            item = self.query_one(TasksPanel).get_selected_item()
+            if item:
+                crud_tasks.open_edit_task(self.app, item, self._on_crud_done)
 
     def _handle_delete(self) -> None:
         """Despacha deleção conforme contexto."""
@@ -118,7 +120,9 @@ class DashboardScreen(Static):
             if item:
                 crud_habits.open_delete_habit(self.app, item, self._on_crud_done)
         elif self._focused_panel == "panel-tasks":
-            pass  # Sprint 4d
+            item = self.query_one(TasksPanel).get_selected_item()
+            if item:
+                crud_tasks.open_delete_task(self.app, item, self._on_crud_done)
 
     def _on_crud_done(self) -> None:
         """Callback universal: refresh após qualquer operação CRUD."""
