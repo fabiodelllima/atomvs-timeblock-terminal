@@ -180,6 +180,18 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
             if not value.isdigit() or int(value) <= 0:
                 return "Deve ser número positivo"
 
+        if value and field.field_type == "date":
+            parts = value.split("/")
+            if len(parts) not in (2, 3):
+                return "Formato: DD/MM ou DD/MM/YYYY"
+            try:
+                day, month = int(parts[0]), int(parts[1])
+                year = int(parts[2]) if len(parts) == 3 else 2000
+                if not (1 <= day <= 31 and 1 <= month <= 12 and year >= 1900):
+                    return "Data inválida"
+            except ValueError:
+                return "Formato: DD/MM ou DD/MM/YYYY"
+
         return ""
 
     @staticmethod
@@ -189,4 +201,11 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
             return None
         if field.field_type == "number":
             return int(value)
+        if field.field_type == "date":
+            from datetime import date as _date
+
+            parts = value.split("/")
+            day, month = int(parts[0]), int(parts[1])
+            year = int(parts[2]) if len(parts) == 3 else _date.today().year
+            return f"{year:04d}-{month:02d}-{day:02d}"
         return value
