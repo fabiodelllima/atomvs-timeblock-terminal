@@ -68,24 +68,48 @@ def load_instances() -> list[dict]:
         return []
 
 
+def _task_proximity(days: int) -> str:
+    """Retorna label de proximidade para exibição no painel."""
+    if days < 0:
+        return "Atrasada"
+    if days == 0:
+        return "Hoje"
+    if days == 1:
+        return "Amanhã"
+    return f"Em {days}d"
+
+
 def load_tasks() -> list[dict]:
-    """Carrega tasks pendentes como lista de dicts."""
+    """Carrega tasks pendentes como lista de dicts com campos derivados."""
+    from datetime import date as _date
+
     try:
         result, error = service_action(lambda s: TaskService.list_pending_tasks(session=s))
         if error or not result:
             return []
         tasks: list[dict] = []
+        today = _date.today()
         for task in result[:9]:
             nm = task.title[:20] if hasattr(task, "title") else str(task)[:20]
+            dt = task.scheduled_datetime
+            task_date = dt.date() if dt else today
+            days = (task_date - today).days
+
+            # Horário meia-noite (00:00) indica sem horário definido
+            if dt and (dt.hour != 0 or dt.minute != 0):
+                time_str = dt.strftime("%H:%M")
+            else:
+                time_str = "--:--"
+
             tasks.append(
                 {
                     "id": task.id,
                     "name": nm,
-                    "proximity": "",
-                    "date": "",
-                    "time": "--:--",
-                    "status": "pending",
-                    "days": 0,
+                    "proximity": _task_proximity(days),
+                    "date": dt.strftime("%d/%m") if dt else "",
+                    "time": time_str,
+                    "status": "overdue" if days < 0 else "pending",
+                    "days": days,
                 }
             )
         return tasks
