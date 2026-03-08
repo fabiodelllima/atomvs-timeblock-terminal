@@ -174,3 +174,66 @@ class TestBRTUI020FormModal:
             app.push_screen(FormModal(title="Novo", fields=fields))
             await pilot.pause()
             assert len(app.screen_stack) == 2
+
+
+class TestBRTUI020DateField:
+    """BR-TUI-020: FormModal — validação de campo date."""
+
+    def test_br_tui_020_date_field_validates_format_invalid(self):
+        """Campo date rejeita formato inválido."""
+        from timeblock.tui.widgets.form_modal import FormField, FormModal
+
+        field = FormField(name="data", label="Data", field_type="date")
+        error = FormModal._validate_field(field, "31-12-2025")
+        assert error != ""
+
+    def test_br_tui_020_date_field_accepts_dd_mm(self):
+        """Campo date aceita DD/MM sem ano."""
+        from timeblock.tui.widgets.form_modal import FormField, FormModal
+
+        field = FormField(name="data", label="Data", field_type="date")
+        error = FormModal._validate_field(field, "25/12")
+        assert error == ""
+
+    def test_br_tui_020_date_field_accepts_dd_mm_yyyy(self):
+        """Campo date aceita DD/MM/YYYY."""
+        from timeblock.tui.widgets.form_modal import FormField, FormModal
+
+        field = FormField(name="data", label="Data", field_type="date")
+        error = FormModal._validate_field(field, "25/12/2025")
+        assert error == ""
+
+    def test_br_tui_020_date_field_converts_to_iso(self):
+        """Campo date converte DD/MM para YYYY-MM-DD com ano corrente."""
+        from datetime import date
+
+        from timeblock.tui.widgets.form_modal import FormField, FormModal
+
+        field = FormField(name="data", label="Data", field_type="date")
+        result = FormModal._convert_value(field, "25/12")
+        year = date.today().year
+        assert result == f"{year}-12-25"
+
+    def test_br_tui_020_date_field_converts_with_explicit_year(self):
+        """Campo date converte DD/MM/YYYY para YYYY-MM-DD."""
+        from timeblock.tui.widgets.form_modal import FormField, FormModal
+
+        field = FormField(name="data", label="Data", field_type="date")
+        result = FormModal._convert_value(field, "03/08/2026")
+        assert result == "2026-08-03"
+
+    def test_br_tui_020_date_field_rejects_invalid_month(self):
+        """Campo date rejeita mês > 12."""
+        from timeblock.tui.widgets.form_modal import FormField, FormModal
+
+        field = FormField(name="data", label="Data", field_type="date")
+        error = FormModal._validate_field(field, "01/13")
+        assert error != ""
+
+    def test_br_tui_020_date_optional_field_allows_empty(self):
+        """Campo date não-obrigatório aceita valor vazio."""
+        from timeblock.tui.widgets.form_modal import FormField, FormModal
+
+        field = FormField(name="data", label="Data", field_type="date", required=False)
+        error = FormModal._validate_field(field, "")
+        assert error == ""
