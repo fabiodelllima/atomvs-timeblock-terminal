@@ -16,9 +16,11 @@ from textual.widgets import Static
 
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.task_service import TaskService
+from timeblock.services.timer_service import TimerService
 from timeblock.tui.screens.dashboard import crud_habits, crud_routines, crud_tasks, loader
 from timeblock.tui.session import service_action
 from timeblock.tui.widgets.agenda_panel import AgendaPanel
+from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
 from timeblock.tui.widgets.habits_panel import HabitsPanel
 from timeblock.tui.widgets.metrics_panel import MetricsPanel
@@ -153,6 +155,45 @@ class DashboardScreen(Static):
         """Recebe TaskCompleteRequest e executa complete_task via service."""
         service_action(lambda s: TaskService.complete_task(message.task_id, session=s))
         self._on_crud_done()
+
+    # =========================================================================
+    # Timer Handlers — BR-TUI-021
+    # =========================================================================
+
+    def on_habits_panel_timer_start_request(self, message: HabitsPanel.TimerStartRequest) -> None:
+        """Recebe TimerStartRequest e inicia timer via TimerService."""
+        service_action(lambda s: TimerService.start_timer(message.instance_id, session=s))
+        self._on_crud_done()
+
+    def on_timer_panel_timer_pause_request(self, message: TimerPanel.TimerPauseRequest) -> None:
+        """Recebe TimerPauseRequest e pausa timer via TimerService."""
+        service_action(lambda s: TimerService.pause_timer(message.timer_id, session=s))
+        self._on_crud_done()
+
+    def on_timer_panel_timer_resume_request(self, message: TimerPanel.TimerResumeRequest) -> None:
+        """Recebe TimerResumeRequest e retoma timer via TimerService."""
+        service_action(lambda s: TimerService.resume_timer(message.timer_id, session=s))
+        self._on_crud_done()
+
+    def on_timer_panel_timer_stop_request(self, message: TimerPanel.TimerStopRequest) -> None:
+        """Recebe TimerStopRequest e para timer via TimerService."""
+        service_action(lambda s: TimerService.stop_timer(message.timer_id, session=s))
+        self._on_crud_done()
+
+    def on_timer_panel_timer_cancel_request(self, message: TimerPanel.TimerCancelRequest) -> None:
+        """Recebe TimerCancelRequest e abre ConfirmDialog antes de cancelar."""
+
+        def on_confirm() -> None:
+            service_action(lambda s: TimerService.cancel_timer(message.timer_id, session=s))
+            self._on_crud_done()
+
+        self.app.push_screen(
+            ConfirmDialog(
+                title="Cancelar Timer",
+                message="Cancelar timer ativo? A sessão será descartada.",
+                on_confirm=on_confirm,
+            )
+        )
 
     def _refresh_header(self) -> None:
         """Atualiza header bar após operação CRUD."""
