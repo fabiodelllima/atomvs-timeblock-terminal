@@ -6,6 +6,7 @@ BR-TUI-003-R19: Ordenação por start_time.
 BR-TUI-003-R27: Nome herda cor do status.
 BR-TUI-012: Navegação vertical com setas/j/k e highlight.
 BR-TUI-004: Quick actions — Ctrl+Enter done, Ctrl+S skip.
+BR-TUI-021: Shift+Enter inicia timer para hábito selecionado.
 """
 
 from textual.events import Key
@@ -53,6 +54,9 @@ class HabitsPanel(FocusablePanel):
         elif event.key == "ctrl+enter":
             self._action_done()
             event.stop()
+        elif event.key == "shift+enter":
+            self._action_start_timer()
+            event.stop()
 
     class HabitDoneRequest(Message):
         """Solicita marcação de hábito como done ao coordinator (RF-001)."""
@@ -63,6 +67,13 @@ class HabitsPanel(FocusablePanel):
 
     class HabitSkipRequest(Message):
         """Solicita marcação de hábito como skipped ao coordinator (RF-001)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
+    class TimerStartRequest(Message):
+        """Solicita início de timer para hábito ao coordinator (BR-TUI-021)."""
 
         def __init__(self, instance_id: int) -> None:
             self.instance_id = instance_id
@@ -81,6 +92,15 @@ class HabitsPanel(FocusablePanel):
         if not item or not item.get("id"):
             return
         self.post_message(self.HabitSkipRequest(item["id"]))
+
+    def _action_start_timer(self) -> None:
+        """Emite TimerStartRequest para o coordinator (BR-TUI-021)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        if item.get("status") not in ("pending", "running"):
+            return
+        self.post_message(self.TimerStartRequest(item["id"]))
 
     def _refresh_content(self) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
