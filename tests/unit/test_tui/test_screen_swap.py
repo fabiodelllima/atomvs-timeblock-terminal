@@ -22,7 +22,7 @@ class TestBRTUI002ContentSwap:
     async def test_br_tui_002_routines_replaces_dashboard(self):
         """Navegar para Routines oculta Dashboard e exibe RoutinesScreen."""
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("2")
+            await pilot.press("ctrl+2")
 
             assert pilot.app.query_one("#dashboard-view").display is False
             assert pilot.app.query_one("#routines-view").display is True
@@ -30,7 +30,7 @@ class TestBRTUI002ContentSwap:
     async def test_br_tui_002_habits_replaces_content(self):
         """Navegar para Habits exibe HabitsScreen."""
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("3")
+            await pilot.press("ctrl+3")
 
             assert pilot.app.query_one("#routines-view").display is False
             assert pilot.app.query_one("#habits-view").display is True
@@ -38,14 +38,14 @@ class TestBRTUI002ContentSwap:
     async def test_br_tui_002_tasks_replaces_content(self):
         """Navegar para Tasks exibe TasksScreen."""
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("4")
+            await pilot.press("ctrl+4")
 
             assert pilot.app.query_one("#tasks-view").display is True
 
     async def test_br_tui_002_timer_replaces_content(self):
         """Navegar para Timer exibe TimerScreen."""
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("5")
+            await pilot.press("ctrl+5")
 
             assert pilot.app.query_one("#timer-view").display is True
 
@@ -53,24 +53,24 @@ class TestBRTUI002ContentSwap:
         """Navegação sequencial troca conteúdo corretamente."""
         async with TimeBlockApp().run_test() as pilot:
             # Dashboard -> Routines
-            await pilot.press("2")
+            await pilot.press("ctrl+2")
             assert pilot.app.query_one("#routines-view").display is True
             assert pilot.app.query_one("#dashboard-view").display is False
 
             # Routines -> Habits
-            await pilot.press("3")
+            await pilot.press("ctrl+3")
             assert pilot.app.query_one("#habits-view").display is True
             assert pilot.app.query_one("#routines-view").display is False
 
             # Habits -> Dashboard
-            await pilot.press("1")
+            await pilot.press("ctrl+1")
             assert pilot.app.query_one("#dashboard-view").display is True
             assert pilot.app.query_one("#habits-view").display is False
 
     async def test_br_tui_002_escape_swaps_back_to_dashboard(self):
         """Escape troca conteúdo de volta para Dashboard."""
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("r")
+            await pilot.press("ctrl+2")
             assert pilot.app.query_one("#routines-view").display is True
 
             await pilot.press("escape")
