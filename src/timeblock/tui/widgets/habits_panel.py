@@ -79,12 +79,26 @@ class HabitsPanel(FocusablePanel):
             self.instance_id = instance_id
             super().__init__()
 
+    class TimerStopAndDoneRequest(Message):
+        """Solicita parada do timer e marcação como done (BR-TUI-021)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
     def _action_done(self) -> None:
-        """Emite HabitDoneRequest para o coordinator (BR-TUI-004, RF-001)."""
+        """Emite HabitDoneRequest ou TimerStopAndDoneRequest conforme status.
+
+        Se o hábito está running (timer ativo), para o timer e marca done.
+        Caso contrário, marca done diretamente (BR-TUI-004, BR-TUI-021).
+        """
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        self.post_message(self.HabitDoneRequest(item["id"]))
+        if item.get("status") == "running":
+            self.post_message(self.TimerStopAndDoneRequest(item["id"]))
+        else:
+            self.post_message(self.HabitDoneRequest(item["id"]))
 
     def _action_skip(self) -> None:
         """Emite HabitSkipRequest para o coordinator (BR-TUI-004, RF-001)."""
