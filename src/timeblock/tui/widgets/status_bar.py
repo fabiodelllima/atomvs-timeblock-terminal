@@ -14,7 +14,7 @@ PANEL_KEYBINDINGS: dict[str, str] = {
     "agenda-content": "↑↓ navegar",
     "panel-habits": "↑↓ navegar  Ctrl+Enter done  Ctrl+S skip",
     "panel-tasks": "↑↓ navegar  Ctrl+Enter concluir",
-    "panel-timer": "Shift+Enter start/pause  Ctrl+X cancel",
+    "panel-timer": "Shift+Enter start/pause  Ctrl+Enter stop  Ctrl+X cancel",
     "panel-metrics": "",
 }
 
