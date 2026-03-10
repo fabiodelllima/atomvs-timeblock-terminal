@@ -139,7 +139,7 @@ class TestRF001TasksQuickActions:
 
     @pytest.mark.asyncio
     async def test_rf001_ctrl_k_posts_task_complete_request(self):
-        """Ctrl+K com item selecionado posta TaskCompleteRequest."""
+        """Ctrl+Enter com item selecionado posta TaskCompleteRequest."""
         received: list = []
 
         class CaptureApp(App):
@@ -169,13 +169,13 @@ class TestRF001TasksQuickActions:
                 ]
             )
             app.set_focus(panel)
-            await pilot.press("ctrl+k")
+            await pilot.press("ctrl+enter")
             await pilot.pause()
         assert received == [99]
 
     @pytest.mark.asyncio
     async def test_rf001_ctrl_k_without_selection_no_message(self):
-        """Ctrl+K sem item selecionado não posta mensagem."""
+        """Ctrl+Enter sem item selecionado não posta mensagem."""
         received: list = []
 
         class CaptureApp(App):
@@ -193,7 +193,7 @@ class TestRF001TasksQuickActions:
             panel = app.query_one(TasksPanel)
             panel.update_data([])
             app.set_focus(panel)
-            await pilot.press("ctrl+k")
+            await pilot.press("ctrl+enter")
             await pilot.pause()
         assert received == []
 
