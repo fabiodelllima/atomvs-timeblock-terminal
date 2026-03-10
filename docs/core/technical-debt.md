@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.0.0
+**Versão:** 2.1.0
 
 **Status:** SSOT
 
@@ -10,22 +10,28 @@
 
 ## 1. Inventário
 
-| ID     | Descrição                                  | Severidade | Status    | Resolvido em | Sprint planejado         |
-| ------ | ------------------------------------------ | ---------- | --------- | ------------ | ------------------------ |
-| DT-001 | 156 erros mypy                             | CRÍTICA    | RESOLVIDO | Jan/2026     | v1.4.0 S1-S3             |
-| DT-002 | 15 testes skipped                          | ALTA       | RESOLVIDO | Jan/2026     | v1.4.0 S4                |
-| DT-003 | Cobertura abaixo de 80%                    | ALTA       | RESOLVIDO | Mar/2026     | v1.6.0                   |
-| DT-004 | EventReordering parcial (61%)              | MÉDIA      | RESOLVIDO | Fev/2026     | -                        |
-| DT-005 | Código morto                               | BAIXA      | RESOLVIDO | Fev/2026     | -                        |
-| DT-006 | Idioma misto EN/PT em CLI                  | MÉDIA      | RESOLVIDO | Fev/2026     | v1.5.0                   |
-| DT-007 | migration_001 sem cobertura                | BAIXA      | ACEITO    | -            | -                        |
-| DT-008 | GitHub Actions --fail-under divergente     | MÉDIA      | PENDENTE  | -            | v1.7.0                   |
-| DT-009 | FocusablePanel: C_HIGHLIGHT na base        | ALTA       | PENDENTE  | -            | v1.7.0                   |
-| DT-010 | FocusablePanel: flag \_showing_placehold.  | ALTA       | PENDENTE  | -            | v1.7.0                   |
-| DT-011 | FocusablePanel: count em dois lugares      | ALTA       | PENDENTE  | -            | v1.7.0                   |
-| DT-012 | DI inconsistente entre services            | MÉDIA      | PENDENTE  | -            | v2.0                     |
-| DT-013 | \_parse_time duplicado (crud_habits/tasks) | BAIXA      | PENDENTE  | -            | v1.7.0                   |
-| DT-014 | Keybindings divergentes BR vs código       | ALTA       | PENDENTE  | -            | feat/tui-dashboard-timer |
+| ID    | Descrição                                   | Severidade | Status    | Resolvido em | Sprint planejado         |
+| ----- | ------------------------------------------- | ---------- | --------- | ------------ | ------------------------ |
+| DT001 | 156 erros mypy                              | CRÍTICA    | RESOLVIDO | Jan/2026     | v1.4.0 S1-S3             |
+| DT002 | 15 testes skipped                           | ALTA       | RESOLVIDO | Jan/2026     | v1.4.0 S4                |
+| DT003 | Cobertura abaixo de 80%                     | ALTA       | RESOLVIDO | Mar/2026     | v1.6.0                   |
+| DT004 | EventReordering parcial (61%)               | MÉDIA      | RESOLVIDO | Fev/2026     | -                        |
+| DT005 | Código morto                                | BAIXA      | RESOLVIDO | Fev/2026     | -                        |
+| DT006 | Idioma misto EN/PT em CLI                   | MÉDIA      | RESOLVIDO | Fev/2026     | v1.5.0                   |
+| DT007 | migration_001 sem cobertura                 | BAIXA      | ACEITO    | -            | -                        |
+| DT008 | GitHub Actions --fail-under divergente      | MÉDIA      | PENDENTE  | -            | v1.7.0                   |
+| DT009 | FocusablePanel: C_HIGHLIGHT na base         | ALTA       | PENDENTE  | -            | v1.7.0                   |
+| DT010 | FocusablePanel: flag \_showing_placehold.   | ALTA       | PENDENTE  | -            | v1.7.0                   |
+| DT011 | FocusablePanel: count em dois lugares       | ALTA       | PENDENTE  | -            | v1.7.0                   |
+| DT012 | DI inconsistente entre services             | MÉDIA      | PENDENTE  | -            | v2.0                     |
+| DT013 | \_parse_time duplicado (crud_habits/tasks)  | BAIXA      | PENDENTE  | -            | v1.7.0                   |
+| DT014 | Keybindings divergentes BR vs código        | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
+| DT015 | AgendaPanel sem auto-refresh (set_interval) | MÉDIA      | PENDENTE  | -            | feat/tui-dashboard-timer |
+| DT016 | load_active_timer: elapsed int vs str MM:SS | ALTA       | PENDENTE  | -            | feat/tui-dashboard-timer |
+| DT017 | MetricsPanel stub — load_metrics não existe | MÉDIA      | PENDENTE  | -            | Sprint 5                 |
+| DT018 | load_tasks omite completed/cancelled        | BAIXA      | PENDENTE  | -            | Sprint 5                 |
+| DT019 | command_bar.py stub vazio (0 bytes)         | BAIXA      | PENDENTE  | -            | Sprint 6+                |
+| DT020 | Agenda: viewport cortada, sem auto-scroll   | BAIXA      | PENDENTE  | -            | Sprint 5                 |
 
 ---
 
@@ -150,6 +156,54 @@
 
 ---
 
+## 3b. Detalhamento de Itens Adicionados (10/03/2026)
+
+### DT-015: AgendaPanel Sem Auto-Refresh
+
+- **Descoberto:** 10/03/2026
+- **Impacto:** O marcador de hora atual (▸) calcula `datetime.now()` apenas quando `_build_lines()` executa. Sem `set_interval`, o marcador congela até próxima operação CRUD. Usuário observando o dashboard por 30 minutos vê hora desatualizada.
+- **Arquivo:** `src/timeblock/tui/widgets/agenda_panel.py`
+- **Ação:** Adicionar `set_interval(60, self._refresh_content)` no `on_mount` do AgendaPanel ou no DashboardScreen.
+- **Sprint:** feat/tui-dashboard-timer (First Complete Loop)
+
+### DT-016: load_active_timer Retorna elapsed_seconds (int), TimerPanel Espera elapsed (str)
+
+- **Descoberto:** 10/03/2026
+- **Impacto:** `loader.load_active_timer()` retorna `elapsed_seconds: int` e omite `name` e `elapsed` formatado. `TimerPanel._build_active_lines()` lê `info.get("elapsed", "00:00")` e `info.get("name", "")`. Resultado: timer ativo mostra "00:00" com nome vazio.
+- **Arquivo:** `src/timeblock/tui/screens/dashboard/loader.py` linhas 120-139
+- **Ação:** Converter `elapsed_seconds` para string `MM:SS`, buscar nome do hábito via `HabitInstance.habit.title`.
+- **Sprint:** feat/tui-dashboard-timer (First Complete Loop, commit 1)
+
+### DT-017: MetricsPanel Stub — load_metrics Não Existe
+
+- **Descoberto:** 10/03/2026
+- **Impacto:** `screen.py` linha 201 passa `{}` para MetricsPanel. Não existe `load_metrics()` no loader. O panel renderiza streak 0, barras 0%, "Sem dados de atividade".
+- **Ação:** Criar `load_metrics()` no loader com queries de streak, completude 7d/30d, e heatmap semanal.
+- **Sprint:** Sprint 5
+
+### DT-018: load_tasks Omite Tasks Completed/Cancelled
+
+- **Descoberto:** 10/03/2026
+- **Impacto:** `load_tasks()` chama `list_pending_tasks` que filtra por `completed_datetime is None`. O TasksPanel tem formatadores para completed/cancelled (strikethrough) mas nunca recebe esses status. O modelo Task não tem campo `status` — a derivação depende de `completed_datetime`.
+- **Ação:** Enriquecer loader para incluir tasks recém-concluídas (últimas 24h) com status derivado.
+- **Sprint:** Sprint 5
+
+### DT-019: command_bar.py Stub Vazio
+
+- **Descoberto:** 10/03/2026
+- **Impacto:** Arquivo de 0 bytes em `src/timeblock/tui/widgets/command_bar.py`. Nenhum mecanismo de barra de comandos (`/task`, `/habit`, etc.) implementado.
+- **Ação:** Implementar command bar com prefixo `/` ou atalho `Ctrl+P`. Feature planejada para sprint futura.
+- **Sprint:** Sprint 6+
+
+### DT-020: Régua Fixa 06:00-22:00, Sem Auto-Scroll (BR-TUI-003-R15)
+
+- **Descoberto:** 10/03/2026
+- **Impacto:** `AgendaPanel._build_lines()` itera `range(12, 45)` — régua gera slots de 06:00 a 22:00 mas a viewport do TCSS corta a visualização. Docstring menciona "auto-scroll na hora atual" (BR-TUI-003-R15) mas não está implementado. Hábitos antes das 06:00 ou após 22:00 são invisíveis.
+- **Ação:** Implementar viewport adaptativa que centraliza na hora atual ao carregar.
+- **Sprint:** Sprint 5
+
+---
+
 ## 4. Política de Gestão
 
 Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), severidade e sprint planejado para resolução. O inventário é revisado a cada release.
@@ -168,6 +222,8 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 | Data       | Versão | Mudanças                                                |
 | ---------- | ------ | ------------------------------------------------------- |
+| 2026-03-10 | 2.1.0  | DT-014 resolvido. Adicionados DT-015 a DT-020 (gaps de  |
+|            |        | integração: timer, agenda, métricas, command bar)       |
 | 2026-03-08 | 2.0.0  | DT-003 resolvido. Adicionados DT-008 a DT-014 (Sprint 4 |
 |            |        | Code Review + GitHub CI + keybindings divergentes)      |
 | 2026-02-03 | 1.1.0  | Atualiza status: DT-004, DT-005, DT-006 resolvidos      |
