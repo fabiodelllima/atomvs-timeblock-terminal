@@ -1,9 +1,12 @@
-"""TimerPanel - Card compacto do timer com ASCII art (BR-TUI-003).
+"""TimerPanel - Card compacto do timer com ASCII art (BR-TUI-003, BR-TUI-021).
 
+BR-TUI-021: Keybindings de timer no dashboard.
 BR-TUI-003-R25: Timer card compacto (sem ASCII art no dashboard v2).
 BR-TUI-003-R27: Cores por estado (Mauve running, Yellow paused, Overlay0 idle).
 """
 
+from textual.events import Key
+from textual.message import Message
 from textual.widgets import Static
 
 from timeblock.tui.colors import C_ACCENT, C_MUTED, C_WARNING
@@ -17,6 +20,63 @@ class TimerPanel(Static):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self._timer_info: dict | None = None
+
+    # =========================================================================
+    # Messages (BR-TUI-021)
+    # =========================================================================
+
+    class TimerPauseRequest(Message):
+        """Solicita pausa do timer ao coordinator."""
+
+        def __init__(self, timer_id: int) -> None:
+            self.timer_id = timer_id
+            super().__init__()
+
+    class TimerResumeRequest(Message):
+        """Solicita retomada do timer ao coordinator."""
+
+        def __init__(self, timer_id: int) -> None:
+            self.timer_id = timer_id
+            super().__init__()
+
+    class TimerStopRequest(Message):
+        """Solicita parada do timer ao coordinator."""
+
+        def __init__(self, timer_id: int) -> None:
+            self.timer_id = timer_id
+            super().__init__()
+
+    class TimerCancelRequest(Message):
+        """Solicita cancelamento do timer ao coordinator."""
+
+        def __init__(self, timer_id: int) -> None:
+            self.timer_id = timer_id
+            super().__init__()
+
+    # =========================================================================
+    # Key Dispatch (BR-TUI-021, ADR-035)
+    # =========================================================================
+
+    def on_key(self, event: Key) -> None:
+        """Captura keybindings do timer (ADR-035)."""
+        if not self._timer_info:
+            return
+        timer_id = self._timer_info.get("id")
+        if not timer_id:
+            return
+        if event.key == "shift+enter":
+            st = self._timer_info.get("status", "")
+            if st == "running":
+                self.post_message(self.TimerPauseRequest(timer_id))
+            elif st == "paused":
+                self.post_message(self.TimerResumeRequest(timer_id))
+            event.stop()
+        elif event.key == "ctrl+enter":
+            self.post_message(self.TimerStopRequest(timer_id))
+            event.stop()
+        elif event.key == "ctrl+x":
+            self.post_message(self.TimerCancelRequest(timer_id))
+            event.stop()
 
     def update_data(self, timer_info: dict | None) -> None:
         """Recebe info do timer do coordinator e renderiza."""
