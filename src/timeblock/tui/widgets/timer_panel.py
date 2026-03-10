@@ -119,7 +119,7 @@ class TimerPanel(Static):
         lines.append("")
         lines.append(f"    [{color}]{icon} {label}[/{color}]  {name}")
         lines.append("")
-        lines.append(r"  [dim]\[p] pausar  \[enter] parar  \[c] cancelar[/dim]")
+        lines.append(r"  [dim]Shift+Enter pause  Ctrl+Enter stop  Ctrl+X cancel[/dim]")
         return lines
 
     def _build_idle_lines(self) -> list[str]:
