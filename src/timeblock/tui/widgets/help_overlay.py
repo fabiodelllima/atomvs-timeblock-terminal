@@ -1,4 +1,4 @@
-"""HelpOverlay - Overlay de ajuda com keybindings."""
+"""HelpOverlay - Overlay de ajuda com keybindings (ADR-035)."""
 
 from textual.widgets import Static
 
@@ -10,14 +10,20 @@ class HelpOverlay(Static):
         content = (
             "[bold]Atalhos Globais[/]\n"
             "\n"
-            "  1 / d    Dashboard\n"
-            "  2 / r    Rotinas\n"
-            "  3 / h    Hábitos\n"
-            "  4 / t    Tasks\n"
-            "  5 / m    Timer\n"
+            "  Ctrl+1..5  Alternar screens\n"
+            "  Ctrl+Q     Sair\n"
+            "  ?          Ajuda\n"
+            "  Escape     Fechar / Dashboard\n"
             "\n"
-            "  ?        Ajuda\n"
-            "  escape   Fechar / Dashboard\n"
-            "  q        Sair\n"
+            "[bold]Navegação[/]\n"
+            "\n"
+            "  Tab        Próximo panel\n"
+            "  ↑↓ / j/k   Cursor\n"
+            "  n / e / x  Novo / Editar / Deletar\n"
+            "\n"
+            "[bold]Quick Actions[/]\n"
+            "\n"
+            "  Ctrl+Enter  Done / Concluir\n"
+            "  Ctrl+S      Skip (hábitos)\n"
         )
         super().__init__(content, id="help-overlay")
