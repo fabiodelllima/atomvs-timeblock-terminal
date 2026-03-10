@@ -63,6 +63,7 @@ class DashboardScreen(Static):
         self.refresh_data()
         self.app.set_focus(None)
         self.set_interval(1, self._tick_timer)
+        self.set_interval(60, self._refresh_agenda)
 
     def on_descendant_focus(self, event) -> None:
         """Rastreia panel focado para CRUD contextual."""
@@ -219,6 +220,15 @@ class DashboardScreen(Static):
                 crud_habits.open_create_habit(self.app, self._active_routine_id, self._on_crud_done)
         elif message.panel_id == "panel-tasks":
             crud_tasks.open_create_task(self.app, self._on_crud_done)
+
+    def _refresh_agenda(self) -> None:
+        """Atualiza agenda e hábitos a cada 60s (DT-015)."""
+        instances = loader.load_instances()
+        try:
+            self.query_one(AgendaPanel).update_data(instances)
+            self.query_one(HabitsPanel).update_data(instances)
+        except Exception:
+            pass
 
     def _tick_timer(self) -> None:
         """Atualiza TimerPanel a cada segundo (DT-015)."""
