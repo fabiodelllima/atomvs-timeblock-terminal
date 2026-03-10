@@ -9,7 +9,11 @@ Referências:
 """
 
 from datetime import date, datetime
+from typing import Any
 
+from sqlmodel import Session, select
+
+from timeblock.models.habit_instance import HabitInstance
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.routine_service import RoutineService
 from timeblock.services.task_service import TaskService
@@ -81,14 +85,12 @@ def _task_proximity(days: int) -> str:
 
 def load_tasks() -> list[dict]:
     """Carrega tasks pendentes como lista de dicts com campos derivados."""
-    from datetime import date as _date
-
     try:
         result, error = service_action(lambda s: TaskService.list_pending_tasks(session=s))
         if error or not result:
             return []
         tasks: list[dict] = []
-        today = _date.today()
+        today = date.today()
         for task in result[:9]:
             nm = task.title[:20] if hasattr(task, "title") else str(task)[:20]
             dt = task.scheduled_datetime
@@ -117,23 +119,46 @@ def load_tasks() -> list[dict]:
         return []
 
 
-def load_active_timer() -> dict | None:
-    """Carrega timer ativo como dict ou None."""
+def load_active_timer() -> dict[str, Any] | None:
+    """Carrega timer ativo como dict com elapsed MM:SS e nome do hábito (DT-016).
+
+    Retorna dict compatível com TimerPanel:
+        - id, status, elapsed (str MM:SS), name (str), habit_instance_id
+    Ou None se nenhum timer ativo.
+    """
+
+    def _load(s: Session) -> dict[str, Any] | None:
+        timer = TimerService.get_any_active_timer(session=s)
+        if not timer or not timer.status:
+            return None
+
+        elapsed_secs = int(
+            (datetime.now() - timer.start_time).total_seconds() - (timer.paused_duration or 0)
+        )
+        elapsed_secs = max(elapsed_secs, 0)
+        minutes, seconds = divmod(elapsed_secs, 60)
+
+        name = ""
+        if timer.habit_instance_id:
+            inst = s.exec(
+                select(HabitInstance).where(HabitInstance.id == timer.habit_instance_id)
+            ).first()
+            if inst and inst.habit:
+                name = inst.habit.title
+
+        return {
+            "id": timer.id,
+            "status": timer.status.value,
+            "elapsed": f"{minutes:02d}:{seconds:02d}",
+            "elapsed_seconds": elapsed_secs,
+            "name": name,
+            "habit_instance_id": timer.habit_instance_id,
+        }
+
     try:
-        result, error = service_action(lambda s: TimerService.get_any_active_timer(session=s))
+        result, error = service_action(_load)
         if error or not result:
             return None
-        elapsed = (datetime.now() - result.start_time).total_seconds() - (
-            result.paused_duration or 0
-        )
-        timer_status = result.status
-        if timer_status is None:
-            return None
-        return {
-            "id": result.id,
-            "status": timer_status.value,
-            "elapsed_seconds": int(elapsed),
-            "habit_instance_id": result.habit_instance_id,
-        }
+        return result
     except Exception:
         return None
