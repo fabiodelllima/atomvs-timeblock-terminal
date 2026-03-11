@@ -373,7 +373,7 @@ _Sprint 5+ / v2.0 (futuro):_
 
 ---
 
-### Sprint 4.5 — First Complete Loop [PLANEJADO]
+### Sprint 4.5 — First Complete Loop [WIP]
 
 O Sprint 4.5 implementa o menor conjunto de mudanças que conecta o fluxo completo de uso do ATOMVS no dashboard: criar rotina, criar hábito, ver na agenda, iniciar timer, pausar/retomar, parar timer (marca done), e ver resultado na agenda atualizada. Nenhuma feature é adicionada pela metade — o objetivo é que o usuário consiga completar um ciclo inteiro sem sair do dashboard.
 
@@ -398,49 +398,49 @@ A nomenclatura "4.5" reflete que este sprint é uma extensão direta da Sprint 4
 
 **Commit 1: fix(loader): Corrige load_active_timer — elapsed MM:SS, nome do hábito (DT-016)**
 
-- [ ] Converter `elapsed_seconds` para string `MM:SS` no loader
-- [ ] Buscar nome do hábito via `HabitInstance` → `Habit.title`
-- [ ] Retornar dict compatível com TimerPanel (`elapsed`, `name`, `status`)
-- [ ] Teste: `test_load_active_timer_returns_formatted_elapsed`
-- [ ] Teste: `test_load_active_timer_returns_habit_name`
+- [x] Converter `elapsed_seconds` para string `MM:SS` no loader
+- [x] Buscar nome do hábito via `HabitInstance` → `Habit.title`
+- [x] Retornar dict compatível com TimerPanel (`elapsed`, `name`, `status`)
+- [x] Teste: `test_load_active_timer_returns_formatted_elapsed`
+- [x] Teste: `test_load_active_timer_returns_habit_name`
 
 **Commit 2: feat(tui): Timer keybindings no dashboard (BR-TUI-021)**
 
-- [ ] TimerPanel ganha `on_key` com Shift+Enter (start/pause), Ctrl+Enter (stop), Ctrl+X (cancel)
-- [ ] Mensagens: `TimerStartRequest`, `TimerPauseRequest`, `TimerStopRequest`, `TimerCancelRequest`
-- [ ] DashboardScreen handlers despacham para TimerService
-- [ ] Shift+Enter em hábito running no HabitsPanel → delega start ao TimerPanel via coordinator
-- [ ] Ctrl+X abre ConfirmDialog antes de cancelar
-- [ ] Teste: `test_br_tui_021_shift_enter_starts_timer`
-- [ ] Teste: `test_br_tui_021_shift_enter_toggles_pause`
-- [ ] Teste: `test_br_tui_021_ctrl_enter_stops_timer`
-- [ ] Teste: `test_br_tui_021_ctrl_x_cancel_requires_confirm`
+- [x] TimerPanel ganha `on_key` com Shift+Enter (start/pause), Ctrl+Enter (stop), Ctrl+X (cancel)
+- [x] Mensagens: `TimerStartRequest`, `TimerPauseRequest`, `TimerStopRequest`, `TimerCancelRequest`
+- [x] DashboardScreen handlers despacham para TimerService
+- [x] Shift+Enter em hábito running no HabitsPanel → delega start ao TimerPanel via coordinator
+- [x] Ctrl+X abre ConfirmDialog antes de cancelar
+- [x] Teste: `test_br_tui_021_shift_enter_starts_timer`
+- [x] Teste: `test_br_tui_021_shift_enter_toggles_pause`
+- [x] Teste: `test_br_tui_021_ctrl_enter_stops_timer`
+- [x] Teste: `test_br_tui_021_ctrl_x_cancel_requires_confirm`
 
 **Commit 3: feat(tui): Timer live update via set_interval (DT-015)**
 
-- [ ] DashboardScreen.on_mount adiciona `set_interval(1, self._tick_timer)`
-- [ ] `_tick_timer` recarrega timer do service e atualiza TimerPanel
-- [ ] StatusBar atualiza elapsed globalmente
+- [x] DashboardScreen.on_mount adiciona `set_interval(1, self._tick_timer)`
+- [x] `_tick_timer` recarrega timer do service e atualiza TimerPanel
+- [x] StatusBar atualiza elapsed globalmente
 - [ ] Teste: `test_timer_panel_updates_every_second` (mock time)
 
 **Commit 4: feat(tui): Agenda auto-refresh a cada 60s (DT-015)**
 
-- [ ] DashboardScreen.on_mount adiciona `set_interval(60, self._refresh_agenda)`
-- [ ] `_refresh_agenda` recarrega instâncias e atualiza AgendaPanel + HabitsPanel
-- [ ] Marcador de hora atual se move com o relógio
+- [x] DashboardScreen.on_mount adiciona `set_interval(60, self._refresh_agenda)`
+- [x] `_refresh_agenda` recarrega instâncias e atualiza AgendaPanel + HabitsPanel
+- [x] Marcador de hora atual se move com o relógio
 - [ ] Teste: `test_agenda_refreshes_periodically`
 
 **Commit 5: feat(tui): Ctrl+Enter em hábito running → stop + done**
 
-- [ ] HabitsPanel: Ctrl+Enter em item com status "running" emite `TimerStopAndDoneRequest`
-- [ ] DashboardScreen handler: para timer + marca instância como done
-- [ ] Agenda atualiza bloco de running → done
-- [ ] Teste: `test_ctrl_enter_on_running_habit_stops_and_marks_done`
+- [x] HabitsPanel: Ctrl+Enter em item com status "running" emite `TimerStopAndDoneRequest`
+- [x] DashboardScreen handler: para timer + marca instância como done
+- [x] Agenda atualiza bloco de running → done
+- [x] Teste: `test_ctrl_enter_on_running_habit_stops_and_marks_done`
 
 **Commit 6: docs(sprints): Documenta First Complete Loop, atualiza tech-debt**
 
-- [ ] Atualizar sprints.md com progresso
-- [ ] Atualizar technical-debt.md (DT-015, DT-016 resolvidos)
+- [x] Atualizar sprints.md com progresso
+- [x] Atualizar technical-debt.md (DT-015, DT-016 resolvidos)
 - [ ] Atualizar roadmap.md com estado pós-Sprint 4.5
 
 ---
