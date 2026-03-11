@@ -22,11 +22,26 @@ from timeblock.tui.session import service_action
 
 
 def load_active_routine() -> tuple[int | None, str]:
-    """Carrega rotina ativa. Retorna (id, nome) ou (None, "")."""
-    result, error = service_action(lambda s: RoutineService(s).get_active_routine())
-    if not error and result:
-        return result.id, result.name
-    return None, ""
+    """Carrega rotina ativa. Retorna (id, nome) ou (None, "").
+
+    Extrai escalares dentro da sessão para consistência com
+    os demais loaders e prevenção de DetachedInstanceError
+    em futuras expansões que acessem relationships.
+    """
+
+    def _load(s: Session) -> tuple[int | None, str]:
+        routine = RoutineService(s).get_active_routine()
+        if not routine:
+            return None, ""
+        return routine.id, routine.name
+
+    try:
+        result, error = service_action(_load)
+        if error or not result:
+            return None, ""
+        return result
+    except Exception:
+        return None, ""
 
 
 def load_instances() -> list[dict]:
@@ -91,10 +106,16 @@ def _task_proximity(days: int) -> str:
 
 
 def load_tasks() -> list[dict]:
-    """Carrega tasks pendentes como lista de dicts com campos derivados."""
-    try:
-        result, error = service_action(lambda s: TaskService.list_pending_tasks(session=s))
-        if error or not result:
+    """Carrega tasks pendentes como lista de dicts com campos derivados.
+
+    Toda extração de dados (incluindo atributos escalares) é feita
+    dentro do callback para consistência com os demais loaders e
+    prevenção de DetachedInstanceError em futuras expansões.
+    """
+
+    def _load(s: Session) -> list[dict]:
+        result = TaskService.list_pending_tasks(session=s)
+        if not result:
             return []
         tasks: list[dict] = []
         today = date.today()
@@ -122,6 +143,12 @@ def load_tasks() -> list[dict]:
                 }
             )
         return tasks
+
+    try:
+        result, error = service_action(_load)
+        if error or not result:
+            return []
+        return result
     except Exception:
         return []
 
