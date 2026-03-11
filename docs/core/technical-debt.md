@@ -19,15 +19,15 @@
 | DT005 | Código morto                                | BAIXA      | RESOLVIDO | Fev/2026     | -                        |
 | DT006 | Idioma misto EN/PT em CLI                   | MÉDIA      | RESOLVIDO | Fev/2026     | v1.5.0                   |
 | DT007 | migration_001 sem cobertura                 | BAIXA      | ACEITO    | -            | -                        |
-| DT008 | GitHub Actions --fail-under divergente      | MÉDIA      | PENDENTE  | -            | v1.7.0                   |
+| DT008 | GitHub Actions --fail-under divergente      | MÉDIA      | RESOLVIDO | Mar/2026     | v1.7.0                   |
 | DT009 | FocusablePanel: C_HIGHLIGHT na base         | ALTA       | PENDENTE  | -            | v1.7.0                   |
 | DT010 | FocusablePanel: flag \_showing_placehold.   | ALTA       | PENDENTE  | -            | v1.7.0                   |
 | DT011 | FocusablePanel: count em dois lugares       | ALTA       | PENDENTE  | -            | v1.7.0                   |
 | DT012 | DI inconsistente entre services             | MÉDIA      | PENDENTE  | -            | v2.0                     |
 | DT013 | \_parse_time duplicado (crud_habits/tasks)  | BAIXA      | PENDENTE  | -            | v1.7.0                   |
 | DT014 | Keybindings divergentes BR vs código        | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT015 | AgendaPanel sem auto-refresh (set_interval) | MÉDIA      | PENDENTE  | -            | feat/tui-dashboard-timer |
-| DT016 | load_active_timer: elapsed int vs str MM:SS | ALTA       | PENDENTE  | -            | feat/tui-dashboard-timer |
+| DT015 | AgendaPanel sem auto-refresh (set_interval) | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
+| DT016 | load_active_timer: elapsed int vs str MM:SS | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT017 | MetricsPanel stub — load_metrics não existe | MÉDIA      | PENDENTE  | -            | Sprint 5                 |
 | DT018 | load_tasks omite completed/cancelled        | BAIXA      | PENDENTE  | -            | Sprint 5                 |
 | DT019 | command_bar.py stub vazio (0 bytes)         | BAIXA      | PENDENTE  | -            | Sprint 6+                |
