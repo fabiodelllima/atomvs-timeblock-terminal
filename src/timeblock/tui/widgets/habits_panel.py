@@ -155,9 +155,9 @@ class HabitsPanel(FocusablePanel):
         st = inst["status"]
         sub = inst.get("substatus")
         actual = inst.get("actual_minutes")
-        sh = inst.get("start_hour", 0)
-        eh = inst.get("end_hour", 0)
-        est_min = (eh - sh) * 60
+        sm = inst.get("start_minutes", 0)
+        em = inst.get("end_minutes", 0)
+        est_min = em - sm
         minutes = actual if actual else est_min
         dur = format_duration_card(minutes)
         color = status_color(st, sub)
@@ -173,7 +173,9 @@ class HabitsPanel(FocusablePanel):
             nm_fmt = f"[bold {color}]{name:<16s}[/bold {color}]"
         else:
             nm_fmt = f"[{color}]{name:<16s}[/{color}]"
-        time_fmt = f"[dim]{sh:02d}:00 - {eh:02d}:00[/dim]"
+        sh, s_min = divmod(sm, 60)
+        eh, e_min = divmod(em, 60)
+        time_fmt = f"[dim]{sh:02d}:{s_min:02d} - {eh:02d}:{e_min:02d}[/dim]"
         if bold:
             dur_fmt = f"[{color}]{dur:>7s}[/{color}]"
         else:
