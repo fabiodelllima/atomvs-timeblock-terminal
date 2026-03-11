@@ -30,15 +30,16 @@ def load_active_routine() -> tuple[int | None, str]:
 
 
 def load_instances() -> list[dict]:
-    """Carrega instâncias do dia como lista de dicts."""
-    try:
+    """Carrega instâncias do dia como lista de dicts.
+
+    Toda extração de dados (incluindo lazy relationships como inst.habit)
+    é feita dentro do callback para evitar DetachedInstanceError.
+    """
+
+    def _load(s: Session) -> list[dict]:
         today = date.today()
-        result, error = service_action(
-            lambda s: HabitInstanceService().list_instances(
-                date_start=today, date_end=today, session=s
-            )
-        )
-        if error or not result:
+        result = HabitInstanceService().list_instances(date_start=today, date_end=today, session=s)
+        if not result:
             return []
 
         instances: list[dict] = []
@@ -68,6 +69,12 @@ def load_instances() -> list[dict]:
                 }
             )
         return instances
+
+    try:
+        result, error = service_action(_load)
+        if error or not result:
+            return []
+        return result
     except Exception:
         return []
 
