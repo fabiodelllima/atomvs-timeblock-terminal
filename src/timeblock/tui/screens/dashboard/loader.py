@@ -59,8 +59,10 @@ def load_instances() -> list[dict]:
 
         instances: list[dict] = []
         for inst in result:
-            start_h = inst.scheduled_start.hour if inst.scheduled_start else 0
-            end_h = inst.scheduled_end.hour if inst.scheduled_end else 0
+            ss = inst.scheduled_start
+            se = inst.scheduled_end
+            start_min = (ss.hour * 60 + ss.minute) if ss else 0
+            end_min = (se.hour * 60 + se.minute) if se else start_min + 60
             name = ""
             if inst.habit:
                 name = inst.habit.title
@@ -76,8 +78,8 @@ def load_instances() -> list[dict]:
                 {
                     "id": inst.id,
                     "name": name,
-                    "start_hour": start_h,
-                    "end_hour": end_h,
+                    "start_minutes": start_min,
+                    "end_minutes": end_min,
                     "status": status,
                     "substatus": substatus,
                     "actual_minutes": getattr(inst, "actual_duration", None),
