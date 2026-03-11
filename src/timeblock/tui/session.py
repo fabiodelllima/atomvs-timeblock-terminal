@@ -35,7 +35,7 @@ def get_session():
     Yields:
         Session: Sessão SQLModel pronta para uso com services.
     """
-    with get_engine_context() as engine, Session(engine) as session:
+    with get_engine_context() as engine, Session(engine, expire_on_commit=False) as session:
         yield session
 
 
@@ -56,6 +56,7 @@ def service_action[T](
     try:
         with get_session() as session:
             result = action(session)
+            session.commit()
             return result, None
     except (ValueError, KeyError) as e:
         return None, str(e)
