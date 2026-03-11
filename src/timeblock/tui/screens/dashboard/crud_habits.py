@@ -149,13 +149,14 @@ def open_edit_habit(
             required=True,
         ),
     ]
-    start_h = habit_data.get("start_hour", 0)
-    end_h = habit_data.get("end_hour", 0)
-    duration = (end_h - start_h) * 60
+    sm = habit_data.get("start_minutes", 0)
+    em = habit_data.get("end_minutes", 0)
+    duration = em - sm
+    sh, s_min = divmod(sm, 60)
 
     edit_data = {
         "title": habit_data.get("name", ""),
-        "start": f"{start_h:02d}:00",
+        "start": f"{sh:02d}:{s_min:02d}",
         "duration": str(max(duration, 0)),
     }
 
