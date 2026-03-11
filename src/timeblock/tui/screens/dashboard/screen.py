@@ -10,6 +10,8 @@ Referências:
     - RF-003: Split Phase (FOWLER, 2018, p. 154)
 """
 
+from datetime import date
+
 from textual.containers import Horizontal, Vertical
 from textual.events import Key
 from textual.widgets import Static
@@ -36,6 +38,7 @@ class DashboardScreen(Static):
         self._focused_panel: str = ""
         self._active_routine_id: int | None = None
         self._active_routine_name: str = ""
+        self._current_date: date = date.today()
 
     @staticmethod
     def get_no_routine_label() -> str:
@@ -59,7 +62,8 @@ class DashboardScreen(Static):
             )
 
     def on_mount(self) -> None:
-        """Inicializa o dashboard."""
+        """Inicializa o dashboard (DT-023: garante instâncias do dia)."""
+        loader.ensure_today_instances()
         self.refresh_data()
         self.app.set_focus(None)
         self.set_interval(1, self._tick_timer)
@@ -222,7 +226,17 @@ class DashboardScreen(Static):
             crud_tasks.open_create_task(self.app, self._on_crud_done)
 
     def _refresh_agenda(self) -> None:
-        """Atualiza agenda e hábitos a cada 60s (DT-015)."""
+        """Atualiza agenda e hábitos a cada 60s (DT-015, DT-023).
+
+        Detecta virada de dia e gera instâncias faltantes.
+        """
+        today = date.today()
+        if today != self._current_date:
+            self._current_date = today
+            loader.ensure_today_instances()
+            self.refresh_data()
+            return
+
         instances = loader.load_instances()
         try:
             self.query_one(AgendaPanel).update_data(instances)
