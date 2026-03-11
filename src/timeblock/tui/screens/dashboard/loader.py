@@ -13,12 +13,74 @@ from typing import Any
 
 from sqlmodel import Session, select
 
+from timeblock.models.enums import Status
+from timeblock.models.habit import Habit
 from timeblock.models.habit_instance import HabitInstance
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.routine_service import RoutineService
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
 from timeblock.tui.session import service_action
+
+
+def ensure_today_instances() -> int:
+    """Garante instâncias para todos os hábitos aplicáveis ao dia (DT-023).
+
+    Chamado no startup da TUI e na detecção de virada de dia.
+    Para cada hábito da rotina ativa cuja recurrence bate com hoje
+    e que ainda não tem instância, gera via INSERT direto.
+    Idempotente — chamadas repetidas não duplicam.
+
+    Returns:
+        Número de instâncias criadas.
+    """
+
+    def _ensure(s: Session) -> int:
+        routine = RoutineService(s).get_active_routine()
+        if not routine or not routine.id:
+            return 0
+
+        habits = list(s.exec(select(Habit).where(Habit.routine_id == routine.id)).all())
+        if not habits:
+            return 0
+
+        today = date.today()
+        habit_ids = [h.id for h in habits if h.id is not None]
+
+        existing_ids = set(
+            s.exec(
+                select(HabitInstance.habit_id)
+                .where(HabitInstance.date == today)
+                .where(HabitInstance.habit_id.in_(habit_ids))  # type: ignore[union-attr]
+            ).all()
+        )
+
+        created = 0
+        for habit in habits:
+            if habit.id in existing_ids:
+                continue
+            if not HabitInstanceService._should_create_for_date(habit.recurrence, today):
+                continue
+            s.add(
+                HabitInstance(
+                    habit_id=habit.id,
+                    date=today,
+                    scheduled_start=habit.scheduled_start,
+                    scheduled_end=habit.scheduled_end,
+                    status=Status.PENDING,
+                )
+            )
+            created += 1
+
+        return created
+
+    try:
+        result, error = service_action(_ensure)
+        if error or result is None:
+            return 0
+        return result
+    except Exception:
+        return 0
 
 
 def load_active_routine() -> tuple[int | None, str]:
