@@ -15,6 +15,8 @@ from collections.abc import Callable
 from datetime import time
 from typing import TYPE_CHECKING, Any
 
+from sqlmodel import Session
+
 from timeblock.models import Recurrence
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
@@ -90,22 +92,24 @@ def open_create_habit(
         recurrence_value = data.get("recurrence", "EVERYDAY")
         recurrence = Recurrence(recurrence_value)
 
-        result, error = service_action(
-            lambda s: HabitService(s).create_habit(
+        def _create(s: Session) -> int | None:
+            habit = HabitService(s).create_habit(
                 routine_id=routine_id,
                 title=data["title"],
                 scheduled_start=start,
                 scheduled_end=end,
                 recurrence=recurrence,
             )
-        )
-        if not error and result:
+            return habit.id if habit else None
+
+        habit_id, error = service_action(_create)
+        if not error and habit_id:
             from datetime import date as _date
 
             today = _date.today()
             service_action(
                 lambda s: HabitInstanceService.generate_instances(
-                    habit_id=result.id, start_date=today, end_date=today, session=s
+                    habit_id=habit_id, start_date=today, end_date=today, session=s
                 )
             )
             on_done()
