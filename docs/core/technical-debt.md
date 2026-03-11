@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.2.0
+**Versão:** 2.3.0
 
 **Status:** SSOT
 
@@ -33,6 +33,7 @@
 | DT019 | command_bar.py stub vazio (0 bytes)         | BAIXA      | PENDENTE  | -            | Sprint 6+                |
 | DT020 | Agenda: viewport cortada, sem auto-scroll   | BAIXA      | PENDENTE  | -            | Sprint 5                 |
 | DT021 | Loaders/CRUDs: ORM fora da sessão (frágil)  | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
+| DT022 | Logging: adoção zero fora de habit_inst_svc | MÉDIA      | PENDENTE  | -            | Sprint 5                 |
 
 ## 1b. Quick Status
 
@@ -57,8 +58,9 @@
 - [ ] DT019 — command_bar.py vazio
 - [ ] DT020 — Agenda viewport cortada
 - [x] DT021 — Loaders/CRUDs: ORM fora da sessão
+- [ ] DT022 — Logging: adoção zero fora de habit_instance_service
 
-**Resolvidos:** 11/21 | **Pendentes:** 9/21 | **Aceitos:** 1/21
+**Resolvidos:** 11/22 | **Pendentes:** 10/22 | **Aceitos:** 1/22
 
 ---
 
@@ -238,6 +240,20 @@
 - **Resolução:** Alinhamento ao padrão `_load(s: Session) -> dict/tuple` já usado em `load_instances` e `load_active_timer`. Toda extração de dados acontece dentro do callback; apenas tipos primitivos (dict, tuple, int) saem da sessão.
 - **Commits:** `c546b42`, `195bf0e`
 
+### DT-022: Logging Estruturado — Adoção Zero Fora de habit_instance_service
+
+- **Descoberto:** 11/03/2026 (Auditoria de observabilidade)
+- **Impacto:** Infraestrutura de logging existe (`utils/logger.py` com `setup_logger`, `get_logger`, `RotatingFileHandler`, níveis, toggle para testes), mas apenas `habit_instance_service.py` usa (20 chamadas). Os demais 8 services, toda a camada TUI e todos os commands têm zero instrumentação. Erros em `timer_service`, `routine_service`, `task_service` e no dashboard são invisíveis — `except Exception` engole silenciosamente sem rastro. Bugs como o DetachedInstanceError (DT-021) foram detectados apenas por inspeção manual de código.
+- **Escopo da resolução:**
+  - Formato dual: texto no console (legibilidade dev), JSON Lines no arquivo (análise programática)
+  - Localização dos logs: `~/.local/share/atomvs/logs/atomvs.jsonl` (XDG Base Directory)
+  - Dependência: `python-json-logger` (JsonFormatter para stdlib logging)
+  - Instrumentar: 8 services (timer, routine, task, tag, habit, event_reordering, backup, habit_instance_service já feito), camada TUI (session.py, loader.py, screen.py), commands
+  - Níveis: ERROR (exceções, I/O), WARNING (degradação), INFO (operações de negócio), DEBUG (queries, refresh cycles)
+  - Correlation ID por ação do usuário (equivalente local de distributed tracing)
+- **Ferramentas de análise:** `jq` (filtros CLI), `lnav` (TUI para logs), `tail -f | jq` (live stream). Possibilidade futura de ferramenta própria de análise integrada ao ecossistema ATOMVS.
+- **Sprint:** Sprint 5
+
 ---
 
 ## 4. Política de Gestão
@@ -258,6 +274,8 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 | Data       | Versão | Mudanças                                                |
 | ---------- | ------ | ------------------------------------------------------- |
+| 2026-03-11 | 2.3.0  | Adicionado DT-022 (logging estruturado: escopo,         |
+|            |        | formato, ferramentas, plano de instrumentação)          |
 | 2026-03-11 | 2.2.0  | Adicionado DT-021 (loaders/CRUDs ORM fora da sessão),   |
 |            |        | resolvido na mesma sessão via auditoria preventiva      |
 | 2026-03-10 | 2.1.0  | DT-014 resolvido. Adicionados DT-015 a DT-020 (gaps de  |
