@@ -16,6 +16,7 @@ from datetime import time
 from typing import TYPE_CHECKING, Any
 
 from timeblock.models import Recurrence
+from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.tui.session import service_action
 from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
@@ -99,6 +100,14 @@ def open_create_habit(
             )
         )
         if not error and result:
+            from datetime import date as _date
+
+            today = _date.today()
+            service_action(
+                lambda s: HabitInstanceService.generate_instances(
+                    habit_id=result.id, start_date=today, end_date=today, session=s
+                )
+            )
             on_done()
 
     app.push_screen(
