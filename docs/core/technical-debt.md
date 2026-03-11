@@ -33,6 +33,31 @@
 | DT019 | command_bar.py stub vazio (0 bytes)         | BAIXA      | PENDENTE  | -            | Sprint 6+                |
 | DT020 | Agenda: viewport cortada, sem auto-scroll   | BAIXA      | PENDENTE  | -            | Sprint 5                 |
 
+## 1b. Quick Status
+
+- [x] DT001 — 156 erros mypy
+- [x] DT002 — 15 testes skipped
+- [x] DT003 — Cobertura abaixo de 80%
+- [x] DT004 — EventReordering parcial
+- [x] DT005 — Código morto
+- [x] DT006 — Idioma misto EN/PT
+- [x] DT007 — migration_001 sem cobertura (ACEITO)
+- [x] DT008 — GitHub Actions divergente
+- [ ] DT009 — FocusablePanel: C_HIGHLIGHT na base
+- [ ] DT010 — FocusablePanel: flag \_showing_placeholders
+- [ ] DT011 — FocusablePanel: count em dois lugares
+- [ ] DT012 — DI inconsistente entre services
+- [ ] DT013 — \_parse_time duplicado
+- [x] DT014 — Keybindings divergentes
+- [x] DT015 — AgendaPanel sem auto-refresh
+- [x] DT016 — load_active_timer elapsed/name
+- [ ] DT017 — MetricsPanel stub
+- [ ] DT018 — load_tasks omite completed/cancelled
+- [ ] DT019 — command_bar.py vazio
+- [ ] DT020 — Agenda viewport cortada
+
+**Resolvidos:** 10/20 | **Pendentes:** 9/20 | **Aceitos:** 1/20
+
 ---
 
 ## 2. Detalhamento de Itens Resolvidos
