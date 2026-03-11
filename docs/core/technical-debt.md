@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.1.0
+**Versão:** 2.2.0
 
 **Status:** SSOT
 
@@ -32,6 +32,7 @@
 | DT018 | load_tasks omite completed/cancelled        | BAIXA      | PENDENTE  | -            | Sprint 5                 |
 | DT019 | command_bar.py stub vazio (0 bytes)         | BAIXA      | PENDENTE  | -            | Sprint 6+                |
 | DT020 | Agenda: viewport cortada, sem auto-scroll   | BAIXA      | PENDENTE  | -            | Sprint 5                 |
+| DT021 | Loaders/CRUDs: ORM fora da sessão (frágil)  | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 
 ## 1b. Quick Status
 
@@ -55,8 +56,9 @@
 - [ ] DT018 — load_tasks omite completed/cancelled
 - [ ] DT019 — command_bar.py vazio
 - [ ] DT020 — Agenda viewport cortada
+- [x] DT021 — Loaders/CRUDs: ORM fora da sessão
 
-**Resolvidos:** 10/20 | **Pendentes:** 9/20 | **Aceitos:** 1/20
+**Resolvidos:** 11/21 | **Pendentes:** 9/21 | **Aceitos:** 1/21
 
 ---
 
@@ -227,6 +229,15 @@
 - **Ação:** Implementar viewport adaptativa que centraliza na hora atual ao carregar.
 - **Sprint:** Sprint 5
 
+### DT-021: Loaders/CRUDs Acessam ORM Objects Fora da Sessão (RESOLVIDO)
+
+- **Descoberto:** 11/03/2026 (Auditoria pós-fix DetachedInstanceError)
+- **Resolvido:** 11/03/2026
+- **Impacto:** `load_active_routine` e `load_tasks` retornavam ORM objects do callback `service_action` e acessavam atributos fora da sessão. `crud_habits.open_create_habit` acessava `result.id` (escalar de Habit desanexado) fora da sessão. Com `expire_on_commit=False`, escalares sobrevivem — sem bug hoje. Porém, qualquer acesso futuro a relationships (ex: `result.habits`, `task.tag`) quebraria silenciosamente (DetachedInstanceError engolido por `except Exception`).
+- **Arquivos:** `loader.py` (load_active_routine, load_tasks), `crud_habits.py` (on_submit)
+- **Resolução:** Alinhamento ao padrão `_load(s: Session) -> dict/tuple` já usado em `load_instances` e `load_active_timer`. Toda extração de dados acontece dentro do callback; apenas tipos primitivos (dict, tuple, int) saem da sessão.
+- **Commits:** `c546b42`, `195bf0e`
+
 ---
 
 ## 4. Política de Gestão
@@ -247,6 +258,8 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 | Data       | Versão | Mudanças                                                |
 | ---------- | ------ | ------------------------------------------------------- |
+| 2026-03-11 | 2.2.0  | Adicionado DT-021 (loaders/CRUDs ORM fora da sessão),   |
+|            |        | resolvido na mesma sessão via auditoria preventiva      |
 | 2026-03-10 | 2.1.0  | DT-014 resolvido. Adicionados DT-015 a DT-020 (gaps de  |
 |            |        | integração: timer, agenda, métricas, command bar)       |
 | 2026-03-08 | 2.0.0  | DT-003 resolvido. Adicionados DT-008 a DT-014 (Sprint 4 |
@@ -258,4 +271,4 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 10 de Março de 2026
+**Última atualização:** 11 de Março de 2026
