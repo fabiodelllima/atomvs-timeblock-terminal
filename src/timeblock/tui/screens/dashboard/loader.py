@@ -11,7 +11,7 @@ Referências:
 from datetime import date, datetime
 from typing import Any
 
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from timeblock.models.enums import Status
 from timeblock.models.habit import Habit
@@ -51,7 +51,7 @@ def ensure_today_instances() -> int:
             s.exec(
                 select(HabitInstance.habit_id)
                 .where(HabitInstance.date == today)
-                .where(HabitInstance.habit_id.in_(habit_ids))  # type: ignore[union-attr,attr-defined]
+                .where(col(HabitInstance.habit_id).in_(habit_ids))
             ).all()
         )
 
