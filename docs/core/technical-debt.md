@@ -10,30 +10,32 @@
 
 ## 1. Inventário
 
-| ID    | Descrição                                   | Severidade | Status    | Resolvido em | Sprint planejado         |
-| ----- | ------------------------------------------- | ---------- | --------- | ------------ | ------------------------ |
-| DT001 | 156 erros mypy                              | CRÍTICA    | RESOLVIDO | Jan/2026     | v1.4.0 S1-S3             |
-| DT002 | 15 testes skipped                           | ALTA       | RESOLVIDO | Jan/2026     | v1.4.0 S4                |
-| DT003 | Cobertura abaixo de 80%                     | ALTA       | RESOLVIDO | Mar/2026     | v1.6.0                   |
-| DT004 | EventReordering parcial (61%)               | MÉDIA      | RESOLVIDO | Fev/2026     | -                        |
-| DT005 | Código morto                                | BAIXA      | RESOLVIDO | Fev/2026     | -                        |
-| DT006 | Idioma misto EN/PT em CLI                   | MÉDIA      | RESOLVIDO | Fev/2026     | v1.5.0                   |
-| DT007 | migration_001 sem cobertura                 | BAIXA      | ACEITO    | -            | -                        |
-| DT008 | GitHub Actions --fail-under divergente      | MÉDIA      | RESOLVIDO | Mar/2026     | v1.7.0                   |
-| DT009 | FocusablePanel: C_HIGHLIGHT na base         | ALTA       | PENDENTE  | -            | v1.7.0                   |
-| DT010 | FocusablePanel: flag \_showing_placehold.   | ALTA       | PENDENTE  | -            | v1.7.0                   |
-| DT011 | FocusablePanel: count em dois lugares       | ALTA       | PENDENTE  | -            | v1.7.0                   |
-| DT012 | DI inconsistente entre services             | MÉDIA      | PENDENTE  | -            | v2.0                     |
-| DT013 | \_parse_time duplicado (crud_habits/tasks)  | BAIXA      | PENDENTE  | -            | v1.7.0                   |
-| DT014 | Keybindings divergentes BR vs código        | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT015 | AgendaPanel sem auto-refresh (set_interval) | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT016 | load_active_timer: elapsed int vs str MM:SS | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT017 | MetricsPanel stub — load_metrics não existe | MÉDIA      | PENDENTE  | -            | Sprint 5                 |
-| DT018 | load_tasks omite completed/cancelled        | BAIXA      | PENDENTE  | -            | Sprint 5                 |
-| DT019 | command_bar.py stub vazio (0 bytes)         | BAIXA      | PENDENTE  | -            | Sprint 6+                |
-| DT020 | Agenda: viewport cortada, sem auto-scroll   | BAIXA      | PENDENTE  | -            | Sprint 5                 |
-| DT021 | Loaders/CRUDs: ORM fora da sessão (frágil)  | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT022 | Logging: adoção zero fora de habit_inst_svc | MÉDIA      | PENDENTE  | -            | Sprint 5                 |
+| ID    | Descrição                                      | Severidade | Status    | Resolvido em | Sprint planejado         |
+| ----- | ---------------------------------------------- | ---------- | --------- | ------------ | ------------------------ |
+| DT001 | 156 erros mypy                                 | CRÍTICA    | RESOLVIDO | Jan/2026     | v1.4.0 S1-S3             |
+| DT002 | 15 testes skipped                              | ALTA       | RESOLVIDO | Jan/2026     | v1.4.0 S4                |
+| DT003 | Cobertura abaixo de 80%                        | ALTA       | RESOLVIDO | Mar/2026     | v1.6.0                   |
+| DT004 | EventReordering parcial (61%)                  | MÉDIA      | RESOLVIDO | Fev/2026     | -                        |
+| DT005 | Código morto                                   | BAIXA      | RESOLVIDO | Fev/2026     | -                        |
+| DT006 | Idioma misto EN/PT em CLI                      | MÉDIA      | RESOLVIDO | Fev/2026     | v1.5.0                   |
+| DT007 | migration_001 sem cobertura                    | BAIXA      | ACEITO    | -            | -                        |
+| DT008 | GitHub Actions --fail-under divergente         | MÉDIA      | RESOLVIDO | Mar/2026     | v1.7.0                   |
+| DT009 | FocusablePanel: C_HIGHLIGHT na base            | ALTA       | PENDENTE  | -            | v1.7.0                   |
+| DT010 | FocusablePanel: flag \_showing_placehold.      | ALTA       | PENDENTE  | -            | v1.7.0                   |
+| DT011 | FocusablePanel: count em dois lugares          | ALTA       | PENDENTE  | -            | v1.7.0                   |
+| DT012 | DI inconsistente entre services                | MÉDIA      | PENDENTE  | -            | v2.0                     |
+| DT013 | \_parse_time duplicado (crud_habits/tasks)     | BAIXA      | PENDENTE  | -            | v1.7.0                   |
+| DT014 | Keybindings divergentes BR vs código           | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
+| DT015 | AgendaPanel sem auto-refresh (set_interval)    | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
+| DT016 | load_active_timer: elapsed int vs str MM:SS    | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
+| DT017 | MetricsPanel stub — load_metrics não existe    | MÉDIA      | PENDENTE  | -            | Sprint 5                 |
+| DT018 | load_tasks omite completed/cancelled           | BAIXA      | PENDENTE  | -            | Sprint 5                 |
+| DT019 | command_bar.py stub vazio (0 bytes)            | BAIXA      | PENDENTE  | -            | Sprint 6+                |
+| DT020 | Agenda: viewport cortada, sem auto-scroll      | BAIXA      | PENDENTE  | -            | Sprint 5                 |
+| DT021 | Loaders/CRUDs: ORM fora da sessão (frágil)     | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
+| DT022 | Logging: adoção zero fora de habit_inst_svc    | MÉDIA      | PENDENTE  | -            | Sprint 5                 |
+| DT023 | Instâncias diárias: geração manual obrigatória | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
+| DT024 | Keybindings Ctrl+N inoperantes em VTE/GNOME    | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 
 ## 1b. Quick Status
 
@@ -59,8 +61,10 @@
 - [ ] DT020 — Agenda viewport cortada
 - [x] DT021 — Loaders/CRUDs: ORM fora da sessão
 - [ ] DT022 — Logging: adoção zero fora de habit_instance_service
+- [x] DT023 — Instâncias diárias: geração manual obrigatória
+- [x] DT024 — Keybindings Ctrl+Números inoperantes em VTE/GNOME
 
-**Resolvidos:** 11/22 | **Pendentes:** 10/22 | **Aceitos:** 1/22
+**Resolvidos:** 13/24 | **Pendentes:** 10/24 | **Aceitos:** 1/24
 
 ---
 
@@ -256,6 +260,26 @@
 
 ---
 
+### DT-023: Instâncias Diárias — Geração Manual Obrigatória (RESOLVIDO)
+
+- **Descoberto:** 11/03/2026
+- **Resolvido:** 11/03/2026
+- **Impacto:** Sem `ensure_today_instances()`, o usuário precisava executar `atomvs habit atom generate` manualmente todo dia antes de abrir a TUI. Caso contrário, o dashboard mostrava agenda vazia mesmo com hábitos configurados.
+- **Arquivos:** `loader.py` (novo `ensure_today_instances`), `screen.py` (chamada em `on_mount` e `_refresh_agenda`)
+- **Resolução:** Função idempotente no loader que gera instâncias para hábitos aplicáveis ao dia, filtrada por rotina ativa e recurrence. Chamada no startup e na detecção de virada de dia.
+- **Commits:** `661f361`, `fcd670c`
+
+### DT-024: Keybindings Ctrl+N Inoperantes em VTE/GNOME Terminal (RESOLVIDO)
+
+- **Descoberto:** 12/03/2026
+- **Resolvido:** 12/03/2026
+- **Impacto:** `Ctrl+1..5` para navegação de telas não funcionava em terminais VTE (GNOME Terminal, Tilix, Terminator). O VTE não emite sequências de escape para `Ctrl+digit`, tornando a navegação inacessível nesses terminais.
+- **Arquivos:** `app.py`, `help_overlay.py`, 4 arquivos de teste
+- **Resolução:** Substituição de `Ctrl+1..5` por números puros `1..5` (padrão lazygit), que funciona universalmente em todos os emuladores de terminal.
+- **Commits:** `92da23a`, `1fbe90b`, `b4d2fe1`
+
+---
+
 ## 4. Política de Gestão
 
 Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), severidade e sprint planejado para resolução. O inventário é revisado a cada release.
@@ -274,6 +298,8 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 | Data       | Versão | Mudanças                                                |
 | ---------- | ------ | ------------------------------------------------------- |
+| 2026-03-12 | 2.4.0  | Adicionados DT-023 e DT-024 (resolvidos): auto-geração  |
+|            |        | de instâncias diárias e keybindings VTE/GNOME           |
 | 2026-03-11 | 2.3.0  | Adicionado DT-022 (logging estruturado: escopo,         |
 |            |        | formato, ferramentas, plano de instrumentação)          |
 | 2026-03-11 | 2.2.0  | Adicionado DT-021 (loaders/CRUDs ORM fora da sessão),   |
@@ -289,4 +315,4 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 11 de Março de 2026
+**Última atualização:** 12 de Março de 2026
