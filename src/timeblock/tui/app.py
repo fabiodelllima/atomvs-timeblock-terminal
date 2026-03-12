@@ -50,11 +50,11 @@ class TimeBlockApp(App):
     TITLE = "ATOMVS"
 
     BINDINGS: ClassVar[list[Binding | tuple[str, str] | tuple[str, str, str]]] = [
-        Binding("ctrl+1", "switch_screen('dashboard')", "Dashboard", show=False),
-        Binding("ctrl+2", "switch_screen('routines')", "Rotinas", show=False),
-        Binding("ctrl+3", "switch_screen('habits')", "Hábitos", show=False),
-        Binding("ctrl+4", "switch_screen('tasks')", "Tasks", show=False),
-        Binding("ctrl+5", "switch_screen('timer')", "Timer", show=False),
+        Binding("1", "switch_screen('dashboard')", "Dashboard", show=False),
+        Binding("2", "switch_screen('routines')", "Rotinas", show=False),
+        Binding("3", "switch_screen('habits')", "Hábitos", show=False),
+        Binding("4", "switch_screen('tasks')", "Tasks", show=False),
+        Binding("5", "switch_screen('timer')", "Timer", show=False),
         Binding("?", "toggle_help", "Ajuda", show=False),
         Binding("escape", "handle_escape", "Voltar", show=False),
         Binding("ctrl+q", "quit", "Sair"),
