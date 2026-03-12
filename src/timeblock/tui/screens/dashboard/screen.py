@@ -16,6 +16,7 @@ from textual.containers import Horizontal, Vertical
 from textual.events import Key
 from textual.widgets import Static
 
+from timeblock.models.enums import SkipReason
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
@@ -153,8 +154,12 @@ class DashboardScreen(Static):
         self._on_crud_done()
 
     def on_habits_panel_habit_skip_request(self, message: HabitsPanel.HabitSkipRequest) -> None:
-        """Recebe HabitSkipRequest e executa mark_skipped via service."""
-        service_action(lambda s: HabitInstanceService.mark_skipped(message.instance_id, session=s))
+        """Recebe HabitSkipRequest e executa skip com categorização (BR-SKIP-001)."""
+        service_action(
+            lambda s: HabitInstanceService.skip_habit_instance(
+                message.instance_id, skip_reason=SkipReason.OTHER, session=s
+            )
+        )
         self._on_crud_done()
 
     def on_tasks_panel_task_complete_request(self, message: TasksPanel.TaskCompleteRequest) -> None:
