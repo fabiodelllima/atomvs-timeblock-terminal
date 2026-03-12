@@ -10,7 +10,7 @@ class HelpOverlay(Static):
         content = (
             "[bold]Atalhos Globais[/]\n"
             "\n"
-            "  Ctrl+1..5  Alternar screens\n"
+            "  1..5     Alternar screens\n"
             "  Ctrl+Q     Sair\n"
             "  ?          Ajuda\n"
             "  Escape     Fechar / Dashboard\n"
