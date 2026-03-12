@@ -15,7 +15,10 @@ from collections.abc import Callable
 from datetime import time
 from typing import TYPE_CHECKING, Any
 
+from sqlmodel import Session
+
 from timeblock.models import Recurrence
+from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.tui.session import service_action
 from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
@@ -89,16 +92,26 @@ def open_create_habit(
         recurrence_value = data.get("recurrence", "EVERYDAY")
         recurrence = Recurrence(recurrence_value)
 
-        result, error = service_action(
-            lambda s: HabitService(s).create_habit(
+        def _create(s: Session) -> int | None:
+            habit = HabitService(s).create_habit(
                 routine_id=routine_id,
                 title=data["title"],
                 scheduled_start=start,
                 scheduled_end=end,
                 recurrence=recurrence,
             )
-        )
-        if not error and result:
+            return habit.id if habit else None
+
+        habit_id, error = service_action(_create)
+        if not error and habit_id:
+            from datetime import date as _date
+
+            today = _date.today()
+            service_action(
+                lambda s: HabitInstanceService.generate_instances(
+                    habit_id=habit_id, start_date=today, end_date=today, session=s
+                )
+            )
             on_done()
 
     app.push_screen(
@@ -136,13 +149,14 @@ def open_edit_habit(
             required=True,
         ),
     ]
-    start_h = habit_data.get("start_hour", 0)
-    end_h = habit_data.get("end_hour", 0)
-    duration = (end_h - start_h) * 60
+    sm = habit_data.get("start_minutes", 0)
+    em = habit_data.get("end_minutes", 0)
+    duration = em - sm
+    sh, s_min = divmod(sm, 60)
 
     edit_data = {
         "title": habit_data.get("name", ""),
-        "start": f"{start_h:02d}:00",
+        "start": f"{sh:02d}:{s_min:02d}",
         "duration": str(max(duration, 0)),
     }
 

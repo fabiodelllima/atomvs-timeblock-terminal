@@ -2178,36 +2178,36 @@ class DashboardScreen(Screen):
 
 ---
 
-### BR-TUI-004: Global Keybindings (REVISADA 02/03/2026)
+## BR-TUI-004: Global Keybindings (REVISADA 08/03/2026)
 
-**Descrição:** Keybindings globais funcionam em qualquer screen. Ações exigem modificador Ctrl. Navegação pura não exige modificador. Ações destrutivas e irreversíveis exigem modal de confirmação.
+**Descrição:** Keybindings padronizados em toda a aplicação conforme ADR-035. Navegação pura sem modificador. Ações de domínio com Ctrl ou Shift. CRUD contextual sem modificador (n/e/x). Uma ação = um binding — mesma semântica usa mesmo binding em qualquer screen.
 
-**Política de modificador:**
+**Mapa de keybindings:**
 
 ```plaintext
-SEM modificador (navegação pura, sem risco):
-  Tab .................. avançar entre panels/cards
-  Ctrl+Tab ............. voltar entre panels/cards
-  1-4 .................. focar panel diretamente (dentro da screen)
-  Setas / j/k .......... navegar itens dentro do panel focado
-  Enter ................ editar item selecionado ou placeholder
+GLOBAIS (app.py):
+  Ctrl+1..5 ............ trocar screen (1=Dash, 2=Rotin, 3=Habit, 4=Tasks, 5=Timer)
+  Ctrl+Q ............... sair da TUI [MODAL]
   ? .................... help overlay (leitura)
   Escape ............... fechar modal / voltar ao Dashboard
 
-COM Ctrl (ações e navegação entre screens):
-  Ctrl+1..5 ............ trocar screen (1=Dash, 2=Rotin, 3=Habit, 4=Tasks, 5=Timer)
-  Ctrl+Q ............... sair da TUI [MODAL]
-  Ctrl+Enter ........... confirmar / mark done [MODAL se irreversível]
-  Ctrl+S ............... skip (hábito) / start (timer)
-  Ctrl+P ............... pause/resume (timer)
-  Ctrl+X ............... deletar item selecionado [MODAL]
-  Ctrl+E ............... editar item selecionado (abre modal)
-  Ctrl+K ............... complete task [MODAL]
-  Ctrl+W ............... cancel timer [MODAL]
+NAVEGAÇÃO (intra-screen):
+  Tab .................. avançar entre panels
+  Shift+Tab ............ voltar entre panels
+  Setas up/down ........ navegar itens dentro do panel focado
+  1-9 .................. livres para ações contextuais por screen
+  Enter ................ ativar placeholder / selecionar item
 
-CRIAÇÃO (duas vias):
-  N .................... abre modal com campos (formulário guiado, contextual ao panel)
-  : .................... abre barra de comando (power user)
+CRUD (contextual ao panel focado):
+  n .................... novo (abre FormModal contextual)
+  e .................... editar item sob cursor (abre FormModal)
+  x .................... deletar item sob cursor [MODAL]
+
+AÇÕES DE DOMÍNIO:
+  Ctrl+Enter ........... concluir (done em hábito, complete em task, stop timer)
+  Ctrl+S ............... skip (hábitos)
+  Shift+Enter .......... start timer / pause-resume timer
+  Ctrl+X ............... cancelar timer [MODAL]
 
 PROIBIDOS (reservados pelo OS):
   Ctrl+C ............... SIGINT (nunca capturar)
@@ -2218,45 +2218,47 @@ PROIBIDOS (reservados pelo OS):
 **Modal de confirmação exigido em:**
 
 - Ctrl+Q (sair, especialmente com timer ativo)
-- Ctrl+X (deletar item)
-- Ctrl+W (cancelar timer, descarta sessão)
-- Ctrl+K (completar task, irreversível)
+- x (deletar item)
+- Ctrl+X (cancelar timer, descarta sessão)
 - Ctrl+Enter (mark done, quando hábito já done/overdone)
 
 **Regras:**
 
-1. Todas as ações exigem modificador Ctrl
-2. Navegação pura (Tab, Ctrl+Tab, setas, números, ?, Escape, Enter) sem modificador
-3. Ctrl+1..5 troca screen; números 1..4 focam panel dentro da screen ativa
-4. Tab avança entre panels, Ctrl+Tab volta (ciclo circular)
-5. Setas e j/k navegam itens dentro do panel focado
-6. Enter edita item selecionado (existente ou placeholder)
-7. N abre modal com campos contextual ao panel focado; : abre barra de comando
-8. Ações destrutivas/irreversíveis exigem modal de confirmação
-9. Modal exibe nome do item afetado e ação a ser executada
+1. Ctrl+1..5 troca screen; números puros 1-9 são livres para contexto por screen
+2. Tab/Shift+Tab cicla entre panels; setas movem cursor dentro do panel
+3. n/e/x sem modificador para CRUD — x sempre abre ConfirmDialog antes de deletar
+4. Ctrl+Enter é o binding universal de "concluir" — mesma semântica em todos os domínios
+5. Ctrl+S é exclusivo para skip de hábitos
+6. Shift+Enter é o toggle de timer — start no panel de hábitos, pause/resume no panel de timer
+7. Ctrl+X é o binding universal de "cancelar com perda de dados" — sempre com ConfirmDialog
+8. Enter ativa placeholders (BR-TUI-013) ou seleciona item conforme contexto
+9. Ações destrutivas/irreversíveis exigem modal de confirmação
 10. Modal responde apenas a Enter (confirmar) e Escape (cancelar)
 11. Ctrl+C, Ctrl+Z, Ctrl+D nunca são capturados pela TUI
 12. Se timer ativo e Ctrl+Q, modal informa que sessão será perdida
-13. Keybindings de ação só funcionam na screen/zona ativa
-14. Help overlay (?) lista todos os keybindings com modificadores
+13. Help overlay (?) lista todos os keybindings com contexto
+14. Footer contextual (BR-TUI-007) exibe bindings ativos conforme panel focado
+
+**Supersede:** Versão 02/03/2026. Mudanças: removidos Ctrl+K, Ctrl+P, Ctrl+W, Ctrl+E, d/r/h/t/m. Adicionados Shift+Enter, Ctrl+X para cancel. Ctrl+Enter unificado. Números livres para contexto.
+
+**Referência:** ADR-035 (Keybindings Standardization)
 
 **Testes:**
 
-- `test_br_tui_004_quit_requires_ctrl_q`
-- `test_br_tui_004_plain_q_does_nothing`
-- `test_br_tui_004_quit_shows_confirmation_modal`
-- `test_br_tui_004_quit_with_timer_warns_session_loss`
-- `test_br_tui_004_modal_only_responds_enter_escape`
-- `test_br_tui_004_help_overlay_shows_ctrl_bindings`
+- `test_br_tui_004_ctrl_q_shows_confirmation_modal`
+- `test_br_tui_004_ctrl_1_to_5_switches_screen`
 - `test_br_tui_004_escape_closes_modal`
 - `test_br_tui_004_escape_returns_to_dashboard`
+- `test_br_tui_004_help_overlay_shows_bindings`
 - `test_br_tui_004_ctrl_c_not_captured`
-- `test_br_tui_004_ctrl_tab_navigates_backwards`
-- `test_br_tui_004_ctrl_1_to_5_switches_screen`
-- `test_br_tui_004_numbers_focus_panel`
-- `test_br_tui_004_enter_edits_placeholder`
+- `test_br_tui_004_tab_advances_panels`
+- `test_br_tui_004_shift_tab_goes_back`
+- `test_br_tui_004_enter_activates_placeholder`
 - `test_br_tui_004_n_opens_contextual_modal`
-- `test_br_tui_004_colon_opens_command_bar`
+- `test_br_tui_004_ctrl_enter_marks_done`
+- `test_br_tui_004_ctrl_enter_completes_task`
+- `test_br_tui_004_ctrl_s_skips_habit`
+- `test_br_tui_004_numbers_free_for_context`
 
 ### BR-TUI-005: CRUD Operations Pattern
 
@@ -3167,6 +3169,41 @@ src/timeblock/tui/styles/
 - `test_br_tui_020_edit_mode_prefilled`
 - `test_br_tui_020_create_mode_empty_with_placeholder`
 - `test_br_tui_020_modal_traps_focus`
+
+### BR-TUI-021: Timer no Dashboard (NOVA 08/03/2026)
+
+**Descrição:** O dashboard permite iniciar, pausar, retomar, parar e cancelar sessões de timer diretamente, sem navegar para a Timer Screen. O TimerPanel exibe elapsed em tempo real com atualização a cada segundo. O timer opera sobre o hábito selecionado no panel de hábitos.
+
+**Regras:**
+
+1. Shift+Enter no panel de hábitos com hábito selecionado inicia timer via TimerService.start_timer
+2. Shift+Enter no panel de timer com timer ativo alterna entre pause e resume
+3. Ctrl+Enter no panel de timer para o timer e salva a sessão via TimerService.stop_timer
+4. Ctrl+X no panel de timer abre ConfirmDialog e, se confirmado, cancela via TimerService.cancel_timer
+5. TimerPanel atualiza elapsed a cada segundo via set_interval do Textual
+6. TimerPanel exibe nome do hábito associado ao timer ativo
+7. Elapsed é formatado como MM:SS e renderizado em ASCII art
+8. Cores por estado: Mauve (#CBA6F7) para running, Yellow (#F9E2AF) para paused, Overlay0 (#6C7086) para idle
+9. Se não há timer ativo, TimerPanel exibe "idle" com hint de keybinding
+10. Iniciar timer requer hábito selecionado no panel de hábitos — sem seleção, nenhuma ação
+11. Se já existe timer ativo e usuário tenta iniciar outro, exibir erro (um timer por vez)
+12. refresh_data() atualiza TimerPanel após start/stop/pause/resume/cancel
+13. Footer contextual exibe keybindings de timer quando panel de timer está focado
+
+**Dependências:** BR-TUI-004 (keybindings), BR-TUI-009 (Service Layer), BR-TUI-012 (navegação), BR-TIMER-001 a BR-TIMER-004 (regras de timer)
+
+**Testes:**
+
+- `test_br_tui_021_shift_enter_starts_timer_on_selected_habit`
+- `test_br_tui_021_shift_enter_without_selection_does_nothing`
+- `test_br_tui_021_shift_enter_pauses_active_timer`
+- `test_br_tui_021_shift_enter_resumes_paused_timer`
+- `test_br_tui_021_ctrl_enter_stops_timer`
+- `test_br_tui_021_ctrl_x_opens_cancel_confirm`
+- `test_br_tui_021_timer_panel_updates_every_second`
+- `test_br_tui_021_timer_panel_shows_habit_name`
+- `test_br_tui_021_one_timer_at_a_time`
+- `test_br_tui_021_idle_shows_hint`
 
 ---
 

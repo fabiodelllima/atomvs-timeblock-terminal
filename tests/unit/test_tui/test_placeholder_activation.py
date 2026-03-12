@@ -65,8 +65,8 @@ class TestBRTUI013PlaceholderShown:
                     "name": "Treino",
                     "status": "pending",
                     "substatus": None,
-                    "start_hour": 7,
-                    "end_hour": 8,
+                    "start_minutes": 420,
+                    "end_minutes": 480,
                     "actual_minutes": None,
                 }
             ]
@@ -97,8 +97,8 @@ class TestBRTUI013PlaceholderShown:
                     "name": "Treino",
                     "status": "pending",
                     "substatus": None,
-                    "start_hour": 7,
-                    "end_hour": 8,
+                    "start_minutes": 420,
+                    "end_minutes": 480,
                     "actual_minutes": None,
                 }
             ]

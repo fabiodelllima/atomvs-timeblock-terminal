@@ -55,14 +55,9 @@ class TimeBlockApp(App):
         Binding("3", "switch_screen('habits')", "Hábitos", show=False),
         Binding("4", "switch_screen('tasks')", "Tasks", show=False),
         Binding("5", "switch_screen('timer')", "Timer", show=False),
-        Binding("d", "switch_screen('dashboard')", "Dashboard", show=False),
-        Binding("r", "switch_screen('routines')", "Rotinas", show=False),
-        Binding("h", "switch_screen('habits')", "Hábitos", show=False),
-        Binding("t", "switch_screen('tasks')", "Tasks", show=False),
-        Binding("m", "switch_screen('timer')", "Timer", show=False),
         Binding("?", "toggle_help", "Ajuda", show=False),
         Binding("escape", "handle_escape", "Voltar", show=False),
-        Binding("q", "quit", "Sair"),
+        Binding("ctrl+q", "quit", "Sair"),
     ]
 
     active_screen: str = "dashboard"

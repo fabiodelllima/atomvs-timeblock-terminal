@@ -52,7 +52,7 @@ class NavBar(Widget):
         """Renderiza logo ATOMVS."""
         try:
             self.query_one("#sidebar-logo", Static).update(
-                "[bold #CBA6F7]◉ ATOMVS[/bold #CBA6F7]\n[#45475A]═══════════════════[/#45475A]"
+                "[bold #CBA6F7]◉ ATOMVS[/bold #CBA6F7]\n[#45475A]══════════════════[/#45475A]"
             )
         except Exception:
             pass
@@ -75,7 +75,7 @@ class NavBar(Widget):
         """Renderiza keybindings de referência."""
         try:
             self.query_one("#sidebar-footer", Static).update(
-                "[#45475A]───────────────────[/#45475A]\n[dim]q quit[/dim]\n[dim]? help[/dim]"
+                "[#45475A]───────────────────[/#45475A]\n[dim]Ctrl+Q quit[/dim]\n[dim]? help[/dim]"
             )
         except Exception:
             pass
