@@ -51,7 +51,7 @@ def ensure_today_instances() -> int:
             s.exec(
                 select(HabitInstance.habit_id)
                 .where(HabitInstance.date == today)
-                .where(HabitInstance.habit_id.in_(habit_ids))  # type: ignore[union-attr]
+                .where(HabitInstance.habit_id.in_(habit_ids))  # type: ignore[union-attr,attr-defined]
             ).all()
         )
 
