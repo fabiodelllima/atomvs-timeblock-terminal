@@ -36,7 +36,7 @@ class TestBRTUI004GlobalKeybindings:
     async def test_br_tui_004_escape_returns_to_dashboard(self):
         """Escape sem modal aberto volta ao Dashboard."""
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("ctrl+2")  # Vai para Routines
+            await pilot.press("2")  # Vai para Routines
             assert pilot.app.active_screen == "routines"
             await pilot.press("escape")
             assert pilot.app.active_screen == "dashboard"
@@ -45,7 +45,7 @@ class TestBRTUI004GlobalKeybindings:
     async def test_br_tui_004_global_keys_work_from_any_screen(self):
         """Keybindings globais funcionam em qualquer screen."""
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("ctrl+4")  # Vai para Tasks
+            await pilot.press("4")  # Vai para Tasks
             assert pilot.app.active_screen == "tasks"
             await pilot.press("?")
             help_overlay = pilot.app.query("#help-overlay")

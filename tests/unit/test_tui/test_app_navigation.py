@@ -22,10 +22,10 @@ class TestBRTUI002ScreenNavigation:
         async with TimeBlockApp().run_test() as pilot:
             app = pilot.app
 
-            await pilot.press("ctrl+1")
+            await pilot.press("1")
             assert app.active_screen == "dashboard"
 
-            await pilot.press("ctrl+2")
+            await pilot.press("2")
             assert app.active_screen == "routines"
 
     async def test_br_tui_002_mnemonic_keybinding_navigation(self):
@@ -35,19 +35,19 @@ class TestBRTUI002ScreenNavigation:
         async with TimeBlockApp().run_test() as pilot:
             app = pilot.app
 
-            await pilot.press("ctrl+1")
+            await pilot.press("1")
             assert app.active_screen == "dashboard"
 
-            await pilot.press("ctrl+2")
+            await pilot.press("2")
             assert app.active_screen == "routines"
 
-            await pilot.press("ctrl+3")
+            await pilot.press("3")
             assert app.active_screen == "habits"
 
-            await pilot.press("ctrl+4")
+            await pilot.press("4")
             assert app.active_screen == "tasks"
 
-            await pilot.press("ctrl+5")
+            await pilot.press("5")
             assert app.active_screen == "timer"
 
     async def test_br_tui_002_nav_bar_shows_active_screen(self):

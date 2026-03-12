@@ -152,7 +152,7 @@ class TestBRTUI011R04GridNavigation:
         from timeblock.tui.app import TimeBlockApp
 
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("ctrl+2")
+            await pilot.press("2")
             routines = pilot.app.query_one("#routines-view")
             initial_day = routines.focused_day
             await pilot.press("right")
@@ -163,7 +163,7 @@ class TestBRTUI011R04GridNavigation:
         from timeblock.tui.app import TimeBlockApp
 
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("ctrl+2")
+            await pilot.press("2")
             routines = pilot.app.query_one("#routines-view")
             await pilot.press("right")
             await pilot.press("left")
@@ -174,7 +174,7 @@ class TestBRTUI011R04GridNavigation:
         from timeblock.tui.app import TimeBlockApp
 
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("ctrl+2")
+            await pilot.press("2")
             routines = pilot.app.query_one("#routines-view")
             initial_week = routines.current_week_offset
             await pilot.press("]")
@@ -185,7 +185,7 @@ class TestBRTUI011R04GridNavigation:
         from timeblock.tui.app import TimeBlockApp
 
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("ctrl+2")
+            await pilot.press("2")
             routines = pilot.app.query_one("#routines-view")
             await pilot.press("]")
             await pilot.press("[")
@@ -196,7 +196,7 @@ class TestBRTUI011R04GridNavigation:
         from timeblock.tui.app import TimeBlockApp
 
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("ctrl+2")
+            await pilot.press("2")
             routines = pilot.app.query_one("#routines-view")
             await pilot.press("]")
             await pilot.press("]")
