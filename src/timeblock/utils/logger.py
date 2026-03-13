@@ -1,113 +1,170 @@
-"""Sistema de logging estruturado para TimeBlock.
+"""Sistema de logging estruturado para ATOMVS TimeBlock.
 
-Este módulo fornece logging padronizado com:
-- Formato estruturado com timestamp, nível, módulo
-- Suporte a console e arquivo
-- Rotação automática de logs
-- Configuração por nível (DEBUG, INFO, WARNING, ERROR)
+Formato dual: texto legível no console (stderr), JSON Lines no arquivo.
+Caminhos seguem XDG Base Directory Specification.
+
+Uso:
+    # No entrypoint (uma vez):
+    from timeblock.utils.logger import configure_logging
+    configure_logging()
+
+    # Em qualquer módulo:
+    from timeblock.utils.logger import get_logger
+    logger = get_logger(__name__)
+    logger.info("Operação concluída", extra={"habit_id": 42})
+
+Variáveis de ambiente:
+    ATOMVS_LOG_LEVEL: nível mínimo (default: INFO)
+    ATOMVS_LOG_FILE: caminho absoluto do arquivo (override do XDG)
+    ATOMVS_LOG_CONSOLE: "1" habilita console em qualquer modo (default: só CLI)
+
+Referências:
+    - DT-022: Logging estruturado
+    - XDG Base Directory Specification (freedesktop.org)
 """
 
 import logging
+import os
 import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+from pythonjsonlogger.json import JsonFormatter  # type: ignore[import-not-found]
 
-def setup_logger(
-    name: str,
-    level: str = "INFO",
-    log_file: Path | None = None,
+_configured: bool = False
+
+# Formato legível para console (stderr)
+_CONSOLE_FORMAT = "[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s"
+_CONSOLE_DATE_FORMAT = "%H:%M:%S"
+
+# Campos incluídos no JSON Lines (arquivo)
+_JSON_FORMAT = "%(asctime)s %(name)s %(levelname)s %(message)s"
+
+
+def _get_log_dir() -> Path:
+    """Retorna diretório de logs seguindo XDG Base Directory.
+
+    Prioridade:
+        1. $ATOMVS_LOG_FILE (usa diretório pai)
+        2. $XDG_DATA_HOME/atomvs/logs
+        3. ~/.local/share/atomvs/logs
+    """
+    env_file = os.environ.get("ATOMVS_LOG_FILE")
+    if env_file:
+        return Path(env_file).parent
+
+    xdg_data = os.environ.get("XDG_DATA_HOME")
+    if xdg_data:
+        return Path(xdg_data) / "atomvs" / "logs"
+
+    return Path.home() / ".local" / "share" / "atomvs" / "logs"
+
+
+def _get_log_file() -> Path:
+    """Retorna caminho completo do arquivo de log."""
+    env_file = os.environ.get("ATOMVS_LOG_FILE")
+    if env_file:
+        return Path(env_file)
+
+    return _get_log_dir() / "atomvs.jsonl"
+
+
+def configure_logging(
+    *,
+    level: str | None = None,
+    console: bool | None = None,
+    log_file: bool = True,
     max_bytes: int = 10_000_000,
     backup_count: int = 5,
-    console: bool = True,
-) -> logging.Logger:
-    """Configura logger com formato estruturado.
+) -> None:
+    """Configura logging global do ATOMVS. Idempotente.
 
     Args:
-        name: Nome do logger (geralmente __name__ do módulo)
-        level: Nível mínimo - DEBUG, INFO, WARNING, ERROR
-        log_file: Caminho do arquivo de log (None = console only)
-        max_bytes: Tamanho máximo antes de rotação (padrão: 10MB)
-        backup_count: Número de backups mantidos (padrão: 5)
-        console: Se True, também loga no console
-
-    Returns:
-        Logger configurado
-
-    Exemplo:
-        >>> from timeblock.utils.logger import setup_logger
-        >>> logger = setup_logger(__name__)
-        >>> logger.info("Operação iniciada")
-        >>> logger.error("Erro ao processar", exc_info=True)
+        level: nível mínimo (env ATOMVS_LOG_LEVEL ou "INFO")
+        console: habilita handler stderr (default: True para CLI, False para TUI)
+        log_file: habilita handler JSON Lines em arquivo
+        max_bytes: tamanho máximo antes de rotação (10MB)
+        backup_count: backups mantidos na rotação (5)
     """
-    # Cria ou obtém logger
-    logger = logging.getLogger(name)
-    logger.setLevel(getattr(logging, level.upper()))
+    global _configured
+    if _configured:
+        return
+    _configured = True
 
-    # Remove handlers existentes (evita duplicação)
-    logger.handlers.clear()
+    resolved_level = (level or os.environ.get("ATOMVS_LOG_LEVEL", "INFO")).upper()
 
-    # Formato estruturado: [timestamp] [level] [module] message
-    formatter = logging.Formatter(
-        fmt="[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-    )
+    # Console: variável de ambiente tem prioridade, depois parâmetro
+    env_console = os.environ.get("ATOMVS_LOG_CONSOLE")
+    if env_console is not None:
+        resolved_console = env_console == "1"
+    elif console is not None:
+        resolved_console = console
+    else:
+        resolved_console = True
 
-    # Handler para console (stderr)
-    if console:
+    root = logging.getLogger("timeblock")
+    root.setLevel(getattr(logging, resolved_level, logging.INFO))
+    root.handlers.clear()
+
+    # Handler console: texto legível no stderr
+    if resolved_console:
         console_handler = logging.StreamHandler(sys.stderr)
-        console_handler.setLevel(getattr(logging, level.upper()))
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
+        console_handler.setLevel(getattr(logging, resolved_level, logging.INFO))
+        console_handler.setFormatter(
+            logging.Formatter(fmt=_CONSOLE_FORMAT, datefmt=_CONSOLE_DATE_FORMAT)
+        )
+        root.addHandler(console_handler)
 
-    # Handler para arquivo com rotação
+    # Handler arquivo: JSON Lines com rotação
     if log_file:
-        # Garante que diretório existe
-        log_file.parent.mkdir(parents=True, exist_ok=True)
+        file_path = _get_log_file()
+        file_path.parent.mkdir(parents=True, exist_ok=True)
 
         file_handler = RotatingFileHandler(
-            filename=log_file, maxBytes=max_bytes, backupCount=backup_count, encoding="utf-8"
+            filename=file_path,
+            maxBytes=max_bytes,
+            backupCount=backup_count,
+            encoding="utf-8",
         )
-        file_handler.setLevel(getattr(logging, level.upper()))
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(JsonFormatter(fmt=_JSON_FORMAT, json_ensure_ascii=False))
+        root.addHandler(file_handler)
 
-    # Evita propagação para root logger
-    logger.propagate = False
-
-    return logger
+    root.propagate = False
 
 
 def get_logger(name: str) -> logging.Logger:
-    """Obtém logger existente ou cria um novo com configuração padrão.
+    """Obtém logger filho do namespace timeblock.
+
+    Se configure_logging() ainda não foi chamado, configura
+    com defaults (console only, nível INFO). Isso garante
+    compatibilidade com código que chama get_logger diretamente.
 
     Args:
-        name: Nome do logger (geralmente __name__ do módulo)
+        name: nome do módulo (geralmente __name__)
 
     Returns:
-        Logger configurado
-
-    Nota:
-        Se logger não existir, cria com nível INFO e console only.
+        Logger configurado no namespace timeblock.
     """
-    logger = logging.getLogger(name)
+    if not _configured:
+        configure_logging(log_file=False)
 
-    # Se logger não tem handlers, configura padrão
-    if not logger.handlers:
-        return setup_logger(name, level="INFO", console=True)
-
-    return logger
+    return logging.getLogger(name)
 
 
-def disable_logging():
-    """Desabilita todos os logs (útil para testes).
-
-    Exemplo:
-        >>> from timeblock.utils.logger import disable_logging
-        >>> disable_logging()  # Silencia logs durante testes
-    """
+def disable_logging() -> None:
+    """Desabilita todos os logs (útil para testes)."""
     logging.disable(logging.CRITICAL)
 
 
-def enable_logging():
+def enable_logging() -> None:
     """Reabilita logs após disable_logging()."""
     logging.disable(logging.NOTSET)
+
+
+def _reset_for_testing() -> None:
+    """Reseta estado interno para testes. NÃO usar em produção."""
+    global _configured
+    _configured = False
+    root = logging.getLogger("timeblock")
+    root.handlers.clear()
