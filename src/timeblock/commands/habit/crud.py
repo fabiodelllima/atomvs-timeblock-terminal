@@ -13,6 +13,9 @@ from timeblock.models import Recurrence
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.services.routine_service import RoutineService
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 console = Console()
 
@@ -105,6 +108,7 @@ def create_habit(
                 console.print(f"\n[green]{len(instances)} instâncias geradas[/green]")
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -153,6 +157,7 @@ def list_habits(
             console.print()
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -200,6 +205,7 @@ def update_habit(
             console.print(f"[green]Hábito atualizado: [bold]{habit.title}[/bold][/green]")
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -227,5 +233,6 @@ def delete_habit(
             console.print(f"[green]Hábito deletado: [bold]{habit.title}[/bold][/green]")
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
