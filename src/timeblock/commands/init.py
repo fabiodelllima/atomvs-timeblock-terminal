@@ -6,6 +6,9 @@ import typer
 from rich.console import Console
 
 from timeblock.database import create_db_and_tables, get_db_path
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 console = Console()
 
@@ -28,6 +31,7 @@ def init():
             style="bold green",
         )
     except Exception as e:
+        logger.exception("Falha ao inicializar banco de dados")
         console.print(
             f"[red]✗[/red] Erro ao inicializar banco de dados: {e}",
             style="bold red",
