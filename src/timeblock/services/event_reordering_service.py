@@ -6,8 +6,11 @@ from sqlmodel import Session, or_, select
 
 from timeblock.database import get_engine_context
 from timeblock.models import Event, HabitInstance, Task
+from timeblock.utils.logger import get_logger
 
 from .event_reordering_models import Conflict, ConflictType
+
+logger = get_logger(__name__)
 
 
 class EventReorderingService:

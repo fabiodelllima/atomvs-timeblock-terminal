@@ -9,6 +9,9 @@ from datetime import datetime
 from pathlib import Path
 
 from timeblock.database.engine import get_db_path
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 MAX_BACKUPS = 50
 BACKUP_DIR_NAME = "backups"

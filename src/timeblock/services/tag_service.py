@@ -3,6 +3,9 @@
 from sqlmodel import Session, select
 
 from timeblock.models import Tag
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class TagService:
