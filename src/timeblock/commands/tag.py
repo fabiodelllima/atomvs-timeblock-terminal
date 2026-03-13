@@ -7,8 +7,13 @@ from sqlmodel import Session
 
 from timeblock.database import get_engine_context
 from timeblock.services.tag_service import TagService
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 app = typer.Typer(help="Gerenciar tags")
+
+
 console = Console()
 
 
