@@ -47,6 +47,7 @@ def create_backup(label: str = "") -> Path | None:
 
     shutil.copy2(db_path, backup_path)
     _cleanup_old_backups(backup_dir)
+    logger.info("Backup criado: %s", backup_path)
     return backup_path
 
 
@@ -66,6 +67,7 @@ def list_backups() -> list[Path]:
 
 
 def restore_backup(backup_path: Path) -> bool:
+    logger.info("Restaurando backup: %s", backup_path)
     """Restaura banco a partir de um backup.
 
     Args:
