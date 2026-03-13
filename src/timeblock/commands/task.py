@@ -8,8 +8,13 @@ from rich.table import Table
 
 from timeblock.services.task_service import TaskService
 from timeblock.utils.conflict_display import display_conflicts
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 app = typer.Typer(help="Gerenciar tarefas")
+
+
 console = Console()
 
 
