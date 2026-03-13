@@ -75,6 +75,7 @@ class EventReorderingService:
                         )
                     )
 
+            logger.debug("Conflitos detectados: %d", len(conflicts))
             return conflicts
 
         if session is not None:
