@@ -12,6 +12,7 @@ from timeblock.models.habit import Habit
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.routine_service import RoutineService
 from timeblock.services.timer_service import TimerService
+from timeblock.utils.logger import get_logger
 
 from .display import (
     _resolve_date_range,
@@ -20,6 +21,8 @@ from .display import (
     display_log_result,
     handle_log_error,
 )
+
+logger = get_logger(__name__)
 
 console = Console()
 
@@ -93,6 +96,7 @@ def atom_list(
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
     except Exception as e:
+        logger.exception("Erro inesperado em comando atom")
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -154,6 +158,7 @@ def atom_generate(
     except typer.Exit:
         raise
     except Exception as e:
+        logger.exception("Erro inesperado em comando atom")
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
