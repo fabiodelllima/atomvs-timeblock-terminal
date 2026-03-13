@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.3.0
+**Versão:** 2.5.0
 
 **Status:** SSOT
 
@@ -33,9 +33,10 @@
 | DT019 | command_bar.py stub vazio (0 bytes)            | BAIXA      | PENDENTE  | -            | Sprint 6+                |
 | DT020 | Agenda: viewport cortada, sem auto-scroll      | BAIXA      | PENDENTE  | -            | Sprint 5                 |
 | DT021 | Loaders/CRUDs: ORM fora da sessão (frágil)     | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT022 | Logging: adoção zero fora de habit_inst_svc    | MÉDIA      | PENDENTE  | -            | Sprint 5                 |
+| DT022 | Logging: adoção zero fora de habit_inst_svc    | MÉDIA      | RESOLVIDO | Mar/2026     | feat/structured-logging  |
 | DT023 | Instâncias diárias: geração manual obrigatória | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT024 | Keybindings Ctrl+N inoperantes em VTE/GNOME    | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
+| DT025 | Pyright como job CI complementar               | BAIXA      | PENDENTE  | -            | Sprint futuro            |
 
 ## 1b. Quick Status
 
@@ -60,11 +61,12 @@
 - [ ] DT019 — command_bar.py vazio
 - [ ] DT020 — Agenda viewport cortada
 - [x] DT021 — Loaders/CRUDs: ORM fora da sessão
-- [ ] DT022 — Logging: adoção zero fora de habit_instance_service
+- [x] DT022 — Logging: adoção zero fora de habit_instance_service
 - [x] DT023 — Instâncias diárias: geração manual obrigatória
 - [x] DT024 — Keybindings Ctrl+Números inoperantes em VTE/GNOME
+- [ ] DT025 — Pyright como job CI complementar ao mypy e ruff
 
-**Resolvidos:** 13/24 | **Pendentes:** 10/24 | **Aceitos:** 1/24
+**Resolvidos:** 14/25 | **Pendentes:** 10/25 | **Aceitos:** 1/25
 
 ---
 
@@ -244,7 +246,7 @@
 - **Resolução:** Alinhamento ao padrão `_load(s: Session) -> dict/tuple` já usado em `load_instances` e `load_active_timer`. Toda extração de dados acontece dentro do callback; apenas tipos primitivos (dict, tuple, int) saem da sessão.
 - **Commits:** `c546b42`, `195bf0e`
 
-### DT-022: Logging Estruturado — Adoção Zero Fora de habit_instance_service
+### DT-022: Logging Estruturado — Adoção Zero Fora de habit_instance_service (RESOLVIDO)
 
 - **Descoberto:** 11/03/2026 (Auditoria de observabilidade)
 - **Impacto:** Infraestrutura de logging existe (`utils/logger.py` com `setup_logger`, `get_logger`, `RotatingFileHandler`, níveis, toggle para testes), mas apenas `habit_instance_service.py` usa (20 chamadas). Os demais 8 services, toda a camada TUI e todos os commands têm zero instrumentação. Erros em `timer_service`, `routine_service`, `task_service` e no dashboard são invisíveis — `except Exception` engole silenciosamente sem rastro. Bugs como o DetachedInstanceError (DT-021) foram detectados apenas por inspeção manual de código.
@@ -256,7 +258,10 @@
   - Níveis: ERROR (exceções, I/O), WARNING (degradação), INFO (operações de negócio), DEBUG (queries, refresh cycles)
   - Correlation ID por ação do usuário (equivalente local de distributed tracing)
 - **Ferramentas de análise:** `jq` (filtros CLI), `lnav` (TUI para logs), `tail -f | jq` (live stream). Possibilidade futura de ferramenta própria de análise integrada ao ecossistema ATOMVS.
-- **Sprint:** Sprint 5
+- **Resolvido:** 13/03/2026
+- **Resolução:** MR !31 (feat/structured-logging). `logger.py` refatorado com formato dual (texto console + JSON Lines arquivo), XDG paths, `python-json-logger>=3.0.0`, `configure_logging()` idempotente. Instrumentação completa: 8 services (info em operações de negócio), camada TUI (session, loader, screen), 8 commands (warning/exception em todos os except). Imagem CI reconstruída com dependência.
+- **Commits:** `93b9843` a `b5da37b` (14 commits na branch)
+- **Sprint:** feat/structured-logging
 
 ---
 
@@ -280,6 +285,15 @@
 
 ---
 
+### DT-025: Pyright como Job CI Complementar
+
+- **Descoberto:** 13/03/2026
+- **Impacto:** O projeto usa mypy (`--check-untyped-defs`) como único type checker. Pyright oferece análise complementar — detecta categorias de erros que o mypy ignora (narrowing de unions, reachability, import resolution) e é significativamente mais rápido. A adição como job CI não-bloqueante (`allow_failure: true`) amplia a cobertura de type safety sem risco de quebrar pipelines.
+- **Ação:** Adicionar job `pyright` no `.gitlab-ci.yml` com `allow_failure: true`. Configurar `pyrightconfig.json` com `typeCheckingMode: "basic"` inicialmente, evoluir para `"standard"` conforme erros forem resolvidos.
+- **Sprint:** Sprint futuro
+
+---
+
 ## 4. Política de Gestão
 
 Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), severidade e sprint planejado para resolução. O inventário é revisado a cada release.
@@ -298,6 +312,8 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 | Data       | Versão | Mudanças                                                |
 | ---------- | ------ | ------------------------------------------------------- |
+| 2026-03-13 | 2.5.0  | DT-022 resolvido (feat/structured-logging mergeado).    |
+|            |        | Adicionado DT-025 (Pyright CI complementar)             |
 | 2026-03-12 | 2.4.0  | Adicionados DT-023 e DT-024 (resolvidos): auto-geração  |
 |            |        | de instâncias diárias e keybindings VTE/GNOME           |
 | 2026-03-11 | 2.3.0  | Adicionado DT-022 (logging estruturado: escopo,         |
@@ -315,4 +331,4 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 12 de Março de 2026
+**Última atualização:** 13 de Março de 2026
