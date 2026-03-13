@@ -150,7 +150,7 @@ class TestBRTUI009R04ServiceAction:
 
         result, error = service_action(action)
         assert result is None
-        assert "DB crash" in error
+        assert error == "Erro interno"
 
 
 # ============================================================

@@ -23,6 +23,9 @@ from contextlib import contextmanager
 from sqlmodel import Session
 
 from timeblock.database.engine import get_engine_context
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 @contextmanager
@@ -59,6 +62,8 @@ def service_action[T](
             session.commit()
             return result, None
     except (ValueError, KeyError) as e:
+        logger.warning("Operação recusada: %s", e)
         return None, str(e)
-    except Exception as e:
-        return None, str(e)
+    except Exception:
+        logger.exception("Erro inesperado em service_action")
+        return None, "Erro interno"

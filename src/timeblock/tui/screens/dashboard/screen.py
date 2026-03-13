@@ -29,6 +29,9 @@ from timeblock.tui.widgets.habits_panel import HabitsPanel
 from timeblock.tui.widgets.metrics_panel import MetricsPanel
 from timeblock.tui.widgets.tasks_panel import TasksPanel
 from timeblock.tui.widgets.timer_panel import TimerPanel
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class DashboardScreen(Static):
@@ -213,7 +216,7 @@ class DashboardScreen(Static):
 
             self.app.query_one(HeaderBar)._refresh_content()
         except Exception:
-            pass
+            logger.debug("HeaderBar indisponível para refresh")
 
     # =========================================================================
     # Data Loading (delegado para loader.py)
@@ -247,7 +250,7 @@ class DashboardScreen(Static):
             self.query_one(AgendaPanel).update_data(instances)
             self.query_one(HabitsPanel).update_data(instances)
         except Exception:
-            pass
+            logger.debug("Panels indisponíveis durante refresh")
 
     def _tick_timer(self) -> None:
         """Atualiza TimerPanel a cada segundo (DT-015)."""
@@ -255,7 +258,7 @@ class DashboardScreen(Static):
         try:
             self.query_one(TimerPanel).update_data(timer)
         except Exception:
-            pass
+            logger.debug("TimerPanel indisponível durante tick")
 
     def refresh_data(self) -> None:
         """Carrega dados via loader e distribui para panels."""
@@ -271,7 +274,7 @@ class DashboardScreen(Static):
             self.query_one("#agenda-column").border_title = "Agenda do Dia"
             self.query_one("#agenda-header", Static).update("")
         except Exception:
-            pass
+            logger.debug("Layout parcial durante inicialização")
 
         self.query_one(AgendaPanel).update_data(instances)
         self.query_one(HabitsPanel).update_data(instances)

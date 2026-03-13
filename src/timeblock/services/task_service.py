@@ -6,9 +6,12 @@ from sqlmodel import Session, select
 
 from timeblock.database import get_engine_context
 from timeblock.models import Task
+from timeblock.utils.logger import get_logger
 
 from .event_reordering_models import Conflict
 from .event_reordering_service import EventReorderingService
+
+logger = get_logger(__name__)
 
 
 class TaskService:
@@ -49,6 +52,7 @@ class TaskService:
             sess.add(task)
             sess.commit()
             sess.refresh(task)
+            logger.info("Task criada: id=%s, title='%s'", task.id, task.title)
             return task
 
         if session is not None:
@@ -189,6 +193,7 @@ class TaskService:
             sess.add(task)
             sess.commit()
             sess.refresh(task)
+            logger.info("Task concluída: id=%s", task_id)
             return task
 
         if session is not None:
@@ -210,6 +215,7 @@ class TaskService:
                 return False
             sess.delete(task)
             sess.commit()
+            logger.info("Task deletada: id=%s", task_id)
             return True
 
         if session is not None:
