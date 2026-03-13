@@ -49,6 +49,7 @@ class HabitService:
         self.session.add(habit)
         self.session.commit()
         self.session.refresh(habit)
+        logger.info("Hábito criado: id=%s, title='%s'", habit.id, habit.title)
         return habit
 
     def get_habit(self, habit_id: int) -> Habit | None:
@@ -97,6 +98,7 @@ class HabitService:
         self.session.add(habit)
         self.session.commit()
         self.session.refresh(habit)
+        logger.info("Hábito atualizado: id=%s", habit.id)
         return habit
 
     def delete_habit(self, habit_id: int) -> bool:
@@ -107,4 +109,5 @@ class HabitService:
 
         self.session.delete(habit)
         self.session.commit()
+        logger.info("Hábito deletado: id=%s", habit_id)
         return True
