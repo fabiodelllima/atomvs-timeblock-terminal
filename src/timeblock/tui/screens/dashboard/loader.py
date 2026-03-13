@@ -21,6 +21,9 @@ from timeblock.services.routine_service import RoutineService
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
 from timeblock.tui.session import service_action
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def ensure_today_instances() -> int:
@@ -80,6 +83,7 @@ def ensure_today_instances() -> int:
             return 0
         return result
     except Exception:
+        logger.exception("Falha em ensure_today_instances")
         return 0
 
 
@@ -103,6 +107,7 @@ def load_active_routine() -> tuple[int | None, str]:
             return None, ""
         return result
     except Exception:
+        logger.exception("Falha em load_active_routine")
         return None, ""
 
 
@@ -155,6 +160,7 @@ def load_instances() -> list[dict]:
             return []
         return result
     except Exception:
+        logger.exception("Falha ao carregar instâncias")
         return []
 
 
@@ -214,6 +220,7 @@ def load_tasks() -> list[dict]:
             return []
         return result
     except Exception:
+        logger.exception("Falha ao carregar tasks")
         return []
 
 
@@ -259,4 +266,5 @@ def load_active_timer() -> dict[str, Any] | None:
             return None
         return result
     except Exception:
+        logger.exception("Falha em load_active_timer")
         return None
