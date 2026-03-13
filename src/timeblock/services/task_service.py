@@ -6,9 +6,12 @@ from sqlmodel import Session, select
 
 from timeblock.database import get_engine_context
 from timeblock.models import Task
+from timeblock.utils.logger import get_logger
 
 from .event_reordering_models import Conflict
 from .event_reordering_service import EventReorderingService
+
+logger = get_logger(__name__)
 
 
 class TaskService:

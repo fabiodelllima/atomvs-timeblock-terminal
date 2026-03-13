@@ -3,6 +3,9 @@
 from sqlmodel import Session, select
 
 from timeblock.models import Routine
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class RoutineService:
@@ -79,6 +82,7 @@ class RoutineService:
             raise ValueError(f"Rotina {routine_id} não encontrada")
 
         self._activate_routine_internal(routine)
+        logger.info("Rotina ativada: id=%s", routine_id)
         return routine
 
     def _activate_routine_internal(self, routine: Routine) -> None:

@@ -5,6 +5,9 @@ from datetime import time
 from sqlmodel import Session, select
 
 from timeblock.models import Habit, Recurrence
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class HabitService:
