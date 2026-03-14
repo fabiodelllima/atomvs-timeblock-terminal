@@ -173,6 +173,7 @@ class TestBRRoutine003:
         task = Task(
             title="Dentista",
             scheduled_datetime=datetime(2025, 11, 25, 14, 30),
+            original_scheduled_datetime=datetime(2025, 11, 25, 14, 30),
         )
         session.add(task)
         session.commit()
@@ -190,6 +191,7 @@ class TestBRRoutine003:
         task = Task(
             title="Dentista",
             scheduled_datetime=datetime(2025, 11, 25, 14, 30),
+            original_scheduled_datetime=datetime(2025, 11, 25, 14, 30),
         )
         session.add(task)
         session.commit()

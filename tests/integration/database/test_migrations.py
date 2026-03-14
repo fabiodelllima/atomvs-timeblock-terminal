@@ -209,6 +209,7 @@ class TestBRDatabaseMigrations:
             task = Task(
                 title="Doctor Appointment",
                 scheduled_datetime=datetime(2025, 10, 17, 14, 0),
+                original_scheduled_datetime=datetime(2025, 10, 17, 14, 0),
             )
             session.add(task)
             session.commit()

@@ -31,6 +31,9 @@ class TestBRTask006:
     def test_br_task_006_has_only_expected_fields(self):
         """BR-TASK-006: Task possui apenas campos do MVP."""
         expected_fields = {
+            "original_scheduled_datetime",
+            "cancelled_datetime",
+            "postponement_count",
             "id",
             "title",
             "scheduled_datetime",

@@ -175,44 +175,73 @@ def _task_proximity(days: int) -> str:
     return f"Em {days}d"
 
 
-def load_tasks() -> list[dict]:
-    """Carrega tasks pendentes como lista de dicts com campos derivados.
+def _build_task_dict(task: Any, status: str, proximity: str | None = None) -> dict:
+    """Converte Task ORM em dict para consumo do TasksPanel.
 
-    Toda extração de dados (incluindo atributos escalares) é feita
-    dentro do callback para consistência com os demais loaders e
-    prevenção de DetachedInstanceError em futuras expansões.
+    Extração centralizada para evitar duplicação entre pendentes
+    e recentes (BR-TUI-003-R29).
+    """
+    today = date.today()
+    nm = task.title[:20] if hasattr(task, "title") else str(task)[:20]
+    dt = task.scheduled_datetime
+    task_date = dt.date() if dt else today
+    days = (task_date - today).days
+
+    if dt and (dt.hour != 0 or dt.minute != 0):
+        time_str = dt.strftime("%H:%M")
+    else:
+        time_str = "--:--"
+
+    if proximity is None:
+        proximity = _task_proximity(days)
+
+    return {
+        "id": task.id,
+        "name": nm,
+        "proximity": proximity,
+        "date": dt.strftime("%d/%m") if dt else "",
+        "time": time_str,
+        "status": status,
+        "days": days,
+    }
+
+
+def load_tasks() -> list[dict]:
+    """Carrega tasks para o dashboard (BR-TUI-003-R29).
+
+    Combina pendentes/overdue com concluídas e canceladas das últimas 24h.
+    Pendentes/overdue têm prioridade dentro do limite de 9 items.
+    Toda extração de dados é feita dentro do callback para consistência
+    com os demais loaders e prevenção de DetachedInstanceError.
     """
 
     def _load(s: Session) -> list[dict]:
-        result = TaskService.list_pending_tasks(session=s)
-        if not result:
-            return []
-        tasks: list[dict] = []
-        today = date.today()
-        for task in result[:9]:
-            nm = task.title[:20] if hasattr(task, "title") else str(task)[:20]
-            dt = task.scheduled_datetime
-            task_date = dt.date() if dt else today
-            days = (task_date - today).days
+        # Pendentes + overdue (sem filtro temporal)
+        pending = TaskService.list_pending_tasks(session=s)
+        active_tasks: list[dict] = []
+        for task in pending:
+            status = task.derived_status  # "overdue" ou "pending"
+            active_tasks.append(_build_task_dict(task, status))
 
-            # Horário meia-noite (00:00) indica sem horário definido
-            if dt and (dt.hour != 0 or dt.minute != 0):
-                time_str = dt.strftime("%H:%M")
-            else:
-                time_str = "--:--"
+        # Concluídas recentes (últimas 24h)
+        completed = TaskService.list_recently_completed_tasks(hours=24, session=s)
+        recent_tasks: list[dict] = []
+        for task in completed:
+            recent_tasks.append(_build_task_dict(task, "completed", "Concluída"))
 
-            tasks.append(
-                {
-                    "id": task.id,
-                    "name": nm,
-                    "proximity": _task_proximity(days),
-                    "date": dt.strftime("%d/%m") if dt else "",
-                    "time": time_str,
-                    "status": "overdue" if days < 0 else "pending",
-                    "days": days,
-                }
-            )
-        return tasks
+        # Canceladas recentes (últimas 24h)
+        cancelled = TaskService.list_recently_cancelled_tasks(hours=24, session=s)
+        for task in cancelled:
+            recent_tasks.append(_build_task_dict(task, "cancelled", "Cancelada"))
+
+        # Pendentes/overdue têm prioridade, recentes preenchem o restante
+        limit = 9
+        result = active_tasks[:limit]
+        remaining = limit - len(result)
+        if remaining > 0:
+            result.extend(recent_tasks[:remaining])
+
+        return result
 
     try:
         result, error = service_action(_load)
