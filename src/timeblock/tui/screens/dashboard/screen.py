@@ -289,4 +289,4 @@ class DashboardScreen(Static):
         self.query_one(HabitsPanel).update_data(instances)
         self.query_one(TasksPanel).update_data(tasks)
         self.query_one(TimerPanel).update_data(timer)
-        self.query_one(MetricsPanel).update_data({})
+        self.query_one(MetricsPanel).update_data(loader.load_metrics())
