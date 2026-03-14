@@ -53,6 +53,11 @@ DashboardScreen {
     height: 1fr;                       /* Preenche espaço restante */
     overflow-y: auto;                  /* Scroll vertical quando necessário */
     padding: 0 1 1 1;                  /* Padding: 0 top, 1 lados, 1 bottom */
+    scrollbar-size-vertical: 1;        /* Scrollbar fina (1 caractere) */
+    scrollbar-color: #45475A;          /* Surface1: thumb */
+    scrollbar-background: #1E1E2E;     /* Base: fundo */
+    scrollbar-color-hover: #585B70;    /* Surface2: hover */
+    scrollbar-color-active: #7F849C;   /* Overlay1: ativo */
 }
 
 #agenda-actions {
