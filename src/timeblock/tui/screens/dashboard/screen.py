@@ -70,8 +70,17 @@ class DashboardScreen(Static):
         loader.ensure_today_instances()
         self.refresh_data()
         self.app.set_focus(None)
+        # BR-TUI-003-R15: auto-scroll na hora atual
+        self.call_after_refresh(self._autoscroll_agenda)
         self.set_interval(1, self._tick_timer)
         self.set_interval(60, self._refresh_agenda)
+
+    def _autoscroll_agenda(self) -> None:
+        """Auto-scroll da agenda na hora atual (BR-TUI-003-R15)."""
+        try:
+            self.query_one(AgendaPanel).scroll_to_current_time()
+        except Exception:
+            pass  # Agenda pode nao estar montada ainda
 
     def on_descendant_focus(self, event) -> None:
         """Rastreia panel focado para CRUD contextual."""
