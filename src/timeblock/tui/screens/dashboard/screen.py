@@ -56,6 +56,7 @@ class DashboardScreen(Static):
                 Static(id="agenda-header"),
                 AgendaPanel(id="agenda-content"),
                 id="agenda-column",
+                can_focus=False,
             )
             yield Vertical(
                 HabitsPanel(id="panel-habits"),
