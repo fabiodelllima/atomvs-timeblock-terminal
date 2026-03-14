@@ -1207,7 +1207,9 @@ A Task é o complemento pontual dos Habits recorrentes. Enquanto hábitos repres
 
 A independência estrutural da Task em relação à Routine é uma decisão deliberada de design. Uma tarefa de trabalho não pertence à "Rotina Matinal" nem à "Rotina Noturna" — ela existe por si só, visível independente de qual rotina está ativa. Trocar de rotina não esconde tarefas pendentes. Deletar uma rotina não afeta tarefas. Essa separação garante que compromissos pontuais nunca desapareçam acidentalmente ao reorganizar hábitos recorrentes.
 
-O modelo de Task é intencionalmente simples: título, data/hora, descrição opcional e um estado binário derivado (pendente se `completed_datetime` é nulo, concluída se preenchido). Não há prioridade, não há subtarefas, não há dependências. Essa simplicidade é proposital: o TimeBlock Planner não é um gerenciador de projetos. Tasks existem para que eventos pontuais possam ser posicionados na linha do tempo ao lado dos hábitos, criando uma visão completa do dia — e para que o sistema possa detectar conflitos entre tasks e hábitos da rotina.
+O modelo de Task evoluiu de um checkbox simples para uma entidade com lifecycle rastreável (ADR-036). O status é derivado de timestamps — `completed_datetime`, `cancelled_datetime` e `scheduled_datetime` — sem enum explícito, seguindo a mesma filosofia de auditabilidade do restante do domínio. Quatro estados são derivados por precedência fixa: CANCELLED, COMPLETED, OVERDUE e PENDING (BR-TASK-007). Adiamentos são rastreados via `original_scheduled_datetime` (imutável, fixado na criação) e `postponement_count` (incrementado a cada reagendamento para data posterior), permitindo análise de padrões de procrastinação (BR-TASK-008). Cancelamento opera como soft delete — o registro permanece no banco com `cancelled_datetime` preenchido, preservando dados para métricas (BR-TASK-009). A partir desses timestamps, métricas como tempo até conclusão, taxa de pontualidade e frequência de adiamento são calculadas sob demanda (BR-TASK-010).
+
+Não há prioridade, não há subtarefas, não há dependências. O TimeBlock Planner não é um gerenciador de projetos. Tasks existem para que eventos pontuais possam ser posicionados na linha do tempo ao lado dos hábitos, criando uma visão completa do dia — e para que o sistema possa detectar conflitos entre tasks e hábitos da rotina.
 
 ### BR-TASK-001: Estrutura de Task
 
@@ -1378,6 +1380,173 @@ task reopen ID
 - Checklist interno
 
 **Justificativa:** Foco do TimeBlock está em hábitos e rotinas. Tasks são complemento para atividades pontuais.
+
+---
+
+### BR-TASK-007: Task Lifecycle — Derivação de Status (NOVA 14/03/2026)
+
+**Descrição:** O status de uma Task é derivado de seus timestamps, sem campo enum explícito. A ordem de avaliação é determinística e com precedência fixa.
+
+**Decisão arquitetural:** ADR-036
+
+**Derivação (em ordem de precedência):**
+
+1. `cancelled_datetime is not None` => CANCELLED
+2. `completed_datetime is not None` => COMPLETED
+3. `scheduled_datetime < now()` => OVERDUE
+4. Caso contrário => PENDING
+
+**Regras:**
+
+1. Cancelamento tem precedência absoluta — mesmo que `completed_datetime` esteja preenchido, `cancelled_datetime` prevalece
+2. A derivação é pura (sem side effects) e determinística (mesmos inputs => mesmo output)
+3. Nenhum campo `status` é armazenado — o status é sempre calculado na leitura
+4. A implementação deve ser um `@property` ou função utilitária, nunca lógica espalhada
+
+**Testes:**
+
+- `test_br_task_007_pending_status_derivation`
+- `test_br_task_007_completed_status_derivation`
+- `test_br_task_007_cancelled_status_derivation`
+- `test_br_task_007_overdue_status_derivation`
+- `test_br_task_007_cancelled_overrides_completed`
+
+---
+
+### BR-TASK-008: Rastreamento de Adiamento (NOVA 14/03/2026)
+
+**Descrição:** Cada adiamento de task é rastreado para análise posterior de padrões comportamentais. O adiamento é ortogonal ao status — uma task pode estar em qualquer status e ter histórico de adiamentos.
+
+**Decisão arquitetural:** ADR-036
+
+**Campos:**
+
+```python
+original_scheduled_datetime: datetime  # Imutável, fixado na criação
+postponement_count: int = 0            # Incrementado a cada adiamento
+```
+
+**Regras:**
+
+1. `original_scheduled_datetime` é definido na criação da task com o valor de `scheduled_datetime` e nunca é alterado depois
+2. `postponement_count` é incrementado quando `scheduled_datetime` é atualizado para uma data **posterior** à atual
+3. Reagendar para data **anterior** (antecipação) não incrementa o contador
+4. Reagendar para a mesma data/hora não incrementa o contador
+5. O delta `scheduled_datetime - original_scheduled_datetime` fornece o adiamento total em dias
+
+**Métricas derivadas:**
+
+```python
+was_postponed    = postponement_count > 0
+days_postponed   = (scheduled_datetime - original_scheduled_datetime).days
+avg_postponement = days_postponed / postponement_count  # se count > 0
+```
+
+**Testes:**
+
+- `test_br_task_008_original_datetime_set_on_creation`
+- `test_br_task_008_original_datetime_immutable_on_update`
+- `test_br_task_008_postponement_count_increments_on_later_date`
+- `test_br_task_008_postponement_count_unchanged_on_earlier_date`
+- `test_br_task_008_postponement_count_unchanged_on_same_date`
+- `test_br_task_008_days_postponed_calculation`
+
+---
+
+### BR-TASK-009: Cancelamento Soft Delete (NOVA 14/03/2026)
+
+**Descrição:** Cancelar uma task registra o timestamp sem remover o registro do banco, preservando dados para métricas e histórico.
+
+**Decisão arquitetural:** ADR-036
+
+**Campo:**
+
+```python
+cancelled_datetime: datetime | None = None
+```
+
+**Regras:**
+
+1. `task delete` seta `cancelled_datetime = datetime.now()` (soft delete)
+2. Task cancelada sai da lista de pendentes mas permanece no banco
+3. Task cancelada aparece no dashboard por 24h com status CANCELLED e strikethrough
+4. Reverter cancelamento é possível zerando `cancelled_datetime` (via `task reopen`)
+5. Hard delete (remoção permanente) disponível via `task purge` — operação futura, não implementada no MVP
+
+**Impacto em operações:**
+
+| Operação                | Comportamento                     |
+| ----------------------- | --------------------------------- |
+| `task list`             | Omite canceladas                  |
+| `task list --all`       | Inclui canceladas                 |
+| `task list --cancelled` | Apenas canceladas                 |
+| Dashboard (TUI)         | Mostra canceladas das últimas 24h |
+
+**Testes:**
+
+- `test_br_task_009_cancel_sets_datetime`
+- `test_br_task_009_cancel_preserves_record`
+- `test_br_task_009_cancelled_excluded_from_pending`
+- `test_br_task_009_cancelled_included_in_all`
+- `test_br_task_009_reopen_clears_cancelled_datetime`
+
+---
+
+### BR-TASK-010: Métricas de Task Lifecycle (NOVA 14/03/2026)
+
+**Descrição:** O sistema calcula métricas a partir dos timestamps do lifecycle para análise de produtividade e padrões comportamentais.
+
+**Decisão arquitetural:** ADR-036
+
+**Métricas por task:**
+
+```python
+# Tempo até conclusão (apenas tasks COMPLETED)
+time_to_completion = completed_datetime - original_scheduled_datetime
+
+# Pontualidade
+completed_on_time = completed_datetime.date() <= original_scheduled_datetime.date()
+days_late = max(0, (completed_datetime.date() - original_scheduled_datetime.date()).days)
+
+# Adiamento (qualquer status)
+was_postponed = postponement_count > 0
+total_days_postponed = (scheduled_datetime - original_scheduled_datetime).days
+```
+
+**Métricas agregadas (período configurável):**
+
+```python
+# Taxas
+completion_rate = completed_count / total_count
+cancellation_rate = cancelled_count / total_count
+on_time_rate = on_time_count / completed_count
+
+# Adiamento
+avg_postponement_count = sum(postponement_counts) / total_count
+avg_days_postponed = sum(days_postponed) / postponed_count
+most_postponed_tasks = top_n(tasks, key=postponement_count)
+
+# Tempo
+avg_time_to_completion = mean(time_to_completions)
+```
+
+**Regras:**
+
+1. Métricas são calculadas sob demanda (query), não armazenadas
+2. Período padrão: últimos 7 dias e últimos 30 dias
+3. Tasks sem `original_scheduled_datetime` (migração) usam `scheduled_datetime` como fallback
+4. Tasks PENDING/OVERDUE contribuem para contagem total mas não para métricas de conclusão
+5. Estas métricas alimentam o futuro MetricsPanel (DT-017)
+
+**Testes:**
+
+- `test_br_task_010_time_to_completion_calculation`
+- `test_br_task_010_on_time_detection`
+- `test_br_task_010_days_late_calculation`
+- `test_br_task_010_completion_rate`
+- `test_br_task_010_cancellation_rate`
+- `test_br_task_010_postponement_aggregates`
+- `test_br_task_010_migration_fallback_original_datetime`
 
 ---
 
@@ -2731,6 +2900,59 @@ PROIBIDOS (reservados pelo OS):
 
 ---
 
+### BR-TUI-003-R29: Tasks Recentes no Dashboard (NOVA 14/03/2026)
+
+**Descrição:** O `load_tasks()` do dashboard inclui tasks concluídas e canceladas das últimas 24 horas, além das pendentes e overdue. Tasks recentes aparecem após as ativas na ordenação.
+
+**Decisão arquitetural:** ADR-036
+
+**Dependências:** BR-TASK-007 (derivação de status), BR-TASK-009 (soft delete)
+
+**Dados carregados:**
+
+```python
+# Pendentes + Overdue (sem filtro temporal)
+pending_tasks = Task.where(completed_datetime=None, cancelled_datetime=None)
+
+# Concluídas recentes (últimas 24h)
+recent_completed = Task.where(
+    completed_datetime >= now() - 24h,
+    cancelled_datetime=None
+)
+
+# Canceladas recentes (últimas 24h)
+recent_cancelled = Task.where(
+    cancelled_datetime >= now() - 24h
+)
+```
+
+**Ordenação no painel (BR-TUI-003-R20 estendida):**
+
+```plaintext
+overdue > pending > completed (recentes) > cancelled (recentes)
+```
+
+**Regras:**
+
+1. O loader combina as três queries em uma lista unificada
+2. Cada dict inclui `status` derivado conforme BR-TASK-007
+3. O campo `proximity` para tasks completed exibe "Concluída" (ou delta como "Há 2h")
+4. O campo `proximity` para tasks cancelled exibe "Cancelada"
+5. Tasks completed/cancelled contam para o subtítulo (BR-TUI-003-R23) — os contadores já existem no `TasksPanel`
+6. Limite de 9 tasks no painel permanece (BR-TUI-003 original)
+7. Dentro do limite, pendentes/overdue têm prioridade sobre recentes
+
+**Testes:**
+
+- `test_br_tui_003_r29_loads_pending_tasks`
+- `test_br_tui_003_r29_loads_recently_completed`
+- `test_br_tui_003_r29_loads_recently_cancelled`
+- `test_br_tui_003_r29_excludes_old_completed`
+- `test_br_tui_003_r29_pending_priority_over_recent`
+- `test_br_tui_003_r29_respects_nine_task_limit`
+
+---
+
 ### BR-TUI-008: Visual Consistency (Material-like)
 
 **Descrição:** A TUI segue design system Material-like com paleta de cores definida, cards com bordas, spacing consistente, hierarquia visual clara e layout responsivo com três breakpoints.
@@ -3277,6 +3499,6 @@ src/timeblock/tui/styles/
 
 ---
 
-**Última atualização em:** 05 de Março de 2026
+**Última atualização em:** 14 de Março de 2026
 
-**Total de regras:** 104 BRs
+**Total de regras:** 109 BRs
