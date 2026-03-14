@@ -1,4 +1,4 @@
-"""Task service com detecção de conflitos."""
+"""Task service com detecção de conflitos e lifecycle (ADR-036)."""
 
 from datetime import datetime
 
@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 
 
 class TaskService:
-    """Service for managing tasks."""
+    """Serviço de gerenciamento de tasks (ADR-036)."""
 
     @staticmethod
     def create_task(
@@ -26,14 +26,10 @@ class TaskService:
         tag_id: int | None = None,
         session: Session | None = None,
     ) -> Task:
-        """Create a new task.
-        Args:
-            title: Task title
-            scheduled_datetime: When task is scheduled
-            description: Optional description
-            color: Optional color
-            tag_id: Optional tag reference
-            session: Optional session (for tests/transactions)
+        """Cria uma nova task.
+
+        BR-TASK-008: original_scheduled_datetime é fixado com o valor de scheduled_datetime
+        na criação e nunca é modificado depois.
         """
         title = title.strip()
         if not title:
@@ -45,6 +41,7 @@ class TaskService:
             task = Task(
                 title=title,
                 scheduled_datetime=scheduled_datetime,
+                original_scheduled_datetime=scheduled_datetime,
                 description=description,
                 color=color,
                 tag_id=tag_id,
@@ -62,11 +59,7 @@ class TaskService:
 
     @staticmethod
     def get_task(task_id: int, session: Session | None = None) -> Task | None:
-        """Get a task by ID.
-        Args:
-            task_id: ID of task to retrieve
-            session: Optional session (for tests/transactions)
-        """
+        """Retorna task por ID."""
 
         def _get(sess: Session) -> Task | None:
             return sess.get(Task, task_id)
@@ -82,12 +75,7 @@ class TaskService:
         end: datetime | None = None,
         session: Session | None = None,
     ) -> list[Task]:
-        """List all tasks, optionally filtered by date range.
-        Args:
-            start: Optional start datetime filter
-            end: Optional end datetime filter
-            session: Optional session (for tests/transactions)
-        """
+        """Lista todas as tasks, com filtro opcional por período."""
 
         def _list(sess: Session) -> list[Task]:
             statement = select(Task)
@@ -104,13 +92,16 @@ class TaskService:
 
     @staticmethod
     def list_pending_tasks(session: Session | None = None) -> list[Task]:
-        """List tasks that are not completed.
-        Args:
-            session: Optional session (for tests/transactions)
+        """Lista tasks pendentes (não concluídas e não canceladas).
+
+        BR-TASK-009: tasks canceladas são excluídas da lista de pendentes.
         """
 
         def _list(sess: Session) -> list[Task]:
-            statement = select(Task).where(Task.completed_datetime.is_(None))  # type: ignore[union-attr]
+            statement = select(Task).where(
+                Task.completed_datetime.is_(None),
+                Task.cancelled_datetime.is_(None),
+            )
             return list(sess.exec(statement).all())
 
         if session is not None:
@@ -128,17 +119,9 @@ class TaskService:
         session: Session | None = None,
     ) -> tuple[Task | None, list[Conflict] | None]:
         """Atualiza task existente.
-        Se horário for alterado, detecta conflitos e retorna informações.
-        Não aplica nenhuma resolução automática.
-        Args:
-            task_id: ID da task a atualizar
-            title: Novo título (opcional)
-            scheduled_datetime: Novo horário (opcional)
-            description: Nova descrição (opcional)
-            tag_id: Nova tag (opcional)
-            session: Optional session (for tests/transactions)
-        Returns:
-            Tupla (task atualizada, lista de conflitos se horário mudou)
+
+        BR-TASK-008: se scheduled_datetime é movido para data posterior,
+        incrementa postponement_count. original_scheduled_datetime nunca muda.
         """
 
         def _update(sess: Session) -> tuple[Task | None, bool]:
@@ -156,6 +139,9 @@ class TaskService:
                     raise ValueError("Title cannot exceed 200 characters")
                 task.title = title_stripped
             if scheduled_datetime is not None:
+                # BR-TASK-008: incrementa contador se data posterior
+                if scheduled_datetime > task.scheduled_datetime:
+                    task.postponement_count += 1
                 task.scheduled_datetime = scheduled_datetime
             if description is not None:
                 task.description = description
@@ -179,11 +165,7 @@ class TaskService:
 
     @staticmethod
     def complete_task(task_id: int, session: Session | None = None) -> Task | None:
-        """Mark a task as completed.
-        Args:
-            task_id: ID of task to complete
-            session: Optional session (for tests/transactions)
-        """
+        """Marca task como concluída."""
 
         def _complete(sess: Session) -> Task | None:
             task = sess.get(Task, task_id)
@@ -202,12 +184,54 @@ class TaskService:
             return _complete(sess)
 
     @staticmethod
-    def delete_task(task_id: int, session: Session | None = None) -> bool:
-        """Delete a task.
-        Args:
-            task_id: ID of task to delete
-            session: Optional session (for tests/transactions)
+    def cancel_task(task_id: int, session: Session | None = None) -> Task | None:
+        """Cancela task (soft delete).
+
+        BR-TASK-009: seta cancelled_datetime ao invés de remover o registro.
         """
+
+        def _cancel(sess: Session) -> Task | None:
+            task = sess.get(Task, task_id)
+            if not task:
+                return None
+            task.cancelled_datetime = datetime.now()
+            sess.add(task)
+            sess.commit()
+            sess.refresh(task)
+            logger.info("Task cancelada: id=%s", task_id)
+            return task
+
+        if session is not None:
+            return _cancel(session)
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _cancel(sess)
+
+    @staticmethod
+    def reopen_task(task_id: int, session: Session | None = None) -> Task | None:
+        """Reabre task cancelada.
+
+        BR-TASK-009: limpa cancelled_datetime, retornando task para pendente.
+        """
+
+        def _reopen(sess: Session) -> Task | None:
+            task = sess.get(Task, task_id)
+            if not task:
+                return None
+            task.cancelled_datetime = None
+            sess.add(task)
+            sess.commit()
+            sess.refresh(task)
+            logger.info("Task reaberta: id=%s", task_id)
+            return task
+
+        if session is not None:
+            return _reopen(session)
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _reopen(sess)
+
+    @staticmethod
+    def delete_task(task_id: int, session: Session | None = None) -> bool:
+        """Remove task permanentemente (hard delete — usar cancel_task para soft delete)."""
 
         def _delete(sess: Session) -> bool:
             task = sess.get(Task, task_id)
