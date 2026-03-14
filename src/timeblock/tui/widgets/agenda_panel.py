@@ -142,6 +142,22 @@ class AgendaPanel(Static):
 
         return out
 
+    def scroll_to_current_time(self) -> None:
+        """Auto-scroll para posicionar hora atual no terco superior (BR-TUI-003-R15).
+
+        Calcula offset em linhas baseado no slot atual e faz scroll
+        no container pai (agenda-content tem overflow-y: auto).
+        """
+        now = datetime.now()
+        current_slot = (now.hour * 60 + now.minute) // 30
+        range_start, _ = compute_agenda_range(self._instances)
+        slot_offset = current_slot - range_start
+        if slot_offset < 0:
+            return
+        # Cada slot = 2 linhas; terco superior = 1/3 do viewport
+        line_offset = slot_offset * 2
+        self.scroll_y = max(0, line_offset - 6)  # 6 linhas acima = terco superior
+
     @staticmethod
     def find_block_at(instances: list[dict], hour: int, minute: int = 0) -> dict | None:
         """Encontra bloco que cobre o slot hora:minuto."""
