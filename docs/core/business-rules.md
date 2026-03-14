@@ -2552,27 +2552,45 @@ PROIBIDOS (reservados pelo OS):
 
 ---
 
-### BR-TUI-003-R13: Régua de Horário Adaptativa
+### BR-TUI-003-R13: Régua de Horário Adaptativa (EMENDADA 14/03/2026)
 
-**Descrição:** A agenda exibe range de horários baseado nos eventos do dia, com piso e teto para evitar espaço desperdiçado.
+**Descrição:** A agenda exibe range de horários adaptativo ao conteúdo do dia, cobrindo de 00:00 a 23:30 conforme necessidade. Default compacto quando não há eventos fora do horário comercial.
 
-**Algoritmo:** `range_start = min(06, first_event_hour - 1)`, `range_end = max(22, last_event_hour + 1)`
+**Algoritmo:**
+
+```python
+if not instances:
+    range_start, range_end = 10, 47   # 05:00–23:30 (default)
+else:
+    first_slot = min(i["start_minutes"] // 30 for i in instances)
+    last_slot  = max(-(-i["end_minutes"] // 30) for i in instances)  # ceil
+    range_start = max(0, first_slot - 2)     # 1h padding antes
+    range_end   = min(47, last_slot + 2)     # 1h padding depois
+    range_start = min(range_start, 10)       # nunca acima de 05:00
+    range_end   = max(range_end, 47)         # nunca abaixo de 23:30
+```
 
 **Regras:**
 
-1. Range: `min(06, first_event - 1)` até `max(22, last_event + 1)`
-2. Piso absoluto: 06:00 (não exibe antes das 06:00)
-3. Teto absoluto: 23:00 (não exibe após 23:00)
-4. Granularidade: 30 minutos = 1 linha
-5. Se nenhum evento no dia, exibe 06:00-22:00
+1. Range adaptativo: expande para cobrir todos os eventos com 1h de padding
+2. Piso absoluto: 00:00 (slot 0) — hábitos de madrugada são visíveis
+3. Teto absoluto: 23:30 (slot 47) — cobre até meia-noite
+4. Range mínimo garantido: 05:00–23:30 (slots 10–47) — nunca menor que isso
+5. Granularidade: 30 minutos = 2 linhas (header + fill)
+6. Se nenhum evento no dia, exibe 05:00–23:30
+
+**Emenda:** Removido piso fixo de 06:00 e teto de 22:00 da versão anterior. Range mínimo agora é 05:00–23:30, cobrindo o dia completo. Hábitos de madrugada (antes das 05:00) expandem o range para baixo.
 
 **Testes:**
 
 - `test_br_tui_003_r13_range_adapts_to_events`
-- `test_br_tui_003_r13_floor_06_ceiling_22`
+- `test_br_tui_003_r13_default_range_no_events`
 - `test_br_tui_003_r13_early_event_extends_range`
-- `test_br_tui_003_r13_no_events_default_range`
+- `test_br_tui_003_r13_late_event_extends_range`
+- `test_br_tui_003_r13_madrugada_event_visible`
+- `test_br_tui_003_r13_minimum_range_05_2330`
 - `test_br_tui_003_r13_granularity_30min`
+- `test_br_tui_003_r13_padding_one_hour`
 
 ---
 
