@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from timeblock.database import get_engine_context
 from timeblock.models import Task
@@ -99,8 +99,8 @@ class TaskService:
 
         def _list(sess: Session) -> list[Task]:
             statement = select(Task).where(
-                Task.completed_datetime.is_(None),
-                Task.cancelled_datetime.is_(None),
+                col(Task.completed_datetime).is_(None),
+                col(Task.cancelled_datetime).is_(None),
             )
             return list(sess.exec(statement).all())
 

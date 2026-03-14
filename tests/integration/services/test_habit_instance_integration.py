@@ -136,6 +136,7 @@ class TestBRHabitInstanceReordering:
         task = Task(
             title="Conflicting Task",
             scheduled_datetime=datetime.combine(date.today(), time(10, 30)),
+            original_scheduled_datetime=datetime.combine(date.today(), time(10, 30)),
         )
         test_db.add(task)
         test_db.flush()

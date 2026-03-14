@@ -161,6 +161,7 @@ class TestBRTag002:
         task = Task(
             title="Sem tag",
             scheduled_datetime=datetime(2026, 2, 1, 9, 0),
+            original_scheduled_datetime=datetime(2026, 2, 1, 9, 0),
         )
         session.add(task)
         session.commit()
@@ -180,6 +181,7 @@ class TestBRTag002:
         task = Task(
             title="Com tag",
             scheduled_datetime=datetime(2026, 2, 1, 9, 0),
+            original_scheduled_datetime=datetime(2026, 2, 1, 9, 0),
             tag_id=tag.id,
         )
         session.add(task)
@@ -229,6 +231,7 @@ class TestBRTag002:
         task = Task(
             title="Vinculado",
             scheduled_datetime=datetime(2026, 2, 1, 9, 0),
+            original_scheduled_datetime=datetime(2026, 2, 1, 9, 0),
             tag_id=tag.id,
         )
         session.add(task)
