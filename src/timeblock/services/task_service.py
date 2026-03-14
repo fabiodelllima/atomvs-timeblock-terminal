@@ -246,3 +246,47 @@ class TaskService:
             return _delete(session)
         with get_engine_context() as engine, Session(engine) as sess:
             return _delete(sess)
+
+    @staticmethod
+    def list_recently_completed_tasks(
+        hours: int = 24, session: Session | None = None
+    ) -> list[Task]:
+        """Lista tasks concluídas nas últimas N horas (BR-TUI-003-R29).
+
+        Exclui tasks canceladas (cancelled_datetime prevalece).
+        """
+        from datetime import timedelta
+
+        cutoff = datetime.now() - timedelta(hours=hours)
+
+        def _list(sess: Session) -> list[Task]:
+            statement = select(Task).where(
+                col(Task.completed_datetime) >= cutoff,
+                col(Task.cancelled_datetime).is_(None),
+            )
+            return list(sess.exec(statement).all())
+
+        if session is not None:
+            return _list(session)
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _list(sess)
+
+    @staticmethod
+    def list_recently_cancelled_tasks(
+        hours: int = 24, session: Session | None = None
+    ) -> list[Task]:
+        """Lista tasks canceladas nas últimas N horas (BR-TUI-003-R29)."""
+        from datetime import timedelta
+
+        cutoff = datetime.now() - timedelta(hours=hours)
+
+        def _list(sess: Session) -> list[Task]:
+            statement = select(Task).where(
+                col(Task.cancelled_datetime) >= cutoff,
+            )
+            return list(sess.exec(statement).all())
+
+        if session is not None:
+            return _list(session)
+        with get_engine_context() as engine, Session(engine) as sess:
+            return _list(sess)
