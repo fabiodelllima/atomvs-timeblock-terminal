@@ -17,8 +17,6 @@ from timeblock.services.task_service import TaskService
 # =============================================================================
 
 
-@pytest.mark.xfail(reason="RED — awaiting Task lifecycle implementation")
-@pytest.mark.xfail(reason="RED — awaiting Task lifecycle implementation")
 class TestBRTask007:
     """Valida BR-TASK-007: Status derivado de timestamps."""
 
@@ -76,8 +74,6 @@ class TestBRTask007:
 # =============================================================================
 
 
-@pytest.mark.xfail(reason="RED — awaiting Task lifecycle implementation")
-@pytest.mark.xfail(reason="RED — awaiting Task lifecycle implementation")
 class TestBRTask008:
     """Valida BR-TASK-008: Rastreamento de adiamento."""
 
@@ -144,8 +140,6 @@ class TestBRTask008:
 # =============================================================================
 
 
-@pytest.mark.xfail(reason="RED — awaiting Task lifecycle implementation")
-@pytest.mark.xfail(reason="RED — awaiting Task lifecycle implementation")
 class TestBRTask009:
     """Valida BR-TASK-009: Cancelamento como soft delete."""
 
@@ -202,8 +196,6 @@ class TestBRTask009:
 # =============================================================================
 
 
-@pytest.mark.xfail(reason="RED — awaiting Task lifecycle implementation")
-@pytest.mark.xfail(reason="RED — awaiting Task lifecycle implementation")
 class TestBRTask010:
     """Valida BR-TASK-010: Métricas calculadas de lifecycle."""
 

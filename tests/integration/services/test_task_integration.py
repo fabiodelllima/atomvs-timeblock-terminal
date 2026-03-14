@@ -34,6 +34,7 @@ class TestBRTaskReordering:
         task = Task(
             title="Test Task",
             scheduled_datetime=datetime.combine(date.today(), time(10, 0)),
+            original_scheduled_datetime=datetime.combine(date.today(), time(10, 0)),
         )
         test_db.add(task)
         test_db.flush()
@@ -46,6 +47,7 @@ class TestBRTaskReordering:
         task = Task(
             title="Another Task",
             scheduled_datetime=datetime.combine(date.today(), time(14, 0)),
+            original_scheduled_datetime=datetime.combine(date.today(), time(14, 0)),
         )
         test_db.add(task)
         test_db.flush()

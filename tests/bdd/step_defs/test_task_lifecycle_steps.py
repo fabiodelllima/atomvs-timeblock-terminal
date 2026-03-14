@@ -9,9 +9,6 @@ from sqlmodel import Session
 from timeblock.models import Task
 from timeblock.services.task_service import TaskService
 
-pytestmark = pytest.mark.xfail(reason="RED — awaiting Task lifecycle implementation")
-pytestmark = pytest.mark.xfail(reason="RED — awaiting Task lifecycle implementation")
-
 scenarios("../features/task_lifecycle.feature")
 
 
