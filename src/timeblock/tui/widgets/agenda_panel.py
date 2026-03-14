@@ -23,6 +23,30 @@ from timeblock.tui.colors import (
 from timeblock.tui.formatters import format_duration
 
 
+def compute_agenda_range(instances: list[dict]) -> tuple[int, int]:
+    """Calcula range de slots da régua baseado nos eventos (BR-TUI-003-R13).
+
+    Retorna (start_slot, end_slot) com range minimo 05:00-23:30
+    (slots 10-47). Eventos fora desse intervalo expandem o range
+    com 1h de padding (2 slots).
+    """
+    default_start, default_end = 10, 47  # 05:00-23:30
+
+    if not instances:
+        return default_start, default_end
+
+    first_slot = min(i["start_minutes"] // 30 for i in instances)
+    last_slot = max(-(-i["end_minutes"] // 30) for i in instances)  # ceil
+
+    range_start = max(0, first_slot - 2)  # 1h padding antes
+    range_end = min(47, last_slot + 2)  # 1h padding depois
+
+    range_start = min(range_start, default_start)  # nunca acima de 05:00
+    range_end = max(range_end, default_end)  # nunca abaixo de 23:30
+
+    return range_start, range_end
+
+
 class AgendaPanel(Static):
     can_focus = True
     """Agenda vertical com régua de 30min e blocos proporcionais."""
@@ -71,7 +95,9 @@ class AgendaPanel(Static):
                 return f"[bold {C_ACCENT}]{now.strftime('%H:%M')}[/bold {C_ACCENT}]"
             return f"[dim]{h:02d}:{m:02d}[/dim]"
 
-        for idx in range(12, 45):
+        range_start, range_end = compute_agenda_range(instances)
+
+        for idx in range(range_start, range_end + 1):
             h = idx // 2
             m = (idx % 2) * 30
             tl = _tl(h, m)
@@ -115,6 +141,22 @@ class AgendaPanel(Static):
                 out.append("         [dim]│[/dim]")
 
         return out
+
+    def scroll_to_current_time(self) -> None:
+        """Auto-scroll para posicionar hora atual no terco superior (BR-TUI-003-R15).
+
+        Calcula offset em linhas baseado no slot atual e faz scroll
+        no container pai (agenda-content tem overflow-y: auto).
+        """
+        now = datetime.now()
+        current_slot = (now.hour * 60 + now.minute) // 30
+        range_start, _ = compute_agenda_range(self._instances)
+        slot_offset = current_slot - range_start
+        if slot_offset < 0:
+            return
+        # Cada slot = 2 linhas; terco superior = 1/3 do viewport
+        line_offset = slot_offset * 2
+        self.scroll_y = max(0, line_offset - 6)  # 6 linhas acima = terco superior
 
     @staticmethod
     def find_block_at(instances: list[dict], hour: int, minute: int = 0) -> dict | None:
