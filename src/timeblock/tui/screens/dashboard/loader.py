@@ -297,3 +297,99 @@ def load_active_timer() -> dict[str, Any] | None:
     except Exception:
         logger.exception("Falha em load_active_timer")
         return None
+
+
+_WEEKDAYS_PT = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
+
+
+def load_metrics() -> dict:
+    """Carrega métricas do dashboard (DT-017).
+
+    Calcula streak global, completude 7d/30d e heatmap semanal
+    a partir de HabitInstances da rotina ativa.
+    """
+    from datetime import timedelta
+
+    def _load(s: Session) -> dict:
+        today = date.today()
+
+        # Busca instancias dos ultimos 30 dias
+        cutoff_30d = today - timedelta(days=29)
+        instances_30d = list(
+            s.exec(
+                select(HabitInstance)
+                .where(HabitInstance.date >= cutoff_30d)
+                .where(HabitInstance.date <= today)
+            ).all()
+        )
+
+        if not instances_30d:
+            return {
+                "streak": 0,
+                "best_streak": 0,
+                "pct_7d": 0,
+                "pct_30d": 0,
+                "week_data": [],
+            }
+
+        # --- Completude 30d ---
+        done_30d = sum(1 for i in instances_30d if i.status == Status.DONE)
+        total_30d = len(instances_30d)
+        pct_30d = int((done_30d / total_30d) * 100) if total_30d > 0 else 0
+
+        # --- Completude 7d ---
+        cutoff_7d = today - timedelta(days=6)
+        instances_7d = [i for i in instances_30d if i.date >= cutoff_7d]
+        done_7d = sum(1 for i in instances_7d if i.status == Status.DONE)
+        total_7d = len(instances_7d)
+        pct_7d = int((done_7d / total_7d) * 100) if total_7d > 0 else 0
+
+        # --- Streak (BR-STREAK-001): dias consecutivos com todas DONE ---
+        by_date: dict[date, list] = {}
+        for inst in instances_30d:
+            by_date.setdefault(inst.date, []).append(inst)
+
+        streak = 0
+        d = today
+        while d >= cutoff_30d:
+            day_instances = by_date.get(d, [])
+            if not day_instances:
+                d -= timedelta(days=1)
+                continue
+            all_done = all(i.status == Status.DONE for i in day_instances)
+            if all_done:
+                streak += 1
+                d -= timedelta(days=1)
+            else:
+                break
+
+        # --- Week data (heatmap semanal) ---
+        week_data: list[tuple[str, int, int, str]] = []
+        for offset in range(6, -1, -1):
+            d = today - timedelta(days=offset)
+            day_instances = by_date.get(d, [])
+            total = len(day_instances)
+            done = sum(1 for i in day_instances if i.status == Status.DONE)
+            day_name = _WEEKDAYS_PT[d.weekday()]
+            checks = " ".join(
+                "\u2713" if i.status == Status.DONE else "\u00b7"
+                for i in sorted(day_instances, key=lambda x: x.scheduled_start)
+            )
+            week_data.append((day_name, done, total, checks))
+
+        return {
+            "streak": streak,
+            "best_streak": streak,  # TODO: persistir best_streak historico
+            "pct_7d": pct_7d,
+            "pct_30d": pct_30d,
+            "week_data": week_data,
+        }
+
+    try:
+        result, error = service_action(_load)
+        if error or not result:
+            return {}
+        return result
+    except Exception:
+        logger.exception("Falha em load_metrics")
+        return {}
