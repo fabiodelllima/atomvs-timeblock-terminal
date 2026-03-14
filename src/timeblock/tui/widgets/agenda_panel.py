@@ -156,7 +156,7 @@ class AgendaPanel(Static):
             return
         # Cada slot = 2 linhas; terco superior = 1/3 do viewport
         line_offset = slot_offset * 2
-        self.scroll_y = max(0, line_offset - 6)  # 6 linhas acima = terco superior
+        self.scroll_to(y=max(0, line_offset - 6), animate=False)
 
     @staticmethod
     def find_block_at(instances: list[dict], hour: int, minute: int = 0) -> dict | None:
