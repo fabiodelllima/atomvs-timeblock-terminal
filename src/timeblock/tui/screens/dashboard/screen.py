@@ -12,7 +12,7 @@ Referências:
 
 from datetime import date
 
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.events import Key
 from textual.widgets import Static
 
@@ -52,7 +52,7 @@ class DashboardScreen(Static):
     def compose(self):
         """Compõe layout: agenda esquerda + panels direita."""
         with Horizontal(id="dashboard-layout"):
-            yield Vertical(
+            yield VerticalScroll(
                 Static(id="agenda-header"),
                 AgendaPanel(id="agenda-content"),
                 id="agenda-column",
@@ -71,7 +71,7 @@ class DashboardScreen(Static):
         self.refresh_data()
         self.app.set_focus(None)
         # BR-TUI-003-R15: auto-scroll na hora atual
-        self.call_later(self._autoscroll_agenda)
+        # self.call_later(self._autoscroll_agenda)  # TEMP DISABLED
         self.set_interval(1, self._tick_timer)
         self.set_interval(60, self._refresh_agenda)
 
