@@ -8,6 +8,9 @@ from timeblock.database.engine import get_engine_context
 from timeblock.models.enums import DoneSubstatus, Status, TimerStatus
 from timeblock.models.habit_instance import HabitInstance
 from timeblock.models.time_log import TimeLog
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class TimerService:
@@ -126,6 +129,9 @@ class TimerService:
             sess.add(timelog)
             sess.commit()
             sess.refresh(timelog)
+            logger.info(
+                "Timer iniciado: timelog_id=%s, instance_id=%s", timelog.id, habit_instance_id
+            )
             return timelog
 
         if session is not None:
@@ -216,6 +222,12 @@ class TimerService:
             sess.refresh(timelog)
             sess.refresh(instance)
 
+            logger.info(
+                "Timer parado: timelog_id=%s, duration=%ss, substatus=%s",
+                timelog_id,
+                timelog.duration_seconds,
+                done_substatus.value,
+            )
             return timelog
 
         if session is not None:
@@ -259,6 +271,7 @@ class TimerService:
             sess.add(timelog)
             sess.commit()
             sess.refresh(timelog)
+            logger.info("Timer pausado: timelog_id=%s", timelog_id)
             return timelog
 
         if session is not None:
@@ -304,6 +317,7 @@ class TimerService:
             sess.add(timelog)
             sess.commit()
             sess.refresh(timelog)
+            logger.info("Timer retomado: timelog_id=%s", timelog_id)
             return timelog
 
         if session is not None:

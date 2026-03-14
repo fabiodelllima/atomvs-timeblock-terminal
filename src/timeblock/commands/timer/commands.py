@@ -12,8 +12,11 @@ from timeblock.services.habit_service import HabitService
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
 from timeblock.utils.conflict_display import display_conflicts
+from timeblock.utils.logger import get_logger
 
 from .display import display_timer, format_duration, get_activity_name, get_selected_schedule
+
+logger = get_logger(__name__)
 
 console = Console()
 
@@ -65,6 +68,7 @@ def start_timer(
             display_timer(timelog.id)
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -147,6 +151,7 @@ def pause_timer():
         console.print("[yellow][||] Timer pausado[/yellow]")
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -170,6 +175,7 @@ def resume_timer(
             display_timer(active.id)  # type: ignore[arg-type]
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -198,6 +204,7 @@ def stop_timer():
         console.print()
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -218,6 +225,7 @@ def cancel_timer():
         console.print("[yellow]Timer cancelado (não salvo)[/yellow]")
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -241,5 +249,6 @@ def timer_status():
         console.print(f"Iniciado: {active.start_time.strftime('%H:%M')}\n")
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)

@@ -54,14 +54,15 @@ class AgendaPanel(Static):
         out: list[str] = []
         fw = 38  # fill width
 
-        sorted_inst = sorted(instances, key=lambda x: x.get("start_hour", 0))
+        sorted_inst = sorted(instances, key=lambda x: x.get("start_minutes", 0))
 
         # Mapeia slot index → (inst, role)
         slot_info: dict[int, tuple[dict, str]] = {}
         for inst in sorted_inst:
-            sh = inst.get("start_hour", 0)
-            eh = inst.get("end_hour", sh + 1)
-            si, ei = sh * 2, eh * 2
+            sm = inst.get("start_minutes", 0)
+            em = inst.get("end_minutes", sm + 60)
+            si = sm // 30
+            ei = max(si + 1, -(-em // 30))  # ceil, mínimo 1 slot
             for i, s in enumerate(range(si, ei)):
                 slot_info[s] = (inst, "start" if i == 0 else "fill")
 
@@ -96,7 +97,7 @@ class AgendaPanel(Static):
                     ind = f"[{color}]{icon} {label}[/{color}]"
 
                 if role == "start":
-                    est_min = (inst.get("end_hour", 0) - inst.get("start_hour", 0)) * 60
+                    est_min = inst.get("end_minutes", 0) - inst.get("start_minutes", 0)
                     est_dur = format_duration(est_min) if not dur else dur
                     if bold:
                         nm_fmt = f"[bold {color}]{nm}[/bold {color}]"
@@ -120,8 +121,8 @@ class AgendaPanel(Static):
         """Encontra bloco que cobre o slot hora:minuto."""
         slot_min = hour * 60 + minute
         for inst in instances:
-            start_min = inst.get("start_hour", 0) * 60
-            end_min = inst.get("end_hour", 0) * 60
+            start_min = inst.get("start_minutes", 0)
+            end_min = inst.get("end_minutes", 0)
             if start_min <= slot_min < end_min:
                 return inst
         return None
