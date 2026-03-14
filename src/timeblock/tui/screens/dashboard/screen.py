@@ -71,7 +71,7 @@ class DashboardScreen(Static):
         self.refresh_data()
         self.app.set_focus(None)
         # BR-TUI-003-R15: auto-scroll na hora atual
-        self.call_after_refresh(self._autoscroll_agenda)
+        self.call_later(self._autoscroll_agenda)
         self.set_interval(1, self._tick_timer)
         self.set_interval(60, self._refresh_agenda)
 
