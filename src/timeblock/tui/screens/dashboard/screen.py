@@ -18,7 +18,7 @@ from textual.events import Key
 from textual.widgets import Static
 
 from timeblock.models import HabitInstance
-from timeblock.models.enums import SkipReason, Status
+from timeblock.models.enums import SkipReason
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
@@ -211,9 +211,7 @@ class DashboardScreen(Static):
         def _undo(s: Session) -> None:
             instance = s.get(HabitInstance, message.instance_id)
             if instance:
-                instance.status = Status.PENDING
-                instance.done_substatus = None
-                instance.not_done_substatus = None
+                instance.reset_to_pending()
                 s.add(instance)
                 s.commit()
 
