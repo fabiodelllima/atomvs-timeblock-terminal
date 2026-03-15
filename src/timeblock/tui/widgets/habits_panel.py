@@ -5,8 +5,8 @@ BR-TUI-003-R18: Effort bar proporcional.
 BR-TUI-003-R19: Ordenação por start_time.
 BR-TUI-003-R27: Nome herda cor do status.
 BR-TUI-012: Navegação vertical com setas/j/k e highlight.
-BR-TUI-004: Quick actions — Ctrl+Enter done, Ctrl+S skip.
-BR-TUI-021: Shift+Enter inicia timer para hábito selecionado.
+BR-TUI-004: Quick actions — v done, s skip (ADR-037).
+BR-TUI-021: t inicia timer para hábito selecionado (ADR-037).
 """
 
 from textual.events import Key
@@ -48,13 +48,13 @@ class HabitsPanel(FocusablePanel):
 
     def on_key(self, event: Key) -> None:
         """Captura navegação e quick actions."""
-        if event.key == "ctrl+s":
+        if event.key == "s":
             self._action_skip()
             event.stop()
-        elif event.key == "ctrl+enter":
+        elif event.key == "v":
             self._action_done()
             event.stop()
-        elif event.key == "shift+enter":
+        elif event.key == "t":
             self._action_start_timer()
             event.stop()
 
