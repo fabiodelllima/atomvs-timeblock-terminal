@@ -80,8 +80,9 @@ def open_create_habit(
         FormField(
             name="recurrence",
             label="Recorrência",
+            field_type="select",
             default="EVERYDAY",
-            placeholder="EVERYDAY",
+            options=RECURRENCE_OPTIONS,
         ),
     ]
 
@@ -148,6 +149,12 @@ def open_edit_habit(
             field_type="number",
             required=True,
         ),
+        FormField(
+            name="recurrence",
+            label="Recorrência",
+            field_type="select",
+            options=RECURRENCE_OPTIONS,
+        ),
     ]
     sm = habit_data.get("start_minutes", 0)
     em = habit_data.get("end_minutes", 0)
@@ -157,6 +164,7 @@ def open_edit_habit(
     edit_data = {
         "title": habit_data.get("name", ""),
         "start": f"{sh:02d}:{s_min:02d}",
+        "recurrence": habit_data.get("recurrence", "EVERYDAY"),
         "duration": str(max(duration, 0)),
     }
 
