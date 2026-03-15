@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.6.0
+**Versão:** 2.7.0
 
 **Status:** SSOT
 
@@ -37,6 +37,15 @@
 | DT023 | Instâncias diárias: geração manual obrigatória | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT024 | Keybindings Ctrl+N inoperantes em VTE/GNOME    | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT025 | Pyright como job CI complementar               | BAIXA      | PENDENTE  | -            | Sprint futuro            |
+| DT034 | mark_completed sem done_substatus              | CRITICA    | PENDENTE  | -            | fix/dashboard-quality    |
+| DT035 | Undo handler nao limpa skip_reason/skip_note   | CRITICA    | PENDENTE  | -            | fix/dashboard-quality    |
+| DT036 | TimerStopAndDoneRequest sem handler             | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
+| DT037 | v (done) deveria abrir modal de substatus      | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
+| DT038 | s (postpone) deveria abrir FormModal de edit   | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
+| DT039 | s (skip) deveria abrir modal de SkipReason     | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
+| DT040 | n sem rotina: silent no-op ao inves de modal   | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
+| DT041 | BR-TUI-004/017/018/021 keybindings obsoletos   | ALTA       | PENDENTE  | -            | docs/br-update           |
+| DT042 | BR-HABITINSTANCE-001 nao documenta undo        | ALTA       | PENDENTE  | -            | docs/br-update           |
 
 ## 1b. Quick Status
 
@@ -66,6 +75,15 @@
 - [x] DT024 — Keybindings Ctrl+Números inoperantes em VTE/GNOME
 - [ ] DT025 — Pyright como job CI complementar ao mypy e ruff
 - [ ] DT026 — load_metrics sem filtro de rotina ativa
+- [ ] DT034 — mark_completed sem done_substatus (CRITICA)
+- [ ] DT035 — Undo handler nao limpa skip_reason/skip_note (CRITICA)
+- [ ] DT036 — TimerStopAndDoneRequest sem handler
+- [ ] DT037 — v (done) deveria abrir modal de substatus
+- [ ] DT038 — s (postpone) deveria abrir FormModal de edit
+- [ ] DT039 — s (skip) deveria abrir modal de SkipReason
+- [ ] DT040 — n sem rotina: silent no-op ao inves de modal
+- [ ] DT041 — BR-TUI-004/017/018/021 keybindings obsoletos
+- [ ] DT042 — BR-HABITINSTANCE-001 nao documenta undo
 - [x] DT027 — FormModal sem suporte a campo select (recorrencia)
 - [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
 - [x] DT029 — Conflitos de horario detectados no CRUD habits
@@ -74,7 +92,75 @@
 - [x] DT032 — Migração de banco manual para Task lifecycle
 - [x] DT033 — 3 testes CRUD routines quebrados por VerticalScroll
 
-**Resolvidos:** 27/33 | **Pendentes:** 6/33 | **Aceitos:** 1/33
+**Resolvidos:** 27/42 | **Pendentes:** 15/42 | **Aceitos:** 1/42
+
+---
+
+
+## 1c. Detalhamento de Itens Pendentes (Novos)
+
+### DT-034: mark_completed sem done_substatus (CRITICA)
+
+- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Impacto:** `HabitInstanceService.mark_completed()` seta `status=DONE` sem setar `done_substatus`. Viola BR-HABITINSTANCE-002 regra 1.
+- **Correcao:** Abrir modal de substatus ao pressionar `v` (ADR-038 D3).
+- **BRs afetadas:** BR-HABITINSTANCE-002, BR-TUI-004
+
+### DT-035: Undo handler nao limpa skip_reason/skip_note (CRITICA)
+
+- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Impacto:** Handler undo limpa `done_substatus` e `not_done_substatus` mas nao limpa `skip_reason`, `skip_note`, `completion_percentage`. Viola `validate_status_consistency()`.
+- **Correcao:** Limpar todos os campos no undo.
+- **BRs afetadas:** BR-SKIP-002, BR-HABITINSTANCE-002
+
+### DT-036: TimerStopAndDoneRequest sem handler (ALTA)
+
+- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Impacto:** `v` em habito com timer ativo e silenciosamente ignorado.
+- **Correcao:** Implementar handler com modal de opcoes (ADR-038 D4).
+- **BRs afetadas:** BR-TUI-021
+
+### DT-037: v (done) deveria abrir modal de substatus (ALTA)
+
+- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Impacto:** `v` marca done sem substatus. Viola BR-HABITINSTANCE-002.
+- **Correcao:** Abrir modal com Select de DoneSubstatus (ADR-038 D3).
+- **BRs afetadas:** BR-HABITINSTANCE-002, BR-HABITINSTANCE-003
+
+### DT-038: s (postpone) deveria abrir FormModal de edit (MEDIA)
+
+- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Impacto:** Handler chama `update_task` sem parametros. Nenhuma acao visivel.
+- **Correcao:** `s` abre mesmo FormModal que `e` (ADR-038 D5).
+- **BRs afetadas:** BR-TASK-008, BR-TUI-018
+
+### DT-039: s (skip) deveria abrir modal de SkipReason (MEDIA)
+
+- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Impacto:** `s` aplica `SkipReason.OTHER` hardcoded. Viola BR-SKIP-001.
+- **Correcao:** Abrir modal com Select de SkipReason (ADR-038 D6).
+- **BRs afetadas:** BR-SKIP-001, BR-SKIP-004
+
+### DT-040: n sem rotina: silent no-op no habits panel (MEDIA)
+
+- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Impacto:** `n` com habits focado e sem rotina nao faz nada.
+- **Correcao:** Redirecionar para criacao de rotina (ADR-038 D9).
+- **BRs afetadas:** BR-TUI-017
+
+### DT-041: BR-TUI-004/017/018/021 keybindings obsoletos (ALTA)
+
+- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Impacto:** BRs documentam Ctrl+Enter, Ctrl+S, Shift+Enter. Codigo usa v, s, space, c (ADR-037).
+- **Correcao:** Reescrever secoes de keybindings nas 4 BRs.
+- **BRs afetadas:** BR-TUI-004, BR-TUI-017, BR-TUI-018, BR-TUI-021
+
+### DT-042: BR-HABITINSTANCE-001 nao documenta undo (ALTA)
+
+- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Impacto:** BR define DONE e NOT_DONE como [FINAL]. Codigo implementa undo.
+- **Correcao:** Adicionar transicao undo + BR-HABITINSTANCE-007 (ADR-038 D1).
+- **BRs afetadas:** BR-HABITINSTANCE-001
 
 ---
 
