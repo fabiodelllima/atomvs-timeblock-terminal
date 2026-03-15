@@ -18,7 +18,7 @@ from textual.events import Key
 from textual.widgets import Static
 
 from timeblock.models import HabitInstance
-from timeblock.models.enums import SkipReason
+from timeblock.models.enums import DoneSubstatus, SkipReason
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
@@ -165,7 +165,9 @@ class DashboardScreen(Static):
     def on_habits_panel_habit_done_request(self, message: HabitsPanel.HabitDoneRequest) -> None:
         """Recebe HabitDoneRequest e executa mark_completed via service."""
         service_action(
-            lambda s: HabitInstanceService.mark_completed(message.instance_id, session=s)
+            lambda s: HabitInstanceService.mark_completed(
+                message.instance_id, done_substatus=DoneSubstatus.FULL, session=s
+            )  # TODO(DT-037): modal substituirá hardcode
         )
         self._on_crud_done()
 
