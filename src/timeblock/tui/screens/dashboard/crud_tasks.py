@@ -126,10 +126,11 @@ def open_edit_task(
             required=False,
         ),
     ]
+    raw_time = task_data.get("time", "")
     edit_data = {
         "title": task_data.get("name", ""),
         "date": task_data.get("date", _today_dd_mm()),
-        "time": task_data.get("time", ""),
+        "time": "" if raw_time == "--:--" else raw_time,
     }
 
     def on_submit(data: dict[str, Any]) -> None:
