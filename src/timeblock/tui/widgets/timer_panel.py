@@ -64,17 +64,17 @@ class TimerPanel(Static):
         timer_id = self._timer_info.get("id")
         if not timer_id:
             return
-        if event.key == "shift+enter":
+        if event.key == "space":
             st = self._timer_info.get("status", "")
             if st == "running":
                 self.post_message(self.TimerPauseRequest(timer_id))
             elif st == "paused":
                 self.post_message(self.TimerResumeRequest(timer_id))
             event.stop()
-        elif event.key == "ctrl+enter":
+        elif event.key == "s":
             self.post_message(self.TimerStopRequest(timer_id))
             event.stop()
-        elif event.key == "ctrl+x":
+        elif event.key == "c":
             self.post_message(self.TimerCancelRequest(timer_id))
             event.stop()
 
@@ -119,7 +119,7 @@ class TimerPanel(Static):
         lines.append("")
         lines.append(f"    [{color}]{icon} {label}[/{color}]  {name}")
         lines.append("")
-        lines.append(r"  [dim]Shift+Enter pause  Ctrl+Enter stop  Ctrl+X cancel[/dim]")
+        lines.append(r"  [dim]space pause  s stop  c cancel[/dim]")
         return lines
 
     def _build_idle_lines(self) -> list[str]:
