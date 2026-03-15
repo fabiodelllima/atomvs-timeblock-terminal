@@ -122,7 +122,7 @@ class TestBRTUI005R04ListNavigation:
     def test_br_tui_005_r04_navigate_up_keybinding(self) -> None:
         """'k' navega para cima."""
         keys = self._get_binding_keys()
-        assert "k" in keys
+        assert "i" in keys
 
     def test_br_tui_005_r04_move_down_increments(self) -> None:
         """Move down incrementa selected_index."""

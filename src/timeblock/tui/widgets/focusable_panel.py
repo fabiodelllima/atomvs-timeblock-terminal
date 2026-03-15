@@ -47,7 +47,7 @@ class FocusablePanel(Static):
         if event.key in ("down", "j"):
             self._move_cursor(1)
             event.stop()
-        elif event.key in ("up", "k"):
+        elif event.key in ("up", "i"):
             self._move_cursor(-1)
             event.stop()
         elif event.key == "enter":

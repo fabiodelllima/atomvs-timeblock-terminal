@@ -31,7 +31,7 @@ class HabitsScreen(Widget):
         Binding("d", "select_done", "Done", show=False),
         Binding("s", "select_skip", "Skip", show=False),
         Binding("j", "move_down", "Baixo", show=False),
-        Binding("k", "move_up", "Cima", show=False),
+        Binding("i", "move_up", "Cima", show=False),
         Binding("escape", "cancel_action", "Voltar", show=True),
     ]
 
