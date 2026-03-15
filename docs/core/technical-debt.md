@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.8.0
+**Versão:** 2.9.0
 
 **Status:** SSOT
 
@@ -37,7 +37,7 @@
 | DT023 | Instâncias diárias: geração manual obrigatória | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT024 | Keybindings Ctrl+N inoperantes em VTE/GNOME    | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT025 | Pyright como job CI complementar               | BAIXA      | PENDENTE  | -            | Sprint futuro            |
-| DT034 | mark_completed sem done_substatus              | CRITICA    | PENDENTE  | -            | fix/dashboard-quality    |
+| DT034 | mark_completed sem done_substatus              | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT035 | Undo handler nao limpa skip_reason/skip_note   | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT036 | TimerStopAndDoneRequest sem handler            | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
 | DT037 | v (done) deveria abrir modal de substatus      | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
@@ -75,7 +75,7 @@
 - [x] DT024 — Keybindings Ctrl+Números inoperantes em VTE/GNOME
 - [ ] DT025 — Pyright como job CI complementar ao mypy e ruff
 - [ ] DT026 — load_metrics sem filtro de rotina ativa
-- [ ] DT034 — mark_completed sem done_substatus (CRITICA)
+- [x] DT034 — mark_completed sem done_substatus (CRITICA)
 - [x] DT035 — Undo handler nao limpa skip_reason/skip_note (CRITICA)
 - [ ] DT036 — TimerStopAndDoneRequest sem handler
 - [ ] DT037 — v (done) deveria abrir modal de substatus
@@ -104,6 +104,7 @@
 - **Impacto:** `HabitInstanceService.mark_completed()` seta `status=DONE` sem setar `done_substatus`. Viola BR-HABITINSTANCE-002 regra 1.
 - **Correcao:** Abrir modal de substatus ao pressionar `v` (ADR-038 D3).
 - **BRs afetadas:** BR-HABITINSTANCE-002, BR-TUI-004
+- **Resolvido:** Mar/2026 — Parâmetro `done_substatus` obrigatório em `mark_completed()`. Campos conflitantes limpos, `validate_status_consistency()` chamado antes de persistir.
 
 ### DT-035: Undo handler nao limpa skip_reason/skip_note (CRITICA)
 
