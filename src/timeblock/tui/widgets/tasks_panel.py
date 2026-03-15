@@ -52,9 +52,39 @@ class TasksPanel(FocusablePanel):
         if event.key == "v":
             self._action_complete()
             event.stop()
+        elif event.key == "s":
+            self._action_postpone()
+            event.stop()
+        elif event.key == "c":
+            self._action_cancel()
+            event.stop()
+        elif event.key == "u":
+            self._action_reopen()
+            event.stop()
 
     class TaskCompleteRequest(Message):
         """Solicita conclusão de task ao coordinator (RF-001)."""
+
+        def __init__(self, task_id: int) -> None:
+            super().__init__()
+            self.task_id = task_id
+
+    class TaskPostponeRequest(Message):
+        """Solicita adiamento de task (ADR-037)."""
+
+        def __init__(self, task_id: int) -> None:
+            self.task_id = task_id
+            super().__init__()
+
+    class TaskCancelRequest(Message):
+        """Solicita cancelamento de task (ADR-037)."""
+
+        def __init__(self, task_id: int) -> None:
+            self.task_id = task_id
+            super().__init__()
+
+    class TaskReopenRequest(Message):
+        """Solicita reabertura de task cancelada (ADR-037)."""
 
         def __init__(self, task_id: int) -> None:
             self.task_id = task_id
@@ -66,6 +96,27 @@ class TasksPanel(FocusablePanel):
         if not item or not item.get("id"):
             return
         self.post_message(self.TaskCompleteRequest(item["id"]))
+
+    def _action_postpone(self) -> None:
+        """Emite TaskPostponeRequest (ADR-037)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        self.post_message(self.TaskPostponeRequest(item["id"]))
+
+    def _action_cancel(self) -> None:
+        """Emite TaskCancelRequest (ADR-037)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        self.post_message(self.TaskCancelRequest(item["id"]))
+
+    def _action_reopen(self) -> None:
+        """Emite TaskReopenRequest (ADR-037)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        self.post_message(self.TaskReopenRequest(item["id"]))
 
     def _order_tasks(self) -> None:
         """Ordena: overdue > pending > completed > cancelled."""
