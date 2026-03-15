@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any
 from sqlmodel import Session
 
 from timeblock.models import Recurrence
+from timeblock.services.event_reordering_service import EventReorderingService
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.tui.session import service_action
@@ -108,6 +109,22 @@ def open_create_habit(
                     habit_id=habit_id, start_date=today, end_date=today, session=s
                 )
             )
+            # Detectar conflitos (informar, nunca decidir)
+            conflicts, _ = service_action(
+                lambda s: EventReorderingService.detect_conflicts(
+                    habit_id, "habit_instance", session=s
+                )
+            )
+
+            if conflicts:
+                names = ", ".join(
+                    f"{c.conflicting_event_type}#{c.conflicting_event_id}" for c in conflicts[:3]
+                )
+                app.notify(
+                    f"Conflito detectado com: {names}",
+                    severity="warning",
+                    timeout=5,
+                )
             on_done()
 
     app.push_screen(
