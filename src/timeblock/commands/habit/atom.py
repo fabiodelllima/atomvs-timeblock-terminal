@@ -8,6 +8,7 @@ from rich.console import Console
 from sqlmodel import Session, select
 
 from timeblock.database import get_engine_context
+from timeblock.models.enums import DoneSubstatus
 from timeblock.models.habit import Habit
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.routine_service import RoutineService
@@ -167,22 +168,38 @@ def atom_generate(
 @atom_app.command("done")
 def atom_done(
     instance_id: int = typer.Argument(..., help="ID da instância"),
+    substatus: str = typer.Option("full", help="Substatus: full, partial, overdone, excessive"),
 ):
     """
     Marca instância de hábito como concluída (DONE).
 
+    Requer substatus (BR-HABITINSTANCE-002). Default: full.
+
     Exemplos:
         atomvs habit atom done 42
+        atomvs habit atom done 42 --substatus partial
     """
     try:
+        done_sub = DoneSubstatus(substatus)
+    except ValueError:
+        valid = ", ".join(s.value for s in DoneSubstatus)
+        console.print(f"[red]Substatus inválido: {substatus!r}. Válidos: {valid}[/red]")
+        raise typer.Exit(1)
+
+    try:
         with get_engine_context() as engine, Session(engine) as session:
-            result = HabitInstanceService.mark_completed(instance_id=instance_id, session=session)
+            result = HabitInstanceService.mark_completed(
+                instance_id=instance_id,
+                done_substatus=done_sub,
+                session=session,
+            )
             if result:
                 name = ""
                 if result.habit:
                     name = f" ({result.habit.title})"
                 console.print(
-                    f"[green]\u2713 Instância #{instance_id}{name} marcada como concluída[/green]"
+                    f"[green]\u2713 Instância #{instance_id}{name} marcada como concluída"
+                    f" ({done_sub.value})[/green]"
                 )
             else:
                 console.print(f"[red]Instância #{instance_id} não encontrada[/red]")
