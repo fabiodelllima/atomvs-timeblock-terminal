@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.7.0
+**Versão:** 2.8.0
 
 **Status:** SSOT
 
@@ -38,7 +38,7 @@
 | DT024 | Keybindings Ctrl+N inoperantes em VTE/GNOME    | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT025 | Pyright como job CI complementar               | BAIXA      | PENDENTE  | -            | Sprint futuro            |
 | DT034 | mark_completed sem done_substatus              | CRITICA    | PENDENTE  | -            | fix/dashboard-quality    |
-| DT035 | Undo handler nao limpa skip_reason/skip_note   | CRITICA    | PENDENTE  | -            | fix/dashboard-quality    |
+| DT035 | Undo handler nao limpa skip_reason/skip_note   | CRITICA    | RESOLVIDO | Mar/2026    | fix/dashboard-quality    |
 | DT036 | TimerStopAndDoneRequest sem handler             | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
 | DT037 | v (done) deveria abrir modal de substatus      | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
 | DT038 | s (postpone) deveria abrir FormModal de edit   | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
@@ -76,7 +76,7 @@
 - [ ] DT025 — Pyright como job CI complementar ao mypy e ruff
 - [ ] DT026 — load_metrics sem filtro de rotina ativa
 - [ ] DT034 — mark_completed sem done_substatus (CRITICA)
-- [ ] DT035 — Undo handler nao limpa skip_reason/skip_note (CRITICA)
+- [x] DT035 — Undo handler nao limpa skip_reason/skip_note (CRITICA)
 - [ ] DT036 — TimerStopAndDoneRequest sem handler
 - [ ] DT037 — v (done) deveria abrir modal de substatus
 - [ ] DT038 — s (postpone) deveria abrir FormModal de edit
@@ -112,6 +112,7 @@
 - **Impacto:** Handler undo limpa `done_substatus` e `not_done_substatus` mas nao limpa `skip_reason`, `skip_note`, `completion_percentage`. Viola `validate_status_consistency()`.
 - **Correcao:** Limpar todos os campos no undo.
 - **BRs afetadas:** BR-SKIP-002, BR-HABITINSTANCE-002
+- **Resolvido:** Mar/2026 — Metodo `reset_to_pending()` centraliza limpeza de todos os campos.
 
 ### DT-036: TimerStopAndDoneRequest sem handler (ALTA)
 
