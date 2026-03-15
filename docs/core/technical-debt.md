@@ -52,7 +52,7 @@
 - [ ] DT010 — FocusablePanel: flag \_showing_placeholders
 - [ ] DT011 — FocusablePanel: count em dois lugares
 - [ ] DT012 — DI inconsistente entre services
-- [ ] DT013 — \_parse_time duplicado
+- [x] DT013 — _parse_time consolidado em validators
 - [x] DT014 — Keybindings divergentes
 - [x] DT015 — AgendaPanel sem auto-refresh
 - [x] DT016 — load_active_timer elapsed/name
@@ -74,7 +74,7 @@
 - [x] DT032 — Migração de banco manual para Task lifecycle
 - [x] DT033 — 3 testes CRUD routines quebrados por VerticalScroll
 
-**Resolvidos:** 24/33 | **Pendentes:** 9/33 | **Aceitos:** 1/33
+**Resolvidos:** 26/33 | **Pendentes:** 7/33 | **Aceitos:** 1/33
 
 ---
 
