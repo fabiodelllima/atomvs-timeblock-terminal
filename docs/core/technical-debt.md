@@ -71,10 +71,10 @@
 - [ ] DT029 — Conflitos de horario nao integrados na TUI
 - [ ] DT030 — Help overlay incompleto (timer bindings)
 - [ ] DT031 — Auto-scroll desabilitado (call_later travava TUI)
-- [ ] DT032 — Migração de banco manual para Task lifecycle
-- [ ] DT033 — 3 testes CRUD routines quebrados por VerticalScroll
+- [x] DT032 — Migração de banco manual para Task lifecycle
+- [x] DT033 — 3 testes CRUD routines quebrados por VerticalScroll
 
-**Resolvidos:** 17/33 | **Pendentes:** 15/33 | **Aceitos:** 1/33
+**Resolvidos:** 19/33 | **Pendentes:** 13/33 | **Aceitos:** 1/33
 
 ---
 
