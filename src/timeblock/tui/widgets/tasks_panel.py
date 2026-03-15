@@ -5,7 +5,7 @@ BR-TUI-003-R22: Strikethrough em done/cancelled.
 BR-TUI-003-R23: Subtítulo com contadores por status.
 BR-TUI-003-R27: Nome herda cor do status.
 BR-TUI-012: Navegação vertical com setas/j/k e highlight.
-BR-TUI-004: Quick actions — Ctrl+Enter completa task.
+BR-TUI-004: Quick actions — v completa task (ADR-037).
 """
 
 from textual.events import Key
@@ -49,7 +49,7 @@ class TasksPanel(FocusablePanel):
 
     def on_key(self, event: Key) -> None:
         """Captura navegação e quick actions."""
-        if event.key == "ctrl+enter":
+        if event.key == "v":
             self._action_complete()
             event.stop()
 
