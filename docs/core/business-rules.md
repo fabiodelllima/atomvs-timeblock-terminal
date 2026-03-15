@@ -1,6 +1,6 @@
 # Business Rules
 
-**Versão:** 3.0.0
+**Versão:** 3.1.0
 
 **Status:** Consolidado (SSOT)
 
@@ -791,8 +791,8 @@ PENDING
   ├─> DONE (via timer stop ou log manual)
   └─> NOT_DONE (via skip ou timeout)
 
-DONE → [FINAL]
-NOT_DONE → [FINAL]
+DONE -> PENDING (via undo - ADR-038 D1)
+NOT_DONE -> PENDING (via undo - ADR-038 D1)
 ```
 
 **Testes:**
@@ -958,6 +958,33 @@ habit edit INSTANCE_ID --start 08:00 --end 09:30
 
 ---
 
+
+### BR-HABITINSTANCE-007: Undo com Preservacao de TimeLog (NOVA 15/03/2026)
+
+**Descricao:** O undo reverte HabitInstance para PENDING preservando TimeLogs como registros factuais. Re-done detecta TimeLogs existentes e oferece restauracao.
+
+**Decisao arquitetural:** ADR-038 D1, D2
+
+**Regras:**
+
+1. `u` em habito DONE ou NOT_DONE reverte status para PENDING
+2. Undo limpa: `done_substatus`, `not_done_substatus`, `skip_reason`, `skip_note`, `completion_percentage`
+3. TimeLogs com status DONE vinculados a instancia permanecem inalterados
+4. `v` em habito PENDING que possui TimeLog DONE vinculado abre modal de restauracao
+5. Modal de restauracao: "Sessao anterior encontrada (Xmin, Y%). Restaurar? [Sim/Nao]"
+6. "Sim" restaura `done_substatus` e `completion_percentage` originais do TimeLog
+7. "Nao" abre modal de done manual (BR-TUI-022)
+
+**Testes:**
+
+- `test_br_habitinstance_007_undo_done_to_pending`
+- `test_br_habitinstance_007_undo_not_done_to_pending`
+- `test_br_habitinstance_007_undo_clears_all_substatus`
+- `test_br_habitinstance_007_undo_preserves_timelog`
+- `test_br_habitinstance_007_redone_detects_timelog`
+- `test_br_habitinstance_007_redone_restores_substatus`
+
+---
 ## 6. Skip
 
 O Skip é o mecanismo que transforma ausência em informação. Na maioria dos sistemas de rastreamento de hábitos, não fazer algo é simplesmente um vazio — um dia sem marcação que pode significar esquecimento, preguiça, doença ou uma decisão racional. O TimeBlock Planner distingue entre "não fiz porque escolhi não fazer" (Skip) e "não fiz porque ignorei" (Ignored), e dentro do Skip, diferencia _por que_ o usuário optou por pular.
@@ -1550,6 +1577,31 @@ avg_time_to_completion = mean(time_to_completions)
 
 ---
 
+
+### BR-TASK-011: Tasks Sem Horario Explicito (NOVA 15/03/2026)
+
+**Descricao:** Tasks criadas sem horario (scheduled_datetime com hora e minuto ambos zero) sao tratadas como "dia inteiro" e seguem regra de overdue diferente.
+
+**Decisao arquitetural:** ADR-038 D7
+
+**Regras:**
+
+1. Task com `hour == 0 and minute == 0` e considerada "sem horario explicito"
+2. Task sem horario explicito nao fica overdue no mesmo dia da data agendada
+3. Task sem horario explicito fica overdue a partir do dia seguinte (`date < today`)
+4. Task com horario explicito fica overdue quando `scheduled_datetime < now()`
+5. Exibicao no dashboard: tasks sem horario mostram `"--:--"` no campo time
+6. FormModal de edicao limpa `"--:--"` para string vazia no campo de horario
+
+**Testes:**
+
+- `test_br_task_011_no_time_not_overdue_same_day`
+- `test_br_task_011_no_time_overdue_next_day`
+- `test_br_task_011_with_time_overdue_after_hour`
+- `test_br_task_011_display_no_time_shows_dashes`
+- `test_br_task_011_edit_clears_dashes`
+
+---
 ## 9. Timer
 
 O Timer fecha o loop de feedback do Atomic Habits. Planejar (Routine/Habit), executar (HabitInstance), e agora _medir_ — com precisão de segundos, quanto tempo o usuário realmente dedicou a cada atividade. James Clear escreve que "o que é medido é gerenciado", e o Timer torna essa medição automática e sem fricção: iniciar é um comando, pausar é outro, parar registra o tempo no banco.
@@ -2347,24 +2399,22 @@ class DashboardScreen(Screen):
 
 ---
 
-## BR-TUI-004: Global Keybindings (REVISADA 08/03/2026)
+## BR-TUI-004: Global Keybindings (REVISADA 15/03/2026)
 
-**Descrição:** Keybindings padronizados em toda a aplicação conforme ADR-035. Navegação pura sem modificador. Ações de domínio com Ctrl ou Shift. CRUD contextual sem modificador (n/e/x). Uma ação = um binding — mesma semântica usa mesmo binding em qualquer screen.
+**Descricao:** Keybindings padronizados em toda a aplicacao conforme ADR-037. Teclas simples sem modificador. CRUD contextual (n/e/x). Quick actions por panel (v/s/u/c/t). Uma acao = um binding.
 
 **Mapa de keybindings:**
-
 ```plaintext
 GLOBAIS (app.py):
-  Ctrl+1..5 ............ trocar screen (1=Dash, 2=Rotin, 3=Habit, 4=Tasks, 5=Timer)
-  Ctrl+Q ............... sair da TUI [MODAL]
-  ? .................... help overlay (leitura)
-  Escape ............... fechar modal / voltar ao Dashboard
+  1..5 ................. trocar screen (1=Dash, 2=Rotin, 3=Habit, 4=Tasks, 5=Timer)
+  Ctrl+Q ............... sair da TUI
+  ? .................... help overlay (toggle)
+  Escape ............... fechar modal / fechar help / voltar ao Dashboard
 
-NAVEGAÇÃO (intra-screen):
-  Tab .................. avançar entre panels
-  Shift+Tab ............ voltar entre panels
-  Setas up/down ........ navegar itens dentro do panel focado
-  1-9 .................. livres para ações contextuais por screen
+NAVEGACAO (intra-screen):
+  Tab .................. avancar entre panels
+  j / seta baixo ....... proximo item no panel focado
+  i / seta cima ........ item anterior no panel focado
   Enter ................ ativar placeholder / selecionar item
 
 CRUD (contextual ao panel focado):
@@ -2372,62 +2422,77 @@ CRUD (contextual ao panel focado):
   e .................... editar item sob cursor (abre FormModal)
   x .................... deletar item sob cursor [MODAL]
 
-AÇÕES DE DOMÍNIO:
-  Ctrl+Enter ........... concluir (done em hábito, complete em task, stop timer)
-  Ctrl+S ............... skip (hábitos)
-  Shift+Enter .......... start timer / pause-resume timer
-  Ctrl+X ............... cancelar timer [MODAL]
+HABITS PANEL (quick actions):
+  v .................... marcar done [MODAL de substatus - BR-TUI-022]
+  s .................... skip [MODAL de SkipReason - BR-TUI-024]
+  t .................... iniciar timer para habito selecionado
+  u .................... undo (reverter para pending)
 
-PROIBIDOS (reservados pelo OS):
+TASKS PANEL (quick actions):
+  v .................... completar task
+  s .................... adiar task (abre FormModal de edit - ADR-038 D5)
+  c .................... cancelar task (soft delete)
+  u .................... reabrir task cancelada
+
+TIMER PANEL (quick actions):
+  space ................ pausar / retomar timer
+  s .................... parar timer (stop - marca habito como done)
+  c .................... cancelar timer [MODAL]
+
+PROIBIDOS (reservados pelo OS - ADR-035):
   Ctrl+C ............... SIGINT (nunca capturar)
   Ctrl+Z ............... SIGTSTP (nunca capturar)
   Ctrl+D ............... EOF (nunca capturar)
 ```
 
-**Modal de confirmação exigido em:**
+**Modal de confirmacao exigido em:**
 
-- Ctrl+Q (sair, especialmente com timer ativo)
-- x (deletar item)
-- Ctrl+X (cancelar timer, descarta sessão)
-- Ctrl+Enter (mark done, quando hábito já done/overdone)
+- x (deletar item - ConfirmDialog)
+- c no timer panel (cancelar timer, descarta sessao - ConfirmDialog)
+- v no habits panel (done manual - modal de substatus, BR-TUI-022)
+- v com timer ativo (notificacao com opcoes - BR-TUI-023)
+- s no habits panel (skip - modal de SkipReason, BR-TUI-024)
 
 **Regras:**
 
-1. Ctrl+1..5 troca screen; números puros 1-9 são livres para contexto por screen
-2. Tab/Shift+Tab cicla entre panels; setas movem cursor dentro do panel
-3. n/e/x sem modificador para CRUD — x sempre abre ConfirmDialog antes de deletar
-4. Ctrl+Enter é o binding universal de "concluir" — mesma semântica em todos os domínios
-5. Ctrl+S é exclusivo para skip de hábitos
-6. Shift+Enter é o toggle de timer — start no panel de hábitos, pause/resume no panel de timer
-7. Ctrl+X é o binding universal de "cancelar com perda de dados" — sempre com ConfirmDialog
-8. Enter ativa placeholders (BR-TUI-013) ou seleciona item conforme contexto
-9. Ações destrutivas/irreversíveis exigem modal de confirmação
-10. Modal responde apenas a Enter (confirmar) e Escape (cancelar)
-11. Ctrl+C, Ctrl+Z, Ctrl+D nunca são capturados pela TUI
-12. Se timer ativo e Ctrl+Q, modal informa que sessão será perdida
-13. Help overlay (?) lista todos os keybindings com contexto
-14. Footer contextual (BR-TUI-007) exibe bindings ativos conforme panel focado
+1. 1..5 sem modificador troca screen (ADR-037)
+2. Tab cicla entre panels; j/i ou setas movem cursor dentro do panel
+3. n/e/x sem modificador para CRUD - x sempre abre ConfirmDialog
+4. v e o binding de "concluir/done" - abre modal no habits, executa direto no tasks
+5. s e contextual: skip (habits), postpone/edit (tasks), stop (timer)
+6. t inicia timer para habito selecionado
+7. u e undo/reopen - reverte status em ambos os panels
+8. space e toggle de pause/resume exclusivo do timer panel
+9. c e cancelar - soft delete (tasks), cancel com ConfirmDialog (timer)
+10. Enter ativa placeholders (BR-TUI-013) ou seleciona item
+11. Acoes que alteram estado devem usar modal (ADR-038 D12)
+12. Ctrl+C, Ctrl+Z, Ctrl+D nunca sao capturados pela TUI
+13. Help overlay (?) lista todos os keybindings - toggle
+14. Footer contextual (BR-TUI-007) exibe bindings conforme panel focado
+15. Modals respondem a Enter (confirmar) e Escape (cancelar)
 
-**Supersede:** Versão 02/03/2026. Mudanças: removidos Ctrl+K, Ctrl+P, Ctrl+W, Ctrl+E, d/r/h/t/m. Adicionados Shift+Enter, Ctrl+X para cancel. Ctrl+Enter unificado. Números livres para contexto.
+**Supersede:** Versao 08/03/2026. Removidos todos os Ctrl+/Shift+ (ADR-037).
 
-**Referência:** ADR-035 (Keybindings Standardization)
+**Referencia:** ADR-037, ADR-038
 
 **Testes:**
 
-- `test_br_tui_004_ctrl_q_shows_confirmation_modal`
-- `test_br_tui_004_ctrl_1_to_5_switches_screen`
+- `test_br_tui_004_1_to_5_switches_screen`
+- `test_br_tui_004_ctrl_q_quits`
 - `test_br_tui_004_escape_closes_modal`
-- `test_br_tui_004_escape_returns_to_dashboard`
-- `test_br_tui_004_help_overlay_shows_bindings`
-- `test_br_tui_004_ctrl_c_not_captured`
+- `test_br_tui_004_help_overlay_toggle`
 - `test_br_tui_004_tab_advances_panels`
-- `test_br_tui_004_shift_tab_goes_back`
-- `test_br_tui_004_enter_activates_placeholder`
+- `test_br_tui_004_ji_navigates_items`
 - `test_br_tui_004_n_opens_contextual_modal`
-- `test_br_tui_004_ctrl_enter_marks_done`
-- `test_br_tui_004_ctrl_enter_completes_task`
-- `test_br_tui_004_ctrl_s_skips_habit`
-- `test_br_tui_004_numbers_free_for_context`
+- `test_br_tui_004_v_marks_done_with_modal`
+- `test_br_tui_004_s_skips_with_reason`
+- `test_br_tui_004_t_starts_timer`
+- `test_br_tui_004_u_undoes_action`
+- `test_br_tui_004_space_toggles_pause`
+- `test_br_tui_004_c_cancels_with_confirm`
+- `test_br_tui_004_x_deletes_with_confirm`
+
+---
 
 ### BR-TUI-005: CRUD Operations Pattern
 
@@ -3296,7 +3361,7 @@ src/timeblock/tui/styles/
 4. Requer rotina ativa — sem rotina, `n` exibe mensagem de erro inline
 5. Hábito criado gera HabitInstance para o dia atual automaticamente (via HabitInstanceService)
 6. Hábito criado aparece imediatamente no panel (refresh local + banco)
-7. Quick actions existentes coexistem: Ctrl+Enter done, Ctrl+S skip (BR-TUI-004)
+7. Quick actions existentes coexistem: v done [MODAL], s skip [MODAL] (BR-TUI-004, ADR-037)
 8. Campos obrigatórios: título, horário início, duração. Recorrência default: EVERYDAY
 9. Validação inline: título não vazio, duração > 0, horário no formato HH:MM
 
@@ -3327,7 +3392,7 @@ src/timeblock/tui/styles/
 2. `e` edita task sob cursor (FormModal preenchido)
 3. `x` deleta task sob cursor com ConfirmDialog
 4. Task criada aparece na posição correta (ordenação por proximidade temporal)
-5. Ctrl+K complete coexiste (BR-TUI-004)
+5. v complete coexiste (BR-TUI-004, ADR-037)
 6. Campos obrigatórios: título. Data, horário e prioridade são opcionais
 7. Prioridade: low, medium, high (default: medium)
 8. Data default: hoje. Horário default: vazio (sem horário)
@@ -3416,10 +3481,10 @@ src/timeblock/tui/styles/
 
 **Regras:**
 
-1. Shift+Enter no panel de hábitos com hábito selecionado inicia timer via TimerService.start_timer
-2. Shift+Enter no panel de timer com timer ativo alterna entre pause e resume
-3. Ctrl+Enter no panel de timer para o timer e salva a sessão via TimerService.stop_timer
-4. Ctrl+X no panel de timer abre ConfirmDialog e, se confirmado, cancela via TimerService.cancel_timer
+1. `t` no panel de habitos com habito selecionado inicia timer via TimerService.start_timer (ADR-037)
+2. `space` no panel de timer com timer ativo alterna entre pause e resume (ADR-037)
+3. `s` no panel de timer para o timer e salva a sessao via TimerService.stop_timer (ADR-037)
+4. `c` no panel de timer abre ConfirmDialog e, se confirmado, cancela via TimerService.cancel_timer (ADR-037)
 5. TimerPanel atualiza elapsed a cada segundo via set_interval do Textual
 6. TimerPanel exibe nome do hábito associado ao timer ativo
 7. Elapsed é formatado como MM:SS e renderizado em ASCII art
@@ -3447,6 +3512,121 @@ src/timeblock/tui/styles/
 
 ---
 
+
+### BR-TUI-022: Done Manual via Modal (NOVA 15/03/2026)
+
+**Descricao:** Ao marcar habito como done sem timer ativo, o sistema abre modal para o usuario selecionar substatus, aderindo a BR-HABITINSTANCE-002.
+
+**Decisao arquitetural:** ADR-038 D3
+
+**Regras:**
+
+1. `v` em habito PENDING sem timer ativo e sem TimeLog DONE existente abre modal
+2. Modal exibe Select com DoneSubstatus: FULL, PARTIAL, OVERDONE, EXCESSIVE
+3. Default pre-selecionado: FULL
+4. Enter confirma, Esc cancela sem alterar status
+5. Apos confirmacao: `status=DONE`, `done_substatus=<selecionado>`
+6. `v` em habito PENDING com TimeLog DONE existente abre modal de restauracao (BR-HABITINSTANCE-007 regra 5)
+
+**Testes:**
+
+- `test_br_tui_022_v_without_timer_opens_modal`
+- `test_br_tui_022_modal_shows_substatus_options`
+- `test_br_tui_022_esc_cancels_without_change`
+- `test_br_tui_022_enter_confirms_done_with_substatus`
+- `test_br_tui_022_detects_existing_timelog`
+
+---
+
+### BR-TUI-023: Notificacao de Timer Ativo no Done (NOVA 15/03/2026)
+
+**Descricao:** Ao pressionar `v` em habito com timer ativo, o sistema abre modal informativo com opcoes.
+
+**Decisao arquitetural:** ADR-038 D4
+
+**Regras:**
+
+1. `v` em habito com status `running` abre modal
+2. Modal: "Timer ativo para este habito"
+3. Opcoes: [Parar timer e marcar done] / [Cancelar]
+4. "Parar timer e marcar done": executa `TimerService.stop_timer`
+5. "Cancelar": fecha modal, nenhuma acao
+
+**Testes:**
+
+- `test_br_tui_023_v_on_running_opens_modal`
+- `test_br_tui_023_stop_and_done_marks_habit`
+- `test_br_tui_023_cancel_does_nothing`
+
+---
+
+### BR-TUI-024: Skip com Modal de SkipReason (NOVA 15/03/2026)
+
+**Descricao:** Ao pular habito via `s`, o sistema sempre abre modal para categorizacao do skip, aderindo a BR-SKIP-001.
+
+**Decisao arquitetural:** ADR-038 D6
+
+**Regras:**
+
+1. `s` em habito PENDING abre modal com Select de SkipReason
+2. Opcoes: HEALTH, WORK, FAMILY, TRAVEL, WEATHER, LACK_RESOURCES, EMERGENCY, OTHER
+3. Campo opcional de nota (texto livre, max 500 chars)
+4. Enter confirma skip com razao selecionada
+5. Esc cancela sem alterar status
+6. Apos confirmacao: `status=NOT_DONE`, `not_done_substatus=SKIPPED_JUSTIFIED`, `skip_reason=<selecionado>`
+
+**Testes:**
+
+- `test_br_tui_024_s_opens_skip_reason_modal`
+- `test_br_tui_024_modal_shows_all_reasons`
+- `test_br_tui_024_note_optional`
+- `test_br_tui_024_esc_cancels`
+- `test_br_tui_024_confirm_sets_skip_reason`
+
+---
+
+### BR-TUI-025: Fluxo Routine-first (NOVA 15/03/2026)
+
+**Descricao:** Quando o usuario tenta criar habito sem rotina ativa, o sistema redireciona para criacao de rotina com mensagem explicativa.
+
+**Decisao arquitetural:** ADR-038 D9
+
+**Regras:**
+
+1. `n` com habits panel focado e sem rotina ativa abre FormModal de criacao de rotina
+2. FormModal exibe mensagem: "Crie uma rotina primeiro para adicionar habitos"
+3. Apos criar rotina, retorna ao dashboard
+4. `n` sem panel focado e sem rotina ativa: mesmo comportamento
+5. `n` com tasks panel focado nao depende de rotina (tasks sao independentes)
+
+**Testes:**
+
+- `test_br_tui_025_n_habits_no_routine_opens_routine_modal`
+- `test_br_tui_025_returns_to_dashboard_after_routine`
+- `test_br_tui_025_n_tasks_independent_of_routine`
+
+---
+
+### BR-TUI-026: Limites de Exibicao nos Panels (NOVA 15/03/2026)
+
+**Descricao:** Panels do dashboard exibem numero limitado de items para manter legibilidade.
+
+**Decisao arquitetural:** ADR-038 D10
+
+**Regras:**
+
+1. HabitsPanel exibe no maximo 12 habitos
+2. TasksPanel exibe no maximo 9 tasks
+3. Limites sao fixos (constantes no codigo)
+4. Items excedentes sao acessiveis via screens dedicadas (Habits Screen, Tasks Screen)
+5. Limites serao configuraveis em screen de configuracoes futura
+
+**Testes:**
+
+- `test_br_tui_026_habits_panel_max_12`
+- `test_br_tui_026_tasks_panel_max_9`
+
+---
 ## 15. Data
 
 ### BR-DATA-001: Backup Automático do Banco de Dados (NOVA 02/03/2026)
@@ -3517,6 +3697,6 @@ src/timeblock/tui/styles/
 
 ---
 
-**Última atualização em:** 14 de Março de 2026
+**Última atualização em:** 15 de Marco de 2026
 
-**Total de regras:** 109 BRs
+**Total de regras:** 114 BRs
