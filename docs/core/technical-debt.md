@@ -68,13 +68,13 @@
 - [ ] DT026 — load_metrics sem filtro de rotina ativa
 - [x] DT027 — FormModal sem suporte a campo select (recorrencia)
 - [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
-- [ ] DT029 — Conflitos de horario nao integrados na TUI
+- [x] DT029 — Conflitos de horario detectados no CRUD habits
 - [x] DT030 — Help overlay completo (ADR-037)
 - [x] DT031 — Auto-scroll desabilitado (call_later travava TUI)
 - [x] DT032 — Migração de banco manual para Task lifecycle
 - [x] DT033 — 3 testes CRUD routines quebrados por VerticalScroll
 
-**Resolvidos:** 26/33 | **Pendentes:** 7/33 | **Aceitos:** 1/33
+**Resolvidos:** 27/33 | **Pendentes:** 6/33 | **Aceitos:** 1/33
 
 ---
 
