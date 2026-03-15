@@ -116,7 +116,7 @@ class TestFirstCompleteLoop:
             # 3. Shift+Enter — inicia timer
             pilot.app.set_focus(panel_h)
             await _wait(pilot)
-            await pilot.press("shift+enter")
+            await pilot.press("t")
             await _wait(pilot)
 
             # 4. Verificar timer ativo
@@ -129,15 +129,15 @@ class TestFirstCompleteLoop:
             panel_t = pilot.app.query_one(TimerPanel)
             pilot.app.set_focus(panel_t)
             await _wait(pilot)
-            await pilot.press("shift+enter")
+            await pilot.press("space")
             await _wait(pilot)
 
             timer_data = loader.load_active_timer()
             assert timer_data is not None
             assert timer_data["status"] == "paused"
 
-            # 6. Shift+Enter — retoma
-            await pilot.press("shift+enter")
+            # 6. space — retoma
+            await pilot.press("space")
             await _wait(pilot)
 
             timer_data = loader.load_active_timer()
@@ -145,7 +145,7 @@ class TestFirstCompleteLoop:
             assert timer_data["status"] == "running"
 
             # 7. Ctrl+Enter — stop timer
-            await pilot.press("ctrl+enter")
+            await pilot.press("s")
             await _wait(pilot)
 
             # 8. Timer deve estar idle
