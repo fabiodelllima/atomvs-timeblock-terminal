@@ -61,7 +61,8 @@ class TestBRTUI017CRUDHabits:
             await pilot.pause()
             modal = app.screen_stack[-1]
             inputs = modal.query("Input")
-            assert len(inputs) == 4
+            selects = modal.query("Select")
+            assert len(inputs) + len(selects) == 4
 
     @pytest.mark.asyncio
     async def test_br_tui_017_esc_closes_form(self):
