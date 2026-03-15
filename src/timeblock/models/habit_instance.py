@@ -93,3 +93,18 @@ class HabitInstance(SQLModel, table=True):
         else:
             if self.skip_reason is not None:
                 raise ValueError("skip_reason só permitido com SKIPPED_JUSTIFIED")
+
+    def reset_to_pending(self) -> None:
+        """Reset instance to PENDING, clearing all substatus fields.
+
+        Centralizes undo logic (BR-HABITINSTANCE-007).
+        Preserves: habit_id, date, scheduled_start, scheduled_end.
+        Clears: status -> PENDING, all substatus/skip/completion fields -> None.
+        Does NOT touch TimeLog records (factual, immutable).
+        """
+        self.status = Status.PENDING
+        self.done_substatus = None
+        self.not_done_substatus = None
+        self.skip_reason = None
+        self.skip_note = None
+        self.completion_percentage = None
