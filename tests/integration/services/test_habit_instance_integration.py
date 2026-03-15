@@ -187,12 +187,14 @@ class TestBRHabitInstanceReordering:
         # ACT
         result = HabitInstanceService.mark_completed(
             instance_id=instance.id,
+            done_substatus=DoneSubstatus.FULL,
             session=test_db,
         )
 
         # ASSERT
         assert result is not None
         assert result.status == Status.DONE
+        assert result.done_substatus == DoneSubstatus.FULL
 
 
 class TestBRHabitinstance007UndoPreservesTimelog:
