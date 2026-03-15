@@ -12,7 +12,7 @@ Referências:
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import time
+from datetime import date, time
 from typing import TYPE_CHECKING, Any
 
 from sqlmodel import Session
@@ -101,9 +101,7 @@ def open_create_habit(
 
         habit_id, error = service_action(_create)
         if not error and habit_id:
-            from datetime import date as _date
-
-            today = _date.today()
+            today = date.today()
             service_action(
                 lambda s: HabitInstanceService.generate_instances(
                     habit_id=habit_id, start_date=today, end_date=today, session=s
