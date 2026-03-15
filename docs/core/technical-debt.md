@@ -69,12 +69,12 @@
 - [x] DT027 — FormModal sem suporte a campo select (recorrencia)
 - [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
 - [ ] DT029 — Conflitos de horario nao integrados na TUI
-- [ ] DT030 — Help overlay incompleto (timer bindings)
+- [x] DT030 — Help overlay completo (ADR-037)
 - [x] DT031 — Auto-scroll desabilitado (call_later travava TUI)
 - [x] DT032 — Migração de banco manual para Task lifecycle
 - [x] DT033 — 3 testes CRUD routines quebrados por VerticalScroll
 
-**Resolvidos:** 23/33 | **Pendentes:** 10/33 | **Aceitos:** 1/33
+**Resolvidos:** 24/33 | **Pendentes:** 9/33 | **Aceitos:** 1/33
 
 ---
 
