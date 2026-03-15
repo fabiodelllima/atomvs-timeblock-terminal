@@ -23,6 +23,7 @@ from timeblock.services.habit_service import HabitService
 from timeblock.tui.session import service_action
 from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
 from timeblock.tui.widgets.form_modal import FormField, FormModal
+from timeblock.utils.validators import parse_time_to_time
 
 if TYPE_CHECKING:
     from textual.app import App
@@ -39,12 +40,6 @@ RECURRENCE_OPTIONS = [
     ("SATURDAY", "Sábado"),
     ("SUNDAY", "Domingo"),
 ]
-
-
-def _parse_time(value: str) -> time:
-    """Converte string HH:MM para time."""
-    parts = value.split(":")
-    return time(int(parts[0]), int(parts[1]))
 
 
 def _calculate_end_time(start: time, duration_minutes: int) -> time:
@@ -87,7 +82,7 @@ def open_create_habit(
     ]
 
     def on_submit(data: dict[str, Any]) -> None:
-        start = _parse_time(data["start"])
+        start = parse_time_to_time(data["start"])
         duration = data["duration"]
         end = _calculate_end_time(start, duration)
         recurrence_value = data.get("recurrence", "EVERYDAY")
@@ -169,7 +164,7 @@ def open_edit_habit(
     }
 
     def on_submit(data: dict[str, Any]) -> None:
-        start = _parse_time(data["start"])
+        start = parse_time_to_time(data["start"])
         dur = data["duration"]
         end = _calculate_end_time(start, dur)
 

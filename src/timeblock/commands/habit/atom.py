@@ -13,6 +13,7 @@ from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.routine_service import RoutineService
 from timeblock.services.timer_service import TimerService
 from timeblock.utils.logger import get_logger
+from timeblock.utils.validators import parse_time_to_time
 
 from .display import (
     _resolve_date_range,
@@ -215,8 +216,8 @@ def atom_log(
     try:
         _validate_log_mode(start, end, duration)
 
-        start_time = _parse_time_string(start, "--start") if start else None
-        end_time = _parse_time_string(end, "--end") if end else None
+        start_time = parse_time_to_time(start) if start else None
+        end_time = parse_time_to_time(end) if end else None
 
         with get_engine_context() as engine, Session(engine) as session:
             service = TimerService()
