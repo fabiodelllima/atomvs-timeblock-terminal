@@ -66,15 +66,15 @@
 - [x] DT024 — Keybindings Ctrl+Números inoperantes em VTE/GNOME
 - [ ] DT025 — Pyright como job CI complementar ao mypy e ruff
 - [ ] DT026 — load_metrics sem filtro de rotina ativa
-- [ ] DT027 — FormModal sem suporte a campo select (recorrencia)
-- [ ] DT028 — Enter sem ação em habit selecionado no dashboard
+- [x] DT027 — FormModal sem suporte a campo select (recorrencia)
+- [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
 - [ ] DT029 — Conflitos de horario nao integrados na TUI
 - [ ] DT030 — Help overlay incompleto (timer bindings)
-- [ ] DT031 — Auto-scroll desabilitado (call_later travava TUI)
+- [x] DT031 — Auto-scroll desabilitado (call_later travava TUI)
 - [x] DT032 — Migração de banco manual para Task lifecycle
 - [x] DT033 — 3 testes CRUD routines quebrados por VerticalScroll
 
-**Resolvidos:** 19/33 | **Pendentes:** 13/33 | **Aceitos:** 1/33
+**Resolvidos:** 23/33 | **Pendentes:** 10/33 | **Aceitos:** 1/33
 
 ---
 
