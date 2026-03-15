@@ -44,6 +44,13 @@ def version():
 
 def launch_tui() -> bool:
     """Importa e executa a TUI. Raises ImportError se textual não instalado."""
+    from timeblock.database.migrations.runner import run_pending_migrations
+
+    try:
+        run_pending_migrations()
+    except Exception:
+        pass  # Banco pode nao existir (primeiro uso)
+
     from timeblock.tui.app import TimeBlockApp
 
     TimeBlockApp().run()
