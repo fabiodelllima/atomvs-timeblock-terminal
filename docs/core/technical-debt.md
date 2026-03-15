@@ -38,8 +38,8 @@
 | DT024 | Keybindings Ctrl+N inoperantes em VTE/GNOME    | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT025 | Pyright como job CI complementar               | BAIXA      | PENDENTE  | -            | Sprint futuro            |
 | DT034 | mark_completed sem done_substatus              | CRITICA    | PENDENTE  | -            | fix/dashboard-quality    |
-| DT035 | Undo handler nao limpa skip_reason/skip_note   | CRITICA    | RESOLVIDO | Mar/2026    | fix/dashboard-quality    |
-| DT036 | TimerStopAndDoneRequest sem handler             | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
+| DT035 | Undo handler nao limpa skip_reason/skip_note   | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
+| DT036 | TimerStopAndDoneRequest sem handler            | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
 | DT037 | v (done) deveria abrir modal de substatus      | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
 | DT038 | s (postpone) deveria abrir FormModal de edit   | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
 | DT039 | s (skip) deveria abrir modal de SkipReason     | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
@@ -61,7 +61,7 @@
 - [ ] DT010 — FocusablePanel: flag \_showing_placeholders
 - [ ] DT011 — FocusablePanel: count em dois lugares
 - [ ] DT012 — DI inconsistente entre services
-- [x] DT013 — _parse_time consolidado em validators
+- [x] DT013 — \_parse_time consolidado em validators
 - [x] DT014 — Keybindings divergentes
 - [x] DT015 — AgendaPanel sem auto-refresh
 - [x] DT016 — load_active_timer elapsed/name
@@ -95,7 +95,6 @@
 **Resolvidos:** 27/42 | **Pendentes:** 15/42 | **Aceitos:** 1/42
 
 ---
-
 
 ## 1c. Detalhamento de Itens Pendentes (Novos)
 

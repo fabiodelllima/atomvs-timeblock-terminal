@@ -958,7 +958,6 @@ habit edit INSTANCE_ID --start 08:00 --end 09:30
 
 ---
 
-
 ### BR-HABITINSTANCE-007: Undo com Preservacao de TimeLog (NOVA 15/03/2026)
 
 **Descricao:** O undo reverte HabitInstance para PENDING preservando TimeLogs como registros factuais. Re-done detecta TimeLogs existentes e oferece restauracao.
@@ -985,6 +984,7 @@ habit edit INSTANCE_ID --start 08:00 --end 09:30
 - `test_br_habitinstance_007_redone_restores_substatus`
 
 ---
+
 ## 6. Skip
 
 O Skip é o mecanismo que transforma ausência em informação. Na maioria dos sistemas de rastreamento de hábitos, não fazer algo é simplesmente um vazio — um dia sem marcação que pode significar esquecimento, preguiça, doença ou uma decisão racional. O TimeBlock Planner distingue entre "não fiz porque escolhi não fazer" (Skip) e "não fiz porque ignorei" (Ignored), e dentro do Skip, diferencia _por que_ o usuário optou por pular.
@@ -1577,7 +1577,6 @@ avg_time_to_completion = mean(time_to_completions)
 
 ---
 
-
 ### BR-TASK-011: Tasks Sem Horario Explicito (NOVA 15/03/2026)
 
 **Descricao:** Tasks criadas sem horario (scheduled_datetime com hora e minuto ambos zero) sao tratadas como "dia inteiro" e seguem regra de overdue diferente.
@@ -1602,6 +1601,7 @@ avg_time_to_completion = mean(time_to_completions)
 - `test_br_task_011_edit_clears_dashes`
 
 ---
+
 ## 9. Timer
 
 O Timer fecha o loop de feedback do Atomic Habits. Planejar (Routine/Habit), executar (HabitInstance), e agora _medir_ — com precisão de segundos, quanto tempo o usuário realmente dedicou a cada atividade. James Clear escreve que "o que é medido é gerenciado", e o Timer torna essa medição automática e sem fricção: iniciar é um comando, pausar é outro, parar registra o tempo no banco.
@@ -2404,6 +2404,7 @@ class DashboardScreen(Screen):
 **Descricao:** Keybindings padronizados em toda a aplicacao conforme ADR-037. Teclas simples sem modificador. CRUD contextual (n/e/x). Quick actions por panel (v/s/u/c/t). Uma acao = um binding.
 
 **Mapa de keybindings:**
+
 ```plaintext
 GLOBAIS (app.py):
   1..5 ................. trocar screen (1=Dash, 2=Rotin, 3=Habit, 4=Tasks, 5=Timer)
@@ -3512,7 +3513,6 @@ src/timeblock/tui/styles/
 
 ---
 
-
 ### BR-TUI-022: Done Manual via Modal (NOVA 15/03/2026)
 
 **Descricao:** Ao marcar habito como done sem timer ativo, o sistema abre modal para o usuario selecionar substatus, aderindo a BR-HABITINSTANCE-002.
@@ -3627,6 +3627,7 @@ src/timeblock/tui/styles/
 - `test_br_tui_026_tasks_panel_max_9`
 
 ---
+
 ## 15. Data
 
 ### BR-DATA-001: Backup Automático do Banco de Dados (NOVA 02/03/2026)

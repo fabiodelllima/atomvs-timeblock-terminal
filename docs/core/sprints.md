@@ -20,15 +20,15 @@ A v1.7.0 marca a transição do ATOMVS TimeBlock de ferramenta CLI pura para uma
 
 **Métricas de acompanhamento:**
 
-| Métrica               | Início (v1.6.0) | Atual (15/03)   | Meta v1.7.0 |
-| --------------------- | --------------- | --------------- | ----------- |
-| Cobertura global      | 87%             | ~82%            | >= 80%      |
-| Cobertura tui/        | 0%              | ~65% (parcial)  | >= 80%      |
-| Testes totais         | 778             | 1241            | 1200+       |
-| Erros mypy            | 0               | 0               | 0           |
-| BRs TUI especificadas | 0               | 26              | 26/26       |
-| BRs TUI implementadas | 0               | 8 (001-004,016-018,021) | 26/26 |
-| Screens funcionais    | 0/5             | 1/5 (Dashboard) | 5/5         |
+| Métrica               | Início (v1.6.0) | Atual (15/03)           | Meta v1.7.0 |
+| --------------------- | --------------- | ----------------------- | ----------- |
+| Cobertura global      | 87%             | ~82%                    | >= 80%      |
+| Cobertura tui/        | 0%              | ~65% (parcial)          | >= 80%      |
+| Testes totais         | 778             | 1241                    | 1200+       |
+| Erros mypy            | 0               | 0                       | 0           |
+| BRs TUI especificadas | 0               | 26                      | 26/26       |
+| BRs TUI implementadas | 0               | 8 (001-004,016-018,021) | 26/26       |
+| Screens funcionais    | 0/5             | 1/5 (Dashboard)         | 5/5         |
 
 ---
 
@@ -578,7 +578,7 @@ O Sprint 6 fecha a v1.7.0 com revisão de cobertura, audit de qualidade de códi
 |            |        | dashboard-first CRUD (ADR-034), Sprint 4 CRUD Screens       |
 |            |        | removida, BRs 016-020 + BR-TEST-001, métricas 1079 testes   |
 | 2026-03-15 | 5.0.0  | Sprint 5.5 planejada (Dashboard Funcional), métricas        |
-|            |        | 1241 testes, ADR-038, DT-034 a DT-042, BRs 022-026         |
+|            |        | 1241 testes, ADR-038, DT-034 a DT-042, BRs 022-026          |
 
 ---
 
