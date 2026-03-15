@@ -121,15 +121,15 @@ class TestBRTUI018CRUDTasks:
 
     @pytest.mark.asyncio
     async def test_br_tui_018_coexists_with_ctrl_k(self):
-        """O ctrl+enter não é interceptado pelo dispatcher de tarefas."""
+        """O v não é interceptado pelo dispatcher de tarefas."""
         app = DashboardTasksTestApp()
         async with app.run_test() as pilot:
             await pilot.pause()
             dashboard = app.query_one(DashboardScreen)
             dashboard._focused_panel = "panel-tasks"
-            await pilot.press("ctrl+enter")
+            await pilot.press("v")
             await pilot.pause()
-            # ctrl+enter não deve abrir modal de CRUD
+            # v não deve abrir modal de CRUD
             assert len(app.screen_stack) == 1
 
     @pytest.mark.asyncio
