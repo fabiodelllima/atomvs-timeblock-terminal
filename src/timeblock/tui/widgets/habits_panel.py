@@ -57,6 +57,9 @@ class HabitsPanel(FocusablePanel):
         elif event.key == "t":
             self._action_start_timer()
             event.stop()
+        elif event.key == "u":
+            self._action_undo()
+            event.stop()
 
     class HabitDoneRequest(Message):
         """Solicita marcação de hábito como done ao coordinator (RF-001)."""
@@ -106,6 +109,20 @@ class HabitsPanel(FocusablePanel):
         if not item or not item.get("id"):
             return
         self.post_message(self.HabitSkipRequest(item["id"]))
+
+    class HabitUndoRequest(Message):
+        """Solicita reverter hábito para pending (ADR-037)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
+    def _action_undo(self) -> None:
+        """Emite HabitUndoRequest (ADR-037)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        self.post_message(self.HabitUndoRequest(item["id"]))
 
     def _action_start_timer(self) -> None:
         """Emite TimerStartRequest para o coordinator (BR-TUI-021)."""
