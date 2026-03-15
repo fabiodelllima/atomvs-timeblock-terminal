@@ -12,11 +12,13 @@ Referências:
 
 from datetime import date
 
-from textual.containers import Horizontal, Vertical
+from sqlmodel import Session
+from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.events import Key
 from textual.widgets import Static
 
-from timeblock.models.enums import SkipReason
+from timeblock.models import HabitInstance
+from timeblock.models.enums import SkipReason, Status
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
@@ -26,6 +28,7 @@ from timeblock.tui.widgets.agenda_panel import AgendaPanel
 from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
 from timeblock.tui.widgets.habits_panel import HabitsPanel
+from timeblock.tui.widgets.header_bar import HeaderBar
 from timeblock.tui.widgets.metrics_panel import MetricsPanel
 from timeblock.tui.widgets.tasks_panel import TasksPanel
 from timeblock.tui.widgets.timer_panel import TimerPanel
@@ -52,10 +55,11 @@ class DashboardScreen(Static):
     def compose(self):
         """Compõe layout: agenda esquerda + panels direita."""
         with Horizontal(id="dashboard-layout"):
-            yield Vertical(
+            yield VerticalScroll(
                 Static(id="agenda-header"),
                 AgendaPanel(id="agenda-content"),
                 id="agenda-column",
+                can_focus=False,
             )
             yield Vertical(
                 HabitsPanel(id="panel-habits"),
@@ -71,7 +75,7 @@ class DashboardScreen(Static):
         self.refresh_data()
         self.app.set_focus(None)
         # BR-TUI-003-R15: auto-scroll na hora atual
-        self.call_after_refresh(self._autoscroll_agenda)
+        self.set_timer(0.5, self._autoscroll_agenda)
         self.set_interval(1, self._tick_timer)
         self.set_interval(60, self._refresh_agenda)
 
@@ -183,6 +187,40 @@ class DashboardScreen(Static):
     # Timer Handlers — BR-TUI-021
     # =========================================================================
 
+    def on_tasks_panel_task_postpone_request(self, message: TasksPanel.TaskPostponeRequest) -> None:
+        """Adia task (ADR-037)."""
+        service_action(lambda s: TaskService.update_task(message.task_id, session=s))
+        self.app.notify("Task adiada", timeout=2)
+        self.refresh_data()
+
+    def on_tasks_panel_task_cancel_request(self, message: TasksPanel.TaskCancelRequest) -> None:
+        """Cancela task (ADR-037)."""
+        service_action(lambda s: TaskService.cancel_task(message.task_id, session=s))
+        self.app.notify("Task cancelada", timeout=2)
+        self.refresh_data()
+
+    def on_tasks_panel_task_reopen_request(self, message: TasksPanel.TaskReopenRequest) -> None:
+        """Reabre task cancelada (ADR-037)."""
+        service_action(lambda s: TaskService.reopen_task(message.task_id, session=s))
+        self.app.notify("Task reaberta", timeout=2)
+        self.refresh_data()
+
+    def on_habits_panel_habit_undo_request(self, message: HabitsPanel.HabitUndoRequest) -> None:
+        """Reverte hábito para pending (ADR-037)."""
+
+        def _undo(s: Session) -> None:
+            instance = s.get(HabitInstance, message.instance_id)
+            if instance:
+                instance.status = Status.PENDING
+                instance.done_substatus = None
+                instance.not_done_substatus = None
+                s.add(instance)
+                s.commit()
+
+        service_action(_undo)
+        self.app.notify("Hábito revertido para pendente", timeout=2)
+        self.refresh_data()
+
     def on_habits_panel_timer_start_request(self, message: HabitsPanel.TimerStartRequest) -> None:
         """Recebe TimerStartRequest e inicia timer via TimerService."""
         service_action(lambda s: TimerService.start_timer(message.instance_id, session=s))
@@ -221,8 +259,6 @@ class DashboardScreen(Static):
     def _refresh_header(self) -> None:
         """Atualiza header bar após operação CRUD."""
         try:
-            from timeblock.tui.widgets.header_bar import HeaderBar
-
             self.app.query_one(HeaderBar)._refresh_content()
         except Exception:
             logger.debug("HeaderBar indisponível para refresh")

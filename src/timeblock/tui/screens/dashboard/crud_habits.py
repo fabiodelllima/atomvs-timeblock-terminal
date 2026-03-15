@@ -12,17 +12,19 @@ Referências:
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import time
+from datetime import date, time
 from typing import TYPE_CHECKING, Any
 
 from sqlmodel import Session
 
 from timeblock.models import Recurrence
+from timeblock.services.event_reordering_service import EventReorderingService
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.tui.session import service_action
 from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
 from timeblock.tui.widgets.form_modal import FormField, FormModal
+from timeblock.utils.validators import parse_time_to_time
 
 if TYPE_CHECKING:
     from textual.app import App
@@ -39,12 +41,6 @@ RECURRENCE_OPTIONS = [
     ("SATURDAY", "Sábado"),
     ("SUNDAY", "Domingo"),
 ]
-
-
-def _parse_time(value: str) -> time:
-    """Converte string HH:MM para time."""
-    parts = value.split(":")
-    return time(int(parts[0]), int(parts[1]))
 
 
 def _calculate_end_time(start: time, duration_minutes: int) -> time:
@@ -80,13 +76,14 @@ def open_create_habit(
         FormField(
             name="recurrence",
             label="Recorrência",
+            field_type="select",
             default="EVERYDAY",
-            placeholder="EVERYDAY",
+            options=RECURRENCE_OPTIONS,
         ),
     ]
 
     def on_submit(data: dict[str, Any]) -> None:
-        start = _parse_time(data["start"])
+        start = parse_time_to_time(data["start"])
         duration = data["duration"]
         end = _calculate_end_time(start, duration)
         recurrence_value = data.get("recurrence", "EVERYDAY")
@@ -104,14 +101,28 @@ def open_create_habit(
 
         habit_id, error = service_action(_create)
         if not error and habit_id:
-            from datetime import date as _date
-
-            today = _date.today()
+            today = date.today()
             service_action(
                 lambda s: HabitInstanceService.generate_instances(
                     habit_id=habit_id, start_date=today, end_date=today, session=s
                 )
             )
+            # Detectar conflitos (informar, nunca decidir)
+            conflicts, _ = service_action(
+                lambda s: EventReorderingService.detect_conflicts(
+                    habit_id, "habit_instance", session=s
+                )
+            )
+
+            if conflicts:
+                names = ", ".join(
+                    f"{c.conflicting_event_type}#{c.conflicting_event_id}" for c in conflicts[:3]
+                )
+                app.notify(
+                    f"Conflito detectado com: {names}",
+                    severity="warning",
+                    timeout=5,
+                )
             on_done()
 
     app.push_screen(
@@ -148,6 +159,12 @@ def open_edit_habit(
             field_type="number",
             required=True,
         ),
+        FormField(
+            name="recurrence",
+            label="Recorrência",
+            field_type="select",
+            options=RECURRENCE_OPTIONS,
+        ),
     ]
     sm = habit_data.get("start_minutes", 0)
     em = habit_data.get("end_minutes", 0)
@@ -157,11 +174,12 @@ def open_edit_habit(
     edit_data = {
         "title": habit_data.get("name", ""),
         "start": f"{sh:02d}:{s_min:02d}",
+        "recurrence": habit_data.get("recurrence", "EVERYDAY"),
         "duration": str(max(duration, 0)),
     }
 
     def on_submit(data: dict[str, Any]) -> None:
-        start = _parse_time(data["start"])
+        start = parse_time_to_time(data["start"])
         dur = data["duration"]
         end = _calculate_end_time(start, dur)
 

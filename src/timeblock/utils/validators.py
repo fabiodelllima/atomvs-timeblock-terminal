@@ -2,6 +2,26 @@
 
 import re
 from datetime import UTC, date, datetime, timedelta
+from datetime import time as dt_time
+
+
+def parse_time_to_time(value: str) -> dt_time:
+    """Converte string HH:MM para objeto time.
+
+    Args:
+        value: String no formato HH:MM
+
+    Returns:
+        Objeto time
+
+    Raises:
+        ValueError: Se formato invalido
+    """
+    try:
+        parts = value.split(":")
+        return dt_time(int(parts[0]), int(parts[1]))
+    except (ValueError, IndexError) as e:
+        raise ValueError(f"Formato invalido: {value}. Use HH:MM") from e
 
 
 def parse_time(time_str: str) -> datetime:

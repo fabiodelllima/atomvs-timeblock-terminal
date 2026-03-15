@@ -15,7 +15,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Input, Label
+from textual.widgets import Input, Label, Select
 
 
 class FormField:
@@ -92,6 +92,10 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
     FormModal > Vertical > Input:focus {
         border: tall #89B4FA;
     }
+
+    FormModal > Vertical > Select {
+        margin-bottom: 0;
+    }
     """
 
     def __init__(
@@ -121,11 +125,21 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
             for field in self._fields:
                 yield Label(field.label, classes="fm-label")
                 default = self._edit_data.get(field.name, field.default)
-                yield Input(
-                    value=str(default) if default else "",
-                    placeholder=field.placeholder or field.label,
-                    id=f"fm-input-{field.name}",
-                )
+                if field.field_type == "select" and field.options:
+                    options = [(label, value) for value, label in field.options]
+                    initial = str(default) if default else field.options[0][0]
+                    yield Select(
+                        options,
+                        value=initial,
+                        id=f"fm-input-{field.name}",
+                        allow_blank=False,
+                    )
+                else:
+                    yield Input(
+                        value=str(default) if default else "",
+                        placeholder=field.placeholder or field.label,
+                        id=f"fm-input-{field.name}",
+                    )
                 yield Label("", classes="fm-error", id=f"fm-err-{field.name}")
             yield Label("Tab navegar  Enter salvar  Esc cancelar", id="fm-hint")
 
@@ -145,9 +159,13 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
         has_errors = False
 
         for field in self._fields:
-            input_widget = self.query_one(f"#fm-input-{field.name}", Input)
             error_label = self.query_one(f"#fm-err-{field.name}", Label)
-            value = input_widget.value.strip()
+            if field.field_type == "select" and field.options:
+                select_widget = self.query_one(f"#fm-input-{field.name}", Select)
+                value = str(select_widget.value) if select_widget.value else ""
+            else:
+                input_widget = self.query_one(f"#fm-input-{field.name}", Input)
+                value = input_widget.value.strip()
 
             error = self._validate_field(field, value)
             if error:

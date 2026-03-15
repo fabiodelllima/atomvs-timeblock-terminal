@@ -5,8 +5,8 @@ BR-TUI-003-R18: Effort bar proporcional.
 BR-TUI-003-R19: Ordenação por start_time.
 BR-TUI-003-R27: Nome herda cor do status.
 BR-TUI-012: Navegação vertical com setas/j/k e highlight.
-BR-TUI-004: Quick actions — Ctrl+Enter done, Ctrl+S skip.
-BR-TUI-021: Shift+Enter inicia timer para hábito selecionado.
+BR-TUI-004: Quick actions — v done, s skip (ADR-037).
+BR-TUI-021: t inicia timer para hábito selecionado (ADR-037).
 """
 
 from textual.events import Key
@@ -48,14 +48,17 @@ class HabitsPanel(FocusablePanel):
 
     def on_key(self, event: Key) -> None:
         """Captura navegação e quick actions."""
-        if event.key == "ctrl+s":
+        if event.key == "s":
             self._action_skip()
             event.stop()
-        elif event.key == "ctrl+enter":
+        elif event.key == "v":
             self._action_done()
             event.stop()
-        elif event.key == "shift+enter":
+        elif event.key == "t":
             self._action_start_timer()
+            event.stop()
+        elif event.key == "u":
+            self._action_undo()
             event.stop()
 
     class HabitDoneRequest(Message):
@@ -106,6 +109,20 @@ class HabitsPanel(FocusablePanel):
         if not item or not item.get("id"):
             return
         self.post_message(self.HabitSkipRequest(item["id"]))
+
+    class HabitUndoRequest(Message):
+        """Solicita reverter hábito para pending (ADR-037)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
+    def _action_undo(self) -> None:
+        """Emite HabitUndoRequest (ADR-037)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        self.post_message(self.HabitUndoRequest(item["id"]))
 
     def _action_start_timer(self) -> None:
         """Emite TimerStartRequest para o coordinator (BR-TUI-021)."""

@@ -44,7 +44,7 @@ class TestBRTUI021HabitsTimerStart:
             panel._showing_placeholders = False
             panel._set_item_count(1)
             app.set_focus(panel)
-            await pilot.press("shift+enter")
+            await pilot.press("t")
             await pilot.pause()
         assert received == [10]
 
@@ -69,7 +69,7 @@ class TestBRTUI021HabitsTimerStart:
             panel._instances = []
             panel._set_item_count(0)
             app.set_focus(panel)
-            await pilot.press("shift+enter")
+            await pilot.press("t")
             await pilot.pause()
         assert received == []
 
@@ -105,7 +105,7 @@ class TestBRTUI021StopAndDone:
             panel._showing_placeholders = False
             panel._set_item_count(1)
             app.set_focus(panel)
-            await pilot.press("ctrl+enter")
+            await pilot.press("v")
             await pilot.pause()
         assert received_stop_done == [20]
         assert received_done == []
@@ -138,7 +138,7 @@ class TestBRTUI021StopAndDone:
             panel._showing_placeholders = False
             panel._set_item_count(1)
             app.set_focus(panel)
-            await pilot.press("ctrl+enter")
+            await pilot.press("v")
             await pilot.pause()
         assert received_done == [30]
         assert received_stop_done == []
@@ -167,7 +167,7 @@ class TestBRTUI021TimerPanelKeys:
             panel = app.query_one(TimerPanel)
             panel.update_data({"id": 5, "status": "running", "elapsed": "01:30", "name": "T"})
             app.set_focus(panel)
-            await pilot.press("shift+enter")
+            await pilot.press("space")
             await pilot.pause()
         assert received == [5]
 
@@ -191,7 +191,7 @@ class TestBRTUI021TimerPanelKeys:
             panel = app.query_one(TimerPanel)
             panel.update_data({"id": 6, "status": "paused", "elapsed": "02:00", "name": "T"})
             app.set_focus(panel)
-            await pilot.press("shift+enter")
+            await pilot.press("space")
             await pilot.pause()
         assert received == [6]
 
@@ -215,7 +215,7 @@ class TestBRTUI021TimerPanelKeys:
             panel = app.query_one(TimerPanel)
             panel.update_data({"id": 7, "status": "running", "elapsed": "05:00", "name": "T"})
             app.set_focus(panel)
-            await pilot.press("ctrl+enter")
+            await pilot.press("s")
             await pilot.pause()
         assert received == [7]
 
@@ -239,7 +239,7 @@ class TestBRTUI021TimerPanelKeys:
             panel = app.query_one(TimerPanel)
             panel.update_data({"id": 8, "status": "running", "elapsed": "03:00", "name": "T"})
             app.set_focus(panel)
-            await pilot.press("ctrl+x")
+            await pilot.press("c")
             await pilot.pause()
         assert received == [8]
 
@@ -267,8 +267,8 @@ class TestBRTUI021TimerPanelKeys:
             panel = app.query_one(TimerPanel)
             panel.update_data(None)
             app.set_focus(panel)
-            await pilot.press("shift+enter")
-            await pilot.press("ctrl+enter")
-            await pilot.press("ctrl+x")
+            await pilot.press("space")
+            await pilot.press("s")
+            await pilot.press("c")
             await pilot.pause()
         assert received == []

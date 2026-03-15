@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.5.0
+**Versão:** 2.6.0
 
 **Status:** SSOT
 
@@ -28,10 +28,10 @@
 | DT014 | Keybindings divergentes BR vs código           | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT015 | AgendaPanel sem auto-refresh (set_interval)    | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT016 | load_active_timer: elapsed int vs str MM:SS    | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT017 | MetricsPanel stub — load_metrics não existe    | MÉDIA      | PENDENTE  | -            | Sprint 5                 |
-| DT018 | load_tasks omite completed/cancelled           | BAIXA      | PENDENTE  | -            | Sprint 5                 |
+| DT017 | MetricsPanel stub — load_metrics não existe    | MÉDIA      | RESOLVIDO | Mar/2026     | feat/metrics-panel       |
+| DT018 | load_tasks omite completed/cancelled           | BAIXA      | RESOLVIDO | Mar/2026     | feat/task-lifecycle      |
 | DT019 | command_bar.py stub vazio (0 bytes)            | BAIXA      | PENDENTE  | -            | Sprint 6+                |
-| DT020 | Agenda: viewport cortada, sem auto-scroll      | BAIXA      | PENDENTE  | -            | Sprint 5                 |
+| DT020 | Agenda: viewport cortada, sem auto-scroll      | BAIXA      | RESOLVIDO | Mar/2026     | feat/agenda-viewport     |
 | DT021 | Loaders/CRUDs: ORM fora da sessão (frágil)     | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT022 | Logging: adoção zero fora de habit_inst_svc    | MÉDIA      | RESOLVIDO | Mar/2026     | feat/structured-logging  |
 | DT023 | Instâncias diárias: geração manual obrigatória | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
@@ -52,21 +52,29 @@
 - [ ] DT010 — FocusablePanel: flag \_showing_placeholders
 - [ ] DT011 — FocusablePanel: count em dois lugares
 - [ ] DT012 — DI inconsistente entre services
-- [ ] DT013 — \_parse_time duplicado
+- [x] DT013 — _parse_time consolidado em validators
 - [x] DT014 — Keybindings divergentes
 - [x] DT015 — AgendaPanel sem auto-refresh
 - [x] DT016 — load_active_timer elapsed/name
-- [ ] DT017 — MetricsPanel stub
-- [ ] DT018 — load_tasks omite completed/cancelled
+- [x] DT017 — MetricsPanel stub
+- [x] DT018 — load_tasks omite completed/cancelled
 - [ ] DT019 — command_bar.py vazio
-- [ ] DT020 — Agenda viewport cortada
+- [x] DT020 — Agenda viewport cortada
 - [x] DT021 — Loaders/CRUDs: ORM fora da sessão
 - [x] DT022 — Logging: adoção zero fora de habit_instance_service
 - [x] DT023 — Instâncias diárias: geração manual obrigatória
 - [x] DT024 — Keybindings Ctrl+Números inoperantes em VTE/GNOME
 - [ ] DT025 — Pyright como job CI complementar ao mypy e ruff
+- [ ] DT026 — load_metrics sem filtro de rotina ativa
+- [x] DT027 — FormModal sem suporte a campo select (recorrencia)
+- [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
+- [x] DT029 — Conflitos de horario detectados no CRUD habits
+- [x] DT030 — Help overlay completo (ADR-037)
+- [x] DT031 — Auto-scroll desabilitado (call_later travava TUI)
+- [x] DT032 — Migração de banco manual para Task lifecycle
+- [x] DT033 — 3 testes CRUD routines quebrados por VerticalScroll
 
-**Resolvidos:** 14/25 | **Pendentes:** 10/25 | **Aceitos:** 1/25
+**Resolvidos:** 27/33 | **Pendentes:** 6/33 | **Aceitos:** 1/33
 
 ---
 
@@ -312,6 +320,8 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 | Data       | Versão | Mudanças                                                |
 | ---------- | ------ | ------------------------------------------------------- |
+| 2026-03-14 | 2.6.0  | DT-017/018/020 resolvidos. Registra DT-026 a 033        |
+|            |        | (bugs TUI encontrados em teste manual)                  |
 | 2026-03-13 | 2.5.0  | DT-022 resolvido (feat/structured-logging mergeado).    |
 |            |        | Adicionado DT-025 (Pyright CI complementar)             |
 | 2026-03-12 | 2.4.0  | Adicionados DT-023 e DT-024 (resolvidos): auto-geração  |
@@ -331,4 +341,4 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 13 de Março de 2026
+**Última atualização:** 14 de Março de 2026

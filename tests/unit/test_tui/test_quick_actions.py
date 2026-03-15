@@ -58,7 +58,7 @@ class TestRF001HabitsQuickActions:
             panel._instances = [{"id": 42, "name": "Teste", "status": "pending"}]
             panel._set_item_count(1)
             app.set_focus(panel)
-            await pilot.press("ctrl+enter")
+            await pilot.press("v")
             await pilot.pause()
         assert received == [42]
 
@@ -83,7 +83,7 @@ class TestRF001HabitsQuickActions:
             panel._instances = [{"id": 7, "name": "Teste", "status": "pending"}]
             panel._set_item_count(1)
             app.set_focus(panel)
-            await pilot.press("ctrl+s")
+            await pilot.press("s")
             await pilot.pause()
         assert received == [7]
 
@@ -108,7 +108,7 @@ class TestRF001HabitsQuickActions:
             panel._instances = []
             panel._set_item_count(0)
             app.set_focus(panel)
-            await pilot.press("ctrl+enter")
+            await pilot.press("v")
             await pilot.pause()
         assert received == []
 
@@ -169,7 +169,7 @@ class TestRF001TasksQuickActions:
                 ]
             )
             app.set_focus(panel)
-            await pilot.press("ctrl+enter")
+            await pilot.press("v")
             await pilot.pause()
         assert received == [99]
 
@@ -193,7 +193,7 @@ class TestRF001TasksQuickActions:
             panel = app.query_one(TasksPanel)
             panel.update_data([])
             app.set_focus(panel)
-            await pilot.press("ctrl+enter")
+            await pilot.press("v")
             await pilot.pause()
         assert received == []
 
