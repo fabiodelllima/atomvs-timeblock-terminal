@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any
 from sqlmodel import Session, col, select
 
 from timeblock.models import Recurrence
-from timeblock.models.enums import DoneSubstatus, TimerStatus
+from timeblock.models.enums import DoneSubstatus, SkipReason, TimerStatus
 from timeblock.models.habit_instance import HabitInstance
 from timeblock.models.time_log import TimeLog
 from timeblock.services.event_reordering_service import EventReorderingService
@@ -50,6 +50,17 @@ DONE_SUBSTATUS_OPTIONS = [
     ("PARTIAL", "Parcial (<90%)"),
     ("OVERDONE", "Além do esperado (110-150%)"),
     ("EXCESSIVE", "Excessivo (>150%)"),
+]
+
+SKIP_REASON_OPTIONS = [
+    ("HEALTH", "Saúde"),
+    ("WORK", "Trabalho"),
+    ("FAMILY", "Família"),
+    ("TRAVEL", "Viagem"),
+    ("WEATHER", "Clima"),
+    ("LACK_RESOURCES", "Falta de recursos"),
+    ("EMERGENCY", "Emergência"),
+    ("OTHER", "Outro"),
 ]
 
 
@@ -270,6 +281,55 @@ def open_done_modal(
         )
     else:
         _show_substatus_form(app, instance_id, on_done)
+
+
+def open_skip_modal(
+    app: App,
+    instance_id: int,
+    on_done: Callable[[], None],
+) -> None:
+    """Abre FormModal para selecionar SkipReason (BR-TUI-024, DT-039).
+
+    Campos:
+        - Select de SkipReason (8 opções, default OTHER)
+        - Input opcional para nota (max 500 chars)
+    """
+    fields = [
+        FormField(
+            name="reason",
+            label="Motivo do skip",
+            field_type="select",
+            default="OTHER",
+            options=SKIP_REASON_OPTIONS,
+        ),
+        FormField(
+            name="note",
+            label="Nota (opcional)",
+            placeholder="Ex: Gripe forte",
+        ),
+    ]
+
+    def on_submit(data: dict[str, Any]) -> None:
+        reason_value = data.get("reason", "OTHER")
+        skip_reason = SkipReason[reason_value]
+        skip_note = data.get("note") or None
+        service_action(
+            lambda s: HabitInstanceService.skip_habit_instance(
+                instance_id,
+                skip_reason=skip_reason,
+                skip_note=skip_note,
+                session=s,
+            )
+        )
+        on_done()
+
+    app.push_screen(
+        FormModal(
+            title="Pular Hábito",
+            fields=fields,
+            on_submit=on_submit,
+        )
+    )
 
 
 def open_edit_habit(
