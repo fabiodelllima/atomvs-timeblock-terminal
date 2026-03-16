@@ -168,6 +168,31 @@ class DashboardScreen(Static):
         """Abre modal de skip reason (BR-TUI-024, DT-039)."""
         crud_habits.open_skip_modal(self.app, message.instance_id, self._on_crud_done)
 
+    def on_habits_panel_timer_stop_and_done_request(
+        self, message: HabitsPanel.TimerStopAndDoneRequest
+    ) -> None:
+        """Timer ativo: confirma parada antes de marcar done (BR-TUI-023, DT-036)."""
+        instance_id = message.instance_id
+        timelog, _ = service_action(lambda s: TimerService.get_active_timer(instance_id, session=s))
+        if not timelog:
+            self.app.notify("Nenhum timer ativo encontrado", severity="warning")
+            return
+
+        assert timelog.id is not None
+        timelog_id = timelog.id
+
+        def on_confirm() -> None:
+            service_action(lambda s: TimerService.stop_timer(timelog_id, session=s))
+            self._on_crud_done()
+
+        self.app.push_screen(
+            ConfirmDialog(
+                title="Timer Ativo",
+                message="Parar timer e marcar como concluído?",
+                on_confirm=on_confirm,
+            )
+        )
+
     def on_tasks_panel_task_complete_request(self, message: TasksPanel.TaskCompleteRequest) -> None:
         """Recebe TaskCompleteRequest e executa complete_task via service."""
         service_action(lambda s: TaskService.complete_task(message.task_id, session=s))
