@@ -18,8 +18,6 @@ from textual.events import Key
 from textual.widgets import Static
 
 from timeblock.models import HabitInstance
-from timeblock.models.enums import SkipReason
-from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
 from timeblock.tui.screens.dashboard import crud_habits, crud_routines, crud_tasks, loader
@@ -167,13 +165,8 @@ class DashboardScreen(Static):
         crud_habits.open_done_modal(self.app, message.instance_id, self._on_crud_done)
 
     def on_habits_panel_habit_skip_request(self, message: HabitsPanel.HabitSkipRequest) -> None:
-        """Recebe HabitSkipRequest e executa skip com categorização (BR-SKIP-001)."""
-        service_action(
-            lambda s: HabitInstanceService.skip_habit_instance(
-                message.instance_id, skip_reason=SkipReason.OTHER, session=s
-            )
-        )
-        self._on_crud_done()
+        """Abre modal de skip reason (BR-TUI-024, DT-039)."""
+        crud_habits.open_skip_modal(self.app, message.instance_id, self._on_crud_done)
 
     def on_tasks_panel_task_complete_request(self, message: TasksPanel.TaskCompleteRequest) -> None:
         """Recebe TaskCompleteRequest e executa complete_task via service."""
