@@ -317,6 +317,7 @@ class HabitInstanceService:
     def mark_completed(
         instance_id: int,
         done_substatus: DoneSubstatus,
+        completion_percentage: int | None = None,
         session: Session | None = None,
     ) -> HabitInstance | None:
         """Marca instância como completa com substatus (BR-HABITINSTANCE-002).
@@ -324,6 +325,7 @@ class HabitInstanceService:
         Args:
             instance_id: ID da instância
             done_substatus: Substatus obrigatório (FULL, PARTIAL, OVERDONE, EXCESSIVE)
+            completion_percentage: Percentual de conclusão (opcional, usado na restauração via TimeLog)
             session: Optional session (for tests/transactions)
 
         Returns:
@@ -335,7 +337,7 @@ class HabitInstanceService:
             - not_done_substatus → None
             - skip_reason → None
             - skip_note → None
-            - completion_percentage → None (caller pode setar após)
+            - completion_percentage → valor fornecido ou None
         """
         logger.debug(
             f"Marcando como completa: instance_id={instance_id}, substatus={done_substatus.value}"
@@ -356,7 +358,7 @@ class HabitInstanceService:
             instance.not_done_substatus = None
             instance.skip_reason = None
             instance.skip_note = None
-            instance.completion_percentage = None
+            instance.completion_percentage = completion_percentage
 
             # Validar consistência antes de persistir (BR-HABITINSTANCE-002)
             instance.validate_status_consistency()
