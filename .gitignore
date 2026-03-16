@@ -57,3 +57,8 @@ migrate_*.py
 # Others
 docs/core/ci-optimization.md
 docs/sysdesign/
+
+# Claude Code automation (local only)
+CLAUDE.md
+TASK.md
+run-overnight.sh
