@@ -15,9 +15,12 @@ from collections.abc import Callable
 from datetime import date, time
 from typing import TYPE_CHECKING, Any
 
-from sqlmodel import Session
+from sqlmodel import Session, col, select
 
 from timeblock.models import Recurrence
+from timeblock.models.enums import DoneSubstatus, TimerStatus
+from timeblock.models.habit_instance import HabitInstance
+from timeblock.models.time_log import TimeLog
 from timeblock.services.event_reordering_service import EventReorderingService
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
@@ -40,6 +43,13 @@ RECURRENCE_OPTIONS = [
     ("FRIDAY", "Sexta"),
     ("SATURDAY", "Sábado"),
     ("SUNDAY", "Domingo"),
+]
+
+DONE_SUBSTATUS_OPTIONS = [
+    ("FULL", "Completo (90-110%)"),
+    ("PARTIAL", "Parcial (<90%)"),
+    ("OVERDONE", "Além do esperado (110-150%)"),
+    ("EXCESSIVE", "Excessivo (>150%)"),
 ]
 
 
@@ -132,6 +142,134 @@ def open_create_habit(
             on_submit=on_submit,
         )
     )
+
+
+def _find_done_timelog(session: Session, instance_id: int) -> dict[str, Any] | None:
+    """Busca TimeLog DONE e calcula substatus/completion para restauração."""
+    instance = session.get(HabitInstance, instance_id)
+    if not instance:
+        return None
+
+    statement = (
+        select(TimeLog)
+        .where(
+            TimeLog.habit_instance_id == instance_id,
+            col(TimeLog.status) == TimerStatus.DONE,
+        )
+        .order_by(col(TimeLog.id).desc())
+    )
+    timelog = session.exec(statement).first()
+    if not timelog or not timelog.duration_seconds:
+        return None
+
+    # Calcular completion_percentage (mesmo algoritmo de stop_timer)
+    from datetime import datetime
+
+    target_start = datetime.combine(instance.date, instance.scheduled_start)
+    target_end = datetime.combine(instance.date, instance.scheduled_end)
+    target_seconds = (target_end - target_start).total_seconds()
+    if target_seconds <= 0:
+        return None
+
+    completion_percentage = int((timelog.duration_seconds / target_seconds) * 100)
+
+    if completion_percentage < 90:
+        done_substatus = DoneSubstatus.PARTIAL
+    elif completion_percentage <= 110:
+        done_substatus = DoneSubstatus.FULL
+    elif completion_percentage <= 150:
+        done_substatus = DoneSubstatus.OVERDONE
+    else:
+        done_substatus = DoneSubstatus.EXCESSIVE
+
+    minutes = timelog.duration_seconds // 60
+    return {
+        "substatus": done_substatus,
+        "completion_percentage": completion_percentage,
+        "minutes": minutes,
+    }
+
+
+def _show_substatus_form(
+    app: App,
+    instance_id: int,
+    on_done: Callable[[], None],
+) -> None:
+    """Abre FormModal com Select de DoneSubstatus (BR-TUI-022)."""
+    fields = [
+        FormField(
+            name="substatus",
+            label="Como foi a execução?",
+            field_type="select",
+            default="FULL",
+            options=DONE_SUBSTATUS_OPTIONS,
+        ),
+    ]
+
+    def on_submit(data: dict[str, Any]) -> None:
+        substatus_value = data.get("substatus", "FULL")
+        done_sub = DoneSubstatus(substatus_value)
+        service_action(
+            lambda s: HabitInstanceService.mark_completed(
+                instance_id, done_substatus=done_sub, session=s
+            )
+        )
+        on_done()
+
+    app.push_screen(
+        FormModal(
+            title="Marcar Concluído",
+            fields=fields,
+            on_submit=on_submit,
+        )
+    )
+
+
+def open_done_modal(
+    app: App,
+    instance_id: int,
+    on_done: Callable[[], None],
+) -> None:
+    """Abre modal de done com detecção de TimeLog (BR-TUI-022, DT-037).
+
+    Fluxo:
+        1. Busca TimeLog DONE para a instância
+        2. Se encontrado: ConfirmDialog oferece restauração
+           - Enter: restaura substatus/completion do timer
+           - Esc: abre FormModal para seleção manual
+        3. Se não encontrado: abre FormModal diretamente
+    """
+    timelog_data, _ = service_action(lambda s: _find_done_timelog(s, instance_id))
+
+    if timelog_data:
+        substatus = timelog_data["substatus"]
+        pct = timelog_data["completion_percentage"]
+        minutes = timelog_data["minutes"]
+
+        def on_confirm() -> None:
+            service_action(
+                lambda s: HabitInstanceService.mark_completed(
+                    instance_id,
+                    done_substatus=substatus,
+                    completion_percentage=pct,
+                    session=s,
+                )
+            )
+            on_done()
+
+        def on_cancel() -> None:
+            _show_substatus_form(app, instance_id, on_done)
+
+        app.push_screen(
+            ConfirmDialog(
+                title="Sessão Anterior Encontrada",
+                message=f"Timer: {minutes}min ({pct}%). Restaurar como {substatus.value}?",
+                on_confirm=on_confirm,
+                on_cancel=on_cancel,
+            )
+        )
+    else:
+        _show_substatus_form(app, instance_id, on_done)
 
 
 def open_edit_habit(
