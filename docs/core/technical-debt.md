@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.9.0
+**Versão:** 2.10.0
 
 **Status:** SSOT
 
@@ -39,10 +39,10 @@
 | DT025 | Pyright como job CI complementar               | BAIXA      | PENDENTE  | -            | Sprint futuro            |
 | DT034 | mark_completed sem done_substatus              | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT035 | Undo handler nao limpa skip_reason/skip_note   | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT036 | TimerStopAndDoneRequest sem handler            | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
-| DT037 | v (done) deveria abrir modal de substatus      | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
+| DT036 | TimerStopAndDoneRequest sem handler            | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
+| DT037 | v (done) deveria abrir modal de substatus      | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT038 | s (postpone) deveria abrir FormModal de edit   | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
-| DT039 | s (skip) deveria abrir modal de SkipReason     | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
+| DT039 | s (skip) deveria abrir modal de SkipReason     | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT040 | n sem rotina: silent no-op ao inves de modal   | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
 | DT041 | BR-TUI-004/017/018/021 keybindings obsoletos   | ALTA       | PENDENTE  | -            | docs/br-update           |
 | DT042 | BR-HABITINSTANCE-001 nao documenta undo        | ALTA       | PENDENTE  | -            | docs/br-update           |
@@ -77,10 +77,10 @@
 - [ ] DT026 — load_metrics sem filtro de rotina ativa
 - [x] DT034 — mark_completed sem done_substatus (CRITICA)
 - [x] DT035 — Undo handler nao limpa skip_reason/skip_note (CRITICA)
-- [ ] DT036 — TimerStopAndDoneRequest sem handler
-- [ ] DT037 — v (done) deveria abrir modal de substatus
+- [x] DT036 — TimerStopAndDoneRequest sem handler
+- [x] DT037 — v (done) deveria abrir modal de substatus
 - [ ] DT038 — s (postpone) deveria abrir FormModal de edit
-- [ ] DT039 — s (skip) deveria abrir modal de SkipReason
+- [x] DT039 — s (skip) deveria abrir modal de SkipReason
 - [ ] DT040 — n sem rotina: silent no-op ao inves de modal
 - [ ] DT041 — BR-TUI-004/017/018/021 keybindings obsoletos
 - [ ] DT042 — BR-HABITINSTANCE-001 nao documenta undo
@@ -120,6 +120,7 @@
 - **Impacto:** `v` em habito com timer ativo e silenciosamente ignorado.
 - **Correcao:** Implementar handler com modal de opcoes (ADR-038 D4).
 - **BRs afetadas:** BR-TUI-021
+- **Resolvido:** Mar/2026 — Handler on_habits_panel_timer_stop_and_done_request com ConfirmDialog.
 
 ### DT-037: v (done) deveria abrir modal de substatus (ALTA)
 
@@ -127,6 +128,7 @@
 - **Impacto:** `v` marca done sem substatus. Viola BR-HABITINSTANCE-002.
 - **Correcao:** Abrir modal com Select de DoneSubstatus (ADR-038 D3).
 - **BRs afetadas:** BR-HABITINSTANCE-002, BR-HABITINSTANCE-003
+- **Resolvido:** Mar/2026 — Modal open_done_modal com detecção de TimeLog e restauração de substatus.
 
 ### DT-038: s (postpone) deveria abrir FormModal de edit (MEDIA)
 
@@ -141,6 +143,7 @@
 - **Impacto:** `s` aplica `SkipReason.OTHER` hardcoded. Viola BR-SKIP-001.
 - **Correcao:** Abrir modal com Select de SkipReason (ADR-038 D6).
 - **BRs afetadas:** BR-SKIP-001, BR-SKIP-004
+- **Resolvido:** Mar/2026 — Modal open_skip_modal com Select de SkipReason e nota opcional.
 
 ### DT-040: n sem rotina: silent no-op no habits panel (MEDIA)
 
