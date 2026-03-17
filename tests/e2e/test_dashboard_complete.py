@@ -156,7 +156,7 @@ class TestHabitsPanelComplete:
             pilot.app.set_focus(panel)
             await _wait(pilot)
             await pilot.press("e")
-            await _wait(pilot)
+            await _wait(pilot, 5)  # Extra cycles: edit FormModal com 4 campos + edit_data
 
             # Verificar modal aberto com dados pré-preenchidos
             inputs = list(pilot.app.screen.query(Input))
@@ -368,7 +368,7 @@ class TestTasksPanelComplete:
             await _wait(pilot)
 
             await pilot.press("e")
-            await _wait(pilot)
+            await _wait(pilot, 5)  # Extra cycles: edit FormModal com edit_data
 
             # Verificar modal pré-preenchido
             inputs = list(pilot.app.screen.query(Input))
