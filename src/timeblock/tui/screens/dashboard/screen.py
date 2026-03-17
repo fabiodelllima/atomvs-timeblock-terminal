@@ -203,10 +203,15 @@ class DashboardScreen(Static):
     # =========================================================================
 
     def on_tasks_panel_task_postpone_request(self, message: TasksPanel.TaskPostponeRequest) -> None:
-        """Adia task (ADR-037)."""
-        service_action(lambda s: TaskService.update_task(message.task_id, session=s))
-        self.app.notify("Task adiada", timeout=2)
-        self.refresh_data()
+        """Abre FormModal de edição para adiar task (DT-038, ADR-038 D5).
+
+        TaskService.update_task incrementa postponement_count quando a data
+        muda (BR-TASK-008), então editar a data via FormModal é semanticamente
+        equivalente a adiar.
+        """
+        item = self.query_one(TasksPanel).get_selected_item()
+        if item:
+            crud_tasks.open_edit_task(self.app, item, self._on_crud_done)
 
     def on_tasks_panel_task_cancel_request(self, message: TasksPanel.TaskCancelRequest) -> None:
         """Cancela task (ADR-037)."""
