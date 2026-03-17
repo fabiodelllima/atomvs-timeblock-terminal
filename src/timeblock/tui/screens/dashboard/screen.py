@@ -112,6 +112,8 @@ class DashboardScreen(Static):
         elif self._focused_panel == "panel-habits":
             if self._active_routine_id:
                 crud_habits.open_create_habit(self.app, self._active_routine_id, self._on_crud_done)
+            else:
+                crud_routines.open_create_routine(self.app, self._on_crud_done)
         elif self._focused_panel == "panel-tasks":
             crud_tasks.open_create_task(self.app, self._on_crud_done)
 
