@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.10.0
+**Versão:** 2.11.0
 
 **Status:** SSOT
 
@@ -41,9 +41,9 @@
 | DT035 | Undo handler nao limpa skip_reason/skip_note   | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT036 | TimerStopAndDoneRequest sem handler            | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT037 | v (done) deveria abrir modal de substatus      | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT038 | s (postpone) deveria abrir FormModal de edit   | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
+| DT038 | s (postpone) deveria abrir FormModal de edit   | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT039 | s (skip) deveria abrir modal de SkipReason     | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT040 | n sem rotina: silent no-op ao inves de modal   | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
+| DT040 | n sem rotina: silent no-op ao inves de modal   | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT041 | BR-TUI-004/017/018/021 keybindings obsoletos   | ALTA       | PENDENTE  | -            | docs/br-update           |
 | DT042 | BR-HABITINSTANCE-001 nao documenta undo        | ALTA       | PENDENTE  | -            | docs/br-update           |
 
@@ -79,9 +79,9 @@
 - [x] DT035 — Undo handler nao limpa skip_reason/skip_note (CRITICA)
 - [x] DT036 — TimerStopAndDoneRequest sem handler
 - [x] DT037 — v (done) deveria abrir modal de substatus
-- [ ] DT038 — s (postpone) deveria abrir FormModal de edit
+- [x] DT038 — s (postpone) deveria abrir FormModal de edit
 - [x] DT039 — s (skip) deveria abrir modal de SkipReason
-- [ ] DT040 — n sem rotina: silent no-op ao inves de modal
+- [x] DT040 — n sem rotina: silent no-op ao inves de modal
 - [ ] DT041 — BR-TUI-004/017/018/021 keybindings obsoletos
 - [ ] DT042 — BR-HABITINSTANCE-001 nao documenta undo
 - [x] DT027 — FormModal sem suporte a campo select (recorrencia)
@@ -136,6 +136,7 @@
 - **Impacto:** Handler chama `update_task` sem parametros. Nenhuma acao visivel.
 - **Correcao:** `s` abre mesmo FormModal que `e` (ADR-038 D5).
 - **BRs afetadas:** BR-TASK-008, BR-TUI-018
+- **Resolvido:** Mar/2026 — Postpone delega para crud_tasks.open_edit_task via FormModal.
 
 ### DT-039: s (skip) deveria abrir modal de SkipReason (MEDIA)
 
@@ -151,6 +152,7 @@
 - **Impacto:** `n` com habits focado e sem rotina nao faz nada.
 - **Correcao:** Redirecionar para criacao de rotina (ADR-038 D9).
 - **BRs afetadas:** BR-TUI-017
+- **Resolvido:** Mar/2026 — Fallback para crud_routines.open_create_routine quando sem rotina ativa.
 
 ### DT-041: BR-TUI-004/017/018/021 keybindings obsoletos (ALTA)
 
