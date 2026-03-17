@@ -180,19 +180,28 @@ def _build_task_dict(task: Any, status: str, proximity: str | None = None) -> di
 
     Extração centralizada para evitar duplicação entre pendentes
     e recentes (BR-TUI-003-R29).
+
+    BR-TASK-010: Tasks sem horário explícito (00:00) são tratadas como
+    "dia inteiro" — não ficam overdue até o dia seguinte.
     """
     today = date.today()
     nm = task.title[:20] if hasattr(task, "title") else str(task)[:20]
     dt = task.scheduled_datetime
     task_date = dt.date() if dt else today
+    has_explicit_time = dt is not None and (dt.hour != 0 or dt.minute != 0)
     days = (task_date - today).days
 
-    if dt and (dt.hour != 0 or dt.minute != 0):
+    if has_explicit_time:
         time_str = dt.strftime("%H:%M")
     else:
         time_str = "--:--"
 
     if proximity is None:
+        proximity = _task_proximity(days)
+
+    # BR-TASK-010: sem horário explícito, overdue só a partir do dia seguinte
+    if status == "overdue" and not has_explicit_time and days >= 0:
+        status = "pending"
         proximity = _task_proximity(days)
 
     return {

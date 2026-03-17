@@ -1,6 +1,6 @@
 # Sprints
 
-**Versão:** 4.0.0
+**Versão:** 5.0.0
 
 **Status:** Single Source of Truth (SSOT)
 
@@ -20,15 +20,15 @@ A v1.7.0 marca a transição do ATOMVS TimeBlock de ferramenta CLI pura para uma
 
 **Métricas de acompanhamento:**
 
-| Métrica               | Início (v1.6.0) | Atual (05/03)   | Meta v1.7.0 |
-| --------------------- | --------------- | --------------- | ----------- |
-| Cobertura global      | 87%             | ~81%            | >= 80%      |
-| Cobertura tui/        | 0%              | ~60% (parcial)  | >= 80%      |
-| Testes totais         | 778             | 1079            | 1000+       |
-| Erros mypy            | 0               | 0               | 0           |
-| BRs TUI especificadas | 0               | 20              | 20/20       |
-| BRs TUI implementadas | 0               | 4 (001-004)     | 20/20       |
-| Screens funcionais    | 0/5             | 1/5 (Dashboard) | 5/5         |
+| Métrica               | Início (v1.6.0) | Atual (15/03)           | Meta v1.7.0 |
+| --------------------- | --------------- | ----------------------- | ----------- |
+| Cobertura global      | 87%             | ~82%                    | >= 80%      |
+| Cobertura tui/        | 0%              | ~65% (parcial)          | >= 80%      |
+| Testes totais         | 778             | 1241                    | 1200+       |
+| Erros mypy            | 0               | 0                       | 0           |
+| BRs TUI especificadas | 0               | 26                      | 26/26       |
+| BRs TUI implementadas | 0               | 8 (001-004,016-018,021) | 26/26       |
+| Screens funcionais    | 0/5             | 1/5 (Dashboard)         | 5/5         |
 
 ---
 
@@ -445,6 +445,68 @@ A nomenclatura "4.5" reflete que este sprint é uma extensão direta da Sprint 4
 
 ---
 
+### Sprint 5.5 — Dashboard Integralmente Funcional [PLANNED]
+
+O Sprint 5.5 resolve todos os gaps de aderência entre implementação e BRs revelados pela revisão de testes e2e (15/03/2026). O objetivo é que cada interação do dashboard funcione conforme as regras de negócio documentadas, com modais de interação consistentes e substatus corretamente gerenciados.
+
+**Branch:** `fix/dashboard-quality` (continuação) + `docs/br-update`
+
+**Critério de conclusão:** Todos os DTs CRÍTICA e ALTA resolvidos (DT-034 a DT-042), 1241+ testes passando, 0 violações de `validate_status_consistency()`.
+
+**Decisão arquitetural:** ADR-038 (Dashboard Interaction Patterns)
+
+**Fase 1: Fixes CRÍTICA (DT-034, DT-035)**
+
+Branch: `fix/dashboard-quality`
+
+- [ ] DT-034: `mark_completed` recebe `done_substatus` como parâmetro obrigatório
+- [ ] DT-035: Handler undo limpa todos os campos (`skip_reason`, `skip_note`, `completion_percentage`)
+- [ ] Teste: `test_br_habitinstance_007_undo_clears_all_substatus`
+- [ ] Teste: `test_br_habitinstance_002_done_requires_substatus_via_tui`
+
+**Fase 2: Modais de interação (DT-036, DT-037, DT-039)**
+
+Branch: `feat/dashboard-modals`
+
+- [ ] DT-037: `v` sem timer abre modal de DoneSubstatus (BR-TUI-022)
+- [ ] DT-037: `v` com TimeLog existente abre modal de restauração (BR-HABITINSTANCE-007)
+- [ ] DT-036: `v` com timer running abre modal de opções (BR-TUI-023)
+- [ ] DT-039: `s` abre modal de SkipReason + nota (BR-TUI-024)
+- [ ] Teste: `test_br_tui_022_v_without_timer_opens_modal`
+- [ ] Teste: `test_br_tui_023_v_on_running_opens_modal`
+- [ ] Teste: `test_br_tui_024_s_opens_skip_reason_modal`
+
+**Fase 3: Postpone e Routine-first (DT-038, DT-040)**
+
+Branch: `feat/dashboard-modals` (continuação)
+
+- [ ] DT-038: `s` no tasks panel abre FormModal de edit (BR-TUI-018 + ADR-038 D5)
+- [ ] DT-040: `n` sem rotina redireciona para criação com mensagem (BR-TUI-025)
+- [ ] Teste: `test_br_tui_025_n_habits_no_routine_opens_routine_modal`
+- [ ] Teste: `test_tasks_postpone_opens_edit_modal`
+
+**Fase 4: Documentação (DT-041, DT-042)**
+
+Branch: `docs/br-update`
+
+- [ ] DT-041: Reescrever keybindings em BR-TUI-004, BR-TUI-017, BR-TUI-018, BR-TUI-021
+- [ ] DT-042: Atualizar BR-HABITINSTANCE-001 com transição undo
+- [ ] Adicionar BR-HABITINSTANCE-007, BR-TASK-011, BR-TUI-022 a BR-TUI-026
+- [ ] ADR-038 commitado e referenciado
+
+**Fase 5: Testes e2e fortalecidos**
+
+Branch: `test/dashboard-complete`
+
+- [ ] Fortalecer asserções: verificar substatus, skip_reason, completion_percentage
+- [ ] Adicionar testes: Esc cancela FormModal, Esc cancela ConfirmDialog
+- [ ] Adicionar testes: setas (up/down) equivalentes a j/i
+- [ ] Adicionar teste: BR-TIMER-001 bloqueia segundo timer
+- [ ] Remover workarounds dos testes existentes
+- [ ] Validar: 1241+ testes passando, 0 xfail (exceto DT-026)
+
+---
+
 ### Sprint 5 — Timer
 
 O Sprint 5 implementa a screen mais interativa da TUI: o Timer com display live atualizado a cada segundo. Esta screen exige integração com `set_interval` do Textual para atualização contínua e com o TimerService existente para persistência de sessões. O timer ativo também passa a ser visível no footer de qualquer screen, completando a integração com BR-TUI-007.
@@ -515,9 +577,11 @@ O Sprint 6 fecha a v1.7.0 com revisão de cobertura, audit de qualidade de códi
 | 2026-03-05 | 3.0.0  | Sprint 3.2 marcada DONE, Sprint 4 reescrita para            |
 |            |        | dashboard-first CRUD (ADR-034), Sprint 4 CRUD Screens       |
 |            |        | removida, BRs 016-020 + BR-TEST-001, métricas 1079 testes   |
+| 2026-03-15 | 5.0.0  | Sprint 5.5 planejada (Dashboard Funcional), métricas        |
+|            |        | 1241 testes, ADR-038, DT-034 a DT-042, BRs 022-026          |
 
 ---
 
-**Próxima revisão:** Após Sprint 4.5 concluída
+**Próxima revisão:** Após Sprint 5.5 concluída
 
-**Última atualização:** 10 de Março de 2026
+**Última atualização:** 15 de Março de 2026
