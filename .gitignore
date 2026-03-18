@@ -13,6 +13,7 @@ build/
 cli/data/
 
 # IDE
+.zed/
 .vscode/*
 .idea/
 
