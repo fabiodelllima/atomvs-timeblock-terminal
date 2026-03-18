@@ -1,7 +1,8 @@
 """FormModal - Modal de formulário para criação e edição (BR-TUI-020).
 
 Suporta campos tipados (text, time, number, select) com validação inline.
-Tab navega entre campos, Enter submete, Esc cancela.
+Tab navega entre campos, Enter submete (em Input) ou clique no botão
+Confirmar. Esc cancela.
 
 Referências:
     - BR-TUI-020: FormModal
@@ -15,7 +16,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Input, Label, Select
+from textual.widgets import Button, Input, Label, Select
 
 
 class FormField:
@@ -96,6 +97,11 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
     FormModal > Vertical > Select {
         margin-bottom: 0;
     }
+
+    FormModal > Vertical > #fm-submit {
+        margin-top: 1;
+        width: 100%;
+    }
     """
 
     def __init__(
@@ -119,7 +125,7 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
         return bool(self._edit_data)
 
     def compose(self) -> ComposeResult:
-        """Compõe layout: título, campos com labels, hint."""
+        """Compõe layout: título, campos com labels, botão e hint."""
         with Vertical():
             yield Label(self._title, id="fm-title")
             for field in self._fields:
@@ -141,11 +147,17 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
                         id=f"fm-input-{field.name}",
                     )
                 yield Label("", classes="fm-error", id=f"fm-err-{field.name}")
-            yield Label("Tab navegar  Enter salvar  Esc cancelar", id="fm-hint")
+            yield Button("Confirmar", id="fm-submit", variant="primary")
+            yield Label("Tab navegar  Enter confirmar  Esc cancelar", id="fm-hint")
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
-        """Enter em qualquer campo submete o formulário."""
+        """Enter em qualquer campo Input submete o formulário."""
         self._try_submit()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Clique no botão Confirmar submete o formulário."""
+        if event.button.id == "fm-submit":
+            self._try_submit()
 
     def action_cancel(self) -> None:
         """Cancela formulário e fecha modal."""
