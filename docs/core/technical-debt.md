@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.12.0
+**Versão:** 2.13.0
 
 **Status:** SSOT
 
@@ -48,6 +48,7 @@
 | DT042 | BR-HABITINSTANCE-001 nao documenta undo        | ALTA       | PENDENTE  | -            | docs/br-update           |
 | DT043 | DEFAULT_CSS inline no FormModal                | BAIXA      | PENDENTE  | -            | Sprint futuro            |
 | DT044 | basedpyright standard: ~190 warnings           | MEDIA      | PENDENTE  | -            | Sprint futuro            |
+| DT045 | Blocos sobrepostos sem distinção na Agenda     | ALTA       | PENDENTE  | -            | Sprint futuro            |
 
 ## 1b. Quick Status
 
@@ -88,6 +89,7 @@
 - [ ] DT042 — BR-HABITINSTANCE-001 não documenta undo
 - [ ] DT043 — DEFAULT_CSS inline no FormModal
 - [ ] DT044 — basedpyright standard: ~190 warnings
+- [ ] DT045 — Blocos sobrepostos sem distinção visual na Agenda
 - [x] DT027 — FormModal sem suporte a campo select (recorrencia)
 - [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
 - [x] DT029 — Conflitos de horario detectados no CRUD habits
@@ -187,6 +189,14 @@
 - **Impacto:** App[Unknown], dict[Unknown, Unknown], reportAny, reportUnusedCallResult em screen.py, crud_habits.py, form_modal.py e demais. Modo reduzido para basic temporariamente no pyproject.toml.
 - **Correcao:** Adicionar type arguments a App, tipar dicts com TypedDict, resolver reportAny com casts explicitos. Restaurar typeCheckingMode = standard apos limpeza.
 - **BRs afetadas:** Nenhuma diretamente — qualidade de codigo.
+
+
+### DT-045: Blocos sobrepostos sem distinção visual na Agenda (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da TUI)
+- **Impacto:** Quando dois hábitos têm horários sobrepostos (ex: 08:30-10:30 e 09:00-10:00), os blocos se empilham verticalmente sem distinção visual. O bloco de 2h aparenta ter a duração do espaço até o próximo bloco (30min), enquanto o bloco de 1h herda visualmente o espaço restante (parecendo 2h). Confusão grave sobre duração real de cada hábito.
+- **Correcao:** Implementar renderização lado a lado para blocos com sobreposição temporal, similar a calendários como Google Calendar e Outlook. Alternativas para TUI: (1) colunas divididas com Rich layout, (2) indicador visual de conflito (cor, borda), (3) tooltip ou annotation com horário real. Pesquisar referências de TUI calendar rendering.
+- **BRs afetadas:** BR-TUI-003 (Dashboard layout), BR-EVENT-001 (detecção de conflitos)
 
 
 ## 2. Detalhamento de Itens Resolvidos
