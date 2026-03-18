@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.11.0
+**Versão:** 2.12.0
 
 **Status:** SSOT
 
@@ -46,6 +46,8 @@
 | DT040 | n sem rotina: silent no-op ao inves de modal   | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT041 | BR-TUI-004/017/018/021 keybindings obsoletos   | ALTA       | PENDENTE  | -            | docs/br-update           |
 | DT042 | BR-HABITINSTANCE-001 nao documenta undo        | ALTA       | PENDENTE  | -            | docs/br-update           |
+| DT043 | DEFAULT_CSS inline no FormModal                | BAIXA      | PENDENTE  | -            | Sprint futuro            |
+| DT044 | basedpyright standard: ~190 warnings           | MEDIA      | PENDENTE  | -            | Sprint futuro            |
 
 ## 1b. Quick Status
 
@@ -83,7 +85,9 @@
 - [x] DT039 — s (skip) deveria abrir modal de SkipReason
 - [x] DT040 — n sem rotina: silent no-op ao inves de modal
 - [ ] DT041 — BR-TUI-004/017/018/021 keybindings obsoletos
-- [ ] DT042 — BR-HABITINSTANCE-001 nao documenta undo
+- [ ] DT042 — BR-HABITINSTANCE-001 não documenta undo
+- [ ] DT043 — DEFAULT_CSS inline no FormModal
+- [ ] DT044 — basedpyright standard: ~190 warnings
 - [x] DT027 — FormModal sem suporte a campo select (recorrencia)
 - [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
 - [x] DT029 — Conflitos de horario detectados no CRUD habits
@@ -169,6 +173,21 @@
 - **BRs afetadas:** BR-HABITINSTANCE-001
 
 ---
+
+### DT-043: DEFAULT_CSS inline no FormModal (BAIXA)
+
+- **Descoberto:** 17/03/2026 (revisao de codigo)
+- **Impacto:** FormModal define ~50 linhas de CSS via DEFAULT_CSS inline. O projeto usa pasta dedicada para TCSS modularizado.
+- **Correcao:** Mover CSS para arquivo TCSS dedicado e usar CSS_PATH. Alinhar com padrao do projeto.
+- **BRs afetadas:** BR-TUI-020
+
+### DT-044: basedpyright em modo standard gera ~190 warnings (MEDIA)
+
+- **Descoberto:** 17/03/2026 (configuracao basedpyright no Zed)
+- **Impacto:** App[Unknown], dict[Unknown, Unknown], reportAny, reportUnusedCallResult em screen.py, crud_habits.py, form_modal.py e demais. Modo reduzido para basic temporariamente no pyproject.toml.
+- **Correcao:** Adicionar type arguments a App, tipar dicts com TypedDict, resolver reportAny com casts explicitos. Restaurar typeCheckingMode = standard apos limpeza.
+- **BRs afetadas:** Nenhuma diretamente — qualidade de codigo.
+
 
 ## 2. Detalhamento de Itens Resolvidos
 
@@ -433,4 +452,4 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 14 de Março de 2026
+**Última atualização:** 17 de Março de 2026
