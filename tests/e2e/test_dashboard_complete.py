@@ -210,8 +210,14 @@ class TestHabitsPanelComplete:
             pilot.app.set_focus(panel)
             await _wait(pilot)
 
-            # Marcar done com v
+            # Marcar done com v — abre modal de substatus (Select-only)
             await pilot.press("v")
+            await _wait(pilot, 5)
+
+            # Submeter modal: Tab (Select -> Button) + Enter
+            await pilot.press("tab")
+            await _wait(pilot)
+            await pilot.press("enter")
             await _wait(pilot)
 
             instances = loader.load_instances()
@@ -270,11 +276,7 @@ class TestHabitsPanelComplete:
 
     @pytest.mark.asyncio
     async def test_habits_skip_registers(self):
-        """s marca hábito como skipped com SkipReason.OTHER (BR-TUI-004).
-
-        TODO: quando modal de SkipReason for implementado, validar
-        que o usuário pode escolher motivo (LAZY, SICK, TRAVEL, OTHER).
-        """
+        """s abre modal de SkipReason, Enter submete, status muda para not_done (BR-TUI-024)."""
         async with TimeBlockApp().run_test() as pilot:
             await _wait(pilot)
             await _setup_routine_and_habit(pilot, "Skip Este")
@@ -283,7 +285,14 @@ class TestHabitsPanelComplete:
             pilot.app.set_focus(panel)
             await _wait(pilot)
 
+            # s abre modal de skip (Select + Input para nota)
             await pilot.press("s")
+            await _wait(pilot, 5)
+
+            # Tab para Input de nota, Enter submete
+            await pilot.press("tab")
+            await _wait(pilot)
+            await pilot.press("enter")
             await _wait(pilot)
 
             instances = loader.load_instances()
