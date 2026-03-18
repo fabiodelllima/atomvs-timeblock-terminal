@@ -416,6 +416,25 @@ class TestTasksPanelComplete:
             assert len(tasks) == 0, "Task deve ter sido removida"
 
     @pytest.mark.asyncio
+    async def test_tasks_complete_flow(self):
+        """v marca task como completa via TaskService.complete_task (ADR-037, BR-TASK-007)."""
+        async with TimeBlockApp().run_test() as pilot:
+            await _wait(pilot)
+            await _create_task(pilot, "Completar Task")
+
+            panel = pilot.app.query_one(TasksPanel)
+            pilot.app.set_focus(panel)
+            await _wait(pilot)
+
+            await pilot.press("v")
+            await _wait(pilot)
+
+            # Task aparece como completed nas recentes (últimas 24h)
+            tasks = loader.load_tasks()
+            completed = [t for t in tasks if t["status"] == "completed"]
+            assert len(completed) > 0, "Task deve aparecer como completed"
+
+    @pytest.mark.asyncio
     async def test_tasks_postpone_emits_handler(self):
         """s emite TaskPostponeRequest e handler é chamado (ADR-037).
 
