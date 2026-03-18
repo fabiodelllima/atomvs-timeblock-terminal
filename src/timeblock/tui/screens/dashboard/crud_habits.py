@@ -219,7 +219,7 @@ def _show_substatus_form(
 
     def on_submit(data: dict[str, Any]) -> None:
         substatus_value = data.get("substatus", "FULL")
-        done_sub = DoneSubstatus(substatus_value)
+        done_sub = DoneSubstatus[substatus_value]
         service_action(
             lambda s: HabitInstanceService.mark_completed(
                 instance_id, done_substatus=done_sub, session=s
