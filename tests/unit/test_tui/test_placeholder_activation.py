@@ -32,16 +32,16 @@ class TestBRTUI013PlaceholderShown:
         """FocusablePanel define mensagem PlaceholderActivated."""
         assert hasattr(FocusablePanel, "PlaceholderActivated")
 
-    def test_br_tui_013_focusable_panel_has_build_empty_state(self):
-        """FocusablePanel define método _build_empty_state (RF-007)."""
-        assert hasattr(FocusablePanel, "_build_empty_state")
+    def test_br_tui_013_focusable_panel_has_enter_placeholder_mode(self):
+        """FocusablePanel define método _enter_placeholder_mode (RF-007)."""
+        assert hasattr(FocusablePanel, "_enter_placeholder_mode")
 
-    def test_br_tui_013_build_empty_state_returns_count_plus_hint(self):
-        """_build_empty_state retorna count placeholders + linha vazia + hint."""
+    def test_br_tui_013_enter_placeholder_mode_returns_count_plus_hint(self):
+        """_enter_placeholder_mode retorna count placeholders + linha vazia + hint."""
 
         # Instância mínima para testar o método
         panel = HabitsPanel()
-        lines = panel._build_empty_state("---", "Crie algo", count=3)
+        lines = panel._enter_placeholder_mode("---", "Crie algo", count=3)
         # 3 placeholders + 1 vazia + 1 hint = 5
         assert len(lines) == 5
         assert all("---" in line for line in lines[:3])

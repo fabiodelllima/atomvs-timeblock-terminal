@@ -25,6 +25,8 @@ from timeblock.tui.widgets.focusable_panel import FocusablePanel
 class HabitsPanel(FocusablePanel):
     """Card de hábitos com substatus, barra de progresso e navegação."""
 
+    HIGHLIGHT_COLOR: str = C_HIGHLIGHT
+
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self._instances: list[dict] = []
@@ -35,9 +37,6 @@ class HabitsPanel(FocusablePanel):
         if instances:
             self._showing_placeholders = False
             self._set_item_count(len(instances))
-        else:
-            self._showing_placeholders = True
-            self._set_item_count(3)
         self._refresh_content()
 
     def get_selected_item(self) -> dict | None:
@@ -154,7 +153,7 @@ class HabitsPanel(FocusablePanel):
         lines: list[str] = []
         max_bars = 4
         if not instances:
-            return self._build_empty_state(
+            return self._enter_placeholder_mode(
                 "---              · --:-- · --min",
                 "Crie uma rotina: atomvs routine add",
             )
@@ -162,7 +161,7 @@ class HabitsPanel(FocusablePanel):
             for idx, inst in enumerate(instances[:12]):
                 line = self._format_instance(inst, max_bars)
                 if idx == self._cursor_index and self.has_focus:
-                    line = f"[on {C_HIGHLIGHT}]{line}[/on {C_HIGHLIGHT}]"
+                    line = f"[on {self.HIGHLIGHT_COLOR}]{line}[/on {self.HIGHLIGHT_COLOR}]"
                 lines.append(line)
         return lines
 

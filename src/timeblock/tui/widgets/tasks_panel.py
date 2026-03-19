@@ -13,7 +13,6 @@ from textual.message import Message
 
 from timeblock.tui.colors import (
     C_ERROR,
-    C_HIGHLIGHT,
     C_MUTED,
     C_SUCCESS,
     task_proximity_color,
@@ -36,9 +35,6 @@ class TasksPanel(FocusablePanel):
         if self._ordered:
             self._showing_placeholders = False
             self._set_item_count(len(self._ordered))
-        else:
-            self._showing_placeholders = True
-            self._set_item_count(2)
         self._refresh_content()
 
     def get_selected_item(self) -> dict | None:
@@ -145,7 +141,7 @@ class TasksPanel(FocusablePanel):
         """Monta linhas ordenadas com highlight no cursor."""
         lines: list[str] = []
         if not self._ordered:
-            return self._build_empty_state(
+            return self._enter_placeholder_mode(
                 "---                --/--   --:--",
                 "Crie uma task: atomvs task add",
                 count=2,
@@ -154,7 +150,7 @@ class TasksPanel(FocusablePanel):
             for idx, task in enumerate(self._ordered):
                 line = self._format_task(task)
                 if idx == self._cursor_index and self.has_focus:
-                    line = f"[on {C_HIGHLIGHT}]{line}[/on {C_HIGHLIGHT}]"
+                    line = f"[on {self.HIGHLIGHT_COLOR}]{line}[/on {self.HIGHLIGHT_COLOR}]"
                 lines.append(line)
         return lines
 
