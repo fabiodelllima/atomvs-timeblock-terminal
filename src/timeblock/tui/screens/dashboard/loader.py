@@ -8,7 +8,7 @@ Referências:
     - BR-TUI-009: Service Layer Sharing
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from sqlmodel import Session, col, select
@@ -198,6 +198,89 @@ def load_instances(routine_id: int | None = None) -> list[dict]:
     except Exception:
         logger.exception("Falha ao carregar instâncias")
         return []
+
+
+def load_metrics(routine_id: int | None = None) -> dict:
+    """Carrega métricas de completude para a rotina ativa (DT-026).
+
+    Retorna dict com streak, best_streak, pct_7d, pct_30d, week_data.
+    Filtrado por routine_id para consistência com load_instances.
+    """
+    if routine_id is None:
+        return {}
+
+    def _load(s: Session) -> dict:
+        today = date.today()
+        habits = list(s.exec(select(Habit).where(Habit.routine_id == routine_id)).all())
+        if not habits:
+            return {}
+        habit_ids = [h.id for h in habits if h.id is not None]
+        start_30d = today - timedelta(days=29)
+        instances = list(
+            s.exec(
+                select(HabitInstance)
+                .where(col(HabitInstance.habit_id).in_(habit_ids))
+                .where(HabitInstance.date >= start_30d)
+                .where(HabitInstance.date <= today)
+            ).all()
+        )
+        if not instances:
+            return {}
+        by_day: dict[date, list] = {}
+        for inst in instances:
+            by_day.setdefault(inst.date, []).append(inst)
+        day_pcts: dict[date, float] = {}
+        for d, day_insts in by_day.items():
+            total = len(day_insts)
+            done = sum(1 for i in day_insts if i.status == Status.DONE)
+            day_pcts[d] = (done / total * 100) if total > 0 else 0
+        streak = 0
+        check_date = today
+        while check_date >= start_30d:
+            if check_date in day_pcts and day_pcts[check_date] == 100:
+                streak += 1
+                check_date -= timedelta(days=1)
+            else:
+                break
+        best_streak = 0
+        current_streak = 0
+        for d in sorted(day_pcts.keys()):
+            if day_pcts[d] == 100:
+                current_streak += 1
+                best_streak = max(best_streak, current_streak)
+            else:
+                current_streak = 0
+        start_7d = today - timedelta(days=6)
+        pcts_7d = [day_pcts[d] for d in day_pcts if d >= start_7d]
+        pcts_30d = list(day_pcts.values())
+        pct_7d = int(sum(pcts_7d) / len(pcts_7d)) if pcts_7d else 0
+        pct_30d = int(sum(pcts_30d) / len(pcts_30d)) if pcts_30d else 0
+        day_names = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sab", "Dom"]
+        week_data = []
+        for i in range(6, -1, -1):
+            d = today - timedelta(days=i)
+            day_name = day_names[d.weekday()]
+            day_insts = by_day.get(d, [])
+            total_d = len(day_insts)
+            done_d = sum(1 for inst in day_insts if inst.status == Status.DONE)
+            checks = "".join("v" if inst.status == Status.DONE else "." for inst in day_insts)
+            week_data.append((day_name, done_d, total_d, checks))
+        return {
+            "streak": streak,
+            "best_streak": best_streak,
+            "pct_7d": pct_7d,
+            "pct_30d": pct_30d,
+            "week_data": week_data,
+        }
+
+    try:
+        result, error = service_action(_load)
+        if error or not result:
+            return {}
+        return result
+    except Exception:
+        logger.exception("Falha em load_metrics")
+        return {}
 
 
 def _task_proximity(days: int) -> str:
