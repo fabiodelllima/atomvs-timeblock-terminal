@@ -18,12 +18,12 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 
 ## 1. Primeiro Acesso (estado vazio)
 
-- [ ] Dashboard abre sem erro
+- [x] Dashboard abre sem erro
 - [ ] Agenda mostra mensagem de estado vazio
 - [ ] HabitsPanel mostra placeholders
 - [ ] TasksPanel mostra placeholders
-- [ ] TimerPanel mostra estado idle ("Nenhum timer ativo" ou similar)
-- [ ] MetricsPanel renderiza sem erro
+- [x] TimerPanel mostra estado idle ("Nenhum timer ativo" ou similar)
+- [x] MetricsPanel renderiza sem erro
 - [ ] Status bar visível na parte inferior
 
 **Notas:** _______________________________________________
@@ -34,12 +34,12 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 
 ### 2.1. Troca de screens (1-5)
 
-- [ ] `1` → Dashboard (tela inicial)
-- [ ] `2` → Routines
-- [ ] `3` → Habits
-- [ ] `4` → Tasks
-- [ ] `5` → Timer
-- [ ] `1` → volta ao Dashboard
+- [x] `1` → Dashboard (tela inicial)
+- [x] `2` → Routines
+- [x] `3` → Habits
+- [x] `4` → Tasks
+- [x] `5` → Timer
+- [x] `1` → volta ao Dashboard
 
 ### 2.2. Help overlay
 
@@ -49,13 +49,13 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 
 ### 2.3. Tab entre panels
 
-- [ ] `Tab` → foco muda para o próximo panel (borda muda de cor)
-- [ ] `Tab` repetido → cicla entre Habits, Tasks, Timer, Metrics
-- [ ] Panel focado é identificável visualmente
+- [x] `Tab` → foco muda para o próximo panel (borda muda de cor)
+- [x] `Tab` repetido → cicla entre Habits, Tasks, Timer, Metrics
+- [x] Panel focado é identificável visualmente
 
 ### 2.4. Saída
 
-- [ ] `Ctrl+Q` → sai da aplicação
+- [x] `Ctrl+Q` → sai da aplicação
 
 **Notas:** _______________________________________________
 
@@ -65,15 +65,16 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 
 ### 3.1. Criação de rotina (pré-requisito para hábitos)
 
-- [ ] Focar Agenda (Tab até chegar, ou clicar)
-- [ ] `n` → abre FormModal de criação de rotina
-- [ ] Preencher nome (ex: "Rotina Matinal") → `Enter` → rotina criada
-- [ ] Agenda atualiza e mostra nome da rotina no header
+- [x] Focar Agenda (Tab até chegar, ou clicar)
+- [x] `n` → abre FormModal de criação de rotina
+- [x] Preencher nome (ex: "Rotina Matinal") → `Enter` → rotina criada
+- [x] Agenda atualiza e mostra nome da rotina no header
+- [ ] Atualiza Habits e Tasks conforme altera de Rotina para outra
 
 ### 3.2. Edição de rotina
 
-- [ ] `e` com Agenda focada → abre FormModal de edição de rotina
-- [ ] Nome pré-preenchido → alterar → `Enter` → nome atualizado
+- [x] `e` com Agenda focada → abre FormModal de edição de rotina
+- [x] Nome pré-preenchido → alterar → `Enter` → nome atualizado
 
 ### 3.3. Deleção de rotina
 
@@ -91,13 +92,13 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 
 ### 4.1. Navegação
 
-- [ ] `j` ou `seta baixo` → cursor move para próximo item
-- [ ] `i` ou `seta cima` → cursor move para item anterior
-- [ ] Cursor visualmente destacado (cor ou indicador)
+- [x] `j` ou `seta baixo` → cursor move para próximo item
+- [x] `i` ou `seta cima` → cursor move para item anterior
+- [x] Cursor visualmente destacado (cor ou indicador)
 
 ### 4.2. Criação de hábito
 
-- [ ] Focar HabitsPanel (Tab)
+- [x] Focar HabitsPanel (Tab)
 - [ ] `n` → abre FormModal com 4 campos (título, horário, duração, recorrência)
 - [ ] Preencher: título "Meditação", horário "08:00", duração "30"
 - [ ] `Enter` → hábito criado, aparece no panel
@@ -107,41 +108,41 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 
 - [ ] Deletar a rotina (seção 3.3)
 - [ ] Focar HabitsPanel → `n` → abre FormModal de criação de rotina (não de hábito)
-- [ ] Criar rotina → focar HabitsPanel → `n` → agora abre FormModal de hábito
+- [x] Criar rotina → focar HabitsPanel → `n` → agora abre FormModal de hábito
 
 ### 4.4. Edição de hábito
 
-- [ ] Selecionar hábito com cursor → `e`
-- [ ] FormModal abre com dados pré-preenchidos (título, horário, duração)
+- [x] Selecionar hábito com cursor → `e`
+- [x] FormModal abre com dados pré-preenchidos (título, horário, duração)
 - [ ] Alterar título → `Enter` → título atualizado no panel
 
 ### 4.5. Deleção de hábito
 
-- [ ] Selecionar hábito → `x`
+- [x] Selecionar hábito → `x`
 - [ ] ConfirmDialog abre → `Enter` → hábito removido
-- [ ] Testar `Esc` no ConfirmDialog → hábito permanece
+- [x] Testar `Esc` no ConfirmDialog → hábito permanece
 
 ### 4.6. Marcar como done — `v` (sem timer)
 
-- [ ] Selecionar hábito pendente → `v`
-- [ ] FormModal de substatus abre (Select com: Completo, Parcial, Além do esperado, Excessivo)
-- [ ] Selecionar opção (default: Completo)
-- [ ] `Tab` até botão Confirmar → `Enter` → hábito marcado como done
-- [ ] Indicador visual muda (cor, ícone)
+- [x] Selecionar hábito pendente → `v`
+- [x] FormModal de substatus abre (Select com: Completo, Parcial, Além do esperado, Excessivo)
+- [x] Selecionar opção (default: Completo)
+- [x] `Tab` até botão Confirmar → `Enter` → hábito marcado como done
+- [x] Indicador visual muda (cor, ícone)
 
 ### 4.7. Skip — `s`
 
-- [ ] Selecionar hábito pendente → `s`
-- [ ] FormModal de skip abre (Select com 8 motivos + Input opcional para nota)
-- [ ] Selecionar motivo → `Tab` até Input de nota → escrever nota (opcional)
+- [x] Selecionar hábito pendente → `s`
+- [x] FormModal de skip abre (Select com 8 motivos + Input opcional para nota)
+- [x] Selecionar motivo → `Tab` até Input de nota → escrever nota (opcional)
 - [ ] `Enter` no Input → hábito marcado como not_done/skipped
-- [ ] Indicador visual muda
+- [x] Indicador visual muda
 
 ### 4.8. Undo — `u`
 
-- [ ] Selecionar hábito done ou skipped → `u`
-- [ ] Status volta para pending imediatamente (sem modal)
-- [ ] Indicador visual restaurado
+- [x] Selecionar hábito done ou skipped → `u`
+- [x] Status volta para pending imediatamente (sem modal)
+- [x] Indicador visual restaurado
 
 ### 4.9. Conflito de horários
 
@@ -156,47 +157,47 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 
 ### 5.1. Navegação
 
-- [ ] `j` ou `seta baixo` → próxima task
-- [ ] `i` ou `seta cima` → task anterior
+- [x] `j` ou `seta baixo` → próxima task
+- [x] `i` ou `seta cima` → task anterior
 
 ### 5.2. Criação de task
 
-- [ ] Focar TasksPanel → `n`
-- [ ] FormModal abre com campos: título, data (opcional), horário (opcional)
-- [ ] Preencher título → `Enter` → task criada com data de hoje
+- [x] Focar TasksPanel → `n`
+- [x] FormModal abre com campos: título, data (opcional), horário (opcional)
+- [x] Preencher título → `Enter` → task criada com data de hoje
 
 ### 5.3. Edição de task
 
-- [ ] Selecionar task → `e`
-- [ ] FormModal abre com dados pré-preenchidos → alterar → `Enter` → atualizado
+- [x] Selecionar task → `e`
+- [x] FormModal abre com dados pré-preenchidos → alterar → `Enter` → atualizado
 
 ### 5.4. Deleção de task
 
-- [ ] Selecionar task → `x`
-- [ ] ConfirmDialog → `Enter` → task removida
+- [x] Selecionar task → `x`
+- [x] ConfirmDialog → `Enter` → task removida
 
 ### 5.5. Completar — `v`
 
-- [ ] Selecionar task pendente → `v`
-- [ ] Task marcada como completed (sem modal — ação direta)
-- [ ] Task aparece na seção "recentes" com status completed
+- [x] Selecionar task pendente → `v`
+- [x] Task marcada como completed (sem modal — ação direta)
+- [x] Task aparece na seção "recentes" com status completed
 
 ### 5.6. Postpone (adiar) — `s`
 
-- [ ] Selecionar task pendente → `s`
-- [ ] FormModal de edição abre com dados pré-preenchidos (mesma tela que `e`)
-- [ ] Alterar data/horário → `Enter` → task atualizada com nova data
+- [x] Selecionar task pendente → `s`
+- [x] FormModal de edição abre com dados pré-preenchidos (mesma tela que `e`)
+- [x] Alterar data/horário → `Enter` → task atualizada com nova data
 
 ### 5.7. Cancelar — `c`
 
-- [ ] Selecionar task → `c`
-- [ ] Task marcada como cancelled (sem modal — ação direta)
-- [ ] Task aparece na seção "recentes" com status cancelled
+- [x] Selecionar task → `c`
+- [x] Task marcada como cancelled (sem modal — ação direta)
+- [x] Task aparece na seção "recentes" com status cancelled
 
 ### 5.8. Reabrir — `u`
 
-- [ ] Selecionar task cancelled → `u`
-- [ ] Task volta para pending (sem modal — ação direta)
+- [x] Selecionar task cancelled → `u`
+- [x] Task volta para pending (sem modal — ação direta)
 
 **Notas:** _______________________________________________
 
@@ -208,28 +209,28 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 
 ### 6.1. Iniciar timer — `t` no HabitsPanel
 
-- [ ] Focar HabitsPanel → selecionar hábito pendente → `t`
-- [ ] TimerPanel atualiza: mostra nome do hábito, cronômetro rodando
+- [x] Focar HabitsPanel → selecionar hábito pendente → `t`
+- [x] TimerPanel atualiza: mostra nome do hábito, cronômetro rodando
 - [ ] Status do hábito muda para "running"
 
 ### 6.2. Pausar / Resumir — `space` no TimerPanel
 
 - [ ] Focar TimerPanel → `space` → timer pausa (ícone/cor muda)
-- [ ] `space` novamente → timer resume
+- [x] `space` novamente → timer resume
 
 ### 6.3. Parar timer — `s` no TimerPanel
 
-- [ ] Focar TimerPanel (com timer ativo) → `s`
-- [ ] Timer para, hábito marcado como done automaticamente
-- [ ] Substatus calculado automaticamente (partial/full/overdone/excessive)
-- [ ] TimerPanel volta para estado idle
+- [x] Focar TimerPanel (com timer ativo) → `s`
+- [x] Timer para, hábito marcado como done automaticamente
+- [x] Substatus calculado automaticamente (partial/full/overdone/excessive)
+- [x] TimerPanel volta para estado idle
 
 ### 6.4. Cancelar timer — `c` no TimerPanel
 
-- [ ] Iniciar timer → focar TimerPanel → `c`
-- [ ] ConfirmDialog: "Cancelar timer ativo? A sessão será descartada."
-- [ ] `Enter` → timer cancelado, hábito volta para pending
-- [ ] `Esc` → timer continua rodando
+- [x] Iniciar timer → focar TimerPanel → `c`
+- [x] ConfirmDialog: "Cancelar timer ativo? A sessão será descartada."
+- [x] `Enter` → timer cancelado, hábito volta para pending
+- [x] `Esc` → timer continua rodando
 
 ### 6.5. Done com timer ativo — `v` no HabitsPanel
 
