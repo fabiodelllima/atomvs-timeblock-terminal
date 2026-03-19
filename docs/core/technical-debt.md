@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.13.0
+**Versão:** 2.14.0
 
 **Status:** SSOT
 
@@ -49,6 +49,9 @@
 | DT043 | DEFAULT_CSS inline no FormModal                | BAIXA      | PENDENTE  | -            | Sprint futuro            |
 | DT044 | basedpyright standard: ~190 warnings           | MEDIA      | PENDENTE  | -            | Sprint futuro            |
 | DT045 | Blocos sobrepostos sem distinção na Agenda     | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT046 | Troca de rotina não atualiza Habits/Tasks       | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT047 | Sem mecanismo de seleção entre rotinas           | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT048 | Deleção de rotina não carrega outra nem limpa    | ALTA       | PENDENTE  | -            | Sprint futuro            |
 
 ## 1b. Quick Status
 
@@ -90,6 +93,9 @@
 - [ ] DT043 — DEFAULT_CSS inline no FormModal
 - [ ] DT044 — basedpyright standard: ~190 warnings
 - [ ] DT045 — Blocos sobrepostos sem distinção visual na Agenda
+- [ ] DT046 — Troca de rotina não atualiza Habits/Tasks
+- [ ] DT047 — Sem mecanismo de seleção entre rotinas
+- [ ] DT048 — Deleção de rotina não carrega outra rotina e nem limpa panels
 - [x] DT027 — FormModal sem suporte a campo select (recorrencia)
 - [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
 - [x] DT029 — Conflitos de horario detectados no CRUD habits
@@ -197,6 +203,31 @@
 - **Impacto:** Quando dois hábitos têm horários sobrepostos (ex: 08:30-10:30 e 09:00-10:00), os blocos se empilham verticalmente sem distinção visual. O bloco de 2h aparenta ter a duração do espaço até o próximo bloco (30min), enquanto o bloco de 1h herda visualmente o espaço restante (parecendo 2h). Confusão grave sobre duração real de cada hábito.
 - **Correcao:** Implementar renderização lado a lado para blocos com sobreposição temporal, similar a calendários como Google Calendar e Outlook. Alternativas para TUI: (1) colunas divididas com Rich layout, (2) indicador visual de conflito (cor, borda), (3) tooltip ou annotation com horário real. Pesquisar referências de TUI calendar rendering.
 - **BRs afetadas:** BR-TUI-003 (Dashboard layout), BR-EVENT-001 (detecção de conflitos)
+
+
+### DT-046: Troca de rotina não atualiza Habits e Tasks (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Ao criar uma segunda rotina, os panels Habits e Tasks continuam exibindo dados da rotina anterior. O refresh_data usa _active_routine_id que não é atualizado ao trocar de contexto.
+- **Correcao:** Implementar callback de troca de rotina que atualiza _active_routine_id e chama refresh_data. Garantir que load_instances e load_tasks filtrem por routine_id.
+- **BRs afetadas:** BR-TUI-003, BR-TUI-016
+- **Testes necessarios:** e2e com duas rotinas — criar rotina A com hábitos, criar rotina B, verificar que panels atualizam.
+
+### DT-047: Sem mecanismo de seleção entre rotinas no dashboard (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Não existe keybinding nem UI para alternar entre rotinas criadas. O usuário pode criar e editar a rotina ativa, mas não pode selecionar outra. Funcionalidade essencial para uso com múltiplas rotinas (manhã, tarde, noite).
+- **Correcao:** Implementar seletor de rotina — opções: (1) FormModal com Select listando rotinas, (2) keybinding dedicado (ex: r para cycle, ou Select no AgendaPanel), (3) integração com a tela Routines (screen 2).
+- **BRs afetadas:** BR-TUI-003, BR-TUI-016
+- **Testes necessarios:** e2e com troca de rotina e verificação de atualização dos panels.
+
+### DT-048: Deleção de rotina não carrega outra e não limpa panels (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Ao deletar a rotina ativa, o título some do header mas _active_routine_id não é atualizado para None ou para outra rotina existente. Habits e Tasks continuam exibindo dados da rotina deletada. Estado inconsistente.
+- **Correcao:** Após deleção, verificar se existe outra rotina e carregar. Se não existir, setar _active_routine_id = None e limpar panels (mostrar placeholders). refresh_data já trata None via loader, basta garantir que o callback de deleção atualiza o estado.
+- **BRs afetadas:** BR-TUI-003, BR-TUI-016
+- **Testes necessarios:** e2e com deleção de rotina e verificação de estado limpo nos panels.
 
 
 ## 2. Detalhamento de Itens Resolvidos
