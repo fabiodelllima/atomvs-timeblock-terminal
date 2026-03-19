@@ -2422,6 +2422,7 @@ CRUD (contextual ao panel focado):
   n .................... novo (abre FormModal contextual)
   e .................... editar item sob cursor (abre FormModal)
   x .................... deletar item sob cursor [MODAL]
+  r .................... trocar rotina ativa [MODAL] (DT-047)
 
 HABITS PANEL (quick actions):
   v .................... marcar done [MODAL de substatus - BR-TUI-022]
@@ -3359,7 +3360,7 @@ src/timeblock/tui/styles/
 1. `n` com panel hábitos focado abre FormModal (campos: título, horário início, duração em minutos, recorrência)
 2. `e` edita hábito sob cursor (FormModal preenchido)
 3. `x` deleta hábito sob cursor com ConfirmDialog
-4. Requer rotina ativa — sem rotina, `n` exibe mensagem de erro inline
+4. Requer rotina ativa — sem rotina, `n` redireciona para criação de rotina (DT-040, ADR-038 D9)
 5. Hábito criado gera HabitInstance para o dia atual automaticamente (via HabitInstanceService)
 6. Hábito criado aparece imediatamente no panel (refresh local + banco)
 7. Quick actions existentes coexistem: v done [MODAL], s skip [MODAL] (BR-TUI-004, ADR-037)
@@ -3393,7 +3394,7 @@ src/timeblock/tui/styles/
 2. `e` edita task sob cursor (FormModal preenchido)
 3. `x` deleta task sob cursor com ConfirmDialog
 4. Task criada aparece na posição correta (ordenação por proximidade temporal)
-5. v complete coexiste (BR-TUI-004, ADR-037)
+5. Quick actions coexistem (BR-TUI-004, ADR-037): v complete, s postpone [MODAL edit], c cancel, u reopen
 6. Campos obrigatórios: título. Data, horário e prioridade são opcionais
 7. Prioridade: low, medium, high (default: medium)
 8. Data default: hoje. Horário default: vazio (sem horário)
@@ -3500,12 +3501,12 @@ src/timeblock/tui/styles/
 
 **Testes:**
 
-- `test_br_tui_021_shift_enter_starts_timer_on_selected_habit`
-- `test_br_tui_021_shift_enter_without_selection_does_nothing`
-- `test_br_tui_021_shift_enter_pauses_active_timer`
-- `test_br_tui_021_shift_enter_resumes_paused_timer`
-- `test_br_tui_021_ctrl_enter_stops_timer`
-- `test_br_tui_021_ctrl_x_opens_cancel_confirm`
+- `test_br_tui_021_t_starts_timer_on_selected_habit`
+- `test_br_tui_021_t_without_selection_does_nothing`
+- `test_br_tui_021_space_pauses_active_timer`
+- `test_br_tui_021_space_resumes_paused_timer`
+- `test_br_tui_021_s_stops_timer`
+- `test_br_tui_021_c_opens_cancel_confirm`
 - `test_br_tui_021_timer_panel_updates_every_second`
 - `test_br_tui_021_timer_panel_shows_habit_name`
 - `test_br_tui_021_one_timer_at_a_time`
@@ -3698,6 +3699,6 @@ src/timeblock/tui/styles/
 
 ---
 
-**Última atualização em:** 15 de Marco de 2026
+**Última atualização em:** 19 de Marco de 2026
 
-**Total de regras:** 114 BRs
+**Total de regras:** 104 BRs
