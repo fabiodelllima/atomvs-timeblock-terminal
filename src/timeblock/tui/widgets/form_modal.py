@@ -7,6 +7,7 @@ Confirmar. Esc cancela.
 Referências:
     - BR-TUI-020: FormModal
     - ADR-034: Dashboard-first CRUD
+    - DT-043: CSS movido para styles/forms.tcss
 """
 
 from collections.abc import Callable
@@ -47,62 +48,6 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
     BINDINGS: ClassVar[list[Binding | tuple[str, str] | tuple[str, str, str]]] = [
         Binding("escape", "cancel", "Cancelar", show=False),
     ]
-
-    DEFAULT_CSS = """
-    FormModal {
-        align: center middle;
-    }
-
-    FormModal > Vertical {
-        width: 60;
-        height: auto;
-        max-height: 36;
-        border: thick #89B4FA;
-        background: #181825;
-        padding: 1 2;
-    }
-
-    FormModal > Vertical > #fm-title {
-        text-align: center;
-        text-style: bold;
-        color: #89B4FA;
-        margin-bottom: 1;
-    }
-
-    FormModal > Vertical > .fm-label {
-        color: #CDD6F4;
-        margin-top: 1;
-    }
-
-    FormModal > Vertical > .fm-error {
-        color: #F38BA8;
-        margin-bottom: 0;
-    }
-
-    FormModal > Vertical > #fm-hint {
-        text-align: center;
-        color: #6C7086;
-        margin-top: 1;
-    }
-
-    FormModal > Vertical > Input {
-        border: tall #585B70;
-        margin-bottom: 0;
-    }
-
-    FormModal > Vertical > Input:focus {
-        border: tall #89B4FA;
-    }
-
-    FormModal > Vertical > Select {
-        margin-bottom: 0;
-    }
-
-    FormModal > Vertical > #fm-submit {
-        margin-top: 1;
-        width: 100%;
-    }
-    """
 
     def __init__(
         self,
