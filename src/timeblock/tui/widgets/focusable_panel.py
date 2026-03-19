@@ -8,13 +8,12 @@ from textual.events import Key
 from textual.message import Message
 from textual.widgets import Static
 
-from timeblock.tui.colors import C_HIGHLIGHT
-
 
 class FocusablePanel(Static):
     """Panel focável com cursor interno para navegação vertical."""
 
     can_focus = True
+    HIGHLIGHT_COLOR: str = "#313244"
 
     class PlaceholderActivated(Message):
         """Enviada ao coordinator quando Enter é pressionado em placeholder (BR-TUI-013)."""
@@ -69,22 +68,24 @@ class FocusablePanel(Static):
         """Retorna True se o índice aponta para um placeholder navegável."""
         return self._showing_placeholders and 0 <= index < self._item_count
 
-    def _build_empty_state(
+    def _enter_placeholder_mode(
         self,
         placeholder: str,
         hint: str,
         count: int = 3,
     ) -> list[str]:
-        """Constrói linhas de empty state com highlight e hint (RF-007).
+        """Ativa modo placeholder e retorna linhas de empty state (DT-010, DT-011).
 
-        Centraliza a lógica de placeholder repetida em subclasses.
-        Placeholders são navegáveis — highlight aplica-se normalmente.
+        Unifica _showing_placeholders e _set_item_count em chamada única,
+        eliminando risco de divergência entre count visual e count do cursor.
         """
+        self._showing_placeholders = True
+        self._set_item_count(count)
         lines: list[str] = []
-        for i in range(count):
+        for i in range(self._item_count):
             line = f"  [dim]{placeholder}[/dim]"
             if i == self._cursor_index and self.has_focus:
-                line = f"[on {C_HIGHLIGHT}]{line}[/on {C_HIGHLIGHT}]"
+                line = f"[on {self.HIGHLIGHT_COLOR}]{line}[/on {self.HIGHLIGHT_COLOR}]"
             lines.append(line)
         lines.append("")
         lines.append(f"  [dim]{hint}[/dim]")
