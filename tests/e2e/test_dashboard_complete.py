@@ -230,6 +230,7 @@ class TestHabitsPanelComplete:
 
             instances = loader.load_instances()
             assert instances[0]["status"] == "pending", "Status deve voltar a pending após u"
+            assert instances[0]["substatus"] is None, "Substatus deve ser limpo após undo"
 
     @pytest.mark.asyncio
     async def test_habits_timer_full_flow(self):
@@ -298,6 +299,48 @@ class TestHabitsPanelComplete:
             instances = loader.load_instances()
             assert len(instances) > 0
             assert instances[0]["status"] == "not_done", "Skip deve mudar status para not_done"
+            assert instances[0]["substatus"] is not None, "Skip deve definir substatus"
+
+    @pytest.mark.asyncio
+    async def test_habits_done_esc_cancels(self):
+        """v abre modal, Esc cancela sem alterar status (BR-TUI-022)."""
+        async with TimeBlockApp().run_test() as pilot:
+            await _wait(pilot)
+            await _setup_routine_and_habit(pilot, "Esc Done")
+
+            panel = pilot.app.query_one(HabitsPanel)
+            pilot.app.set_focus(panel)
+            await _wait(pilot)
+
+            await pilot.press("v")
+            await _wait(pilot, 5)
+
+            # Esc cancela o modal
+            await pilot.press("escape")
+            await _wait(pilot)
+
+            instances = loader.load_instances()
+            assert instances[0]["status"] == "pending", "Esc não deve alterar status"
+
+    @pytest.mark.asyncio
+    async def test_habits_skip_esc_cancels(self):
+        """s abre modal, Esc cancela sem alterar status (BR-TUI-024)."""
+        async with TimeBlockApp().run_test() as pilot:
+            await _wait(pilot)
+            await _setup_routine_and_habit(pilot, "Esc Skip")
+
+            panel = pilot.app.query_one(HabitsPanel)
+            pilot.app.set_focus(panel)
+            await _wait(pilot)
+
+            await pilot.press("s")
+            await _wait(pilot, 5)
+
+            await pilot.press("escape")
+            await _wait(pilot)
+
+            instances = loader.load_instances()
+            assert instances[0]["status"] == "pending", "Esc não deve alterar status"
 
     @pytest.mark.asyncio
     async def test_habits_conflict_warning(self):
@@ -435,14 +478,8 @@ class TestTasksPanelComplete:
             assert len(completed) > 0, "Task deve aparecer como completed"
 
     @pytest.mark.asyncio
-    async def test_tasks_postpone_emits_handler(self):
-        """s emite TaskPostponeRequest e handler é chamado (ADR-037).
-
-        TODO: o handler atual chama update_task sem parâmetros úteis —
-        não abre modal para nova data/hora. Quando o modal for
-        implementado, expandir este teste para validar nova data
-        e incremento de postponement_count.
-        """
+    async def test_tasks_postpone_opens_edit_form(self):
+        """s abre FormModal de edição com dados pré-preenchidos (DT-038, ADR-038 D5)."""
         async with TimeBlockApp().run_test() as pilot:
             await _wait(pilot)
             await _create_task(pilot, "Adiar Task")
@@ -451,13 +488,20 @@ class TestTasksPanelComplete:
             pilot.app.set_focus(panel)
             await _wait(pilot)
 
-            # s emite request; handler processa sem crash
             await pilot.press("s")
+            await _wait(pilot, 5)
+
+            # FormModal deve abrir com título pré-preenchido
+            inputs = list(pilot.app.screen.query(Input))
+            assert len(inputs) >= 1, "FormModal de edição deve abrir"
+            assert inputs[0].value == "Adiar Task", "Título deve estar pré-preenchido"
+
+            # Esc cancela sem alterar
+            await pilot.press("escape")
             await _wait(pilot)
 
-            # Task continua existindo (postpone não remove)
             tasks = loader.load_tasks()
-            assert len(tasks) > 0, "Task deve continuar existindo após postpone"
+            assert len(tasks) > 0, "Task deve continuar existindo após cancelar postpone"
 
     @pytest.mark.asyncio
     async def test_tasks_cancel_flow(self):
@@ -584,6 +628,36 @@ class TestTimerPanelComplete:
             assert timer["name"] == "Meditação Guiada", "Timer deve exibir nome do hábito"
 
     @pytest.mark.asyncio
+    async def test_timer_second_blocked(self):
+        """Segundo timer não inicia com timer ativo (BR-TIMER-001)."""
+        async with TimeBlockApp().run_test() as pilot:
+            await _wait(pilot)
+            await _create_routine(pilot)
+            await _create_habit(pilot, "Timer A", "08:00", "60")
+            await _create_habit(pilot, "Timer B", "10:00", "60")
+
+            # Iniciar timer no primeiro hábito
+            panel = pilot.app.query_one(HabitsPanel)
+            pilot.app.set_focus(panel)
+            await _wait(pilot)
+            await pilot.press("t")
+            await _wait(pilot)
+
+            timer = loader.load_active_timer()
+            assert timer is not None, "Timer A deve estar ativo"
+
+            # Navegar para segundo hábito e tentar iniciar
+            await pilot.press("j")
+            await _wait(pilot)
+            await pilot.press("t")
+            await _wait(pilot)
+
+            # Timer deve continuar sendo o primeiro (bloqueio)
+            timer = loader.load_active_timer()
+            assert timer is not None
+            assert timer["name"] == "Timer A", "Segundo timer não deve substituir o primeiro"
+
+    @pytest.mark.asyncio
     async def test_timer_stop_marks_habit_done(self):
         """t (start) → s (stop) → hábito marcado done (BR-TIMER-003, BR-TUI-021).
 
@@ -611,6 +685,7 @@ class TestTimerPanelComplete:
             instances = loader.load_instances()
             done = [i for i in instances if i["status"] == "done"]
             assert len(done) > 0, "stop_timer deve marcar hábito como done"
+            assert done[0]["substatus"] is not None, "stop_timer deve definir substatus"
 
 
 # =========================================================================
