@@ -98,7 +98,7 @@ class HabitsPanel(FocusablePanel):
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        if item.get("status") == "running":
+        if item.get("status") in ("running", "paused"):
             self.post_message(self.TimerStopAndDoneRequest(item["id"]))
         else:
             self.post_message(self.HabitDoneRequest(item["id"]))

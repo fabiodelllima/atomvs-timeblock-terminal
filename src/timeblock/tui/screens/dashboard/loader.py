@@ -13,9 +13,10 @@ from typing import Any
 
 from sqlmodel import Session, col, select
 
-from timeblock.models.enums import Status
+from timeblock.models.enums import Status, TimerStatus
 from timeblock.models.habit import Habit
 from timeblock.models.habit_instance import HabitInstance
+from timeblock.models.time_log import TimeLog
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.routine_service import RoutineService
 from timeblock.services.task_service import TaskService
@@ -111,11 +112,17 @@ def load_active_routine() -> tuple[int | None, str]:
         return None, ""
 
 
-def load_instances() -> list[dict]:
+def load_instances(routine_id: int | None = None) -> list[dict]:
     """Carrega instâncias do dia como lista de dicts.
 
     Toda extração de dados (incluindo lazy relationships como inst.habit)
     é feita dentro do callback para evitar DetachedInstanceError.
+
+    Detecta timer ativo e sobrescreve status para 'running'/'paused'
+    na instância correspondente (DT-055).
+
+    Args:
+        routine_id: Se fornecido, filtra por rotina (DT-049).
     """
 
     def _load(s: Session) -> list[dict]:
@@ -123,6 +130,25 @@ def load_instances() -> list[dict]:
         result = HabitInstanceService().list_instances(date_start=today, date_end=today, session=s)
         if not result:
             return []
+
+        # Filtrar por rotina (DT-049)
+        if routine_id is not None:
+            result = [inst for inst in result if inst.habit and inst.habit.routine_id == routine_id]
+            if not result:
+                return []
+
+        # Detectar timer ativo para sobrescrever status (DT-055)
+        active_timer = s.exec(
+            select(TimeLog).where(
+                TimeLog.status.in_(  # type: ignore[union-attr]
+                    [TimerStatus.RUNNING, TimerStatus.PAUSED]
+                )
+            )
+        ).first()
+        timer_instance_id = active_timer.habit_instance_id if active_timer else None
+        timer_status_str = (
+            active_timer.status.value if active_timer and active_timer.status else None
+        )
 
         instances: list[dict] = []
         for inst in result:
@@ -135,7 +161,13 @@ def load_instances() -> list[dict]:
                 name = inst.habit.title
             elif hasattr(inst, "habit_id"):
                 name = f"Hábito #{inst.habit_id}"
-            status = inst.status.value if inst.status else "pending"
+
+            # Sobrescrever status com timer se aplicável (DT-055)
+            if inst.id == timer_instance_id and timer_status_str:
+                status = timer_status_str
+            else:
+                status = inst.status.value if inst.status else "pending"
+
             substatus = None
             if hasattr(inst, "done_substatus") and inst.done_substatus:
                 substatus = inst.done_substatus.value
@@ -275,10 +307,11 @@ def load_active_timer() -> dict[str, Any] | None:
         if not timer or not timer.status:
             return None
 
-        elapsed_secs = int(
-            (datetime.now() - timer.start_time).total_seconds() - (timer.paused_duration or 0)
-        )
-        elapsed_secs = max(elapsed_secs, 0)
+        total_elapsed = (datetime.now() - timer.start_time).total_seconds()
+        paused_total = timer.paused_duration or 0
+        if timer.status == TimerStatus.PAUSED and timer.pause_start:
+            paused_total += (datetime.now() - timer.pause_start).total_seconds()
+        elapsed_secs = max(int(total_elapsed - paused_total), 0)
         minutes, seconds = divmod(elapsed_secs, 60)
 
         name = ""

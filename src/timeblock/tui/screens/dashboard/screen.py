@@ -310,7 +310,7 @@ class DashboardScreen(Static):
             self.refresh_data()
             return
 
-        instances = loader.load_instances()
+        instances = loader.load_instances(self._active_routine_id)
         try:
             self.query_one(AgendaPanel).update_data(instances)
             self.query_one(HabitsPanel).update_data(instances)
@@ -331,7 +331,7 @@ class DashboardScreen(Static):
         self._active_routine_id = routine_id
         self._active_routine_name = routine_name
 
-        instances = loader.load_instances()
+        instances = loader.load_instances(self._active_routine_id)
         tasks = loader.load_tasks()
         timer = loader.load_active_timer()
 
