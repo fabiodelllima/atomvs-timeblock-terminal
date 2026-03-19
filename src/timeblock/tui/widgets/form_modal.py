@@ -1,7 +1,8 @@
 """FormModal - Modal de formulário para criação e edição (BR-TUI-020).
 
 Suporta campos tipados (text, time, number, select) com validação inline.
-Tab navega entre campos, Enter submete, Esc cancela.
+Tab navega entre campos, Enter submete (em Input) ou clique no botão
+Confirmar. Esc cancela.
 
 Referências:
     - BR-TUI-020: FormModal
@@ -15,7 +16,7 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Input, Label
+from textual.widgets import Button, Input, Label, Select
 
 
 class FormField:
@@ -92,6 +93,15 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
     FormModal > Vertical > Input:focus {
         border: tall #89B4FA;
     }
+
+    FormModal > Vertical > Select {
+        margin-bottom: 0;
+    }
+
+    FormModal > Vertical > #fm-submit {
+        margin-top: 1;
+        width: 100%;
+    }
     """
 
     def __init__(
@@ -115,23 +125,39 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
         return bool(self._edit_data)
 
     def compose(self) -> ComposeResult:
-        """Compõe layout: título, campos com labels, hint."""
+        """Compõe layout: título, campos com labels, botão e hint."""
         with Vertical():
             yield Label(self._title, id="fm-title")
             for field in self._fields:
                 yield Label(field.label, classes="fm-label")
                 default = self._edit_data.get(field.name, field.default)
-                yield Input(
-                    value=str(default) if default else "",
-                    placeholder=field.placeholder or field.label,
-                    id=f"fm-input-{field.name}",
-                )
+                if field.field_type == "select" and field.options:
+                    options = [(label, value) for value, label in field.options]
+                    initial = str(default) if default else field.options[0][0]
+                    yield Select(
+                        options,
+                        value=initial,
+                        id=f"fm-input-{field.name}",
+                        allow_blank=False,
+                    )
+                else:
+                    yield Input(
+                        value=str(default) if default else "",
+                        placeholder=field.placeholder or field.label,
+                        id=f"fm-input-{field.name}",
+                    )
                 yield Label("", classes="fm-error", id=f"fm-err-{field.name}")
-            yield Label("Tab navegar  Enter salvar  Esc cancelar", id="fm-hint")
+            yield Button("Confirmar", id="fm-submit", variant="primary")
+            yield Label("Tab navegar  Enter confirmar  Esc cancelar", id="fm-hint")
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
-        """Enter em qualquer campo submete o formulário."""
+        """Enter em qualquer campo Input submete o formulário."""
         self._try_submit()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Clique no botão Confirmar submete o formulário."""
+        if event.button.id == "fm-submit":
+            self._try_submit()
 
     def action_cancel(self) -> None:
         """Cancela formulário e fecha modal."""
@@ -145,9 +171,13 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
         has_errors = False
 
         for field in self._fields:
-            input_widget = self.query_one(f"#fm-input-{field.name}", Input)
             error_label = self.query_one(f"#fm-err-{field.name}", Label)
-            value = input_widget.value.strip()
+            if field.field_type == "select" and field.options:
+                select_widget = self.query_one(f"#fm-input-{field.name}", Select)
+                value = str(select_widget.value) if select_widget.value else ""
+            else:
+                input_widget = self.query_one(f"#fm-input-{field.name}", Input)
+                value = input_widget.value.strip()
 
             error = self._validate_field(field, value)
             if error:

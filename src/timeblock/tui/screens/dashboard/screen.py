@@ -10,20 +10,29 @@ Referências:
     - RF-003: Split Phase (FOWLER, 2018, p. 154)
 """
 
-from textual.containers import Horizontal, Vertical
+from datetime import date
+
+from sqlmodel import Session
+from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.events import Key
 from textual.widgets import Static
 
-from timeblock.services.habit_instance_service import HabitInstanceService
+from timeblock.models import HabitInstance
 from timeblock.services.task_service import TaskService
+from timeblock.services.timer_service import TimerService
 from timeblock.tui.screens.dashboard import crud_habits, crud_routines, crud_tasks, loader
 from timeblock.tui.session import service_action
 from timeblock.tui.widgets.agenda_panel import AgendaPanel
+from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
 from timeblock.tui.widgets.habits_panel import HabitsPanel
+from timeblock.tui.widgets.header_bar import HeaderBar
 from timeblock.tui.widgets.metrics_panel import MetricsPanel
 from timeblock.tui.widgets.tasks_panel import TasksPanel
 from timeblock.tui.widgets.timer_panel import TimerPanel
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class DashboardScreen(Static):
@@ -34,6 +43,7 @@ class DashboardScreen(Static):
         self._focused_panel: str = ""
         self._active_routine_id: int | None = None
         self._active_routine_name: str = ""
+        self._current_date: date = date.today()
 
     @staticmethod
     def get_no_routine_label() -> str:
@@ -43,10 +53,11 @@ class DashboardScreen(Static):
     def compose(self):
         """Compõe layout: agenda esquerda + panels direita."""
         with Horizontal(id="dashboard-layout"):
-            yield Vertical(
+            yield VerticalScroll(
                 Static(id="agenda-header"),
                 AgendaPanel(id="agenda-content"),
                 id="agenda-column",
+                can_focus=False,
             )
             yield Vertical(
                 HabitsPanel(id="panel-habits"),
@@ -57,9 +68,21 @@ class DashboardScreen(Static):
             )
 
     def on_mount(self) -> None:
-        """Inicializa o dashboard."""
+        """Inicializa o dashboard (DT-023: garante instâncias do dia)."""
+        loader.ensure_today_instances()
         self.refresh_data()
         self.app.set_focus(None)
+        # BR-TUI-003-R15: auto-scroll na hora atual
+        self.set_timer(0.5, self._autoscroll_agenda)
+        self.set_interval(1, self._tick_timer)
+        self.set_interval(60, self._refresh_agenda)
+
+    def _autoscroll_agenda(self) -> None:
+        """Auto-scroll da agenda na hora atual (BR-TUI-003-R15)."""
+        try:
+            self.query_one(AgendaPanel).scroll_to_current_time()
+        except Exception:
+            pass  # Agenda pode nao estar montada ainda
 
     def on_descendant_focus(self, event) -> None:
         """Rastreia panel focado para CRUD contextual."""
@@ -89,6 +112,8 @@ class DashboardScreen(Static):
         elif self._focused_panel == "panel-habits":
             if self._active_routine_id:
                 crud_habits.open_create_habit(self.app, self._active_routine_id, self._on_crud_done)
+            else:
+                crud_routines.open_create_routine(self.app, self._on_crud_done)
         elif self._focused_panel == "panel-tasks":
             crud_tasks.open_create_task(self.app, self._on_crud_done)
 
@@ -138,30 +163,125 @@ class DashboardScreen(Static):
     # =========================================================================
 
     def on_habits_panel_habit_done_request(self, message: HabitsPanel.HabitDoneRequest) -> None:
-        """Recebe HabitDoneRequest e executa mark_completed via service."""
-        service_action(
-            lambda s: HabitInstanceService.mark_completed(message.instance_id, session=s)
-        )
-        self._on_crud_done()
+        """Abre modal de done com detecção de TimeLog (BR-TUI-022, DT-037)."""
+        crud_habits.open_done_modal(self.app, message.instance_id, self._on_crud_done)
 
     def on_habits_panel_habit_skip_request(self, message: HabitsPanel.HabitSkipRequest) -> None:
-        """Recebe HabitSkipRequest e executa mark_skipped via service."""
-        service_action(lambda s: HabitInstanceService.mark_skipped(message.instance_id, session=s))
-        self._on_crud_done()
+        """Abre modal de skip reason (BR-TUI-024, DT-039)."""
+        crud_habits.open_skip_modal(self.app, message.instance_id, self._on_crud_done)
+
+    def on_habits_panel_timer_stop_and_done_request(
+        self, message: HabitsPanel.TimerStopAndDoneRequest
+    ) -> None:
+        """Timer ativo: confirma parada antes de marcar done (BR-TUI-023, DT-036)."""
+        instance_id = message.instance_id
+        timelog, _ = service_action(lambda s: TimerService.get_active_timer(instance_id, session=s))
+        if not timelog:
+            self.app.notify("Nenhum timer ativo encontrado", severity="warning")
+            return
+
+        assert timelog.id is not None
+        timelog_id = timelog.id
+
+        def on_confirm() -> None:
+            service_action(lambda s: TimerService.stop_timer(timelog_id, session=s))
+            self._on_crud_done()
+
+        self.app.push_screen(
+            ConfirmDialog(
+                title="Timer Ativo",
+                message="Parar timer e marcar como concluído?",
+                on_confirm=on_confirm,
+            )
+        )
 
     def on_tasks_panel_task_complete_request(self, message: TasksPanel.TaskCompleteRequest) -> None:
         """Recebe TaskCompleteRequest e executa complete_task via service."""
         service_action(lambda s: TaskService.complete_task(message.task_id, session=s))
         self._on_crud_done()
 
+    # =========================================================================
+    # Timer Handlers — BR-TUI-021
+    # =========================================================================
+
+    def on_tasks_panel_task_postpone_request(self, message: TasksPanel.TaskPostponeRequest) -> None:
+        """Abre FormModal de edição para adiar task (DT-038, ADR-038 D5).
+
+        TaskService.update_task incrementa postponement_count quando a data
+        muda (BR-TASK-008), então editar a data via FormModal é semanticamente
+        equivalente a adiar.
+        """
+        item = self.query_one(TasksPanel).get_selected_item()
+        if item:
+            crud_tasks.open_edit_task(self.app, item, self._on_crud_done)
+
+    def on_tasks_panel_task_cancel_request(self, message: TasksPanel.TaskCancelRequest) -> None:
+        """Cancela task (ADR-037)."""
+        service_action(lambda s: TaskService.cancel_task(message.task_id, session=s))
+        self.app.notify("Task cancelada", timeout=2)
+        self.refresh_data()
+
+    def on_tasks_panel_task_reopen_request(self, message: TasksPanel.TaskReopenRequest) -> None:
+        """Reabre task cancelada (ADR-037)."""
+        service_action(lambda s: TaskService.reopen_task(message.task_id, session=s))
+        self.app.notify("Task reaberta", timeout=2)
+        self.refresh_data()
+
+    def on_habits_panel_habit_undo_request(self, message: HabitsPanel.HabitUndoRequest) -> None:
+        """Reverte hábito para pending (ADR-037)."""
+
+        def _undo(s: Session) -> None:
+            instance = s.get(HabitInstance, message.instance_id)
+            if instance:
+                instance.reset_to_pending()
+                s.add(instance)
+                s.commit()
+
+        service_action(_undo)
+        self.app.notify("Hábito revertido para pendente", timeout=2)
+        self.refresh_data()
+
+    def on_habits_panel_timer_start_request(self, message: HabitsPanel.TimerStartRequest) -> None:
+        """Recebe TimerStartRequest e inicia timer via TimerService."""
+        service_action(lambda s: TimerService.start_timer(message.instance_id, session=s))
+        self._on_crud_done()
+
+    def on_timer_panel_timer_pause_request(self, message: TimerPanel.TimerPauseRequest) -> None:
+        """Recebe TimerPauseRequest e pausa timer via TimerService."""
+        service_action(lambda s: TimerService.pause_timer(message.timer_id, session=s))
+        self._on_crud_done()
+
+    def on_timer_panel_timer_resume_request(self, message: TimerPanel.TimerResumeRequest) -> None:
+        """Recebe TimerResumeRequest e retoma timer via TimerService."""
+        service_action(lambda s: TimerService.resume_timer(message.timer_id, session=s))
+        self._on_crud_done()
+
+    def on_timer_panel_timer_stop_request(self, message: TimerPanel.TimerStopRequest) -> None:
+        """Recebe TimerStopRequest e para timer via TimerService."""
+        service_action(lambda s: TimerService.stop_timer(message.timer_id, session=s))
+        self._on_crud_done()
+
+    def on_timer_panel_timer_cancel_request(self, message: TimerPanel.TimerCancelRequest) -> None:
+        """Recebe TimerCancelRequest e abre ConfirmDialog antes de cancelar."""
+
+        def on_confirm() -> None:
+            service_action(lambda s: TimerService.cancel_timer(message.timer_id, session=s))
+            self._on_crud_done()
+
+        self.app.push_screen(
+            ConfirmDialog(
+                title="Cancelar Timer",
+                message="Cancelar timer ativo? A sessão será descartada.",
+                on_confirm=on_confirm,
+            )
+        )
+
     def _refresh_header(self) -> None:
         """Atualiza header bar após operação CRUD."""
         try:
-            from timeblock.tui.widgets.header_bar import HeaderBar
-
             self.app.query_one(HeaderBar)._refresh_content()
         except Exception:
-            pass
+            logger.debug("HeaderBar indisponível para refresh")
 
     # =========================================================================
     # Data Loading (delegado para loader.py)
@@ -178,6 +298,33 @@ class DashboardScreen(Static):
         elif message.panel_id == "panel-tasks":
             crud_tasks.open_create_task(self.app, self._on_crud_done)
 
+    def _refresh_agenda(self) -> None:
+        """Atualiza agenda e hábitos a cada 60s (DT-015, DT-023).
+
+        Detecta virada de dia e gera instâncias faltantes.
+        """
+        today = date.today()
+        if today != self._current_date:
+            self._current_date = today
+            loader.ensure_today_instances()
+            self.refresh_data()
+            return
+
+        instances = loader.load_instances()
+        try:
+            self.query_one(AgendaPanel).update_data(instances)
+            self.query_one(HabitsPanel).update_data(instances)
+        except Exception:
+            logger.debug("Panels indisponíveis durante refresh")
+
+    def _tick_timer(self) -> None:
+        """Atualiza TimerPanel a cada segundo (DT-015)."""
+        timer = loader.load_active_timer()
+        try:
+            self.query_one(TimerPanel).update_data(timer)
+        except Exception:
+            logger.debug("TimerPanel indisponível durante tick")
+
     def refresh_data(self) -> None:
         """Carrega dados via loader e distribui para panels."""
         routine_id, routine_name = loader.load_active_routine()
@@ -192,7 +339,7 @@ class DashboardScreen(Static):
             self.query_one("#agenda-column").border_title = "Agenda do Dia"
             self.query_one("#agenda-header", Static).update("")
         except Exception:
-            pass
+            logger.debug("Layout parcial durante inicialização")
 
         self.query_one(AgendaPanel).update_data(instances)
         self.query_one(HabitsPanel).update_data(instances)

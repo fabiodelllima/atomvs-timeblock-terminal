@@ -1,12 +1,12 @@
 # Processo de Desenvolvimento
 
-**Versão:** 2.0.0
+**Versão:** 3.0.0
 
-**Data:** 8 de Fevereiro de 2026
+**Data:** 15 de Março de 2026
 
 **Status:** Consolidado (SSOT)
 
-**Alinhado com:** architecture.md v3.0.0, business-rules.md v4.0.0, quality-metrics.md v2.2.0
+**Alinhado com:** architecture.md v3.0.0, business-rules.md v3.1.0, quality-metrics.md v2.2.0, technical-debt.md v2.8.0
 
 ---
 
@@ -39,7 +39,7 @@ O projeto adota Vertical Slicing como unidade de trabalho: cada business rule é
 | Vertical Slicing  | Agile                   | Uma BR completa por vez     |
 | Especificação     | ISO/IEC/IEEE 29148:2018 | BRs formalizadas primeiro   |
 | Validação (BDD)   | Dan North (2006)        | pytest-bdd com Gherkin      |
-| Verificação (TDD) | Robert Martin (2003)    | 3 Leis rigorosas            |
+| Verificação (TDD) | Beck (2003)             | RED-GREEN-REFACTOR          |
 | Sprints           | Scrum                   | Iterações 1-2 semanas       |
 | WIP Limits        | Kanban/Lean             | Max 2 itens In Progress     |
 | Atomic Commits    | Git Best Practices      | 1 commit = 1 mudança lógica |
@@ -48,7 +48,7 @@ O projeto adota Vertical Slicing como unidade de trabalho: cada business rule é
 
 ## 2. Engenharia de Requisitos
 
-O projeto adota técnicas de Engenharia de Requisitos como princípio organizador central do processo de desenvolvimento. Cada fase do ciclo produz artefatos que são pré-requisito da fase seguinte, criando uma cadeia de dependências onde violações são detectáveis e rastreáveis. A direção é sempre descendente: especificação informa validação, validação informa verificação, verificação informa implementação. Nunca o inverso.
+O projeto adota técnicas de Engenharia de Requisitos como princípio organizador central do processo de desenvolvimento. Cada fase do ciclo produz artefatos que são pré-requisito da fase seguinte, criando uma cadeia de dependências onde violações são detectáveis e rastreáveis. A direção predominante é descendente: especificação informa validação, validação informa verificação, verificação informa implementação. A flexibilidade está na escolha deliberada da técnica conforme a natureza da regra — não no relaxamento do rigor. O nível de formalismo é maior do que uma hierarquia fixa, porque exige do desenvolvedor a competência de selecionar a técnica apropriada para cada situação.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -64,7 +64,7 @@ O projeto adota técnicas de Engenharia de Requisitos como princípio organizado
 ┌─────────────────────────────────────────────────────────────────┐
 |         2. VALIDAÇÃO DE REQUISITOS (BDD)                        |
 |    tests/bdd/features/                                          |
-|    - Cenários em formato Gherkin (DADO/QUANDO/ENTÃO)            |
+|    - Cenários em formato Gherkin (Given/When/Then)              |
 |    - Stakeholder requirements verification                      |
 |    - Documentação executável                                    |
 |    Ref: SWEBOK v4.0 Ch.1 (Requirements Validation)              |
@@ -173,7 +173,7 @@ grep -r "BR-HABIT-003" docs/core/business-rules.md
 
 ## 5. Validação de Requisitos (BDD)
 
-Os cenários BDD traduzem business rules em especificações executáveis usando o formato Gherkin com verbos em português (DADO/QUANDO/ENTÃO). Esta fase corresponde à validação de requisitos no ciclo de engenharia de requisitos: confirmar que os requisitos fazem sentido e expressam corretamente a intenção do sistema antes de implementar. A norma ISO/IEC/IEEE 29148 chama isso de "stakeholder requirements verification".
+Os cenários BDD traduzem business rules em especificações executáveis usando o formato Gherkin em inglês (Given/When/Then), conforme formalizado por Dan North (2006). A escolha do inglês para features segue ADR-018 (Language Standards): código e especificações executáveis em inglês, documentação de projeto em português. Esta fase corresponde à validação de requisitos no ciclo de engenharia de requisitos: confirmar que os requisitos expressam corretamente a intenção do sistema antes de implementar. A norma ISO/IEC/IEEE 29148:2018 chama isso de "stakeholder requirements verification". Estruturalmente, o formato Given/When/Then é uma aplicação do Hoare Triple {P} S {Q} — precondição, comando, pós-condição (HOARE, 1969) — à especificação comportamental em linguagem natural.
 
 ### Formato Gherkin
 
@@ -212,7 +212,7 @@ Cada cenário BDD referencia explicitamente a BR que valida, mantendo rastreabil
 
 ## 6. Verificação (TDD)
 
-O projeto adota Strict TDD conforme formalizado por Robert C. Martin, com as três leis aplicadas sem exceção. No contexto da engenharia de requisitos, esta fase corresponde à verificação: garantir que a implementação atende ao requisito especificado. O padrão de nomenclatura `test_br_*` cria uma matriz de rastreabilidade bidirecional entre requisitos e verificação.
+O projeto adota TDD conforme formalizado por Kent Beck em "Test-Driven Development: By Example" (2003), com o ciclo RED-GREEN-REFACTOR aplicado sem exceção. As "Three Laws of TDD", articuladas posteriormente por Robert C. Martin, operacionalizam o ciclo de Beck em regras prescritivas. No contexto da engenharia de requisitos, esta fase corresponde à verificação: garantir que a implementação atende ao requisito especificado. O padrão de nomenclatura `test_br_*` cria uma matriz de rastreabilidade bidirecional entre requisitos e verificação.
 
 ### As 3 Leis do Strict TDD
 
@@ -365,7 +365,7 @@ Cada business rule deve ter rastreabilidade completa, conforme exigido pela disc
 | Artefato           | Localização                 | Formato                     |
 | ------------------ | --------------------------- | --------------------------- |
 | Requisito (BR)     | docs/core/business-rules.md | BR-DOMAIN-XXX               |
-| Validação (BDD)    | tests/bdd/features/         | Gherkin (DADO/QUANDO/ENTÃO) |
+| Validação (BDD)    | tests/bdd/features/         | Gherkin (Given/When/Then)   |
 | Verificação (Unit) | tests/unit/test_services/   | TestBRDomainXXX             |
 | Implementação      | src/timeblock/services/     | Método no service           |
 
@@ -392,9 +392,9 @@ O projeto adota gitflow com commits atômicos em português brasileiro. Cada com
 
 ```
 main          ─────────────────────────────────── produção
-                    ↑ merge (squash)
+                    ↑ merge --no-ff
 develop       ───────────────────────────────── integração
-               ↗ ↑ merge (squash)
+               ↗ ↑ merge --no-ff
 feat/xxx     ── feature branch ──────────────── desenvolvimento
 fix/xxx      ── bugfix branch
 docs/xxx     ── documentação
@@ -427,7 +427,7 @@ feat(models): Adiciona campo user_override ao HabitInstance
 
 ### Merge Strategy
 
-O projeto utiliza squash merge via MR/PR para integrar feature branches em develop. Squash merge condensa todos os commits de uma branch em um único commit no destino, mantendo o histórico de develop linear e legível. O comando padrão é `glab mr merge <number> --squash --yes` no GitLab.
+O projeto preserva commits atômicos ao integrar feature branches em develop, usando merge --no-ff para manter a topologia de branches visível no histórico. Squash merge nunca é usado — cada commit atômico carrega uma mudança lógica única com mensagem descritiva, facilitando bisect, revert e auditoria. O comando padrão é `glab mr merge <number> --yes` no GitLab, sem flag --squash.
 
 ### Tags e Releases
 
@@ -487,26 +487,64 @@ Sprints são agrupados por versão (v1.7.0, v1.8.0, etc.). Cada versão pode con
 
 ### ADRs Relacionadas
 
-| ADR     | Título                                 |
-| ------- | -------------------------------------- |
-| ADR-019 | Test Naming Convention (BR-\* pattern) |
-| ADR-025 | Engenharia de Requisitos               |
-| ADR-026 | Test Database Isolation Strategy       |
-| ADR-031 | TUI Implementation                     |
+| ADR     | Título                                 | Relevância Metodológica         |
+| ------- | -------------------------------------- | ------------------------------- |
+| ADR-019 | Test Naming Convention (BR-\* pattern) | Rastreabilidade BR -> Test      |
+| ADR-025 | Engenharia de Requisitos               | Fundamentação metodológica      |
+| ADR-026 | Test Database Isolation Strategy       | Isolamento de fixtures          |
+| ADR-031 | TUI Implementation                     | Textual como framework TUI      |
+| ADR-033 | Fixture Session Rollback               | join_transaction_mode           |
+| ADR-034 | Dashboard-first CRUD                   | Extract Delegate (Fowler)       |
+| ADR-035 | Keybindings Standardization            | Padronização de atalhos TUI     |
+| ADR-037 | TUI Keybindings Standard               | Mapa definitivo de keybindings  |
+| ADR-038 | Dashboard Interaction Patterns         | Modais, undo, fluxos de usuário |
 
 ### Referências Externas
 
-| Recurso                  | Autor/Org           | Relevância                  |
-| ------------------------ | ------------------- | --------------------------- |
-| ISO/IEC/IEEE 29148:2018  | ISO/IEC/IEEE        | Especificação de requisitos |
-| SWEBOK v4.0              | IEEE                | Corpo de conhecimento SE    |
-| Clean Code (2008)        | Robert C. Martin    | 3 Leis do TDD               |
-| BDD in Action (2014)     | John Ferguson Smart | Gherkin, cenários BDD       |
-| Specification by Example | Gojko Adzic         | Especificação executável    |
-| ISO/IEC 12207:2017       | ISO/IEC             | Processos de ciclo de vida  |
+As referências abaixo constituem o fundamento teórico do processo de desenvolvimento do projeto. Cada técnica adotada é rastreável a uma fonte primária — padrões internacionais, livros seminais ou artigos fundacionais — que a formaliza como prática de engenharia de software.
+
+**Engenharia de Requisitos**
+
+INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. **ISO/IEC/IEEE 29148:2018 — Systems and software engineering — Life cycle processes — Requirements engineering.** 2. ed. Geneva: ISO, 2018. Padrão internacional que define processos de engenharia de requisitos, itens de informação e guidelines de rastreabilidade. Fundamenta a cadeia BR -> Test -> Code do projeto.
+
+INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. **ISO/IEC/IEEE 12207:2017 — Systems and software engineering — Software life cycle processes.** Geneva: ISO, 2017. Define processos de ciclo de vida de software complementares à ISO 29148.
+
+IEEE COMPUTER SOCIETY. **Guide to the Software Engineering Body of Knowledge (SWEBOK), Version 4.0.** Hironori Washizaki (Ed.). IEEE Computer Society, 2024. Corpo de conhecimento que organiza as 18 Knowledge Areas da engenharia de software. Chapter 1 (Software Requirements) e Chapter 5 (Software Testing) fundamentam as práticas de especificação e verificação do projeto.
+
+**Behavior-Driven Development (BDD)**
+
+NORTH, D. Introducing BDD. **Better Software Magazine**, mar. 2006. Artigo fundacional que formalizou BDD como evolução do TDD, introduzindo a mudança de vocabulário de "testes" para "comportamentos" e o formato Given/When/Then. Fonte primária da prática de BDD adotada no projeto.
+
+HOARE, C. A. R. An Axiomatic Basis for Computer Programming. **Communications of the ACM**, v. 12, n. 10, p. 576-580, Oct. 1969. Artigo seminal que define o Hoare Triple {P} S {Q} (precondição, comando, pós-condição). O formato Given/When/Then do BDD é estruturalmente uma aplicação desta lógica à especificação comportamental em linguagem natural.
+
+SMART, J. F. **BDD in Action: Behavior-Driven Development for the Whole Software Lifecycle.** Shelter Island: Manning, 2014. ISBN 978-1-617-29165-4. Referência prática para implementação de BDD com frameworks como Cucumber e pytest-bdd. Complementa o artigo fundacional de North com patterns de adoção em projetos reais.
+
+ADZIC, G. **Specification by Example: How Successful Teams Deliver the Right Software.** Shelter Island: Manning, 2011. ISBN 978-1-617-29008-4. Descreve como equipes de sucesso usam exemplos concretos como especificações executáveis, convergindo com a prática BDD adotada no projeto.
+
+**Test-Driven Development (TDD)**
+
+BECK, K. **Test-Driven Development: By Example.** Boston: Addison-Wesley, 2003. ISBN 0-321-14653-0. Livro seminal que formaliza o ciclo RED-GREEN-REFACTOR. Fonte primária da prática de TDD adotada no projeto. Define TDD como prática de design, não de teste.
+
+MARTIN, R. C. **Clean Code: A Handbook of Agile Software Craftsmanship.** Upper Saddle River: Prentice Hall, 2008. ISBN 978-0-13-235088-4. Formaliza as "Three Laws of TDD" como regras prescritivas que operacionalizam o ciclo de Beck. As 3 Leis aplicadas no projeto derivam desta formulação.
+
+**Architecture Decision Records (ADRs)**
+
+NYGARD, M. Documenting Architecture Decisions. **Cognitect Blog**, 15 nov. 2011. Blog post que popularizou ADRs como registros curtos, sequenciais e versionados no repositório do projeto. Formato adotado integralmente pelo ATOMVS (38 ADRs documentados).
+
+KEELING, M.; RUNDE, J. Love Unrequited: The Story of Architecture, Agile, and How Architecture Decision Records Brought Them Together. **IEEE Software**, v. 39, n. 4, 2022. Apresenta evidência empírica sobre o impacto de ADRs em projetos reais.
+
+ZDUN, U. et al. Sustainable Architectural Decisions. **IEEE Software**, v. 30, n. 6, p. 46-53, 2013. Define guidelines e o Y-statement format para decisões arquiteturais sustentáveis, base teórica da organização adr.github.io.
+
+**Refactoring e Design**
+
+FOWLER, M. **Refactoring: Improving the Design of Existing Code.** 2. ed. Boston: Addison-Wesley, 2018. ISBN 978-0-13-475759-9. Catálogo de refatorações referenciado nas ADRs do projeto (Extract Delegate, Split Phase). Guia para a fase REFACTOR do ciclo TDD.
+
+HUMBLE, J.; FARLEY, D. **Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation.** Boston: Addison-Wesley, 2010. ISBN 978-0-321-60191-9. Fundamenta as práticas de CI/CD, pipeline como gatekeeper de qualidade e deployment automation do projeto.
+
+FOWLER, M. **Patterns of Enterprise Application Architecture.** Boston: Addison-Wesley, 2002. ISBN 978-0-321-12742-6. Padrões arquiteturais de referência para a camada de serviços e persistência do projeto.
 
 ---
 
-**Versão do documento:** 2.0.0
+**Versão do documento:** 3.0.0
 
-**Última atualização:** 8 de Fevereiro de 2026
+**Última atualização:** 15 de Março de 2026

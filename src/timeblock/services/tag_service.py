@@ -3,6 +3,9 @@
 from sqlmodel import Session, select
 
 from timeblock.models import Tag
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class TagService:
@@ -43,6 +46,7 @@ class TagService:
         self.session.add(tag)
         self.session.flush()
         self.session.refresh(tag)
+        logger.info("Tag criada: id=%s, nome='%s'", tag.id, tag.name)
         return tag
 
     def get_tag(self, tag_id: int) -> Tag:
@@ -85,6 +89,7 @@ class TagService:
         self.session.add(tag)
         self.session.flush()
         self.session.refresh(tag)
+        logger.info("Tag atualizada: id=%s", tag.id)
         return tag
 
     def delete_tag(self, tag_id: int) -> None:
@@ -94,3 +99,4 @@ class TagService:
             raise ValueError(f"Tag {tag_id} não encontrada")
 
         self.session.delete(tag)
+        logger.info("Tag deletada: id=%s", tag_id)

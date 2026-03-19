@@ -58,7 +58,7 @@ class TestRF001HabitsQuickActions:
             panel._instances = [{"id": 42, "name": "Teste", "status": "pending"}]
             panel._set_item_count(1)
             app.set_focus(panel)
-            await pilot.press("ctrl+enter")
+            await pilot.press("v")
             await pilot.pause()
         assert received == [42]
 
@@ -83,7 +83,7 @@ class TestRF001HabitsQuickActions:
             panel._instances = [{"id": 7, "name": "Teste", "status": "pending"}]
             panel._set_item_count(1)
             app.set_focus(panel)
-            await pilot.press("ctrl+s")
+            await pilot.press("s")
             await pilot.pause()
         assert received == [7]
 
@@ -108,7 +108,7 @@ class TestRF001HabitsQuickActions:
             panel._instances = []
             panel._set_item_count(0)
             app.set_focus(panel)
-            await pilot.press("ctrl+enter")
+            await pilot.press("v")
             await pilot.pause()
         assert received == []
 
@@ -139,7 +139,7 @@ class TestRF001TasksQuickActions:
 
     @pytest.mark.asyncio
     async def test_rf001_ctrl_k_posts_task_complete_request(self):
-        """Ctrl+K com item selecionado posta TaskCompleteRequest."""
+        """Ctrl+Enter com item selecionado posta TaskCompleteRequest."""
         received: list = []
 
         class CaptureApp(App):
@@ -169,13 +169,13 @@ class TestRF001TasksQuickActions:
                 ]
             )
             app.set_focus(panel)
-            await pilot.press("ctrl+k")
+            await pilot.press("v")
             await pilot.pause()
         assert received == [99]
 
     @pytest.mark.asyncio
     async def test_rf001_ctrl_k_without_selection_no_message(self):
-        """Ctrl+K sem item selecionado não posta mensagem."""
+        """Ctrl+Enter sem item selecionado não posta mensagem."""
         received: list = []
 
         class CaptureApp(App):
@@ -193,7 +193,7 @@ class TestRF001TasksQuickActions:
             panel = app.query_one(TasksPanel)
             panel.update_data([])
             app.set_focus(panel)
-            await pilot.press("ctrl+k")
+            await pilot.press("v")
             await pilot.pause()
         assert received == []
 

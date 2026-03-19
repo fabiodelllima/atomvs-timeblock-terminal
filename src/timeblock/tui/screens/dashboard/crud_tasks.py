@@ -20,15 +20,10 @@ from timeblock.services.task_service import TaskService
 from timeblock.tui.session import service_action
 from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
 from timeblock.tui.widgets.form_modal import FormField, FormModal
+from timeblock.utils.validators import parse_time_to_time
 
 if TYPE_CHECKING:
     from textual.app import App
-
-
-def _parse_time(value: str) -> dt_time:
-    """Converte string HH:MM para time."""
-    parts = value.split(":")
-    return dt_time(int(parts[0]), int(parts[1]))
 
 
 def _build_datetime(date_iso: str, time_str: str | None) -> datetime:
@@ -38,7 +33,7 @@ def _build_datetime(date_iso: str, time_str: str | None) -> datetime:
     """
     year, month, day = (int(p) for p in date_iso.split("-"))
     if time_str:
-        t = _parse_time(time_str)
+        t = parse_time_to_time(time_str)
     else:
         t = dt_time(0, 0)
     return datetime(year, month, day, t.hour, t.minute)
@@ -131,10 +126,11 @@ def open_edit_task(
             required=False,
         ),
     ]
+    raw_time = task_data.get("time", "")
     edit_data = {
         "title": task_data.get("name", ""),
         "date": task_data.get("date", _today_dd_mm()),
-        "time": task_data.get("time", ""),
+        "time": "" if raw_time == "--:--" else raw_time,
     }
 
     def on_submit(data: dict[str, Any]) -> None:

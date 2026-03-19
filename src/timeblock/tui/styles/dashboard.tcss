@@ -40,6 +40,11 @@ DashboardScreen {
     border: round #45475A;           /* Borda arredondada Surface1 */
     border-title-color: #CDD6F4;     /* Título "Agenda do Dia" em Text */
     background: #1E1E2E;             /* Fundo Base */
+    scrollbar-size-vertical: 1;
+    scrollbar-color: #1E1E2E;
+    scrollbar-background: #1E1E2E;
+    scrollbar-color-hover: #313244;
+    scrollbar-color-active: #45475A;
 }
 
 #agenda-header {
@@ -48,11 +53,17 @@ DashboardScreen {
     padding: 0 1;                      /* Padding horizontal */
 }
 
-#agenda-content {
+#agenda-content { 
+
     width: 100%;                       /* Largura total da coluna */
-    height: 1fr;                       /* Preenche espaço restante */
+    height: auto;                      /* Expande ao conteudo para scroll */
     overflow-y: auto;                  /* Scroll vertical quando necessário */
     padding: 0 1 1 1;                  /* Padding: 0 top, 1 lados, 1 bottom */
+    scrollbar-size-vertical: 1;        /* Scrollbar fina (1 caractere) */
+    scrollbar-color: #1E1E2E;          /* Invisivel: mesma cor do fundo */
+    scrollbar-background: #1E1E2E;     /* Invisivel: mesma cor do fundo */
+    scrollbar-color-hover: #313244;    /* Surface0: sutil no hover */
+    scrollbar-color-active: #45475A;   /* Surface1: sutil no drag */
 }
 
 #agenda-actions {

@@ -72,11 +72,11 @@ O detalhamento de métricas por release está disponível em `docs/core/quality-
 
 A versão v1.6.0 representou um ponto de inflexão na maturidade do projeto. A cobertura de testes saltou de 76% para 87%, superando o threshold de 85% configurado no pipeline. A introdução de Docker e DevSecOps (bandit, pip-audit) trouxe segurança automatizada. Com essa base consolidada, o projeto está preparado para adicionar complexidade na camada de apresentação sem risco de regressões silenciosas.
 
-A Sprint 3.2 concluiu o dashboard interativo com dados reais, quick actions, navegação entre panels, footer contextual, backup automático e TCSS modularizado. O foco agora é a Sprint 4: CRUD via dashboard com modais contextuais (ADR-034), precedido por otimização de fixtures de integração (ADR-033). As refatorações durante a Sprint 4 seguem padrões documentados por Fowler (2002) e Humble & Farley (2010), incluindo Dependency Injection nos widgets, mock services nos testes TUI, e Service Layer como boundary formal.
+A Sprint 4 entregou CRUD completo via dashboard com modais contextuais (ADR-034), quick actions via message pattern (RF-001), placeholders editáveis (BR-TUI-013), e widgets reutilizáveis (ConfirmDialog, FormModal). A Sprint 4.5 (First Complete Loop) conectou o fluxo de ponta a ponta no dashboard: criar rotina, criar hábito, iniciar timer, pausar/retomar, parar e marcar done — tudo sem sair do dashboard. O timer atualiza a cada segundo via set_interval, a agenda auto-refresh a cada 60 segundos, e os keybindings foram padronizados conforme ADR-035.
 
 - **Versão:** v1.7.0-dev
-- **Branch:** `feat/tui-crud-dashboard`
-- **Data:** 5 de Março de 2026
+- **Branch:** `feat/tui-dashboard-timer`
+- **Data:** 11 de Março de 2026
 
 ### 3.1. Métricas Principais
 
@@ -86,7 +86,7 @@ As métricas atuais refletem medições reais executadas em 05/03/2026 (branch `
 | ------------- | ----- | ----------- | ---------- |
 | Cobertura     | ~81%  | 80%         | [OK]       |
 | Erros mypy    | 0     | 0           | [OK]       |
-| Testes total  | 1079  | 1200+       | [OK]       |
+| Testes total  | 1156  | 1200+       | [OK]       |
 | BRs cobertas  | 104   | 110+        | [OK]       |
 | ADRs          | 35    | 35+         | [OK]       |
 | CLI funcional | 85%   | 100%        | [PENDENTE] |
@@ -101,7 +101,7 @@ Integration: 116 (10.8%)
 BDD:          56 (5.2%)
 E2E:          30 (2.8%)
 ─────────────────────────
-TOTAL:      1071 testes
+TOTAL:      1156 testes
 ```
 
 ### 3.3. Infraestrutura CI/CD
@@ -142,8 +142,8 @@ A implementação da TUI segue o ADR-031 com sprints incrementais. A fase 1 cobr
 - Mockups: `docs/tui/dashboard-mockup-v4.md`, `docs/tui/routines-weekly-mockup.md`
 - Color System: `docs/tui/color-system.md` (ADR-021, 550 linhas)
 - Showcase: `docs/html/themes/catppuccin-mocha.html`
-- BRs: BR-TUI-001 a BR-TUI-020, BR-TEST-001 (seção 14 e 16 do business-rules.md)
-- ADRs: ADR-031 (TUI), ADR-033 (Fixture), ADR-034 (Dashboard-first CRUD)
+- BRs: BR-TUI-001 a BR-TUI-021, BR-TEST-001 (seção 14 e 16 do business-rules.md)
+- ADRs: ADR-031 (TUI), ADR-033 (Fixture), ADR-034 (Dashboard-first CRUD), ADR-035 (Keybindings)
 
 **Mock Data (Rotina Demo):**
 
@@ -187,6 +187,18 @@ A estratégia de implementação prioriza as telas de maior impacto no uso diár
 | R8  | Pipeline < 10min             | HUMBLE; FARLEY, 2010, p. 185     | Monit. |
 | R4  | Abstração de tempo           | HUMBLE; FARLEY, 2010, p. 184     | 5      |
 | R6  | Repository pattern           | FOWLER, 2002, p. 322             | v2.0   |
+
+**Teste e validação da dashboard (Sprint futuro):**
+
+- Checklist de teste manual: `docs/testing/manual-testing-checklist.md` (94 cenários, 9 seções)
+- Automação visual planejada: script pexpect + asciinema que lança a app num pseudo-terminal, executa cada fluxo com delays visíveis, e grava um `.cast` reproduzível. Permite que qualquer pessoa assista uma sessão completa de validação da TUI com `asciinema play`. Substitui validação manual repetitiva por gravação determinística.
+- Smoke tests via pexpect: app abre, renderiza, responde a input básico — complementa testes e2e com pilot (ADR-037).
+
+**Features futuras planejadas (v1.8.0+):**
+
+- **RapidLog:** Captura rápida de notas, tarefas e eventos em formato livre — inspirado no Bullet Journal (CARROLL, 2018). Input de texto livre no dashboard que classifica automaticamente (task, note, event) via prefixo ou parsing. Reduz fricção de entrada: o usuário digita e o sistema organiza.
+- **BackLog:** Repositório de itens postergados ou não agendados. Tasks e hábitos que foram adiados múltiplas vezes migram automaticamente para o BackLog. Revisão periódica (semanal/mensal) permite reprojetar, descartar ou reagendar. Integra com postponement_count (BR-TASK-008).
+- **Subtasks de Habits:** Modal de checklist interno a cada hábito para um dia específico. O usuário define subtarefas que precisa cumprir dentro daquele hábito naquela instância — lista dentro de lista. Percentual de conclusão das subtarefas alimenta completion_percentage e done_substatus automaticamente. Modelo: HabitSubtask com FK para HabitInstance, campos title + completed.
 
 ---
 
@@ -283,4 +295,4 @@ Working Documents:
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 5 de Março de 2026
+**Última atualização:** 11 de Março de 2026

@@ -1,6 +1,6 @@
 # Business Rules
 
-**Versão:** 3.0.0
+**Versão:** 3.1.0
 
 **Status:** Consolidado (SSOT)
 
@@ -791,8 +791,8 @@ PENDING
   ├─> DONE (via timer stop ou log manual)
   └─> NOT_DONE (via skip ou timeout)
 
-DONE → [FINAL]
-NOT_DONE → [FINAL]
+DONE -> PENDING (via undo - ADR-038 D1)
+NOT_DONE -> PENDING (via undo - ADR-038 D1)
 ```
 
 **Testes:**
@@ -955,6 +955,33 @@ habit edit INSTANCE_ID --start 08:00 --end 09:30
 - `test_br_habitinstance_006_filter_by_habit`
 - `test_br_habitinstance_006_filter_by_date_range`
 - `test_br_habitinstance_006_returns_empty_list`
+
+---
+
+### BR-HABITINSTANCE-007: Undo com Preservacao de TimeLog (NOVA 15/03/2026)
+
+**Descricao:** O undo reverte HabitInstance para PENDING preservando TimeLogs como registros factuais. Re-done detecta TimeLogs existentes e oferece restauracao.
+
+**Decisao arquitetural:** ADR-038 D1, D2
+
+**Regras:**
+
+1. `u` em habito DONE ou NOT_DONE reverte status para PENDING
+2. Undo limpa: `done_substatus`, `not_done_substatus`, `skip_reason`, `skip_note`, `completion_percentage`
+3. TimeLogs com status DONE vinculados a instancia permanecem inalterados
+4. `v` em habito PENDING que possui TimeLog DONE vinculado abre modal de restauracao
+5. Modal de restauracao: "Sessao anterior encontrada (Xmin, Y%). Restaurar? [Sim/Nao]"
+6. "Sim" restaura `done_substatus` e `completion_percentage` originais do TimeLog
+7. "Nao" abre modal de done manual (BR-TUI-022)
+
+**Testes:**
+
+- `test_br_habitinstance_007_undo_done_to_pending`
+- `test_br_habitinstance_007_undo_not_done_to_pending`
+- `test_br_habitinstance_007_undo_clears_all_substatus`
+- `test_br_habitinstance_007_undo_preserves_timelog`
+- `test_br_habitinstance_007_redone_detects_timelog`
+- `test_br_habitinstance_007_redone_restores_substatus`
 
 ---
 
@@ -1207,7 +1234,9 @@ A Task é o complemento pontual dos Habits recorrentes. Enquanto hábitos repres
 
 A independência estrutural da Task em relação à Routine é uma decisão deliberada de design. Uma tarefa de trabalho não pertence à "Rotina Matinal" nem à "Rotina Noturna" — ela existe por si só, visível independente de qual rotina está ativa. Trocar de rotina não esconde tarefas pendentes. Deletar uma rotina não afeta tarefas. Essa separação garante que compromissos pontuais nunca desapareçam acidentalmente ao reorganizar hábitos recorrentes.
 
-O modelo de Task é intencionalmente simples: título, data/hora, descrição opcional e um estado binário derivado (pendente se `completed_datetime` é nulo, concluída se preenchido). Não há prioridade, não há subtarefas, não há dependências. Essa simplicidade é proposital: o TimeBlock Planner não é um gerenciador de projetos. Tasks existem para que eventos pontuais possam ser posicionados na linha do tempo ao lado dos hábitos, criando uma visão completa do dia — e para que o sistema possa detectar conflitos entre tasks e hábitos da rotina.
+O modelo de Task evoluiu de um checkbox simples para uma entidade com lifecycle rastreável (ADR-036). O status é derivado de timestamps — `completed_datetime`, `cancelled_datetime` e `scheduled_datetime` — sem enum explícito, seguindo a mesma filosofia de auditabilidade do restante do domínio. Quatro estados são derivados por precedência fixa: CANCELLED, COMPLETED, OVERDUE e PENDING (BR-TASK-007). Adiamentos são rastreados via `original_scheduled_datetime` (imutável, fixado na criação) e `postponement_count` (incrementado a cada reagendamento para data posterior), permitindo análise de padrões de procrastinação (BR-TASK-008). Cancelamento opera como soft delete — o registro permanece no banco com `cancelled_datetime` preenchido, preservando dados para métricas (BR-TASK-009). A partir desses timestamps, métricas como tempo até conclusão, taxa de pontualidade e frequência de adiamento são calculadas sob demanda (BR-TASK-010).
+
+Não há prioridade, não há subtarefas, não há dependências. O TimeBlock Planner não é um gerenciador de projetos. Tasks existem para que eventos pontuais possam ser posicionados na linha do tempo ao lado dos hábitos, criando uma visão completa do dia — e para que o sistema possa detectar conflitos entre tasks e hábitos da rotina.
 
 ### BR-TASK-001: Estrutura de Task
 
@@ -1378,6 +1407,198 @@ task reopen ID
 - Checklist interno
 
 **Justificativa:** Foco do TimeBlock está em hábitos e rotinas. Tasks são complemento para atividades pontuais.
+
+---
+
+### BR-TASK-007: Task Lifecycle — Derivação de Status (NOVA 14/03/2026)
+
+**Descrição:** O status de uma Task é derivado de seus timestamps, sem campo enum explícito. A ordem de avaliação é determinística e com precedência fixa.
+
+**Decisão arquitetural:** ADR-036
+
+**Derivação (em ordem de precedência):**
+
+1. `cancelled_datetime is not None` => CANCELLED
+2. `completed_datetime is not None` => COMPLETED
+3. `scheduled_datetime < now()` => OVERDUE
+4. Caso contrário => PENDING
+
+**Regras:**
+
+1. Cancelamento tem precedência absoluta — mesmo que `completed_datetime` esteja preenchido, `cancelled_datetime` prevalece
+2. A derivação é pura (sem side effects) e determinística (mesmos inputs => mesmo output)
+3. Nenhum campo `status` é armazenado — o status é sempre calculado na leitura
+4. A implementação deve ser um `@property` ou função utilitária, nunca lógica espalhada
+
+**Testes:**
+
+- `test_br_task_007_pending_status_derivation`
+- `test_br_task_007_completed_status_derivation`
+- `test_br_task_007_cancelled_status_derivation`
+- `test_br_task_007_overdue_status_derivation`
+- `test_br_task_007_cancelled_overrides_completed`
+
+---
+
+### BR-TASK-008: Rastreamento de Adiamento (NOVA 14/03/2026)
+
+**Descrição:** Cada adiamento de task é rastreado para análise posterior de padrões comportamentais. O adiamento é ortogonal ao status — uma task pode estar em qualquer status e ter histórico de adiamentos.
+
+**Decisão arquitetural:** ADR-036
+
+**Campos:**
+
+```python
+original_scheduled_datetime: datetime  # Imutável, fixado na criação
+postponement_count: int = 0            # Incrementado a cada adiamento
+```
+
+**Regras:**
+
+1. `original_scheduled_datetime` é definido na criação da task com o valor de `scheduled_datetime` e nunca é alterado depois
+2. `postponement_count` é incrementado quando `scheduled_datetime` é atualizado para uma data **posterior** à atual
+3. Reagendar para data **anterior** (antecipação) não incrementa o contador
+4. Reagendar para a mesma data/hora não incrementa o contador
+5. O delta `scheduled_datetime - original_scheduled_datetime` fornece o adiamento total em dias
+
+**Métricas derivadas:**
+
+```python
+was_postponed    = postponement_count > 0
+days_postponed   = (scheduled_datetime - original_scheduled_datetime).days
+avg_postponement = days_postponed / postponement_count  # se count > 0
+```
+
+**Testes:**
+
+- `test_br_task_008_original_datetime_set_on_creation`
+- `test_br_task_008_original_datetime_immutable_on_update`
+- `test_br_task_008_postponement_count_increments_on_later_date`
+- `test_br_task_008_postponement_count_unchanged_on_earlier_date`
+- `test_br_task_008_postponement_count_unchanged_on_same_date`
+- `test_br_task_008_days_postponed_calculation`
+
+---
+
+### BR-TASK-009: Cancelamento Soft Delete (NOVA 14/03/2026)
+
+**Descrição:** Cancelar uma task registra o timestamp sem remover o registro do banco, preservando dados para métricas e histórico.
+
+**Decisão arquitetural:** ADR-036
+
+**Campo:**
+
+```python
+cancelled_datetime: datetime | None = None
+```
+
+**Regras:**
+
+1. `task delete` seta `cancelled_datetime = datetime.now()` (soft delete)
+2. Task cancelada sai da lista de pendentes mas permanece no banco
+3. Task cancelada aparece no dashboard por 24h com status CANCELLED e strikethrough
+4. Reverter cancelamento é possível zerando `cancelled_datetime` (via `task reopen`)
+5. Hard delete (remoção permanente) disponível via `task purge` — operação futura, não implementada no MVP
+
+**Impacto em operações:**
+
+| Operação                | Comportamento                     |
+| ----------------------- | --------------------------------- |
+| `task list`             | Omite canceladas                  |
+| `task list --all`       | Inclui canceladas                 |
+| `task list --cancelled` | Apenas canceladas                 |
+| Dashboard (TUI)         | Mostra canceladas das últimas 24h |
+
+**Testes:**
+
+- `test_br_task_009_cancel_sets_datetime`
+- `test_br_task_009_cancel_preserves_record`
+- `test_br_task_009_cancelled_excluded_from_pending`
+- `test_br_task_009_cancelled_included_in_all`
+- `test_br_task_009_reopen_clears_cancelled_datetime`
+
+---
+
+### BR-TASK-010: Métricas de Task Lifecycle (NOVA 14/03/2026)
+
+**Descrição:** O sistema calcula métricas a partir dos timestamps do lifecycle para análise de produtividade e padrões comportamentais.
+
+**Decisão arquitetural:** ADR-036
+
+**Métricas por task:**
+
+```python
+# Tempo até conclusão (apenas tasks COMPLETED)
+time_to_completion = completed_datetime - original_scheduled_datetime
+
+# Pontualidade
+completed_on_time = completed_datetime.date() <= original_scheduled_datetime.date()
+days_late = max(0, (completed_datetime.date() - original_scheduled_datetime.date()).days)
+
+# Adiamento (qualquer status)
+was_postponed = postponement_count > 0
+total_days_postponed = (scheduled_datetime - original_scheduled_datetime).days
+```
+
+**Métricas agregadas (período configurável):**
+
+```python
+# Taxas
+completion_rate = completed_count / total_count
+cancellation_rate = cancelled_count / total_count
+on_time_rate = on_time_count / completed_count
+
+# Adiamento
+avg_postponement_count = sum(postponement_counts) / total_count
+avg_days_postponed = sum(days_postponed) / postponed_count
+most_postponed_tasks = top_n(tasks, key=postponement_count)
+
+# Tempo
+avg_time_to_completion = mean(time_to_completions)
+```
+
+**Regras:**
+
+1. Métricas são calculadas sob demanda (query), não armazenadas
+2. Período padrão: últimos 7 dias e últimos 30 dias
+3. Tasks sem `original_scheduled_datetime` (migração) usam `scheduled_datetime` como fallback
+4. Tasks PENDING/OVERDUE contribuem para contagem total mas não para métricas de conclusão
+5. Estas métricas alimentam o futuro MetricsPanel (DT-017)
+
+**Testes:**
+
+- `test_br_task_010_time_to_completion_calculation`
+- `test_br_task_010_on_time_detection`
+- `test_br_task_010_days_late_calculation`
+- `test_br_task_010_completion_rate`
+- `test_br_task_010_cancellation_rate`
+- `test_br_task_010_postponement_aggregates`
+- `test_br_task_010_migration_fallback_original_datetime`
+
+---
+
+### BR-TASK-011: Tasks Sem Horario Explicito (NOVA 15/03/2026)
+
+**Descricao:** Tasks criadas sem horario (scheduled_datetime com hora e minuto ambos zero) sao tratadas como "dia inteiro" e seguem regra de overdue diferente.
+
+**Decisao arquitetural:** ADR-038 D7
+
+**Regras:**
+
+1. Task com `hour == 0 and minute == 0` e considerada "sem horario explicito"
+2. Task sem horario explicito nao fica overdue no mesmo dia da data agendada
+3. Task sem horario explicito fica overdue a partir do dia seguinte (`date < today`)
+4. Task com horario explicito fica overdue quando `scheduled_datetime < now()`
+5. Exibicao no dashboard: tasks sem horario mostram `"--:--"` no campo time
+6. FormModal de edicao limpa `"--:--"` para string vazia no campo de horario
+
+**Testes:**
+
+- `test_br_task_011_no_time_not_overdue_same_day`
+- `test_br_task_011_no_time_overdue_next_day`
+- `test_br_task_011_with_time_overdue_after_hour`
+- `test_br_task_011_display_no_time_shows_dashes`
+- `test_br_task_011_edit_clears_dashes`
 
 ---
 
@@ -2178,85 +2399,101 @@ class DashboardScreen(Screen):
 
 ---
 
-### BR-TUI-004: Global Keybindings (REVISADA 02/03/2026)
+## BR-TUI-004: Global Keybindings (REVISADA 15/03/2026)
 
-**Descrição:** Keybindings globais funcionam em qualquer screen. Ações exigem modificador Ctrl. Navegação pura não exige modificador. Ações destrutivas e irreversíveis exigem modal de confirmação.
+**Descricao:** Keybindings padronizados em toda a aplicacao conforme ADR-037. Teclas simples sem modificador. CRUD contextual (n/e/x). Quick actions por panel (v/s/u/c/t). Uma acao = um binding.
 
-**Política de modificador:**
+**Mapa de keybindings:**
 
 ```plaintext
-SEM modificador (navegação pura, sem risco):
-  Tab .................. avançar entre panels/cards
-  Ctrl+Tab ............. voltar entre panels/cards
-  1-4 .................. focar panel diretamente (dentro da screen)
-  Setas / j/k .......... navegar itens dentro do panel focado
-  Enter ................ editar item selecionado ou placeholder
-  ? .................... help overlay (leitura)
-  Escape ............... fechar modal / voltar ao Dashboard
+GLOBAIS (app.py):
+  1..5 ................. trocar screen (1=Dash, 2=Rotin, 3=Habit, 4=Tasks, 5=Timer)
+  Ctrl+Q ............... sair da TUI
+  ? .................... help overlay (toggle)
+  Escape ............... fechar modal / fechar help / voltar ao Dashboard
 
-COM Ctrl (ações e navegação entre screens):
-  Ctrl+1..5 ............ trocar screen (1=Dash, 2=Rotin, 3=Habit, 4=Tasks, 5=Timer)
-  Ctrl+Q ............... sair da TUI [MODAL]
-  Ctrl+Enter ........... confirmar / mark done [MODAL se irreversível]
-  Ctrl+S ............... skip (hábito) / start (timer)
-  Ctrl+P ............... pause/resume (timer)
-  Ctrl+X ............... deletar item selecionado [MODAL]
-  Ctrl+E ............... editar item selecionado (abre modal)
-  Ctrl+K ............... complete task [MODAL]
-  Ctrl+W ............... cancel timer [MODAL]
+NAVEGACAO (intra-screen):
+  Tab .................. avancar entre panels
+  j / seta baixo ....... proximo item no panel focado
+  i / seta cima ........ item anterior no panel focado
+  Enter ................ ativar placeholder / selecionar item
 
-CRIAÇÃO (duas vias):
-  N .................... abre modal com campos (formulário guiado, contextual ao panel)
-  : .................... abre barra de comando (power user)
+CRUD (contextual ao panel focado):
+  n .................... novo (abre FormModal contextual)
+  e .................... editar item sob cursor (abre FormModal)
+  x .................... deletar item sob cursor [MODAL]
 
-PROIBIDOS (reservados pelo OS):
+HABITS PANEL (quick actions):
+  v .................... marcar done [MODAL de substatus - BR-TUI-022]
+  s .................... skip [MODAL de SkipReason - BR-TUI-024]
+  t .................... iniciar timer para habito selecionado
+  u .................... undo (reverter para pending)
+
+TASKS PANEL (quick actions):
+  v .................... completar task
+  s .................... adiar task (abre FormModal de edit - ADR-038 D5)
+  c .................... cancelar task (soft delete)
+  u .................... reabrir task cancelada
+
+TIMER PANEL (quick actions):
+  space ................ pausar / retomar timer
+  s .................... parar timer (stop - marca habito como done)
+  c .................... cancelar timer [MODAL]
+
+PROIBIDOS (reservados pelo OS - ADR-035):
   Ctrl+C ............... SIGINT (nunca capturar)
   Ctrl+Z ............... SIGTSTP (nunca capturar)
   Ctrl+D ............... EOF (nunca capturar)
 ```
 
-**Modal de confirmação exigido em:**
+**Modal de confirmacao exigido em:**
 
-- Ctrl+Q (sair, especialmente com timer ativo)
-- Ctrl+X (deletar item)
-- Ctrl+W (cancelar timer, descarta sessão)
-- Ctrl+K (completar task, irreversível)
-- Ctrl+Enter (mark done, quando hábito já done/overdone)
+- x (deletar item - ConfirmDialog)
+- c no timer panel (cancelar timer, descarta sessao - ConfirmDialog)
+- v no habits panel (done manual - modal de substatus, BR-TUI-022)
+- v com timer ativo (notificacao com opcoes - BR-TUI-023)
+- s no habits panel (skip - modal de SkipReason, BR-TUI-024)
 
 **Regras:**
 
-1. Todas as ações exigem modificador Ctrl
-2. Navegação pura (Tab, Ctrl+Tab, setas, números, ?, Escape, Enter) sem modificador
-3. Ctrl+1..5 troca screen; números 1..4 focam panel dentro da screen ativa
-4. Tab avança entre panels, Ctrl+Tab volta (ciclo circular)
-5. Setas e j/k navegam itens dentro do panel focado
-6. Enter edita item selecionado (existente ou placeholder)
-7. N abre modal com campos contextual ao panel focado; : abre barra de comando
-8. Ações destrutivas/irreversíveis exigem modal de confirmação
-9. Modal exibe nome do item afetado e ação a ser executada
-10. Modal responde apenas a Enter (confirmar) e Escape (cancelar)
-11. Ctrl+C, Ctrl+Z, Ctrl+D nunca são capturados pela TUI
-12. Se timer ativo e Ctrl+Q, modal informa que sessão será perdida
-13. Keybindings de ação só funcionam na screen/zona ativa
-14. Help overlay (?) lista todos os keybindings com modificadores
+1. 1..5 sem modificador troca screen (ADR-037)
+2. Tab cicla entre panels; j/i ou setas movem cursor dentro do panel
+3. n/e/x sem modificador para CRUD - x sempre abre ConfirmDialog
+4. v e o binding de "concluir/done" - abre modal no habits, executa direto no tasks
+5. s e contextual: skip (habits), postpone/edit (tasks), stop (timer)
+6. t inicia timer para habito selecionado
+7. u e undo/reopen - reverte status em ambos os panels
+8. space e toggle de pause/resume exclusivo do timer panel
+9. c e cancelar - soft delete (tasks), cancel com ConfirmDialog (timer)
+10. Enter ativa placeholders (BR-TUI-013) ou seleciona item
+11. Acoes que alteram estado devem usar modal (ADR-038 D12)
+12. Ctrl+C, Ctrl+Z, Ctrl+D nunca sao capturados pela TUI
+13. Help overlay (?) lista todos os keybindings - toggle
+14. Footer contextual (BR-TUI-007) exibe bindings conforme panel focado
+15. Modals respondem a Enter (confirmar) e Escape (cancelar)
+
+**Supersede:** Versao 08/03/2026. Removidos todos os Ctrl+/Shift+ (ADR-037).
+
+**Referencia:** ADR-037, ADR-038
 
 **Testes:**
 
-- `test_br_tui_004_quit_requires_ctrl_q`
-- `test_br_tui_004_plain_q_does_nothing`
-- `test_br_tui_004_quit_shows_confirmation_modal`
-- `test_br_tui_004_quit_with_timer_warns_session_loss`
-- `test_br_tui_004_modal_only_responds_enter_escape`
-- `test_br_tui_004_help_overlay_shows_ctrl_bindings`
+- `test_br_tui_004_1_to_5_switches_screen`
+- `test_br_tui_004_ctrl_q_quits`
 - `test_br_tui_004_escape_closes_modal`
-- `test_br_tui_004_escape_returns_to_dashboard`
-- `test_br_tui_004_ctrl_c_not_captured`
-- `test_br_tui_004_ctrl_tab_navigates_backwards`
-- `test_br_tui_004_ctrl_1_to_5_switches_screen`
-- `test_br_tui_004_numbers_focus_panel`
-- `test_br_tui_004_enter_edits_placeholder`
+- `test_br_tui_004_help_overlay_toggle`
+- `test_br_tui_004_tab_advances_panels`
+- `test_br_tui_004_ji_navigates_items`
 - `test_br_tui_004_n_opens_contextual_modal`
-- `test_br_tui_004_colon_opens_command_bar`
+- `test_br_tui_004_v_marks_done_with_modal`
+- `test_br_tui_004_s_skips_with_reason`
+- `test_br_tui_004_t_starts_timer`
+- `test_br_tui_004_u_undoes_action`
+- `test_br_tui_004_space_toggles_pause`
+- `test_br_tui_004_c_cancels_with_confirm`
+- `test_br_tui_004_x_deletes_with_confirm`
+
+---
 
 ### BR-TUI-005: CRUD Operations Pattern
 
@@ -2381,27 +2618,45 @@ PROIBIDOS (reservados pelo OS):
 
 ---
 
-### BR-TUI-003-R13: Régua de Horário Adaptativa
+### BR-TUI-003-R13: Régua de Horário Adaptativa (EMENDADA 14/03/2026)
 
-**Descrição:** A agenda exibe range de horários baseado nos eventos do dia, com piso e teto para evitar espaço desperdiçado.
+**Descrição:** A agenda exibe range de horários adaptativo ao conteúdo do dia, cobrindo de 00:00 a 23:30 conforme necessidade. Default compacto quando não há eventos fora do horário comercial.
 
-**Algoritmo:** `range_start = min(06, first_event_hour - 1)`, `range_end = max(22, last_event_hour + 1)`
+**Algoritmo:**
+
+```python
+if not instances:
+    range_start, range_end = 10, 47   # 05:00–23:30 (default)
+else:
+    first_slot = min(i["start_minutes"] // 30 for i in instances)
+    last_slot  = max(-(-i["end_minutes"] // 30) for i in instances)  # ceil
+    range_start = max(0, first_slot - 2)     # 1h padding antes
+    range_end   = min(47, last_slot + 2)     # 1h padding depois
+    range_start = min(range_start, 10)       # nunca acima de 05:00
+    range_end   = max(range_end, 47)         # nunca abaixo de 23:30
+```
 
 **Regras:**
 
-1. Range: `min(06, first_event - 1)` até `max(22, last_event + 1)`
-2. Piso absoluto: 06:00 (não exibe antes das 06:00)
-3. Teto absoluto: 23:00 (não exibe após 23:00)
-4. Granularidade: 30 minutos = 1 linha
-5. Se nenhum evento no dia, exibe 06:00-22:00
+1. Range adaptativo: expande para cobrir todos os eventos com 1h de padding
+2. Piso absoluto: 00:00 (slot 0) — hábitos de madrugada são visíveis
+3. Teto absoluto: 23:30 (slot 47) — cobre até meia-noite
+4. Range mínimo garantido: 05:00–23:30 (slots 10–47) — nunca menor que isso
+5. Granularidade: 30 minutos = 2 linhas (header + fill)
+6. Se nenhum evento no dia, exibe 05:00–23:30
+
+**Emenda:** Removido piso fixo de 06:00 e teto de 22:00 da versão anterior. Range mínimo agora é 05:00–23:30, cobrindo o dia completo. Hábitos de madrugada (antes das 05:00) expandem o range para baixo.
 
 **Testes:**
 
 - `test_br_tui_003_r13_range_adapts_to_events`
-- `test_br_tui_003_r13_floor_06_ceiling_22`
+- `test_br_tui_003_r13_default_range_no_events`
 - `test_br_tui_003_r13_early_event_extends_range`
-- `test_br_tui_003_r13_no_events_default_range`
+- `test_br_tui_003_r13_late_event_extends_range`
+- `test_br_tui_003_r13_madrugada_event_visible`
+- `test_br_tui_003_r13_minimum_range_05_2330`
 - `test_br_tui_003_r13_granularity_30min`
+- `test_br_tui_003_r13_padding_one_hour`
 
 ---
 
@@ -2726,6 +2981,59 @@ PROIBIDOS (reservados pelo OS):
 - `test_br_tui_003_r28_tasks_empty_message`
 - `test_br_tui_003_r28_timer_empty_message`
 - `test_br_tui_003_r28_no_hardcoded_mock_data`
+
+---
+
+### BR-TUI-003-R29: Tasks Recentes no Dashboard (NOVA 14/03/2026)
+
+**Descrição:** O `load_tasks()` do dashboard inclui tasks concluídas e canceladas das últimas 24 horas, além das pendentes e overdue. Tasks recentes aparecem após as ativas na ordenação.
+
+**Decisão arquitetural:** ADR-036
+
+**Dependências:** BR-TASK-007 (derivação de status), BR-TASK-009 (soft delete)
+
+**Dados carregados:**
+
+```python
+# Pendentes + Overdue (sem filtro temporal)
+pending_tasks = Task.where(completed_datetime=None, cancelled_datetime=None)
+
+# Concluídas recentes (últimas 24h)
+recent_completed = Task.where(
+    completed_datetime >= now() - 24h,
+    cancelled_datetime=None
+)
+
+# Canceladas recentes (últimas 24h)
+recent_cancelled = Task.where(
+    cancelled_datetime >= now() - 24h
+)
+```
+
+**Ordenação no painel (BR-TUI-003-R20 estendida):**
+
+```plaintext
+overdue > pending > completed (recentes) > cancelled (recentes)
+```
+
+**Regras:**
+
+1. O loader combina as três queries em uma lista unificada
+2. Cada dict inclui `status` derivado conforme BR-TASK-007
+3. O campo `proximity` para tasks completed exibe "Concluída" (ou delta como "Há 2h")
+4. O campo `proximity` para tasks cancelled exibe "Cancelada"
+5. Tasks completed/cancelled contam para o subtítulo (BR-TUI-003-R23) — os contadores já existem no `TasksPanel`
+6. Limite de 9 tasks no painel permanece (BR-TUI-003 original)
+7. Dentro do limite, pendentes/overdue têm prioridade sobre recentes
+
+**Testes:**
+
+- `test_br_tui_003_r29_loads_pending_tasks`
+- `test_br_tui_003_r29_loads_recently_completed`
+- `test_br_tui_003_r29_loads_recently_cancelled`
+- `test_br_tui_003_r29_excludes_old_completed`
+- `test_br_tui_003_r29_pending_priority_over_recent`
+- `test_br_tui_003_r29_respects_nine_task_limit`
 
 ---
 
@@ -3054,7 +3362,7 @@ src/timeblock/tui/styles/
 4. Requer rotina ativa — sem rotina, `n` exibe mensagem de erro inline
 5. Hábito criado gera HabitInstance para o dia atual automaticamente (via HabitInstanceService)
 6. Hábito criado aparece imediatamente no panel (refresh local + banco)
-7. Quick actions existentes coexistem: Ctrl+Enter done, Ctrl+S skip (BR-TUI-004)
+7. Quick actions existentes coexistem: v done [MODAL], s skip [MODAL] (BR-TUI-004, ADR-037)
 8. Campos obrigatórios: título, horário início, duração. Recorrência default: EVERYDAY
 9. Validação inline: título não vazio, duração > 0, horário no formato HH:MM
 
@@ -3085,7 +3393,7 @@ src/timeblock/tui/styles/
 2. `e` edita task sob cursor (FormModal preenchido)
 3. `x` deleta task sob cursor com ConfirmDialog
 4. Task criada aparece na posição correta (ordenação por proximidade temporal)
-5. Ctrl+K complete coexiste (BR-TUI-004)
+5. v complete coexiste (BR-TUI-004, ADR-037)
 6. Campos obrigatórios: título. Data, horário e prioridade são opcionais
 7. Prioridade: low, medium, high (default: medium)
 8. Data default: hoje. Horário default: vazio (sem horário)
@@ -3168,6 +3476,156 @@ src/timeblock/tui/styles/
 - `test_br_tui_020_create_mode_empty_with_placeholder`
 - `test_br_tui_020_modal_traps_focus`
 
+### BR-TUI-021: Timer no Dashboard (NOVA 08/03/2026)
+
+**Descrição:** O dashboard permite iniciar, pausar, retomar, parar e cancelar sessões de timer diretamente, sem navegar para a Timer Screen. O TimerPanel exibe elapsed em tempo real com atualização a cada segundo. O timer opera sobre o hábito selecionado no panel de hábitos.
+
+**Regras:**
+
+1. `t` no panel de habitos com habito selecionado inicia timer via TimerService.start_timer (ADR-037)
+2. `space` no panel de timer com timer ativo alterna entre pause e resume (ADR-037)
+3. `s` no panel de timer para o timer e salva a sessao via TimerService.stop_timer (ADR-037)
+4. `c` no panel de timer abre ConfirmDialog e, se confirmado, cancela via TimerService.cancel_timer (ADR-037)
+5. TimerPanel atualiza elapsed a cada segundo via set_interval do Textual
+6. TimerPanel exibe nome do hábito associado ao timer ativo
+7. Elapsed é formatado como MM:SS e renderizado em ASCII art
+8. Cores por estado: Mauve (#CBA6F7) para running, Yellow (#F9E2AF) para paused, Overlay0 (#6C7086) para idle
+9. Se não há timer ativo, TimerPanel exibe "idle" com hint de keybinding
+10. Iniciar timer requer hábito selecionado no panel de hábitos — sem seleção, nenhuma ação
+11. Se já existe timer ativo e usuário tenta iniciar outro, exibir erro (um timer por vez)
+12. refresh_data() atualiza TimerPanel após start/stop/pause/resume/cancel
+13. Footer contextual exibe keybindings de timer quando panel de timer está focado
+
+**Dependências:** BR-TUI-004 (keybindings), BR-TUI-009 (Service Layer), BR-TUI-012 (navegação), BR-TIMER-001 a BR-TIMER-004 (regras de timer)
+
+**Testes:**
+
+- `test_br_tui_021_shift_enter_starts_timer_on_selected_habit`
+- `test_br_tui_021_shift_enter_without_selection_does_nothing`
+- `test_br_tui_021_shift_enter_pauses_active_timer`
+- `test_br_tui_021_shift_enter_resumes_paused_timer`
+- `test_br_tui_021_ctrl_enter_stops_timer`
+- `test_br_tui_021_ctrl_x_opens_cancel_confirm`
+- `test_br_tui_021_timer_panel_updates_every_second`
+- `test_br_tui_021_timer_panel_shows_habit_name`
+- `test_br_tui_021_one_timer_at_a_time`
+- `test_br_tui_021_idle_shows_hint`
+
+---
+
+### BR-TUI-022: Done Manual via Modal (NOVA 15/03/2026)
+
+**Descricao:** Ao marcar habito como done sem timer ativo, o sistema abre modal para o usuario selecionar substatus, aderindo a BR-HABITINSTANCE-002.
+
+**Decisao arquitetural:** ADR-038 D3
+
+**Regras:**
+
+1. `v` em habito PENDING sem timer ativo e sem TimeLog DONE existente abre modal
+2. Modal exibe Select com DoneSubstatus: FULL, PARTIAL, OVERDONE, EXCESSIVE
+3. Default pre-selecionado: FULL
+4. Enter confirma, Esc cancela sem alterar status
+5. Apos confirmacao: `status=DONE`, `done_substatus=<selecionado>`
+6. `v` em habito PENDING com TimeLog DONE existente abre modal de restauracao (BR-HABITINSTANCE-007 regra 5)
+
+**Testes:**
+
+- `test_br_tui_022_v_without_timer_opens_modal`
+- `test_br_tui_022_modal_shows_substatus_options`
+- `test_br_tui_022_esc_cancels_without_change`
+- `test_br_tui_022_enter_confirms_done_with_substatus`
+- `test_br_tui_022_detects_existing_timelog`
+
+---
+
+### BR-TUI-023: Notificacao de Timer Ativo no Done (NOVA 15/03/2026)
+
+**Descricao:** Ao pressionar `v` em habito com timer ativo, o sistema abre modal informativo com opcoes.
+
+**Decisao arquitetural:** ADR-038 D4
+
+**Regras:**
+
+1. `v` em habito com status `running` abre modal
+2. Modal: "Timer ativo para este habito"
+3. Opcoes: [Parar timer e marcar done] / [Cancelar]
+4. "Parar timer e marcar done": executa `TimerService.stop_timer`
+5. "Cancelar": fecha modal, nenhuma acao
+
+**Testes:**
+
+- `test_br_tui_023_v_on_running_opens_modal`
+- `test_br_tui_023_stop_and_done_marks_habit`
+- `test_br_tui_023_cancel_does_nothing`
+
+---
+
+### BR-TUI-024: Skip com Modal de SkipReason (NOVA 15/03/2026)
+
+**Descricao:** Ao pular habito via `s`, o sistema sempre abre modal para categorizacao do skip, aderindo a BR-SKIP-001.
+
+**Decisao arquitetural:** ADR-038 D6
+
+**Regras:**
+
+1. `s` em habito PENDING abre modal com Select de SkipReason
+2. Opcoes: HEALTH, WORK, FAMILY, TRAVEL, WEATHER, LACK_RESOURCES, EMERGENCY, OTHER
+3. Campo opcional de nota (texto livre, max 500 chars)
+4. Enter confirma skip com razao selecionada
+5. Esc cancela sem alterar status
+6. Apos confirmacao: `status=NOT_DONE`, `not_done_substatus=SKIPPED_JUSTIFIED`, `skip_reason=<selecionado>`
+
+**Testes:**
+
+- `test_br_tui_024_s_opens_skip_reason_modal`
+- `test_br_tui_024_modal_shows_all_reasons`
+- `test_br_tui_024_note_optional`
+- `test_br_tui_024_esc_cancels`
+- `test_br_tui_024_confirm_sets_skip_reason`
+
+---
+
+### BR-TUI-025: Fluxo Routine-first (NOVA 15/03/2026)
+
+**Descricao:** Quando o usuario tenta criar habito sem rotina ativa, o sistema redireciona para criacao de rotina com mensagem explicativa.
+
+**Decisao arquitetural:** ADR-038 D9
+
+**Regras:**
+
+1. `n` com habits panel focado e sem rotina ativa abre FormModal de criacao de rotina
+2. FormModal exibe mensagem: "Crie uma rotina primeiro para adicionar habitos"
+3. Apos criar rotina, retorna ao dashboard
+4. `n` sem panel focado e sem rotina ativa: mesmo comportamento
+5. `n` com tasks panel focado nao depende de rotina (tasks sao independentes)
+
+**Testes:**
+
+- `test_br_tui_025_n_habits_no_routine_opens_routine_modal`
+- `test_br_tui_025_returns_to_dashboard_after_routine`
+- `test_br_tui_025_n_tasks_independent_of_routine`
+
+---
+
+### BR-TUI-026: Limites de Exibicao nos Panels (NOVA 15/03/2026)
+
+**Descricao:** Panels do dashboard exibem numero limitado de items para manter legibilidade.
+
+**Decisao arquitetural:** ADR-038 D10
+
+**Regras:**
+
+1. HabitsPanel exibe no maximo 12 habitos
+2. TasksPanel exibe no maximo 9 tasks
+3. Limites sao fixos (constantes no codigo)
+4. Items excedentes sao acessiveis via screens dedicadas (Habits Screen, Tasks Screen)
+5. Limites serao configuraveis em screen de configuracoes futura
+
+**Testes:**
+
+- `test_br_tui_026_habits_panel_max_12`
+- `test_br_tui_026_tasks_panel_max_9`
+
 ---
 
 ## 15. Data
@@ -3240,6 +3698,6 @@ src/timeblock/tui/styles/
 
 ---
 
-**Última atualização em:** 05 de Março de 2026
+**Última atualização em:** 15 de Marco de 2026
 
-**Total de regras:** 104 BRs
+**Total de regras:** 114 BRs

@@ -114,6 +114,7 @@ def sample_task(integration_session: Session):
     task = Task(
         title="Dentist Appointment",
         scheduled_datetime=datetime.now(UTC),
+        original_scheduled_datetime=datetime.now(UTC),
     )
     integration_session.add(task)
     integration_session.flush()
