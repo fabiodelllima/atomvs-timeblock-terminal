@@ -18,8 +18,6 @@ from textual.events import Key
 from textual.widgets import Static
 
 from timeblock.models import HabitInstance
-from timeblock.models.enums import DoneSubstatus, SkipReason
-from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
 from timeblock.tui.screens.dashboard import crud_habits, crud_routines, crud_tasks, loader
@@ -114,6 +112,8 @@ class DashboardScreen(Static):
         elif self._focused_panel == "panel-habits":
             if self._active_routine_id:
                 crud_habits.open_create_habit(self.app, self._active_routine_id, self._on_crud_done)
+            else:
+                crud_routines.open_create_routine(self.app, self._on_crud_done)
         elif self._focused_panel == "panel-tasks":
             crud_tasks.open_create_task(self.app, self._on_crud_done)
 
@@ -163,22 +163,37 @@ class DashboardScreen(Static):
     # =========================================================================
 
     def on_habits_panel_habit_done_request(self, message: HabitsPanel.HabitDoneRequest) -> None:
-        """Recebe HabitDoneRequest e executa mark_completed via service."""
-        service_action(
-            lambda s: HabitInstanceService.mark_completed(
-                message.instance_id, done_substatus=DoneSubstatus.FULL, session=s
-            )  # TODO(DT-037): modal substituirá hardcode
-        )
-        self._on_crud_done()
+        """Abre modal de done com detecção de TimeLog (BR-TUI-022, DT-037)."""
+        crud_habits.open_done_modal(self.app, message.instance_id, self._on_crud_done)
 
     def on_habits_panel_habit_skip_request(self, message: HabitsPanel.HabitSkipRequest) -> None:
-        """Recebe HabitSkipRequest e executa skip com categorização (BR-SKIP-001)."""
-        service_action(
-            lambda s: HabitInstanceService.skip_habit_instance(
-                message.instance_id, skip_reason=SkipReason.OTHER, session=s
+        """Abre modal de skip reason (BR-TUI-024, DT-039)."""
+        crud_habits.open_skip_modal(self.app, message.instance_id, self._on_crud_done)
+
+    def on_habits_panel_timer_stop_and_done_request(
+        self, message: HabitsPanel.TimerStopAndDoneRequest
+    ) -> None:
+        """Timer ativo: confirma parada antes de marcar done (BR-TUI-023, DT-036)."""
+        instance_id = message.instance_id
+        timelog, _ = service_action(lambda s: TimerService.get_active_timer(instance_id, session=s))
+        if not timelog:
+            self.app.notify("Nenhum timer ativo encontrado", severity="warning")
+            return
+
+        assert timelog.id is not None
+        timelog_id = timelog.id
+
+        def on_confirm() -> None:
+            service_action(lambda s: TimerService.stop_timer(timelog_id, session=s))
+            self._on_crud_done()
+
+        self.app.push_screen(
+            ConfirmDialog(
+                title="Timer Ativo",
+                message="Parar timer e marcar como concluído?",
+                on_confirm=on_confirm,
             )
         )
-        self._on_crud_done()
 
     def on_tasks_panel_task_complete_request(self, message: TasksPanel.TaskCompleteRequest) -> None:
         """Recebe TaskCompleteRequest e executa complete_task via service."""
@@ -190,10 +205,15 @@ class DashboardScreen(Static):
     # =========================================================================
 
     def on_tasks_panel_task_postpone_request(self, message: TasksPanel.TaskPostponeRequest) -> None:
-        """Adia task (ADR-037)."""
-        service_action(lambda s: TaskService.update_task(message.task_id, session=s))
-        self.app.notify("Task adiada", timeout=2)
-        self.refresh_data()
+        """Abre FormModal de edição para adiar task (DT-038, ADR-038 D5).
+
+        TaskService.update_task incrementa postponement_count quando a data
+        muda (BR-TASK-008), então editar a data via FormModal é semanticamente
+        equivalente a adiar.
+        """
+        item = self.query_one(TasksPanel).get_selected_item()
+        if item:
+            crud_tasks.open_edit_task(self.app, item, self._on_crud_done)
 
     def on_tasks_panel_task_cancel_request(self, message: TasksPanel.TaskCancelRequest) -> None:
         """Cancela task (ADR-037)."""

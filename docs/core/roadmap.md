@@ -188,6 +188,12 @@ A estratégia de implementação prioriza as telas de maior impacto no uso diár
 | R4  | Abstração de tempo           | HUMBLE; FARLEY, 2010, p. 184     | 5      |
 | R6  | Repository pattern           | FOWLER, 2002, p. 322             | v2.0   |
 
+**Teste e validação da dashboard (Sprint futuro):**
+
+- Checklist de teste manual: `docs/testing/manual-testing-checklist.md` (94 cenários, 9 seções)
+- Automação visual planejada: script pexpect + asciinema que lança a app num pseudo-terminal, executa cada fluxo com delays visíveis, e grava um `.cast` reproduzível. Permite que qualquer pessoa assista uma sessão completa de validação da TUI com `asciinema play`. Substitui validação manual repetitiva por gravação determinística.
+- Smoke tests via pexpect: app abre, renderiza, responde a input básico — complementa testes e2e com pilot (ADR-037).
+
 ---
 
 ### v2.0.0 - REST API (Q2 2026)

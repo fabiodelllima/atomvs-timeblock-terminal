@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.9.0
+**Versão:** 2.14.0
 
 **Status:** SSOT
 
@@ -39,13 +39,19 @@
 | DT025 | Pyright como job CI complementar               | BAIXA      | PENDENTE  | -            | Sprint futuro            |
 | DT034 | mark_completed sem done_substatus              | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT035 | Undo handler nao limpa skip_reason/skip_note   | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT036 | TimerStopAndDoneRequest sem handler            | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
-| DT037 | v (done) deveria abrir modal de substatus      | ALTA       | PENDENTE  | -            | fix/dashboard-quality    |
-| DT038 | s (postpone) deveria abrir FormModal de edit   | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
-| DT039 | s (skip) deveria abrir modal de SkipReason     | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
-| DT040 | n sem rotina: silent no-op ao inves de modal   | MEDIA      | PENDENTE  | -            | fix/dashboard-quality    |
+| DT036 | TimerStopAndDoneRequest sem handler            | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
+| DT037 | v (done) deveria abrir modal de substatus      | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
+| DT038 | s (postpone) deveria abrir FormModal de edit   | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
+| DT039 | s (skip) deveria abrir modal de SkipReason     | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
+| DT040 | n sem rotina: silent no-op ao inves de modal   | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT041 | BR-TUI-004/017/018/021 keybindings obsoletos   | ALTA       | PENDENTE  | -            | docs/br-update           |
 | DT042 | BR-HABITINSTANCE-001 nao documenta undo        | ALTA       | PENDENTE  | -            | docs/br-update           |
+| DT043 | DEFAULT_CSS inline no FormModal                | BAIXA      | PENDENTE  | -            | Sprint futuro            |
+| DT044 | basedpyright standard: ~190 warnings           | MEDIA      | PENDENTE  | -            | Sprint futuro            |
+| DT045 | Blocos sobrepostos sem distinção na Agenda     | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT046 | Troca de rotina não atualiza Habits/Tasks       | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT047 | Sem mecanismo de seleção entre rotinas           | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT048 | Deleção de rotina não carrega outra nem limpa    | ALTA       | PENDENTE  | -            | Sprint futuro            |
 
 ## 1b. Quick Status
 
@@ -77,13 +83,19 @@
 - [ ] DT026 — load_metrics sem filtro de rotina ativa
 - [x] DT034 — mark_completed sem done_substatus (CRITICA)
 - [x] DT035 — Undo handler nao limpa skip_reason/skip_note (CRITICA)
-- [ ] DT036 — TimerStopAndDoneRequest sem handler
-- [ ] DT037 — v (done) deveria abrir modal de substatus
-- [ ] DT038 — s (postpone) deveria abrir FormModal de edit
-- [ ] DT039 — s (skip) deveria abrir modal de SkipReason
-- [ ] DT040 — n sem rotina: silent no-op ao inves de modal
+- [x] DT036 — TimerStopAndDoneRequest sem handler
+- [x] DT037 — v (done) deveria abrir modal de substatus
+- [x] DT038 — s (postpone) deveria abrir FormModal de edit
+- [x] DT039 — s (skip) deveria abrir modal de SkipReason
+- [x] DT040 — n sem rotina: silent no-op ao inves de modal
 - [ ] DT041 — BR-TUI-004/017/018/021 keybindings obsoletos
-- [ ] DT042 — BR-HABITINSTANCE-001 nao documenta undo
+- [ ] DT042 — BR-HABITINSTANCE-001 não documenta undo
+- [ ] DT043 — DEFAULT_CSS inline no FormModal
+- [ ] DT044 — basedpyright standard: ~190 warnings
+- [ ] DT045 — Blocos sobrepostos sem distinção visual na Agenda
+- [ ] DT046 — Troca de rotina não atualiza Habits/Tasks
+- [ ] DT047 — Sem mecanismo de seleção entre rotinas
+- [ ] DT048 — Deleção de rotina não carrega outra rotina e nem limpa panels
 - [x] DT027 — FormModal sem suporte a campo select (recorrencia)
 - [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
 - [x] DT029 — Conflitos de horario detectados no CRUD habits
@@ -120,6 +132,7 @@
 - **Impacto:** `v` em habito com timer ativo e silenciosamente ignorado.
 - **Correcao:** Implementar handler com modal de opcoes (ADR-038 D4).
 - **BRs afetadas:** BR-TUI-021
+- **Resolvido:** Mar/2026 — Handler on_habits_panel_timer_stop_and_done_request com ConfirmDialog.
 
 ### DT-037: v (done) deveria abrir modal de substatus (ALTA)
 
@@ -127,6 +140,7 @@
 - **Impacto:** `v` marca done sem substatus. Viola BR-HABITINSTANCE-002.
 - **Correcao:** Abrir modal com Select de DoneSubstatus (ADR-038 D3).
 - **BRs afetadas:** BR-HABITINSTANCE-002, BR-HABITINSTANCE-003
+- **Resolvido:** Mar/2026 — Modal open_done_modal com detecção de TimeLog e restauração de substatus.
 
 ### DT-038: s (postpone) deveria abrir FormModal de edit (MEDIA)
 
@@ -134,6 +148,7 @@
 - **Impacto:** Handler chama `update_task` sem parametros. Nenhuma acao visivel.
 - **Correcao:** `s` abre mesmo FormModal que `e` (ADR-038 D5).
 - **BRs afetadas:** BR-TASK-008, BR-TUI-018
+- **Resolvido:** Mar/2026 — Postpone delega para crud_tasks.open_edit_task via FormModal.
 
 ### DT-039: s (skip) deveria abrir modal de SkipReason (MEDIA)
 
@@ -141,6 +156,7 @@
 - **Impacto:** `s` aplica `SkipReason.OTHER` hardcoded. Viola BR-SKIP-001.
 - **Correcao:** Abrir modal com Select de SkipReason (ADR-038 D6).
 - **BRs afetadas:** BR-SKIP-001, BR-SKIP-004
+- **Resolvido:** Mar/2026 — Modal open_skip_modal com Select de SkipReason e nota opcional.
 
 ### DT-040: n sem rotina: silent no-op no habits panel (MEDIA)
 
@@ -148,6 +164,7 @@
 - **Impacto:** `n` com habits focado e sem rotina nao faz nada.
 - **Correcao:** Redirecionar para criacao de rotina (ADR-038 D9).
 - **BRs afetadas:** BR-TUI-017
+- **Resolvido:** Mar/2026 — Fallback para crud_routines.open_create_routine quando sem rotina ativa.
 
 ### DT-041: BR-TUI-004/017/018/021 keybindings obsoletos (ALTA)
 
@@ -164,6 +181,54 @@
 - **BRs afetadas:** BR-HABITINSTANCE-001
 
 ---
+
+### DT-043: DEFAULT_CSS inline no FormModal (BAIXA)
+
+- **Descoberto:** 17/03/2026 (revisao de codigo)
+- **Impacto:** FormModal define ~50 linhas de CSS via DEFAULT_CSS inline. O projeto usa pasta dedicada para TCSS modularizado.
+- **Correcao:** Mover CSS para arquivo TCSS dedicado e usar CSS_PATH. Alinhar com padrao do projeto.
+- **BRs afetadas:** BR-TUI-020
+
+### DT-044: basedpyright em modo standard gera ~190 warnings (MEDIA)
+
+- **Descoberto:** 17/03/2026 (configuracao basedpyright no Zed)
+- **Impacto:** App[Unknown], dict[Unknown, Unknown], reportAny, reportUnusedCallResult em screen.py, crud_habits.py, form_modal.py e demais. Modo reduzido para basic temporariamente no pyproject.toml.
+- **Correcao:** Adicionar type arguments a App, tipar dicts com TypedDict, resolver reportAny com casts explicitos. Restaurar typeCheckingMode = standard apos limpeza.
+- **BRs afetadas:** Nenhuma diretamente — qualidade de codigo.
+
+
+### DT-045: Blocos sobrepostos sem distinção visual na Agenda (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da TUI)
+- **Impacto:** Quando dois hábitos têm horários sobrepostos (ex: 08:30-10:30 e 09:00-10:00), os blocos se empilham verticalmente sem distinção visual. O bloco de 2h aparenta ter a duração do espaço até o próximo bloco (30min), enquanto o bloco de 1h herda visualmente o espaço restante (parecendo 2h). Confusão grave sobre duração real de cada hábito.
+- **Correcao:** Implementar renderização lado a lado para blocos com sobreposição temporal, similar a calendários como Google Calendar e Outlook. Alternativas para TUI: (1) colunas divididas com Rich layout, (2) indicador visual de conflito (cor, borda), (3) tooltip ou annotation com horário real. Pesquisar referências de TUI calendar rendering.
+- **BRs afetadas:** BR-TUI-003 (Dashboard layout), BR-EVENT-001 (detecção de conflitos)
+
+
+### DT-046: Troca de rotina não atualiza Habits e Tasks (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Ao criar uma segunda rotina, os panels Habits e Tasks continuam exibindo dados da rotina anterior. O refresh_data usa _active_routine_id que não é atualizado ao trocar de contexto.
+- **Correcao:** Implementar callback de troca de rotina que atualiza _active_routine_id e chama refresh_data. Garantir que load_instances e load_tasks filtrem por routine_id.
+- **BRs afetadas:** BR-TUI-003, BR-TUI-016
+- **Testes necessarios:** e2e com duas rotinas — criar rotina A com hábitos, criar rotina B, verificar que panels atualizam.
+
+### DT-047: Sem mecanismo de seleção entre rotinas no dashboard (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Não existe keybinding nem UI para alternar entre rotinas criadas. O usuário pode criar e editar a rotina ativa, mas não pode selecionar outra. Funcionalidade essencial para uso com múltiplas rotinas (manhã, tarde, noite).
+- **Correcao:** Implementar seletor de rotina — opções: (1) FormModal com Select listando rotinas, (2) keybinding dedicado (ex: r para cycle, ou Select no AgendaPanel), (3) integração com a tela Routines (screen 2).
+- **BRs afetadas:** BR-TUI-003, BR-TUI-016
+- **Testes necessarios:** e2e com troca de rotina e verificação de atualização dos panels.
+
+### DT-048: Deleção de rotina não carrega outra e não limpa panels (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Ao deletar a rotina ativa, o título some do header mas _active_routine_id não é atualizado para None ou para outra rotina existente. Habits e Tasks continuam exibindo dados da rotina deletada. Estado inconsistente.
+- **Correcao:** Após deleção, verificar se existe outra rotina e carregar. Se não existir, setar _active_routine_id = None e limpar panels (mostrar placeholders). refresh_data já trata None via loader, basta garantir que o callback de deleção atualiza o estado.
+- **BRs afetadas:** BR-TUI-003, BR-TUI-016
+- **Testes necessarios:** e2e com deleção de rotina e verificação de estado limpo nos panels.
+
 
 ## 2. Detalhamento de Itens Resolvidos
 
@@ -428,4 +493,4 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 14 de Março de 2026
+**Última atualização:** 17 de Março de 2026
