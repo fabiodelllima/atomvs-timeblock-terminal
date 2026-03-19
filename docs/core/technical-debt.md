@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.17.0
+**Versão:** 2.18.0
 
 **Status:** SSOT
 
@@ -20,9 +20,9 @@
 | DT006 | Idioma misto EN/PT em CLI                      | MÉDIA      | RESOLVIDO | Fev/2026     | v1.5.0                   |
 | DT007 | migration_001 sem cobertura                    | BAIXA      | ACEITO    | -            | -                        |
 | DT008 | GitHub Actions --fail-under divergente         | MÉDIA      | RESOLVIDO | Mar/2026     | v1.7.0                   |
-| DT009 | FocusablePanel: C_HIGHLIGHT na base            | ALTA       | PENDENTE  | -            | v1.7.0                   |
-| DT010 | FocusablePanel: flag \_showing_placehold.      | ALTA       | PENDENTE  | -            | v1.7.0                   |
-| DT011 | FocusablePanel: count em dois lugares          | ALTA       | PENDENTE  | -            | v1.7.0                   |
+| DT009 | FocusablePanel: C_HIGHLIGHT na base            | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
+| DT010 | FocusablePanel: flag \_showing_placehold.      | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
+| DT011 | FocusablePanel: count em dois lugares          | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT012 | DI inconsistente entre services                | MÉDIA      | PENDENTE  | -            | v2.0                     |
 | DT013 | \_parse_time duplicado (crud_habits/tasks)     | BAIXA      | PENDENTE  | -            | v1.7.0                   |
 | DT014 | Keybindings divergentes BR vs código           | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
@@ -44,9 +44,9 @@
 | DT038 | s (postpone) deveria abrir FormModal de edit   | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT039 | s (skip) deveria abrir modal de SkipReason     | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
 | DT040 | n sem rotina: silent no-op ao inves de modal   | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT041 | BR-TUI-004/017/018/021 keybindings obsoletos   | ALTA       | PENDENTE  | -            | docs/br-update           |
-| DT042 | BR-HABITINSTANCE-001 nao documenta undo        | ALTA       | PENDENTE  | -            | docs/br-update           |
-| DT043 | DEFAULT_CSS inline no FormModal                | BAIXA      | PENDENTE  | -            | Sprint futuro            |
+| DT041 | BR-TUI-004/017/018/021 keybindings obsoletos   | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
+| DT042 | BR-HABITINSTANCE-001 nao documenta undo        | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
+| DT043 | DEFAULT_CSS inline no FormModal                | BAIXA      | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT044 | basedpyright standard: ~190 warnings           | MEDIA      | PENDENTE  | -            | Sprint futuro            |
 | DT045 | Blocos sobrepostos sem distinção na Agenda     | ALTA       | PENDENTE  | -            | Sprint futuro            |
 | DT046 | Troca de rotina não atualiza Habits/Tasks      | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
@@ -70,9 +70,9 @@
 - [x] DT006 — Idioma misto EN/PT
 - [x] DT007 — migration_001 sem cobertura (ACEITO)
 - [x] DT008 — GitHub Actions divergente
-- [ ] DT009 — FocusablePanel: C_HIGHLIGHT na base
-- [ ] DT010 — FocusablePanel: flag \_showing_placeholders
-- [ ] DT011 — FocusablePanel: count em dois lugares
+- [x] DT009 — FocusablePanel: C_HIGHLIGHT na base
+- [x] DT010 — FocusablePanel: flag \_showing_placeholders
+- [x] DT011 — FocusablePanel: count em dois lugares
 - [ ] DT012 — DI inconsistente entre services
 - [x] DT013 — \_parse_time consolidado em validators
 - [x] DT014 — Keybindings divergentes
@@ -102,9 +102,9 @@
 - [x] DT038 — s (postpone) deveria abrir FormModal de edit
 - [x] DT039 — s (skip) deveria abrir modal de SkipReason
 - [x] DT040 — n sem rotina: silent no-op ao inves de modal
-- [ ] DT041 — BR-TUI-004/017/018/021 keybindings obsoletos
-- [ ] DT042 — BR-HABITINSTANCE-001 não documenta undo
-- [ ] DT043 — DEFAULT_CSS inline no FormModal
+- [x] DT041 — BR-TUI-004/017/018/021 keybindings obsoletos
+- [x] DT042 — BR-HABITINSTANCE-001 não documenta undo
+- [x] DT043 — DEFAULT_CSS inline no FormModal
 - [ ] DT044 — basedpyright standard: ~190 warnings
 - [ ] DT045 — Blocos sobrepostos sem distinção visual na Agenda
 - [x] DT046 — Troca de rotina não atualiza Habits/Tasks
@@ -118,7 +118,7 @@
 - [x] DT054 — Timer pause não para contagem (só muda status e cor)
 - [x] DT055 — v em hábito running não abre ConfirmDialog
 
-**Resolvidos:** 42/55 | **Pendentes:** 12/55 | **Aceitos:** 1/55
+**Resolvidos:** 48/55 | **Pendentes:** 6/55 | **Aceitos:** 1/55
 
 ---
 
@@ -532,6 +532,7 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 | Data       | Versão | Mudanças                                                    |
 | ---------- | ------ | ----------------------------------------------------------- |
+| 2026-03-19 | 2.18.0 | DT-009/010/011/041/042/043 resolvidos                    |
 | 2026-03-19 | 2.17.0 | DT-046/047/048/050/051/052 resolvidos (fix/loader-critical) |
 | 2026-03-19 | 2.16.0 | DT-049/053/054/055 resolvidos (fix/loader-critical)         |
 | 2026-03-14 | 2.6.0  | DT-017/018/020 resolvidos. Registra DT-026 a 033            |
