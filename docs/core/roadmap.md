@@ -194,6 +194,12 @@ A estratégia de implementação prioriza as telas de maior impacto no uso diár
 - Automação visual planejada: script pexpect + asciinema que lança a app num pseudo-terminal, executa cada fluxo com delays visíveis, e grava um `.cast` reproduzível. Permite que qualquer pessoa assista uma sessão completa de validação da TUI com `asciinema play`. Substitui validação manual repetitiva por gravação determinística.
 - Smoke tests via pexpect: app abre, renderiza, responde a input básico — complementa testes e2e com pilot (ADR-037).
 
+**Features futuras planejadas (v1.8.0+):**
+
+- **RapidLog:** Captura rápida de notas, tarefas e eventos em formato livre — inspirado no Bullet Journal (CARROLL, 2018). Input de texto livre no dashboard que classifica automaticamente (task, note, event) via prefixo ou parsing. Reduz fricção de entrada: o usuário digita e o sistema organiza.
+- **BackLog:** Repositório de itens postergados ou não agendados. Tasks e hábitos que foram adiados múltiplas vezes migram automaticamente para o BackLog. Revisão periódica (semanal/mensal) permite reprojetar, descartar ou reagendar. Integra com postponement_count (BR-TASK-008).
+- **Subtasks de Habits:** Modal de checklist interno a cada hábito para um dia específico. O usuário define subtarefas que precisa cumprir dentro daquele hábito naquela instância — lista dentro de lista. Percentual de conclusão das subtarefas alimenta completion_percentage e done_substatus automaticamente. Modelo: HabitSubtask com FK para HabitInstance, campos title + completed.
+
 ---
 
 ### v2.0.0 - REST API (Q2 2026)
