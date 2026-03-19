@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.15.0
+**Versão:** 2.16.0
 
 **Status:** SSOT
 
@@ -52,13 +52,13 @@
 | DT046 | Troca de rotina não atualiza Habits/Tasks      | ALTA       | PENDENTE  | -            | Sprint futuro            |
 | DT047 | Sem mecanismo de seleção entre rotinas         | ALTA       | PENDENTE  | -            | Sprint futuro            |
 | DT048 | Deleção de rotina não carrega outra nem limpa  | ALTA       | PENDENTE  | -            | Sprint futuro            |
-| DT049 | Habit criado sem vínculo com rotina ativa      | CRITICA    | PENDENTE  | -            | Sprint futuro            |
+| DT049 | Habit criado sem vínculo com rotina ativa      | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT050 | FormModal de habit sem Select de recorrência   | ALTA       | PENDENTE  | -            | Sprint futuro            |
 | DT051 | Edit habit não atualiza render  frontend       | ALTA       | PENDENTE  | -            | Sprint futuro            |
 | DT052 | Skip habit não atualiza render  frontend       | ALTA       | PENDENTE  | -            | Sprint futuro            |
-| DT053 | Timer start não muda visual do bloco/habit     | ALTA       | PENDENTE  | -            | Sprint futuro            |
-| DT054 | Timer pause não para contagem (só muda status) | CRITICA    | PENDENTE  | -            | Sprint futuro            |
-| DT055 | v em hábito running não abre ConfirmDialog     | CRITICA    | PENDENTE  | -            | Sprint futuro            |
+| DT053 | Timer start não muda visual do bloco/habit     | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
+| DT054 | Timer pause não para contagem (só muda status) | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical      |
+| DT055 | v em hábito running não abre ConfirmDialog     | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 
 ## 1b. Quick Status
 
@@ -110,15 +110,15 @@
 - [ ] DT046 — Troca de rotina não atualiza Habits/Tasks
 - [ ] DT047 — Sem mecanismo de seleção entre rotinas
 - [ ] DT048 — Deleção de rotina não carrega outra rotina e nem limpa panels
-- [ ] DT049 — Habit criado sem vínculo com rotina ativa
+- [x] DT049 — Habit criado sem vínculo com rotina ativa
 - [ ] DT050 — FormModal de habit sem Select de recorrência
 - [ ] DT051 — Edit habit não atualiza renderização no frontend
 - [ ] DT052 — Skip habit não atualiza renderização no frontend
-- [ ] DT053 — Timer start não muda visual do bloco/habit
-- [ ] DT054 — Timer pause não para contagem (só muda status e cor)
-- [ ] DT055 — v em hábito running não abre ConfirmDialog
+- [x] DT053 — Timer start não muda visual do bloco/habit
+- [x] DT054 — Timer pause não para contagem (só muda status e cor)
+- [x] DT055 — v em hábito running não abre ConfirmDialog
 
-**Resolvidos:** 27/42 | **Pendentes:** 15/42 | **Aceitos:** 1/42
+**Resolvidos:** 31/42 | **Pendentes:** 11/42 | **Aceitos:** 1/42
 
 ---
 
@@ -534,6 +534,7 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 | Data       | Versão | Mudanças                                                |
 | ---------- | ------ | ------------------------------------------------------- |
+| 2026-03-19 | 2.16.0 | DT-049/053/054/055 resolvidos (fix/loader-critical)      |
 | 2026-03-14 | 2.6.0  | DT-017/018/020 resolvidos. Registra DT-026 a 033        |
 |            |        | (bugs TUI encontrados em teste manual)                  |
 | 2026-03-13 | 2.5.0  | DT-022 resolvido (feat/structured-logging mergeado).    |
@@ -555,4 +556,4 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 17 de Março de 2026
+**Última atualização:** 19 de Março de 2026
