@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.18.0
+**Versão:** 2.19.0
 
 **Status:** SSOT
 
@@ -87,7 +87,7 @@
 - [x] DT023 — Instâncias diárias: geração manual obrigatória
 - [x] DT024 — Keybindings Ctrl+Números inoperantes em VTE/GNOME
 - [ ] DT025 — Pyright como job CI complementar ao mypy e ruff
-- [ ] DT026 — load_metrics sem filtro de rotina ativa
+- [x] DT026 — load_metrics sem filtro de rotina ativa
 - [x] DT027 — FormModal sem suporte a campo select (recorrencia)
 - [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
 - [x] DT029 — Conflitos de horario detectados no CRUD habits
@@ -118,7 +118,7 @@
 - [x] DT054 — Timer pause não para contagem (só muda status e cor)
 - [x] DT055 — v em hábito running não abre ConfirmDialog
 
-**Resolvidos:** 48/55 | **Pendentes:** 6/55 | **Aceitos:** 1/55
+**Resolvidos:** 49/55 | **Pendentes:** 5/55 | **Aceitos:** 1/55
 
 ---
 
@@ -532,6 +532,7 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 | Data       | Versão | Mudanças                                                    |
 | ---------- | ------ | ----------------------------------------------------------- |
+| 2026-03-19 | 2.19.0 | DT-026 resolvido (load_metrics com filtro de rotina)     |
 | 2026-03-19 | 2.18.0 | DT-009/010/011/041/042/043 resolvidos                    |
 | 2026-03-19 | 2.17.0 | DT-046/047/048/050/051/052 resolvidos (fix/loader-critical) |
 | 2026-03-19 | 2.16.0 | DT-049/053/054/055 resolvidos (fix/loader-critical)         |

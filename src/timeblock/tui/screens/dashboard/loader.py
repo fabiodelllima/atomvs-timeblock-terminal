@@ -395,7 +395,7 @@ def load_active_timer() -> dict[str, Any] | None:
             return None
 
         total_elapsed = (datetime.now() - timer.start_time).total_seconds()
-        paused_total = timer.paused_duration or 0
+        paused_total: float = timer.paused_duration or 0
         if timer.status == TimerStatus.PAUSED and timer.pause_start:
             paused_total += (datetime.now() - timer.pause_start).total_seconds()
         elapsed_secs = max(int(total_elapsed - paused_total), 0)
