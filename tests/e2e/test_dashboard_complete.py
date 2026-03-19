@@ -171,7 +171,7 @@ class TestHabitsPanelComplete:
             await _wait(pilot)
 
             # Verificar atualização no panel
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             names = [i["name"] for i in instances]
             assert "Yoga" in names, "Título atualizado deve refletir no loader"
 
@@ -196,7 +196,7 @@ class TestHabitsPanelComplete:
             await _wait(pilot)
 
             # Verificar remoção
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             assert len(instances) == 0, "Hábito deve ter sido removido"
 
     @pytest.mark.asyncio
@@ -220,7 +220,7 @@ class TestHabitsPanelComplete:
             await pilot.press("enter")
             await _wait(pilot)
 
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             assert len(instances) > 0, "Instância deve existir"
             assert instances[0]["status"] == "done", "Status deve ser done após v"
 
@@ -228,7 +228,7 @@ class TestHabitsPanelComplete:
             await pilot.press("u")
             await _wait(pilot)
 
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             assert instances[0]["status"] == "pending", "Status deve voltar a pending após u"
             assert instances[0]["substatus"] is None, "Substatus deve ser limpo após undo"
 
@@ -271,7 +271,7 @@ class TestHabitsPanelComplete:
             timer = loader.load_active_timer()
             assert timer is None, "Timer deve estar idle após stop"
 
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             done = [i for i in instances if i["status"] == "done"]
             assert len(done) > 0, "Hábito deve ser marcado done após stop timer"
 
@@ -296,7 +296,7 @@ class TestHabitsPanelComplete:
             await pilot.press("enter")
             await _wait(pilot)
 
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             assert len(instances) > 0
             assert instances[0]["status"] == "not_done", "Skip deve mudar status para not_done"
             assert instances[0]["substatus"] is not None, "Skip deve definir substatus"
@@ -319,7 +319,7 @@ class TestHabitsPanelComplete:
             await pilot.press("escape")
             await _wait(pilot)
 
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             assert instances[0]["status"] == "pending", "Esc não deve alterar status"
 
     @pytest.mark.asyncio
@@ -339,7 +339,7 @@ class TestHabitsPanelComplete:
             await pilot.press("escape")
             await _wait(pilot)
 
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             assert instances[0]["status"] == "pending", "Esc não deve alterar status"
 
     @pytest.mark.asyncio
@@ -356,7 +356,7 @@ class TestHabitsPanelComplete:
             await _create_habit(pilot, "Hábito B", "09:00", "120")
 
             # Ambos devem existir (conflito é informado, não bloqueado)
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             names = {i["name"] for i in instances}
             assert "Hábito A" in names, "Primeiro hábito deve existir"
             assert "Hábito B" in names, "Segundo hábito deve existir apesar do conflito"
@@ -610,7 +610,7 @@ class TestTimerPanelComplete:
             assert timer is None, "Timer deve estar idle após cancel confirmado"
 
             # Hábito permanece pending (cancel descarta sessão)
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             pending = [i for i in instances if i["status"] == "pending"]
             assert len(pending) > 0, "Hábito deve permanecer pending após timer cancel"
 
@@ -682,7 +682,7 @@ class TestTimerPanelComplete:
             assert timer is None
 
             # Hábito deve estar done
-            instances = loader.load_instances()
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             done = [i for i in instances if i["status"] == "done"]
             assert len(done) > 0, "stop_timer deve marcar hábito como done"
             assert done[0]["substatus"] is not None, "stop_timer deve definir substatus"
