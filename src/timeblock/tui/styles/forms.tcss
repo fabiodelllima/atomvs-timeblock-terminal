@@ -12,7 +12,7 @@
 #crud-header {
     width: 100%;                       /* Largura total */
     height: 1;                         /* 1 linha */
-    color: #CBA6F7;                  /* Mauve: título accent */
+    color: #CBA6F7;                    /* Mauve: título accent */
 }
 
 #crud-list {
@@ -37,5 +37,64 @@
     width: 100%;                       /* Largura total */
     height: 1;                         /* 1 linha */
     dock: bottom;                      /* Fixo no rodapé */
-    color: #6C7086;                  /* Overlay0: ações muted */
+    color: #6C7086;                    /* Overlay0: ações muted */
+}
+
+/* ==========================================================================
+   FormModal (BR-TUI-020, DT-043)
+   Modal de formulário reutilizável com validação inline.
+   ========================================================================== */
+
+FormModal {
+    align: center middle;
+}
+
+FormModal > Vertical {
+    width: 60;
+    height: auto;
+    max-height: 36;
+    border: thick #89B4FA;
+    background: #181825;
+    padding: 1 2;
+}
+
+FormModal > Vertical > #fm-title {
+    text-align: center;
+    text-style: bold;
+    color: #89B4FA;
+    margin-bottom: 1;
+}
+
+FormModal > Vertical > .fm-label {
+    color: #CDD6F4;
+    margin-top: 1;
+}
+
+FormModal > Vertical > .fm-error {
+    color: #F38BA8;
+    margin-bottom: 0;
+}
+
+FormModal > Vertical > #fm-hint {
+    text-align: center;
+    color: #6C7086;
+    margin-top: 1;
+}
+
+FormModal > Vertical > Input {
+    border: tall #585B70;
+    margin-bottom: 0;
+}
+
+FormModal > Vertical > Input:focus {
+    border: tall #89B4FA;
+}
+
+FormModal > Vertical > Select {
+    margin-bottom: 0;
+}
+
+FormModal > Vertical > #fm-submit {
+    margin-top: 1;
+    width: 100%;
 }
