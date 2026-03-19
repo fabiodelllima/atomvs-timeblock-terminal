@@ -20,6 +20,7 @@ from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
 from timeblock.tui.widgets.form_modal import FormField, FormModal
 
 if TYPE_CHECKING:
+    from sqlmodel import Session
     from textual.app import App
 
 
@@ -80,6 +81,8 @@ def open_delete_routine(
 
     def on_confirm() -> None:
         service_action(lambda s: RoutineService(s).delete_routine(routine_id))
+        # DT-048: ativar próxima rotina disponível após deleção
+        service_action(lambda s: _activate_next_routine(s))
         on_done()
 
     app.push_screen(
@@ -87,5 +90,52 @@ def open_delete_routine(
             title="Deletar Rotina",
             message=f"Deletar '{routine_name}'?",
             on_confirm=on_confirm,
+        )
+    )
+
+
+def _activate_next_routine(s: Session) -> None:
+    """Ativa a próxima rotina existente, se houver (DT-048)."""
+    from sqlmodel import select
+
+    from timeblock.models.routine import Routine
+
+    remaining = s.exec(select(Routine)).first()
+    if remaining and remaining.id:
+        RoutineService(s).activate_routine(remaining.id)
+
+
+def open_select_routine(app: App, on_done: Callable[[], None]) -> None:
+    """Abre FormModal com Select listando rotinas para troca (DT-047)."""
+    from sqlmodel import select as sql_select
+
+    from timeblock.models.routine import Routine
+
+    routines, error = service_action(lambda s: list(s.exec(sql_select(Routine)).all()))
+    if error or not routines or len(routines) < 2:
+        app.notify("Apenas uma rotina disponível", severity="information")
+        return
+
+    options = [(str(r.id), r.name) for r in routines if r.id is not None]
+
+    fields = [
+        FormField(
+            name="routine_id",
+            label="Selecione a rotina",
+            field_type="select",
+            options=options,
+        ),
+    ]
+
+    def on_submit(data: dict) -> None:
+        selected_id = int(data["routine_id"])
+        service_action(lambda s: RoutineService(s).activate_routine(selected_id))
+        on_done()
+
+    app.push_screen(
+        FormModal(
+            title="Trocar Rotina",
+            fields=fields,
+            on_submit=on_submit,
         )
     )

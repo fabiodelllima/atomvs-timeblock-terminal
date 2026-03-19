@@ -56,7 +56,7 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
     FormModal > Vertical {
         width: 60;
         height: auto;
-        max-height: 24;
+        max-height: 36;
         border: thick #89B4FA;
         background: #181825;
         padding: 1 2;

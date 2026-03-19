@@ -126,6 +126,10 @@ def load_instances(routine_id: int | None = None) -> list[dict]:
     """
 
     def _load(s: Session) -> list[dict]:
+        # Sem rotina ativa = sem instâncias a exibir (DT-048)
+        if routine_id is None:
+            return []
+
         today = date.today()
         result = HabitInstanceService().list_instances(date_start=today, date_end=today, session=s)
         if not result:

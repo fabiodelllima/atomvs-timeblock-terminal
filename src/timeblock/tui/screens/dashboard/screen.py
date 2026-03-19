@@ -101,6 +101,9 @@ class DashboardScreen(Static):
         elif event.key == "e":
             self._handle_edit()
             event.stop()
+        elif event.key == "r":
+            self._handle_select_routine()
+            event.stop()
         elif event.key == "x":
             self._handle_delete()
             event.stop()
@@ -152,6 +155,10 @@ class DashboardScreen(Static):
             item = self.query_one(TasksPanel).get_selected_item()
             if item:
                 crud_tasks.open_delete_task(self.app, item, self._on_crud_done)
+
+    def _handle_select_routine(self) -> None:
+        """Abre seletor de rotinas (DT-047)."""
+        crud_routines.open_select_routine(self.app, self._on_crud_done)
 
     def _on_crud_done(self) -> None:
         """Callback universal: refresh após qualquer operação CRUD."""

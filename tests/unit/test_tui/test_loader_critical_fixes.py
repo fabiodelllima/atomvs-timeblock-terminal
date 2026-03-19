@@ -184,7 +184,7 @@ class TestDT055LoadInstancesTimerDetection:
             return fn(session), None
 
         mock_sa.side_effect = side_effect
-        result = load_instances()
+        result = load_instances(routine_id=1)
 
         assert len(result) == 1
         assert result[0]["status"] == "running", (
@@ -210,7 +210,7 @@ class TestDT055LoadInstancesTimerDetection:
             return fn(session), None
 
         mock_sa.side_effect = side_effect
-        result = load_instances()
+        result = load_instances(routine_id=1)
 
         assert len(result) == 1
         assert result[0]["status"] == "paused"
@@ -231,7 +231,7 @@ class TestDT055LoadInstancesTimerDetection:
             return fn(session), None
 
         mock_sa.side_effect = side_effect
-        result = load_instances()
+        result = load_instances(routine_id=1)
 
         assert len(result) == 1
         assert result[0]["status"] == "done"
@@ -255,7 +255,7 @@ class TestDT055LoadInstancesTimerDetection:
             return fn(session), None
 
         mock_sa.side_effect = side_effect
-        result = load_instances()
+        result = load_instances(routine_id=1)
 
         assert len(result) == 1
         assert result[0]["status"] == "pending"
@@ -293,8 +293,8 @@ class TestDT049LoadInstancesRoutineFilter:
 
     @patch("timeblock.tui.screens.dashboard.loader.HabitInstanceService")
     @patch("timeblock.tui.screens.dashboard.loader.service_action")
-    def test_dt049_none_routine_returns_all(self, mock_sa, mock_his):
-        """routine_id=None retorna todas as instâncias (backward compat)."""
+    def test_dt049_none_routine_returns_empty(self, mock_sa, mock_his):
+        """routine_id=None retorna lista vazia (sem rotina = sem dados, DT-048)."""
         inst_a = _make_instance(inst_id=1, routine_id=10)
         inst_b = _make_instance(inst_id=2, routine_id=20)
 
@@ -310,7 +310,7 @@ class TestDT049LoadInstancesRoutineFilter:
         mock_sa.side_effect = side_effect
         result = load_instances(routine_id=None)
 
-        assert len(result) == 2
+        assert result == []
 
     @patch("timeblock.tui.screens.dashboard.loader.HabitInstanceService")
     @patch("timeblock.tui.screens.dashboard.loader.service_action")
