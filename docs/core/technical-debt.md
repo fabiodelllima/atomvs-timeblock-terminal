@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.14.0
+**Versão:** 2.15.0
 
 **Status:** SSOT
 
@@ -49,9 +49,16 @@
 | DT043 | DEFAULT_CSS inline no FormModal                | BAIXA      | PENDENTE  | -            | Sprint futuro            |
 | DT044 | basedpyright standard: ~190 warnings           | MEDIA      | PENDENTE  | -            | Sprint futuro            |
 | DT045 | Blocos sobrepostos sem distinção na Agenda     | ALTA       | PENDENTE  | -            | Sprint futuro            |
-| DT046 | Troca de rotina não atualiza Habits/Tasks       | ALTA       | PENDENTE  | -            | Sprint futuro            |
-| DT047 | Sem mecanismo de seleção entre rotinas           | ALTA       | PENDENTE  | -            | Sprint futuro            |
-| DT048 | Deleção de rotina não carrega outra nem limpa    | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT046 | Troca de rotina não atualiza Habits/Tasks      | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT047 | Sem mecanismo de seleção entre rotinas         | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT048 | Deleção de rotina não carrega outra nem limpa  | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT049 | Habit criado sem vínculo com rotina ativa      | CRITICA    | PENDENTE  | -            | Sprint futuro            |
+| DT050 | FormModal de habit sem Select de recorrência   | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT051 | Edit habit não atualiza render  frontend       | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT052 | Skip habit não atualiza render  frontend       | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT053 | Timer start não muda visual do bloco/habit     | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT054 | Timer pause não para contagem (só muda status) | CRITICA    | PENDENTE  | -            | Sprint futuro            |
+| DT055 | v em hábito running não abre ConfirmDialog     | CRITICA    | PENDENTE  | -            | Sprint futuro            |
 
 ## 1b. Quick Status
 
@@ -81,6 +88,13 @@
 - [x] DT024 — Keybindings Ctrl+Números inoperantes em VTE/GNOME
 - [ ] DT025 — Pyright como job CI complementar ao mypy e ruff
 - [ ] DT026 — load_metrics sem filtro de rotina ativa
+- [x] DT027 — FormModal sem suporte a campo select (recorrencia)
+- [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
+- [x] DT029 — Conflitos de horario detectados no CRUD habits
+- [x] DT030 — Help overlay completo (ADR-037)
+- [x] DT031 — Auto-scroll desabilitado (call_later travava TUI)
+- [x] DT032 — Migração de banco manual para Task lifecycle
+- [x] DT033 — 3 testes CRUD routines quebrados por VerticalScroll
 - [x] DT034 — mark_completed sem done_substatus (CRITICA)
 - [x] DT035 — Undo handler nao limpa skip_reason/skip_note (CRITICA)
 - [x] DT036 — TimerStopAndDoneRequest sem handler
@@ -96,13 +110,13 @@
 - [ ] DT046 — Troca de rotina não atualiza Habits/Tasks
 - [ ] DT047 — Sem mecanismo de seleção entre rotinas
 - [ ] DT048 — Deleção de rotina não carrega outra rotina e nem limpa panels
-- [x] DT027 — FormModal sem suporte a campo select (recorrencia)
-- [x] DT028 — Enter sem ação em habit selecionado (ADR-037)
-- [x] DT029 — Conflitos de horario detectados no CRUD habits
-- [x] DT030 — Help overlay completo (ADR-037)
-- [x] DT031 — Auto-scroll desabilitado (call_later travava TUI)
-- [x] DT032 — Migração de banco manual para Task lifecycle
-- [x] DT033 — 3 testes CRUD routines quebrados por VerticalScroll
+- [ ] DT049 — Habit criado sem vínculo com rotina ativa
+- [ ] DT050 — FormModal de habit sem Select de recorrência
+- [ ] DT051 — Edit habit não atualiza renderização no frontend
+- [ ] DT052 — Skip habit não atualiza renderização no frontend
+- [ ] DT053 — Timer start não muda visual do bloco/habit
+- [ ] DT054 — Timer pause não para contagem (só muda status e cor)
+- [ ] DT055 — v em hábito running não abre ConfirmDialog
 
 **Resolvidos:** 27/42 | **Pendentes:** 15/42 | **Aceitos:** 1/42
 
@@ -229,6 +243,54 @@
 - **BRs afetadas:** BR-TUI-003, BR-TUI-016
 - **Testes necessarios:** e2e com deleção de rotina e verificação de estado limpo nos panels.
 
+### DT-049: Habit criado sem vínculo com rotina ativa (CRITICA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Ao criar um hábito via FormModal, o hábito não é vinculado à rotina ativa. Aparece no panel mas sem associação — gera instâncias órfãs ou não gera instâncias. Funcionalidade core quebrada.
+- **Correcao:** Verificar se open_create_habit recebe e propaga _active_routine_id corretamente. Investigar HabitService.create_habit e generate_instances.
+- **BRs afetadas:** BR-TUI-017, BR-HABIT-001
+
+### DT-050: FormModal de criação de habit sem Select de recorrência (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** O FormModal de criação de hábito deveria ter 4 campos (título, horário, duração, recorrência) mas o Select de recorrência não renderiza. Todos os hábitos ficam com recorrência default (EVERYDAY) sem opção de alterar.
+- **Correcao:** Verificar se o campo FormField de recorrência com field_type="select" está no compose de open_create_habit. O campo existe em open_edit_habit — pode ter sido omitido na criação.
+- **BRs afetadas:** BR-TUI-017, BR-TUI-020
+
+### DT-051: Edit habit não atualiza renderização no frontend (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Ao editar título do hábito via FormModal, a alteração persiste no banco de dados mas o panel não re-renderiza com o novo nome. Provável falha no callback _on_crud_done ou no refresh_data não propagando para o HabitsPanel.
+- **Correcao:** Investigar se _on_crud_done chama refresh_data, e se refresh_data reconstrói os dicts via loader.load_instances. Pode ser cache ou falta de _refresh_content no panel.
+- **BRs afetadas:** BR-TUI-017
+
+### DT-052: Skip habit não atualiza renderização no frontend (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Ao marcar skip via modal, o status pode persistir no banco mas o HabitsPanel não atualiza visualmente. Mesmo problema de refresh que DT-051 — provável causa raiz compartilhada.
+- **Correcao:** Mesma investigação de DT-051. Se a causa raiz for refresh_data, um único fix resolve DT-051 e DT-052.
+- **BRs afetadas:** BR-TUI-024, BR-SKIP-001
+
+### DT-053: Timer start não muda visual do bloco na Agenda nem cor no HabitsPanel (ALTA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Ao iniciar timer com t, o TimerPanel atualiza (cronômetro rodando, nome do hábito) mas o bloco na Agenda e o item no HabitsPanel não mudam para estado "running" (sem mudança de cor ou indicador). Usuário não sabe visualmente qual hábito está sendo cronometrado nos outros panels.
+- **Correcao:** Verificar se refresh_data é chamado após timer start e se HabitsPanel._refresh_content renderiza status "running" com cor distinta. Agenda pode precisar de lógica adicional para status running.
+- **BRs afetadas:** BR-TUI-003, BR-TUI-021
+
+### DT-054: Timer pause não para a contagem (CRITICA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Ao pressionar space para pausar, o status e a cor mudam para "paused" no TimerPanel mas o cronômetro continua incrementando. O tempo registrado será incorreto — viola a contabilidade de tempo que é o core do produto.
+- **Correcao:** Investigar TimerService.pause_timer — se atualiza pause_start e status no banco. Verificar se o TimerPanel usa set_interval/set_timer para atualizar o display e se a lógica de elapsed respeita paused_duration. Pode ser bug no cálculo de elapsed no loader ou no display do panel.
+- **BRs afetadas:** BR-TIMER-002, BR-TIMER-003
+
+### DT-055: v em hábito running não abre ConfirmDialog (CRITICA)
+
+- **Descoberto:** 18/03/2026 (teste manual da dashboard)
+- **Impacto:** Ao pressionar v em hábito com timer ativo (status running), nada acontece. O DT-036 foi marcado como resolvido mas o handler pode não estar sendo acionado. O teste e2e test_timer_stop_marks_habit_done passa — investigar diferença entre teste e uso real.
+- **Correcao:** Verificar se HabitsPanel._action_done detecta status "running" no dict do item (item.get("status") == "running"). Pode ser que o loader retorne "running" diferente do que o panel espera. Verificar se o get_selected_item retorna o item atualizado após timer start.
+- **BRs afetadas:** BR-TUI-021, BR-TUI-023
 
 ## 2. Detalhamento de Itens Resolvidos
 
