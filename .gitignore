@@ -63,3 +63,6 @@ docs/sysdesign/
 CLAUDE.md
 TASK.md
 run-overnight.sh
+
+# Design artifacts (box-drawing, themes, system-design)
+design/

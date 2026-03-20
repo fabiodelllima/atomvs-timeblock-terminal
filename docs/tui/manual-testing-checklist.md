@@ -1,4 +1,4 @@
-# ATOMVS Time Planner Terminal — Checklist de Teste Manual da Dashboard
+# ATOMVS Time Planner TUI — Checklist de Teste Manual da Dashboard
 
 **Versão:** 1.0.0
 
@@ -25,8 +25,6 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 - [x] TimerPanel mostra estado idle ("Nenhum timer ativo" ou similar)
 - [x] MetricsPanel renderiza sem erro
 - [ ] Status bar visível na parte inferior
-
-**Notas:** _______________________________________________
 
 ---
 
@@ -57,8 +55,6 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 
 - [x] `Ctrl+Q` → sai da aplicação
 
-**Notas:** _______________________________________________
-
 ---
 
 ## 3. Agenda Panel
@@ -81,8 +77,6 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 - [ ] `x` com Agenda focada → abre ConfirmDialog
 - [ ] `Enter` → confirma deleção, rotina removida
 - [ ] Testar `Esc` no ConfirmDialog → cancela, rotina permanece
-
-**Notas:** _______________________________________________
 
 ---
 
@@ -149,8 +143,6 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 - [ ] Criar dois hábitos com horários sobrepostos (ex: 08:00-10:00 e 09:00-11:00)
 - [ ] Ambos são criados (sistema informa, não bloqueia — "informar, nunca decidir")
 
-**Notas:** _______________________________________________
-
 ---
 
 ## 5. Tasks Panel
@@ -199,8 +191,6 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 - [x] Selecionar task cancelled → `u`
 - [x] Task volta para pending (sem modal — ação direta)
 
-**Notas:** _______________________________________________
-
 ---
 
 ## 6. Timer Panel
@@ -243,16 +233,12 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 - [ ] Com timer ativo no hábito A → tentar `t` no hábito B
 - [ ] Segundo timer não inicia (um timer por vez — BR-TIMER-001)
 
-**Notas:** _______________________________________________
-
 ---
 
 ## 7. Metrics Panel
 
 - [ ] MetricsPanel renderiza sem erro com dados vazios
 - [ ] Com hábitos done, panel atualiza (funcionalidade parcial — xfail em testes)
-
-**Notas:** _______________________________________________
 
 ---
 
@@ -272,8 +258,6 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 
 - [ ] `Enter` → confirma ação
 - [ ] `Esc` → cancela, nenhuma alteração persistida
-
-**Notas:** _______________________________________________
 
 ---
 
@@ -305,8 +289,6 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 - [ ] `v` em hábito → `Esc` no FormModal → status permanece pending
 - [ ] `s` em hábito → `Esc` no FormModal → status permanece pending
 
-**Notas:** _______________________________________________
-
 ---
 
 ## Resultado
@@ -323,14 +305,6 @@ Para resetar: `rm ~/.local/share/atomvs/atomvs.db` antes de iniciar.
 | 8. Modais              | 9      |        |        |     |
 | 9. Cenários Combinados | 14     |        |        |     |
 | **TOTAL**              | **94** |        |        |     |
-
-**Testador:** _______________________________________________
-
-**Data do teste:** _______________________________________________
-
-**Versão testada:** _______________________________________________
-
-**Observações gerais:** _______________________________________________
 
 ---
 
