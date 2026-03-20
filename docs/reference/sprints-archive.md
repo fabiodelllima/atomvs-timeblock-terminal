@@ -6,7 +6,7 @@
 
 ## Visão Geral
 
-Este documento registra as sprints concluídas do projeto ATOMVS TimeBlock Terminal. Cada release é reconstituída a partir do CHANGELOG.md e dos commits históricos, preservando o contexto de decisões e entregas. O planejamento e acompanhamento de sprints ativas está em `docs/core/sprints.md`.
+Este documento registra as sprints concluídas do projeto ATOMVS TimeBlock Terminal. Cada release é reconstituída a partir do CHANGELOG.md e dos commits históricos, preservando o contexto de decisões e entregas. O planejamento e acompanhamento de sprints ativas está em `docs/reference/sprints.md`.
 
 ---
 

@@ -84,7 +84,7 @@ O projeto segue técnicas formais de Engenharia de Requisitos (ISO/IEC/IEEE 2914
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                    1. ESPECIFICAÇÃO DE REQUISITOS                │
-│    docs/core/business-rules.md                                   │
+│    docs/reference/business-rules/index.md                        │
 │    - Business Rules formalizadas (BR-DOMAIN-XXX)                 │
 │    - 60 regras com critérios de aceitação verificáveis           │
 └──────────────────────────────────────────────────────────────────┘
@@ -112,7 +112,7 @@ O projeto segue técnicas formais de Engenharia de Requisitos (ISO/IEC/IEEE 2914
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-A fase de especificação formaliza cada requisito funcional como uma business rule com identificador único (BR-DOMAIN-XXX), descrição do comportamento esperado e critérios de aceitação verificáveis. Nenhum código ou teste é escrito sem que a BR correspondente exista em `docs/core/business-rules.md`.
+A fase de especificação formaliza cada requisito funcional como uma business rule com identificador único (BR-DOMAIN-XXX), descrição do comportamento esperado e critérios de aceitação verificáveis. Nenhum código ou teste é escrito sem que a BR correspondente exista em `docs/reference/business-rules/index.md`.
 
 A fase de validação traduz as business rules em cenários executáveis no formato Gherkin com verbos em português (DADO/QUANDO/ENTÃO). Estes cenários confirmam que os requisitos expressam corretamente a intenção do sistema antes de qualquer implementação, servindo simultaneamente como documentação executável e contrato entre requisitos e comportamento.
 
@@ -120,7 +120,7 @@ A fase de verificação aplica Strict TDD com as três leis de Robert C. Martin 
 
 A fase de implementação produz o código de produção guiado exclusivamente pelos testes que falharam na fase anterior. O princípio fundamental é que, quando um teste falha, o código está errado — não o teste.
 
-**SSOT de Processo:** O detalhamento completo está em `docs/core/development.md`. Ver também ADR-025 (Engenharia de Requisitos).
+**SSOT de Processo:** O detalhamento completo está em `docs/explanation/development-methodology.md`. Ver também ADR-025 (Engenharia de Requisitos).
 
 ### 1.4 Stack Tecnológica
 
@@ -1685,31 +1685,31 @@ Funcionalidade: Cálculo de Streak
 ├────────────────────────────────────────────────────────────────┤
 │                                                                │
 │  1. CRIAR HÁBITO                                               │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │ CLI: habit create --title "Academia" ...             │      │
-│  │           │                                          │      │
-│  │           v                                          │      │
-│  │ HabitService.create_habit()                          │      │
-│  │           │                                          │      │
-│  │           v                                          │      │
-│  │ HabitInstanceService.generate_instances()            │      │
-│  │           │                                          │      │
-│  │           v                                          │      │
-│  │ Database: INSERT habit, INSERT habit_instances       │      │
-│  └──────────────────────────────────────────────────────┘      │
+│  ┌────────────────────────────────────────────────────────┐    │
+│  │ CLI: habit create --title "Academia" ...               │    │
+│  │           │                                            │    │
+│  │           v                                            │    │
+│  │ HabitService.create_habit()                            │    │
+│  │           │                                            │    │
+│  │           v                                            │    │
+│  │ HabitInstanceService.generate_instances()              │    │
+│  │           │                                            │    │
+│  │           v                                            │    │
+│  │ Database: INSERT habit, INSERT habit_instances         │    │
+│  └────────────────────────────────────────────────────────┘    │
 │                                                                │
 │  2. INICIAR TIMER                                              │
-│  ┌──────────────────────────────────────────────────────┐      │
-│  │ CLI: timer start 42                                  │      │
-│  │           │                                          │      │
-│  │           v                                          │      │
-│  │ TimerService.start_timer(instance_id=42)             │      │
-│  │           │                                          │      │
-│  │           ├─> Verifica timer ativo (BR-TIMER-001)    │      │
-│  │           ├─> Verifica conflitos (BR-REORDER-001)    │      │
-│  │           v                                          │      │
-│  │ Database: INSERT time_log (start_time)               │      │
-│  └──────────────────────────────────────────────────────┘      │
+│  ┌────────────────────────────────────────────────────────┐    │
+│  │ CLI: timer start 42                                    │    │
+│  │           │                                            │    │
+│  │           v                                            │    │
+│  │ TimerService.start_timer(instance_id=42)               │    │
+│  │           │                                            │    │
+│  │           ├─> Verifica timer ativo (BR-TIMER-001)      │    │
+│  │           ├─> Verifica conflitos (BR-REORDER-001)      │    │
+│  │           v                                            │    │
+│  │ Database: INSERT time_log (start_time)                 │    │
+│  └────────────────────────────────────────────────────────┘    │
 │                                                                │
 │  3. PARAR TIMER                                                │
 │  ┌────────────────────────────────────────────────────────┐    │
@@ -1837,11 +1837,11 @@ Funcionalidade: Cálculo de Streak
 
 ### 18.2 Referências para Outros Documentos
 
-| Documento         | Conteúdo                     | Localização                 |
-| ----------------- | ---------------------------- | --------------------------- |
-| architecture.md   | Camadas, stack, princípios   | docs/core/architecture.md   |
-| business-rules.md | Todas as 50 BRs detalhadas   | docs/core/business-rules.md |
-| cli-reference.md  | Sintaxe completa de comandos | docs/core/cli-reference.md  |
+| Documento         | Conteúdo                     | Localização                            |
+| ----------------- | ---------------------------- | -------------------------------------- |
+| architecture.md   | Camadas, stack, princípios   | docs/explanation/architecture.md       |
+| business-rules.md | Todas as 50 BRs detalhadas   | docs/reference/business-rules/index.md |
+| cli-reference.md  | Sintaxe completa de comandos | docs/reference/cli-reference.md        |
 
 ### 18.3 Referências Externas
 

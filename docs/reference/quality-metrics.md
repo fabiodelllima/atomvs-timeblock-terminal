@@ -254,7 +254,7 @@ O pipeline espelho no GitHub valida que o repositório de showcase permanece ín
 
 ## 7. Referências
 
-- **ROADMAP:** `docs/core/roadmap.md`
+- **ROADMAP:** `docs/reference/roadmap.md`
 - **CHANGELOG:** `CHANGELOG.md`
 - **ADR-007:** Service Layer com Dependency Injection
 - **ADR-019:** Test Naming Convention

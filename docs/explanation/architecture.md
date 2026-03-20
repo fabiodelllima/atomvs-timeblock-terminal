@@ -1594,7 +1594,7 @@ Especificação --> Validação (BDD) --> Verificação (TDD) --> Implementaçã
 ┌─────────────────────────────────────────────────────────────┐
 │                  VERTICAL SLICE (1 BR)                      │
 ├─────────────────────────────────────────────────────────────┤
-│  1. Especificar BR (docs/core/business-rules.md)            │
+│  1. Especificar BR (docs/reference/business-rules/index.md) │
 │  2. Escrever cenário de validação (.feature)                │
 │  3. Implementar steps (step_defs/)                          │
 │  4. Criar teste de verificação (RED)                        │
@@ -1893,7 +1893,7 @@ Ver também: [ADR-030: Arquitetura Multi-Plataforma](../decisions/ADR-030-multip
 - **Rich:** <https://rich.readthedocs.io/>
 - **FastAPI:** <https://fastapi.tiangolo.com/>
 - **Apache Kafka:** <https://kafka.apache.org/>
-- **Business Rules:** `docs/core/business-rules.md`
+- **Business Rules:** `docs/reference/business-rules/index.md`
 
 ---
 

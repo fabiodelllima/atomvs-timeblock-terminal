@@ -117,7 +117,7 @@ Cada business rule deve ter rastreabilidade completa, conforme exigido pela disc
 
 | Artefato           | Localização                 | Formato                     |
 | ------------------ | --------------------------- | --------------------------- |
-| Requisito (BR)     | docs/core/business-rules.md | BR-DOMAIN-XXX               |
+| Requisito (BR)     | docs/reference/business-rules/index.md | BR-DOMAIN-XXX               |
 | Validação (BDD)    | tests/bdd/features/         | Gherkin (Given/When/Then)   |
 | Verificação (Unit) | tests/unit/test_services/   | TestBRDomainXXX             |
 | Implementação      | src/timeblock/services/     | Método no service           |
@@ -126,7 +126,7 @@ Cada business rule deve ter rastreabilidade completa, conforme exigido pela disc
 
 ```bash
 # BR especificada?
-grep -r "BR-HABIT-003" docs/core/business-rules.md
+grep -r "BR-HABIT-003" docs/reference/business-rules/index.md
 
 # Teste existe?
 grep -rn "BR-HABIT-003\|br_habit_003" tests/
@@ -193,13 +193,13 @@ git push origin main --tags
 
 ### Dual-Repo
 
-O GitLab é fonte de verdade para desenvolvimento. O GitHub é showcase público sincronizado automaticamente via CI/CD. Detalhes completos em `docs/core/cicd-flow.md`.
+O GitLab é fonte de verdade para desenvolvimento. O GitHub é showcase público sincronizado automaticamente via CI/CD. Detalhes completos em `docs/guides/cicd-flow.md`.
 
 ---
 
 ## 10. Gestão de Sprints
 
-Sprints organizam o trabalho em iterações de 1-2 semanas com escopo definido e critérios de aceitação claros. O planejamento ativo reside em `docs/core/sprints.md` enquanto sprints concluídos são arquivados em `docs/core/sprints-archive.md`.
+Sprints organizam o trabalho em iterações de 1-2 semanas com escopo definido e critérios de aceitação claros. O planejamento ativo reside em `docs/reference/sprints.md` enquanto sprints concluídos são arquivados em `docs/reference/sprints-archive.md`.
 
 ### Estrutura de Sprint
 

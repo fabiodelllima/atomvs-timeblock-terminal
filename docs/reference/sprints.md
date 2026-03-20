@@ -8,9 +8,9 @@
 
 ## Visão Geral
 
-Este documento acompanha as sprints ativas do projeto ATOMVS TimeBlock Terminal. Cada sprint representa um ciclo de entregas incrementais onde requisitos formalizados são decompostos em tarefas atômicas, validados e implementados com rastreabilidade completa. A metodologia de engenharia de requisitos, análise comportamental e implementação orientada por testes está documentada em `docs/core/development.md`.
+Este documento acompanha as sprints ativas do projeto ATOMVS TimeBlock Terminal. Cada sprint representa um ciclo de entregas incrementais onde requisitos formalizados são decompostos em tarefas atômicas, validados e implementados com rastreabilidade completa. A metodologia de engenharia de requisitos, análise comportamental e implementação orientada por testes está documentada em `docs/explanation/development-methodology.md`.
 
-O histórico de sprints concluídas (v1.0.0 a v1.6.0) está arquivado em `docs/core/sprints-archive.md`.
+O histórico de sprints concluídas (v1.0.0 a v1.6.0) está arquivado em `docs/reference/sprints-archive.md`.
 
 ---
 
@@ -39,17 +39,17 @@ O Sprint 0 preparou a infraestrutura do repositório para receber a TUI. Incluiu
 **Branch:** `docs/branding` → mergeado em `develop`
 
 - [x] ADR-032: Branding ATOMVS + namespace `atomvs-timeblock-*`
-- [x] Atualizar `docs/core/architecture.md` — nomenclatura repos seção 13.1
-- [x] Atualizar `docs/core/roadmap.md` — sumário executivo com branding
+- [x] Atualizar `docs/explanation/architecture.md` — nomenclatura repos seção 13.1
+- [x] Atualizar `docs/reference/roadmap.md` — sumário executivo com branding
 - [x] Renomear `docs/ssot/` → `docs/core/`
 - [x] Atualizar referências internas `docs/ssot/` → `docs/core/` em todos os .md
 - [x] ADR-031: Implementação TUI com Textual
-- [x] Seção BR-TUI (BR-TUI-001 a BR-TUI-015) em `docs/core/business-rules.md`
-- [x] Criar `docs/core/sprints.md` (este documento)
-- [x] Criar `docs/core/sprints-archive.md` (histórico v1.0.0 a v1.6.0)
-- [ ] Adicionar parágrafos introdutórios nas seções do `docs/core/business-rules.md`
-- [ ] Adicionar parágrafos introdutórios nas seções do `docs/core/architecture.md`
-- [x] Criar `docs/core/development.md` — SSOT do processo de desenvolvimento
+- [x] Seção BR-TUI (BR-TUI-001 a BR-TUI-015) em `docs/reference/business-rules/index.md`
+- [x] Criar `docs/reference/sprints.md` (este documento)
+- [x] Criar `docs/reference/sprints-archive.md` (histórico v1.0.0 a v1.6.0)
+- [ ] Adicionar parágrafos introdutórios nas seções do `docs/reference/business-rules/index.md`
+- [ ] Adicionar parágrafos introdutórios nas seções do `docs/explanation/architecture.md`
+- [x] Criar `docs/explanation/development-methodology.md` — SSOT do processo de desenvolvimento
 - [ ] Atualizar README.md seção "Desenvolvimento" — resumo breve + link para development.md
 - [ ] Atualizar `docs/decisions/README.md` — adicionar ADR-031 e ADR-032 ao índice
 - [x] Flatten: mover `cli/src/` → `src/`
@@ -555,8 +555,8 @@ O Sprint 6 fecha a v1.7.0 com revisão de cobertura, audit de qualidade de códi
 
 - [ ] Atualizar `CHANGELOG.md` com todas as entregas
 - [ ] Atualizar `pyproject.toml` — versão 1.7.0
-- [ ] Atualizar `docs/core/roadmap.md` — marcar v1.7.0 como entregue
-- [ ] Mover seção v1.7.0 concluída para `docs/core/sprints-archive.md`
+- [ ] Atualizar `docs/reference/roadmap.md` — marcar v1.7.0 como entregue
+- [ ] Mover seção v1.7.0 concluída para `docs/reference/sprints-archive.md`
 - [ ] Criar tag `v1.7.0`
 - [ ] Push GitLab + GitHub
 - [ ] Validar: tag criada, pipeline verde, changelog completo

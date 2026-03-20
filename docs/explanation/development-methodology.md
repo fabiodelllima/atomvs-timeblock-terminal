@@ -33,7 +33,7 @@ O projeto adota técnicas de Engenharia de Requisitos como princípio organizado
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 |         1. ESPECIFICAÇÃO DE REQUISITOS                          |
-|    docs/core/business-rules.md                                  |
+|    docs/reference/business-rules/index.md                       |
 |    - Business Rules formalizadas (BR-DOMAIN-XXX)                |
 |    - Requisitos funcionais rastreáveis                          |
 |    - Critérios de aceitação verificáveis                        |
@@ -93,7 +93,7 @@ Cada vertical slice segue um fluxo de 7 etapas:
 ┌──────────────────────────────────────────────────────────────┐
 |                  VERTICAL SLICE (1 BR)                       |
 ├──────────────────────────────────────────────────────────────┤
-|  1. Especificar BR (docs/core/business-rules.md)             |
+|  1. Especificar BR (docs/reference/business-rules/index.md)  |
 |  2. Escrever cenário de validação (.feature)                 |
 |  3. Implementar steps (step_defs/)                           |
 |  4. Criar teste de verificação (RED)                         |
@@ -136,7 +136,7 @@ Cada BR segue o padrão `BR-DOMAIN-XXX` com estrutura fixa:
 
 ### Localização e Índice
 
-As business rules residem em `docs/core/business-rules.md` organizadas por domínio. Cada domínio tem sua seção com tabela de regras seguida de descrições detalhadas. O documento é versionado independentemente e atualizado antes de qualquer implementação.
+As business rules residem em `docs/reference/business-rules/index.md` organizadas por domínio. Cada domínio tem sua seção com tabela de regras seguida de descrições detalhadas. O documento é versionado independentemente e atualizado antes de qualquer implementação.
 
 ### Validação de Existência
 
@@ -144,7 +144,7 @@ Antes de iniciar implementação de qualquer funcionalidade:
 
 ```bash
 # Verificar se BR existe
-grep -r "BR-HABIT-003" docs/core/business-rules.md
+grep -r "BR-HABIT-003" docs/reference/business-rules/index.md
 
 # Se não existir: PARE. Especifique primeiro.
 ```
@@ -241,12 +241,12 @@ class TestBRHabit003:
 
 | Documento          | Conteúdo                | Localização                  |
 | ------------------ | ----------------------- | ---------------------------- |
-| architecture.md    | Camadas, stack, modelos | docs/core/architecture.md    |
-| business-rules.md  | 60 BRs formalizadas     | docs/core/business-rules.md  |
-| quality-metrics.md | Métricas e histórico    | docs/core/quality-metrics.md |
-| cicd-flow.md       | Pipeline e automação    | docs/core/cicd-flow.md       |
-| sprints.md         | Planejamento ativo      | docs/core/sprints.md         |
-| sprints-archive.md | Histórico de sprints    | docs/core/sprints-archive.md |
+| architecture.md    | Camadas, stack, modelos | docs/explanation/architecture.md    |
+| business-rules.md  | 60 BRs formalizadas     | docs/reference/business-rules/index.md  |
+| quality-metrics.md | Métricas e histórico    | docs/reference/quality-metrics.md |
+| cicd-flow.md       | Pipeline e automação    | docs/guides/cicd-flow.md       |
+| sprints.md         | Planejamento ativo      | docs/reference/sprints.md         |
+| sprints-archive.md | Histórico de sprints    | docs/reference/sprints-archive.md |
 
 ### ADRs Relacionadas
 

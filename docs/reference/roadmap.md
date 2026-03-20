@@ -64,7 +64,7 @@ O histórico de releases mostra uma progressão consistente: cada versão expand
 | v1.5.0 | Fev/2026 | CI/CD Dual-Repo, i18n        | CHANGELOG.md |
 | v1.6.0 | Fev/2026 | Docker, DevSecOps, 87% cob.  | CHANGELOG.md |
 
-O detalhamento de métricas por release está disponível em `docs/core/quality-metrics.md`.
+O detalhamento de métricas por release está disponível em `docs/reference/quality-metrics.md`.
 
 ---
 
@@ -234,7 +234,7 @@ Ver: `architecture.md` seção 9.4
 
 ## 5. Débito Técnico
 
-O inventário completo está em `docs/core/technical-debt.md`. A situação de débito técnico melhorou significativamente: dos 7 itens registrados, 6 estão resolvidos. O único item remanescente (DT-007, migration_001) é aceito como decisão consciente — a migração inicial é monolítica por design e será substituída por migrações incrementais na v2.0.0 quando o schema evoluir para PostgreSQL.
+O inventário completo está em `docs/reference/technical-debt.md`. A situação de débito técnico melhorou significativamente: dos 7 itens registrados, 6 estão resolvidos. O único item remanescente (DT-007, migration_001) é aceito como decisão consciente — a migração inicial é monolítica por design e será substituída por migrações incrementais na v2.0.0 quando o schema evoluir para PostgreSQL.
 
 Um novo item de débito técnico foi identificado: o `dashboard.py` com 973 linhas viola SRP e deve ser refatorado em módulos separados (`colors.py`, `formatters.py`, `mock_data.py`). Este refactor está planejado como próximo commit após o fechamento visual.
 

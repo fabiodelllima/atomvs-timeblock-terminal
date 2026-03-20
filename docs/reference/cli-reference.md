@@ -2519,8 +2519,8 @@ Configurações do sistema.
 
 ## Referências
 
-- **Business Rules:** `docs/core/business-rules.md`
-- **Architecture:** `docs/core/architecture.md`
+- **Business Rules:** `docs/reference/business-rules/index.md`
+- **Architecture:** `docs/explanation/architecture.md`
 - **ADR-005:** Resource-first CLI
 - **ADR-018:** Language Standards
 
