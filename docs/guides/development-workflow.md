@@ -115,12 +115,14 @@ Além das verificações por commit, releases devem satisfazer critérios cumula
 
 Cada business rule deve ter rastreabilidade completa, conforme exigido pela disciplina de Engenharia de Requisitos (SWEBOK v4.0, Ch.1 Requirements Traceability):
 
-| Artefato           | Localização                 | Formato                     |
-| ------------------ | --------------------------- | --------------------------- |
-| Requisito (BR)     | docs/reference/business-rules/index.md | BR-DOMAIN-XXX               |
-| Validação (BDD)    | tests/bdd/features/         | Gherkin (Given/When/Then)   |
-| Verificação (Unit) | tests/unit/test_services/   | TestBRDomainXXX             |
-| Implementação      | src/timeblock/services/     | Método no service           |
+| Artefato            | Localização                            | Formato                   |
+| ------------------- | -------------------------------------- | ------------------------- |
+| Requisito (BR)      | docs/reference/business-rules/index.md | BR-DOMAIN-XXX             |
+| Validação (BDD)     | tests/bdd/features/                    | Gherkin (Given/When/Then) |
+| Verificação (Unit)  | tests/unit/test_services/              | TestBRDomainXXX           |
+| Verificação (Integ) | tests/integration/                     | Service + DB real         |
+| Verificação (E2E)   | tests/e2e/                             | CLI/TUI ponta a ponta     |
+| Implementação       | src/timeblock/services/                | Método no service         |
 
 **Verificação rápida:**
 

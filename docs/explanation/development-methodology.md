@@ -68,7 +68,11 @@ O projeto adota técnicas de Engenharia de Requisitos como princípio organizado
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Princípio fundamental:** quando um teste falha, o código está errado, não o teste. Testes validam business rules que são requisitos formais do sistema. Se um teste precisa mudar, a business rule correspondente deve ser alterada primeiro na especificação.
+**Princípio fundamental:**
+
+- Quando um teste falha, o código está errado, não o teste.
+- Testes validam business rules que são requisitos formais do sistema.
+- Se um teste precisa mudar, a business rule correspondente deve ser alterada primeiro na especificação.
 
 ### Mapeamento para Engenharia de Requisitos
 
@@ -114,8 +118,6 @@ Cada vertical slice segue um fluxo de 7 etapas:
 | In Progress    | 1-2        |
 | Code Review    | 2-3        |
 | Done           | Sem limite |
-
-O limite de 1-2 itens In Progress é deliberadamente restritivo. Com um desenvolvedor solo, context switching entre múltiplas BRs desperdiça tempo e aumenta risco de inconsistências.
 
 ---
 
@@ -186,7 +188,8 @@ tests/bdd/
 
 ### Relação com Business Rules
 
-Cada cenário BDD referencia explicitamente a BR que valida, mantendo rastreabilidade bidirecional. Um cenário BDD pode cobrir uma ou mais BRs, mas toda BR com comportamento observável deve ter pelo menos um cenário BDD associado.
+- Cada cenário BDD referencia explicitamente a BR que valida, mantendo rastreabilidade bidirecional.
+- Um cenário BDD pode cobrir uma ou mais BRs, mas toda BR com comportamento observável deve ter pelo menos um cenário BDD associado.
 
 ---
 
@@ -204,11 +207,9 @@ O projeto adota TDD conforme formalizado por Kent Beck em "Test-Driven Developme
 
 O ciclo TDD opera em iterações curtas (minutos, não horas):
 
-**RED:** Escrever um teste que falha. O teste deve ser o mais simples possível, validando exatamente um aspecto da BR. Executar e confirmar que falha pela razão esperada (não por erro de sintaxe ou import).
-
-**GREEN:** Escrever a quantidade mínima de código para o teste passar. Resistir à tentação de implementar funcionalidade adicional. Se o teste pede que uma função retorne True para input X, retornar True literalmente é válido nesta fase.
-
-**REFACTOR:** Com todos os testes verdes, refatorar código de produção e testes para eliminar duplicação, melhorar nomes e simplificar estrutura. Executar testes após cada alteração para garantir que permaneçam verdes.
+- **RED:** Escrever um teste que falha. O teste deve ser o mais simples possível, validando exatamente um aspecto da BR. Executar e confirmar que falha pela razão esperada (não por erro de sintaxe ou import).
+- **GREEN:** Escrever a quantidade mínima de código para o teste passar. Resistir à tentação de implementar funcionalidade adicional. Se o teste pede que uma função retorne True para input X, retornar True literalmente é válido nesta fase.
+- **REFACTOR:** Com todos os testes verdes, refatorar código de produção e testes para eliminar duplicação, melhorar nomes e simplificar estrutura. Executar testes após cada alteração para garantir que permaneçam verdes.
 
 ### Naming Convention (ADR-019)
 
@@ -239,14 +240,14 @@ class TestBRHabit003:
 
 ### Documentos Internos
 
-| Documento          | Conteúdo                | Localização                  |
-| ------------------ | ----------------------- | ---------------------------- |
-| architecture.md    | Camadas, stack, modelos | docs/explanation/architecture.md    |
-| business-rules.md  | 60 BRs formalizadas     | docs/reference/business-rules/index.md  |
-| quality-metrics.md | Métricas e histórico    | docs/reference/quality-metrics.md |
-| cicd-flow.md       | Pipeline e automação    | docs/guides/cicd-flow.md       |
-| sprints.md         | Planejamento ativo      | docs/reference/sprints.md         |
-| sprints-archive.md | Histórico de sprints    | docs/reference/sprints-archive.md |
+| Documento          | Conteúdo                | Localização                            |
+| ------------------ | ----------------------- | -------------------------------------- |
+| architecture.md    | Camadas, stack, modelos | docs/explanation/architecture.md       |
+| business-rules.md  | 60 BRs formalizadas     | docs/reference/business-rules/index.md |
+| quality-metrics.md | Métricas e histórico    | docs/reference/quality-metrics.md      |
+| cicd-flow.md       | Pipeline e automação    | docs/guides/cicd-flow.md               |
+| sprints.md         | Planejamento ativo      | docs/reference/sprints.md              |
+| sprints-archive.md | Histórico de sprints    | docs/reference/sprints-archive.md      |
 
 ### ADRs Relacionadas
 
@@ -268,46 +269,34 @@ As referências abaixo constituem o fundamento teórico do processo de desenvolv
 
 **Engenharia de Requisitos**
 
-INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. **ISO/IEC/IEEE 29148:2018 — Systems and software engineering — Life cycle processes — Requirements engineering.** 2. ed. Geneva: ISO, 2018. Padrão internacional que define processos de engenharia de requisitos, itens de informação e guidelines de rastreabilidade. Fundamenta a cadeia BR -> Test -> Code do projeto.
-
-INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. **ISO/IEC/IEEE 12207:2017 — Systems and software engineering — Software life cycle processes.** Geneva: ISO, 2017. Define processos de ciclo de vida de software complementares à ISO 29148.
-
-IEEE COMPUTER SOCIETY. **Guide to the Software Engineering Body of Knowledge (SWEBOK), Version 4.0.** Hironori Washizaki (Ed.). IEEE Computer Society, 2024. Corpo de conhecimento que organiza as 18 Knowledge Areas da engenharia de software. Chapter 1 (Software Requirements) e Chapter 5 (Software Testing) fundamentam as práticas de especificação e verificação do projeto.
+- INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. **ISO/IEC/IEEE 29148:2018 — Systems and software engineering — Life cycle processes — Requirements engineering.** 2. ed. Geneva: ISO, 2018. Padrão internacional que define processos de engenharia de requisitos, itens de informação e guidelines de rastreabilidade. Fundamenta a cadeia BR -> Test -> Code do projeto.
+- INTERNATIONAL ORGANIZATION FOR STANDARDIZATION. **ISO/IEC/IEEE 12207:2017 — Systems and software engineering — Software life cycle processes.** Geneva: ISO, 2017. Define processos de ciclo de vida de software complementares à ISO 29148.
+- IEEE COMPUTER SOCIETY. **Guide to the Software Engineering Body of Knowledge (SWEBOK), Version 4.0.** Hironori Washizaki (Ed.). IEEE Computer Society, 2024. Corpo de conhecimento que organiza as 18 Knowledge Areas da engenharia de software. Chapter 1 (Software Requirements) e Chapter 5 (Software Testing) fundamentam as práticas de especificação e verificação do projeto.
 
 **Behavior-Driven Development (BDD)**
 
-NORTH, D. Introducing BDD. **Better Software Magazine**, mar. 2006. Artigo fundacional que formalizou BDD como evolução do TDD, introduzindo a mudança de vocabulário de "testes" para "comportamentos" e o formato Given/When/Then. Fonte primária da prática de BDD adotada no projeto.
-
-HOARE, C. A. R. An Axiomatic Basis for Computer Programming. **Communications of the ACM**, v. 12, n. 10, p. 576-580, Oct. 1969. Artigo seminal que define o Hoare Triple {P} S {Q} (precondição, comando, pós-condição). O formato Given/When/Then do BDD é estruturalmente uma aplicação desta lógica à especificação comportamental em linguagem natural.
-
-SMART, J. F. **BDD in Action: Behavior-Driven Development for the Whole Software Lifecycle.** Shelter Island: Manning, 2014. ISBN 978-1-617-29165-4. Referência prática para implementação de BDD com frameworks como Cucumber e pytest-bdd. Complementa o artigo fundacional de North com patterns de adoção em projetos reais.
-
-ADZIC, G. **Specification by Example: How Successful Teams Deliver the Right Software.** Shelter Island: Manning, 2011. ISBN 978-1-617-29008-4. Descreve como equipes de sucesso usam exemplos concretos como especificações executáveis, convergindo com a prática BDD adotada no projeto.
+- NORTH, D. Introducing BDD. **Better Software Magazine**, mar. 2006. Artigo fundacional que formalizou BDD como evolução do TDD, introduzindo a mudança de vocabulário de "testes" para "comportamentos" e o formato Given/When/Then. Fonte primária da prática de BDD adotada no projeto.
+- HOARE, C. A. R. An Axiomatic Basis for Computer Programming. **Communications of the ACM**, v. 12, n. 10, p. 576-580, Oct. 1969. Artigo seminal que define o Hoare Triple {P} S {Q} (precondição, comando, pós-condição). O formato Given/When/Then do BDD é estruturalmente uma aplicação desta lógica à especificação comportamental em linguagem natural.
+- SMART, J. F. **BDD in Action: Behavior-Driven Development for the Whole Software Lifecycle.** Shelter Island: Manning, 2014. ISBN 978-1-617-29165-4. Referência prática para implementação de BDD com frameworks como Cucumber e pytest-bdd. Complementa o artigo fundacional de North com patterns de adoção em projetos reais.
+- ADZIC, G. **Specification by Example: How Successful Teams Deliver the Right Software.** Shelter Island: Manning, 2011. ISBN 978-1-617-29008-4. Descreve como equipes de sucesso usam exemplos concretos como especificações executáveis, convergindo com a prática BDD adotada no projeto.
 
 **Test-Driven Development (TDD)**
 
-BECK, K. **Test-Driven Development: By Example.** Boston: Addison-Wesley, 2003. ISBN 0-321-14653-0. Livro seminal que formaliza o ciclo RED-GREEN-REFACTOR. Fonte primária da prática de TDD adotada no projeto. Define TDD como prática de design, não de teste.
-
-MARTIN, R. C. **Clean Code: A Handbook of Agile Software Craftsmanship.** Upper Saddle River: Prentice Hall, 2008. ISBN 978-0-13-235088-4. Formaliza as "Three Laws of TDD" como regras prescritivas que operacionalizam o ciclo de Beck. As 3 Leis aplicadas no projeto derivam desta formulação.
+- BECK, K. **Test-Driven Development: By Example.** Boston: Addison-Wesley, 2003. ISBN 0-321-14653-0. Livro seminal que formaliza o ciclo RED-GREEN-REFACTOR. Fonte primária da prática de TDD adotada no projeto. Define TDD como prática de design, não de teste.
+- MARTIN, R. C. **Clean Code: A Handbook of Agile Software Craftsmanship.** Upper Saddle River: Prentice Hall, 2008. ISBN 978-0-13-235088-4. Formaliza as "Three Laws of TDD" como regras prescritivas que operacionalizam o ciclo de Beck. As 3 Leis aplicadas no projeto derivam desta formulação.
 
 **Architecture Decision Records (ADRs)**
 
-NYGARD, M. Documenting Architecture Decisions. **Cognitect Blog**, 15 nov. 2011. Blog post que popularizou ADRs como registros curtos, sequenciais e versionados no repositório do projeto. Formato adotado integralmente pelo ATOMVS (38 ADRs documentados).
-
-KEELING, M.; RUNDE, J. Love Unrequited: The Story of Architecture, Agile, and How Architecture Decision Records Brought Them Together. **IEEE Software**, v. 39, n. 4, 2022. Apresenta evidência empírica sobre o impacto de ADRs em projetos reais.
-
-ZDUN, U. et al. Sustainable Architectural Decisions. **IEEE Software**, v. 30, n. 6, p. 46-53, 2013. Define guidelines e o Y-statement format para decisões arquiteturais sustentáveis, base teórica da organização adr.github.io.
+- NYGARD, M. Documenting Architecture Decisions. **Cognitect Blog**, 15 nov. 2011. Blog post que popularizou ADRs como registros curtos, sequenciais e versionados no repositório do projeto. Formato adotado integralmente pelo ATOMVS (38 ADRs documentados).
+- KEELING, M.; RUNDE, J. Love Unrequited: The Story of Architecture, Agile, and How Architecture Decision Records Brought Them Together. **IEEE Software**, v. 39, n. 4, 2022. Apresenta evidência empírica sobre o impacto de ADRs em projetos reais.
+- ZDUN, U. et al. Sustainable Architectural Decisions. **IEEE Software**, v. 30, n. 6, p. 46-53, 2013. Define guidelines e o Y-statement format para decisões arquiteturais sustentáveis, base teórica da organização adr.github.io.
 
 **Refactoring e Design**
 
-FOWLER, M. **Refactoring: Improving the Design of Existing Code.** 2. ed. Boston: Addison-Wesley, 2018. ISBN 978-0-13-475759-9. Catálogo de refatorações referenciado nas ADRs do projeto (Extract Delegate, Split Phase). Guia para a fase REFACTOR do ciclo TDD.
-
-HUMBLE, J.; FARLEY, D. **Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation.** Boston: Addison-Wesley, 2010. ISBN 978-0-321-60191-9. Fundamenta as práticas de CI/CD, pipeline como gatekeeper de qualidade e deployment automation do projeto.
-
-FOWLER, M. **Patterns of Enterprise Application Architecture.** Boston: Addison-Wesley, 2002. ISBN 978-0-321-12742-6. Padrões arquiteturais de referência para a camada de serviços e persistência do projeto.
+- FOWLER, M. **Refactoring: Improving the Design of Existing Code.** 2. ed. Boston: Addison-Wesley, 2018. ISBN 978-0-13-475759-9. Catálogo de refatorações referenciado nas ADRs do projeto (Extract Delegate, Split Phase). Guia para a fase REFACTOR do ciclo TDD.
+- HUMBLE, J.; FARLEY, D. **Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation.** Boston: Addison-Wesley, 2010. ISBN 978-0-321-60191-9. Fundamenta as práticas de CI/CD, pipeline como gatekeeper de qualidade e deployment automation do projeto.
+- FOWLER, M. **Patterns of Enterprise Application Architecture.** Boston: Addison-Wesley, 2002. ISBN 978-0-321-12742-6. Padrões arquiteturais de referência para a camada de serviços e persistência do projeto.
 
 ---
-
-**Versão do documento:** 3.0.0
 
 **Última atualização:** 15 de Março de 2026
