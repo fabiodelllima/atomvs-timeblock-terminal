@@ -18,9 +18,7 @@ from timeblock.tui.colors import (
     is_bold_status,
     status_color,
     status_icon,
-    status_label,
 )
-from timeblock.tui.formatters import format_duration
 
 
 def compute_agenda_range(instances: list[dict]) -> tuple[int, int]:
@@ -68,7 +66,7 @@ class AgendaPanel(Static):
     def _build_lines(self) -> list[str]:
         """Monta linhas da agenda com régua de 30min.
 
-        Formato: horário ─┼─ nome · duração   ícone substatus
+        Formato: horário ─┼─ nome · ícone
         Bold exclusivo em running/paused. Background colorido nos fills.
         Cada slot de 30min ocupa 2 linhas uniformes.
         """
@@ -107,31 +105,24 @@ class AgendaPanel(Static):
                 nm = inst.get("name", "")
                 st = inst.get("status", "pending")
                 sub = inst.get("substatus")
-                dur = format_duration(inst.get("actual_minutes"))
                 color = status_color(st, sub)
                 icon = status_icon(st, sub)
-                label = status_label(st, sub)
                 fc = fill_char(st, sub)
                 bold = is_bold_status(st)
 
                 fcolor = fill_color(st, sub)
-                fb = f"[{color}]▌[/{color}][{fcolor}]{fc * (fw - 1)}[/{fcolor}]"
-                elapsed = f" {dur}" if dur and st in ("running", "paused") else ""
+                fb = f"[{fcolor}]{fc * fw}[/{fcolor}]"
                 if bold:
-                    ind = f"[bold {color}]{icon} {label}{elapsed}[/bold {color}]"
+                    ind = f"[bold {color}]{icon}[/bold {color}]"
                 else:
-                    ind = f"[{color}]{icon} {label}[/{color}]"
+                    ind = f"[{color}]{icon}[/{color}]"
 
                 if role == "start":
-                    est_min = inst.get("end_minutes", 0) - inst.get("start_minutes", 0)
-                    est_dur = format_duration(est_min) if not dur else dur
                     if bold:
                         nm_fmt = f"[bold {color}]{nm}[/bold {color}]"
-                        dur_fmt = f"[{color}]{est_dur}[/{color}]"
                     else:
                         nm_fmt = f"[{color}]{nm}[/{color}]"
-                        dur_fmt = f"[dim]{est_dur}[/dim]"
-                    out.append(f"  {tl} [dim]─┬─[/dim] {nm_fmt} [dim]·[/dim] {dur_fmt}  {ind}")
+                    out.append(f"  {tl} [dim]─┼─[/dim] {nm_fmt} [dim]·[/dim] {ind}")
                     out.append(f"         [dim]│[/dim] {fb}")
                 else:
                     out.append(f"  {tl}  [dim]│[/dim] {fb}")
