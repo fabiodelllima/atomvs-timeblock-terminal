@@ -1,14 +1,14 @@
 # MkDocs Configuration - ATOMVS Time Planner Terminal
-# Atualizado: 2026-03-19 (ADR-039 Fase 1 — Diátaxis)
+# Atualizado: 2026-03-19 (ADR-039 Fases 1-3 — Diátaxis)
 # Referência: ADR-027 (Tooling), ADR-039 (Framework)
 
-site_name: ATOMVS TimeBlock Planner
-site_description: CLI para gerenciamento de tempo baseada em Time Blocking e Atomic Habits
+site_name: ATOMVS Time Planner Terminal
+site_description: Terminal app para gerenciamento de tempo baseada em Time Blocking e Atomic Habits
 site_author: Fábio de Lima
-site_url: https://github.com/fabiodelllima/timeblock-organizer
-repo_name: timeblock-organizer
-repo_url: https://github.com/fabiodelllima/timeblock-organizer
-edit_uri: edit/main/docs/
+site_url: https://gitlab.com/delimafabio/atomvs-timeblock-terminal
+repo_name: atomvs-timeblock-terminal
+repo_url: https://github.com/fabiodelllima/atomvs-timeblock-terminal
+# edit_uri removido — GitHub é mirror read-only
 
 # ==============================================================================
 # THEME
@@ -59,16 +59,33 @@ nav:
   # GUIDES — How-to práticos (Diátaxis)
   # --------------------------------------------------------------------------
   - Guides:
+      - Workflow de Desenvolvimento: guides/development-workflow.md
       - Padrões de Teste: guides/testing-patterns.md
+      - Checklist de Teste Manual: guides/manual-testing-checklist.md
+      - Catálogo de Refatorações: guides/refactoring-catalog.md
       - Otimização CI: guides/ci-optimization.md
       - Fluxo CI/CD: guides/cicd-flow.md
-      # Fase 3: guides/development-workflow.md (extraído de development.md §7-10)
 
   # --------------------------------------------------------------------------
   # REFERENCE — Consulta factual (Diátaxis)
   # --------------------------------------------------------------------------
   - Reference:
-      - Regras de Negócio: core/business-rules.md  # Fase 2: quebrar em reference/business-rules/
+      - Regras de Negócio:
+          - Índice: reference/business-rules/index.md
+          - Routine: reference/business-rules/br-routine.md
+          - Habit: reference/business-rules/br-habit.md
+          - HabitInstance: reference/business-rules/br-habitinstance.md
+          - Skip: reference/business-rules/br-skip.md
+          - Streak: reference/business-rules/br-streak.md
+          - Task: reference/business-rules/br-task.md
+          - Timer: reference/business-rules/br-timer.md
+          - Event Reordering: reference/business-rules/br-event.md
+          - Validações Globais: reference/business-rules/br-validation.md
+          - CLI: reference/business-rules/br-cli.md
+          - Tag: reference/business-rules/br-tag.md
+          - TUI: reference/business-rules/br-tui.md
+          - Data: reference/business-rules/br-data.md
+          - Testing: reference/business-rules/br-testing.md
       - Referência CLI: reference/cli-reference.md
       - Dívida Técnica: reference/technical-debt.md
       - Métricas de Qualidade: reference/quality-metrics.md
@@ -76,21 +93,27 @@ nav:
       - Sprints: reference/sprints.md
       - Histórico Sprints: reference/sprints-archive.md
       - Roadmap: reference/roadmap.md
+      - TUI:
+          - Color System: reference/tui/color-system.md
+          - Dashboard Cards Spec: reference/tui/dashboard-cards-spec.md
+          - Dashboard Mockup v4: reference/tui/dashboard-mockup-v4.md
+          - Box Drawing: reference/tui/box-drawing.md
+          - Sprint Notes: reference/tui/dashboard-sprint-notes.md
+          - Routines Weekly Mockup: reference/tui/routines-weekly-mockup.md
+          - Routines Weekly v1: reference/tui/routines-weekly-mockup-v1.md
 
   # --------------------------------------------------------------------------
   # EXPLANATION — Entendimento conceitual (Diátaxis)
   # --------------------------------------------------------------------------
   - Explanation:
       - Arquitetura: explanation/architecture.md
-      - Metodologia: core/development.md  # Fase 3: extrair para explanation/development-methodology.md
-      # Fase 2: explanation/domain-concepts.md (extraído de business-rules.md §1-2)
+      - Metodologia de Desenvolvimento: explanation/development-methodology.md
+      - Conceitos do Domínio: explanation/domain-concepts.md
 
   # --------------------------------------------------------------------------
   # DECISIONS — arc42 §9 (transversal)
   # --------------------------------------------------------------------------
   - Decisões (ADRs):
-      - Índice: decisions/README.md
-      - Template: decisions/template.md
       - Fundacionais:
           - "ADR-001: SQLModel ORM": decisions/ADR-001-sqlmodel-orm.md
           - "ADR-002: Typer CLI": decisions/ADR-002-typer-cli.md
@@ -141,7 +164,6 @@ nav:
   # DIAGRAMS — arc42 §5-7 (transversal)
   # --------------------------------------------------------------------------
   - Diagramas:
-      - Visão Geral: diagrams/README.md
       - C4 Model:
           - "L1: System Context": diagrams/c4-model/L1-system-context.md
           - "L2: Containers": diagrams/c4-model/L2-containers.md
@@ -165,26 +187,6 @@ nav:
       - Infraestrutura:
           - Deployment: diagrams/infrastructure/deployment.md
 
-  # --------------------------------------------------------------------------
-  # TESTING — Cenários e estratégia (transversal)
-  # --------------------------------------------------------------------------
-  - Testes:
-      - Visão Geral: testing/README.md
-      - Filosofia: testing/testing-philosophy.md
-      - Estratégia: testing/test-strategy.md
-      - Matriz de Rastreabilidade: testing/requirements-traceability-matrix.md
-      - Cenários E2E: testing/e2e-scenarios.md
-      - Cenários:
-          - Conflict Detection: testing/scenarios/conflict-detection.md
-          - Event Creation: testing/scenarios/event-creation.md
-          - Event Reordering: testing/scenarios/event-reordering.md
-          - Habit Generation: testing/scenarios/habit-generation.md
-          - Timer Lifecycle: testing/scenarios/timer-lifecycle.md
-      - Fixtures:
-          - Visão Geral: testing/fixtures/README.md
-          - Database: testing/fixtures/database.md
-          - Time: testing/fixtures/time.md
-
   # API Reference — preparado para mkdocstrings (v1.5.0+)
   # - API Reference:
   #     - Services: api/services.md
@@ -198,16 +200,6 @@ plugins:
       lang:
         - pt
         - en
-  # mkdocstrings — descomentar quando implementar API Reference
-  # - mkdocstrings:
-  #     handlers:
-  #       python:
-  #         options:
-  #           docstring_style: google
-  #           show_source: true
-  #           show_root_heading: true
-  #           members_order: source
-  #           heading_level: 2
 
 # ==============================================================================
 # MARKDOWN EXTENSIONS
@@ -248,5 +240,7 @@ markdown_extensions:
 # ==============================================================================
 extra:
   social:
+    - icon: fontawesome/brands/gitlab
+      link: https://gitlab.com/delimafabio/atomvs-timeblock-terminal
     - icon: fontawesome/brands/github
-      link: https://github.com/fabiodelllima/timeblock-organizer
+      link: https://github.com/fabiodelllima/atomvs-timeblock-terminal
