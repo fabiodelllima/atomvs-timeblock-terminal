@@ -19,6 +19,7 @@ A variável de ambiente `TIMEBLOCK_DB_PATH` existe como override, mas não é do
 ### Path canônico via XDG Base Directory
 
 O `get_db_path()` passa a usar o XDG Base Directory Specification como padrão, alinhando o banco com os logs que já seguem esse padrão:
+
 ```python
 def get_db_path() -> str:
     db_path = os.getenv("TIMEBLOCK_DB_PATH")
@@ -36,6 +37,7 @@ A TUI chama `create_db_and_tables()` no `on_mount` do `DashboardScreen` se o ban
 ### Migração do banco existente
 
 O banco antigo em `src/data/timeblock.db` permanece funcional via `TIMEBLOCK_DB_PATH`. Usuários existentes precisam migrar manualmente:
+
 ```bash
 cp src/data/timeblock.db ~/.local/share/atomvs/atomvs.db
 ```
