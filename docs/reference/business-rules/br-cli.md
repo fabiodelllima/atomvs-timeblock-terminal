@@ -109,3 +109,27 @@ $ habit create --title "Academia" --start 07:00
 - `test_br_cli_003_error_messages_ptbr`
 - `test_br_cli_003_success_messages_ptbr`
 - `test_br_cli_003_help_texts_ptbr`
+
+---
+
+### BR-CLI-004: Logging Estruturado nos Commands (NOVA 21/03/2026)
+
+**Descrição:** Todos os commands da CLI devem gerar log entries estruturados (JSON Lines), registrando entrada, saída e erros de cada operação. Operações via CLI que modifiquem o banco devem ser rastreáveis nos logs, assim como as operações da TUI já são via `service_action`.
+
+**Decisão arquitetural:** DT-058
+
+**Regras:**
+
+1. Cada command Typer deve logar: nome do comando, parâmetros recebidos, resultado (sucesso/erro)
+2. Formato: JSON Lines no mesmo arquivo da TUI (`~/.local/share/atomvs/logs/atomvs.jsonl`)
+3. Implementação via decorator ou middleware aplicável a todos os commands
+4. Erros devem incluir traceback completo no log (sem exibir ao usuário)
+5. Operações de leitura (list, show) logam em nível DEBUG; operações de escrita (create, delete, update) em nível INFO
+6. Logger compartilhado com a TUI (`timeblock.utils.logger.get_logger`)
+
+**Testes:**
+
+- `test_br_cli_004_create_command_logs_info`
+- `test_br_cli_004_delete_command_logs_info`
+- `test_br_cli_004_error_logs_traceback`
+- `test_br_cli_004_list_command_logs_debug`
