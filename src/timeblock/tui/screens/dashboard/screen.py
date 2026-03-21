@@ -17,6 +17,7 @@ from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.events import Key
 from textual.widgets import Static
 
+from timeblock.database.engine import create_db_and_tables
 from timeblock.models import HabitInstance
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
@@ -69,6 +70,7 @@ class DashboardScreen(Static):
 
     def on_mount(self) -> None:
         """Inicializa o dashboard (DT-023: garante instâncias do dia)."""
+        create_db_and_tables()
         loader.ensure_today_instances()
         self.refresh_data()
         self.app.set_focus(None)
