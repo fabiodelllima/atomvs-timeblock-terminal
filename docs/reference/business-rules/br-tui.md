@@ -1375,3 +1375,66 @@ src/timeblock/tui/styles/
 
 - `test_br_tui_026_habits_panel_max_12`
 - `test_br_tui_026_tasks_panel_max_9`
+
+---
+
+### BR-TUI-027: Renderização Multi-Coluna para Sobreposição na Agenda (NOVA 21/03/2026)
+
+**Descrição:** Quando dois ou mais hábitos possuem horários sobrepostos, a Agenda do Dia deve renderizar os blocos lado a lado em colunas proporcionais, similar ao Google Calendar.
+
+**Decisão arquitetural:** DT-045
+
+**Regras:**
+
+1. Eventos sobrepostos são agrupados em clusters de overlap (Union-Find)
+2. Cada evento recebe uma coluna via algoritmo greedy (primeira coluna livre)
+3. Largura de cada coluna é proporcional: `(fw - separadores) / n_colunas`
+4. Separador visual entre colunas é `┆` (tracejado leve)
+5. Nome do hábito é truncado para caber na largura da coluna
+6. Conectores usam `─┼─` (start) e `│` (fill)
+7. Apenas ícone de status é exibido (sem label textual nem duração)
+8. Suporte a 2+ colunas simultâneas
+
+**Testes:**
+
+- `test_br_tui_027_overlap_two_events_side_by_side`
+- `test_br_tui_027_overlap_three_events_columns`
+- `test_br_tui_027_no_overlap_single_column`
+
+### BR-TUI-028: Inicialização de Banco no Startup da TUI (NOVA 21/03/2026)
+
+**Descrição:** A TUI deve garantir que o banco de dados existe e possui todas as tabelas necessárias antes de qualquer operação. Se o banco não existir ou estiver vazio, a TUI deve criá-lo automaticamente.
+
+**Decisão arquitetural:** DT-056
+
+**Regras:**
+
+1. No `on_mount` do DashboardScreen, antes de `ensure_today_instances`, verificar se as tabelas existem
+2. Se tabelas não existirem, chamar `create_db_and_tables()` automaticamente
+3. Se `get_db_path()` resolver para path inexistente, usar XDG path canônico (`~/.local/share/atomvs/atomvs.db`) como fallback
+4. Exibir notificação ao usuário quando banco é inicializado pela primeira vez
+5. Erros de banco em `service_action` devem gerar `app.notify()` em vez de falha silenciosa
+
+**Testes:**
+
+- `test_br_tui_028_startup_creates_tables_if_missing`
+- `test_br_tui_028_service_action_notifies_db_errors`
+
+### BR-TUI-029: Feedback de Erro em Operações Destrutivas (NOVA 21/03/2026)
+
+**Descrição:** Operações destrutivas na TUI (delete de rotina, delete de hábito) devem exibir feedback visual ao usuário quando falham, em vez de fechar o modal silenciosamente.
+
+**Decisão arquitetural:** DT-057
+
+**Regras:**
+
+1. Callbacks de `ConfirmDialog` devem verificar o retorno de `service_action`
+2. Se `service_action` retornar erro, exibir `app.notify(error, severity="error")`
+3. Delete de rotina com hábitos vinculados deve informar: "Rotina possui N hábitos. Delete os hábitos primeiro ou use a CLI para cascade delete."
+4. O modal não deve fechar quando a operação falha — manter aberto com mensagem de erro
+5. Padrão aplicável a todas as operações destrutivas futuras
+
+**Testes:**
+
+- `test_br_tui_029_delete_routine_with_habits_shows_error`
+- `test_br_tui_029_confirm_dialog_stays_open_on_failure`
