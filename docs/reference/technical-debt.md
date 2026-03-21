@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.19.0
+**Versão:** 2.20.0
 
 **Status:** SSOT
 
@@ -289,6 +289,27 @@
 - **Impacto:** Ao pressionar v em hábito com timer ativo (status running), nada acontece. O DT-036 foi marcado como resolvido mas o handler pode não estar sendo acionado. O teste e2e test_timer_stop_marks_habit_done passa — investigar diferença entre teste e uso real.
 - **Correção:** Verificar se HabitsPanel.\_action_done detecta status "running" no dict do item (item.get("status") == "running"). Pode ser que o loader retorne "running" diferente do que o panel espera. Verificar se o get_selected_item retorna o item atualizado após timer start.
 - **BRs afetadas:** BR-TUI-021, BR-TUI-023
+
+### DT-056: TUI conecta a banco sem tabelas — falha silenciosa total (CRITICA)
+
+- **Descoberto:** 21/03/2026 (análise de logs da TUI)
+- **Impacto:** A TUI cria/conecta ao banco via `get_db_path()` (path relativo `src/data/timeblock.db`), mas quando executada de outro diretório de trabalho, o path relativo resolve para um banco inexistente. O SQLModel cria o arquivo vazio (0 bytes) sem tabelas. Todas as operações da TUI falham silenciosamente via `service_action` — `no such table: routines`, `no such table: tasks`, `no such table: time_log`, `no such table: habitinstance`. O dashboard renderiza placeholders vazios sem nenhuma indicação de erro ao usuário. A CLI funciona porque é executada a partir do diretório do projeto.
+- **Correção:** (1) `get_db_path()` deve usar path absoluto ou XDG path canônico, nunca relativo ao CWD. (2) A TUI deve chamar `create_db_and_tables()` no startup se o banco não tiver tabelas. (3) `service_action` deve notificar o usuário quando ocorrem erros de banco (atualmente engole tudo).
+- **BRs afetadas:** Todas — nenhuma funcionalidade da TUI opera sem banco.
+
+### DT-057: Delete de rotina falha silenciosamente na TUI (ALTA)
+
+- **Descoberto:** 21/03/2026 (teste manual da dashboard)
+- **Impacto:** O ConfirmDialog de deleção de rotina fecha com Enter, o callback `on_confirm` executa `service_action(delete_routine)`, mas o delete falha por FK RESTRICT (rotina tem hábitos vinculados). O `service_action` captura o `OperationalError` e retorna `(None, "Erro interno")`, mas o callback ignora o retorno — nenhuma notificação é exibida ao usuário. A rotina permanece ativa como se nada tivesse acontecido. A CLI trata esse caso corretamente: lista os hábitos vinculados e pede confirmação para cascade delete.
+- **Correção:** (1) `on_confirm` em `crud_routines.py` deve verificar o retorno de `service_action` e exibir `app.notify(error)` se houver erro. (2) Avaliar se a TUI deve oferecer cascade delete (como a CLI) ou apenas informar que a rotina tem hábitos e não pode ser deletada.
+- **BRs afetadas:** BR-ROUTINE-002 (soft delete), BR-TUI-016 (CRUD de rotinas)
+
+### DT-058: Logging ausente na CLI — apenas TUI loga via service_action (MEDIA)
+
+- **Descoberto:** 21/03/2026 (análise de logs)
+- **Impacto:** Apenas chamadas via `service_action` (exclusivo da TUI) geram log entries. Operações via CLI (commands Typer) não passam por esse wrapper e não geram nenhum log. Operações externas à TUI que modifiquem o banco (create, delete, update via CLI) são invisíveis nos logs, dificultando diagnóstico de inconsistências entre CLI e TUI.
+- **Correção:** Adicionar logging estruturado nos commands da CLI, idealmente via decorator ou middleware que capture entrada, saída e erros de cada comando.
+- **BRs afetadas:** Nenhuma diretamente — observabilidade.
 
 ## 2. Detalhamento de Itens Resolvidos
 
