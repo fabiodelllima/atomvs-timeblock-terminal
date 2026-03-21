@@ -284,3 +284,38 @@ habit log INSTANCE_ID --duration 90
 - `test_br_timer_008_filter_by_date_range`
 - `test_br_timer_008_returns_empty_list`
 - `test_br_timer_007_validates_times`
+
+---
+
+### BR-TIMER-009: Registro de Motivo de Pausa (NOVA 21/03/2026)
+
+**Descrição:** Quando o usuário dá resume após uma pausa, a TUI deve oferecer um modal opcional para registrar o que foi feito durante o intervalo. O registro é classificado por tags de atividade, permitindo mapeamento de padrões de procrastinação e uso de tempo entre blocos.
+
+**Regras:**
+
+1. Ao pressionar resume (após pause), exibir modal com campo de descrição e select de tag
+2. Tags de pausa são pré-definidas: foco_perdido, descanso, urgencia, alimentacao, higiene, redes_sociais, outro
+3. O modal é opcional — usuário pode pular clicando "Continuar sem registrar"
+4. Se registrado, o motivo é salvo como `PauseNote` vinculado ao `TimeLog` atual
+5. Cada `TimeLog` pode ter múltiplos `PauseNote` (uma pausa pode acontecer várias vezes)
+6. O timer resume imediatamente após fechar o modal (com ou sem registro)
+7. Métricas de pausa são agregáveis por tag para análise de padrões (ex: 40% foco_perdido, 30% redes_sociais)
+
+**Modelo de dados proposto:**
+
+```python
+PauseNote:
+  id: int (PK)
+  time_log_id: int (FK → time_log.id)
+  tag: PauseTag (enum)
+  description: str | None
+  created_at: datetime
+```
+
+**Testes:**
+
+- `test_br_timer_009_resume_shows_pause_modal`
+- `test_br_timer_009_skip_modal_resumes_immediately`
+- `test_br_timer_009_pause_note_saved_with_tag`
+- `test_br_timer_009_multiple_pauses_multiple_notes`
+- `test_br_timer_009_metrics_aggregate_by_tag`
