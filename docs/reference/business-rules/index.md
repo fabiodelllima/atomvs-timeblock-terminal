@@ -39,6 +39,4 @@ Os conceitos introdutórios e o glossário do domínio estão em [Introdução e
 
 ---
 
-**Última atualização em:** 19 de Marco de 2026
-
-**Total de regras:** 104 BRs
+**Total de regras:** 109 BRs
