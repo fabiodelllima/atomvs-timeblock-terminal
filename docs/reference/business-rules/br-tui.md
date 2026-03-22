@@ -1438,3 +1438,137 @@ src/timeblock/tui/styles/
 
 - `test_br_tui_029_delete_routine_with_habits_shows_error`
 - `test_br_tui_029_confirm_dialog_stays_open_on_failure`
+
+---
+
+### BR-TUI-030: Paginação Temporal da Agenda (NOVA 22/03/2026)
+
+**Descrição:** Agenda exibe um dia por vez com navegação temporal de -3 a +3 dias.
+
+**Decisão arquitetural:** ADR-041
+
+**Regras:**
+
+1. Agenda exibe um dia por vez. Padrão: dia atual (hoje)
+2. Navegação via `←` ou `h` (dia anterior) e `→` ou `l` (dia seguinte)
+3. Range permitido: hoje -3 até hoje +3 (7 dias total)
+4. Tecla `0` ou `Home` retorna para hoje
+5. Header exibe data do dia selecionado
+6. Indicador visual quando dia != hoje (`◀` para passados, `▶` para futuros no BorderTitle do header)
+7. Dias passados: hábitos com status final (done/skipped). Ações de edição permitidas, timer desabilitado
+8. Dias futuros: instances geradas sob demanda via `loader.ensure_instances(date)`. Status pending. Timer desabilitado
+9. Mudar de dia recarrega agenda + instances + panels do dia selecionado
+10. Footer inclui `←→ dia` nos keybindings visíveis
+
+**Cenários BDD planejados:**
+```gherkin
+Scenario: Navigate to previous day
+  Given the dashboard is showing today's agenda
+  When I press the left arrow key
+  Then the agenda should display yesterday's habits
+  And the header should show yesterday's date
+
+Scenario: Navigate beyond range limit
+  Given the dashboard is showing today -3
+  When I press the left arrow key
+  Then the agenda should remain on today -3
+  And no navigation should occur
+
+Scenario: Return to today
+  Given the dashboard is showing a past day
+  When I press the 0 key
+  Then the agenda should display today's habits
+  And the header should show today's date
+```
+
+**Testes:**
+
+- `test_br_tui_030_navigate_previous_day`
+- `test_br_tui_030_navigate_next_day`
+- `test_br_tui_030_range_limit_minus3`
+- `test_br_tui_030_range_limit_plus3`
+- `test_br_tui_030_return_to_today`
+- `test_br_tui_030_timer_disabled_past_day`
+
+---
+
+### BR-TUI-031: Scroll Horizontal da Agenda (NOVA 22/03/2026)
+
+**Descrição:** Scroll horizontal interno no painel da agenda quando conteúdo de blocos excede a viewport.
+
+**Decisão arquitetural:** ADR-041
+
+**Regras:**
+
+1. Scroll horizontal ativa quando conteúdo interno (colunas de blocos) excede a largura visível do painel
+2. Input primário: Shift + scroll wheel do mouse
+3. Input alternativo teclado: Shift+h (esquerda) e Shift+l (direita)
+4. Margem de horas (coluna esquerda com `HH:MM │`) permanece fixa — não scrolla horizontalmente
+5. Indicador de overflow à direita: `→` no BorderTitle do painel quando há conteúdo oculto à direita
+6. Indicador de overflow à esquerda: `←` no BorderTitle quando scrollou para a direita e há conteúdo oculto à esquerda
+7. `← →` sem Shift sempre muda dia (BR-TUI-030). Nunca faz scroll horizontal. Sem ambiguidade
+
+**Nota:** BR-TUI-030-R2 define `← →` para navegação de dia. BR-TUI-031-R3 define `Shift+h/l` para scroll horizontal. Modifier key (Shift) diferencia as ações.
+
+**Testes:**
+
+- `test_br_tui_031_scroll_h_activates_on_overflow`
+- `test_br_tui_031_hours_margin_fixed_on_scroll`
+- `test_br_tui_031_overflow_indicator_right`
+- `test_br_tui_031_overflow_indicator_left`
+- `test_br_tui_031_arrow_keys_navigate_day_not_scroll`
+
+---
+
+### BR-TUI-032: Renderização de Blocos de Tempo na Agenda (NOVA 22/03/2026)
+
+**Descrição:** Blocos de tempo são retângulos contínuos com granularidade de 15min, sem interrupção por linhas horizontais.
+
+**Decisão arquitetural:** ADR-041
+
+**Regras — Granularidade:**
+
+1. Cada linha da agenda corresponde a 15 minutos
+2. Labels de hora exibidos a cada 2 linhas (30min). Linha 1 do slot: `HH:MM`. Linha 2: vazio na coluna de hora
+3. Blocos de tempo iniciam e terminam em qualquer múltiplo de 15min (:00, :15, :30, :45)
+
+**Regras — Renderização de bloco:**
+
+4. Primeira linha do bloco (horário de início): `{título} {ícone_status}`. Sem `▌`, sem cor de fundo. Texto limpo
+5. Linhas seguintes do bloco: `▌{cor_sólida}` — accent bar + preenchimento
+6. `▌` (half block esquerdo) na cor saturada do hábito (paleta Catppuccin Mocha)
+7. Fundo do bloco (após `▌`) na cor suave da mesma família
+8. Ícones de status preservam padrão existente: `·` pending, `▶` running, `✓` done, `⏭` skipped, `⏸` paused
+9. Nenhuma linha horizontal (`───`) atravessa um bloco de tempo
+
+**Regras — Término de bloco:**
+
+10. A linha correspondente ao horário de término do bloco AINDA exibe cor (`▌░░░`). A linha seguinte é livre
+11. Se nenhum bloco inicia na linha seguinte ao término: exibe pontilhado (`· · ·`) ou vazio
+12. Se outro bloco inicia exatamente no horário de término: o título do novo bloco substitui diretamente — sem gap, sem cor residual do bloco anterior
+
+**Regras — Multi-coluna (sobreposição):**
+
+13. Largura mínima por coluna: 18 caracteres. Colunas não encolhem abaixo disso
+14. Gap entre colunas: 1 caractere vazio
+15. Título truncado com reticências se exceder largura da coluna
+16. Lógica de overlap: union-find + greedy column assignment (preserva implementação existente de DT-045)
+
+**Regras — Áreas vazias:**
+
+17. Linhas sem bloco em nenhuma coluna: pontilhado sutil (`· · · ·`)
+18. Linhas sem bloco em uma coluna mas com bloco em outra: espaço vazio na coluna sem bloco
+
+**Exemplos de referência:** ver `docs/reference/agenda-panel-mockup-reference.md`
+
+**Testes:**
+
+- `test_br_tui_032_block_first_line_title_icon`
+- `test_br_tui_032_block_body_accent_bar_color`
+- `test_br_tui_032_no_horizontal_lines_through_blocks`
+- `test_br_tui_032_end_time_line_has_color`
+- `test_br_tui_032_consecutive_blocks_no_gap`
+- `test_br_tui_032_minimum_column_width_18`
+- `test_br_tui_032_empty_area_dotted`
+- `test_br_tui_032_granularity_15min`
+
