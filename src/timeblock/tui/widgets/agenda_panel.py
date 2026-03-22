@@ -1,14 +1,13 @@
-"""AgendaPanel - Régua de horas com blocos coloridos por status (BR-TUI-003).
+"""AgendaPanel - Régua de horas com blocos coloridos por status.
 
-BR-TUI-003-R13: Régua adaptativa 06:00-22:00.
+BR-TUI-003-R13: Régua adaptativa 05:00-23:30.
 BR-TUI-003-R15: Auto-scroll na hora atual.
-BR-TUI-003-R16: Marcador ▸ no slot atual.
-BR-TUI-003-R17: Indicador de tempo livre.
-BR-TUI-003-R26: Cores temporais na régua.
+BR-TUI-032: Renderização de blocos contínuos com granularidade de 15min.
 """
 
 from datetime import datetime
 
+from textual.widget import Widget
 from textual.widgets import Static
 
 from timeblock.tui.colors import (
@@ -47,7 +46,7 @@ def compute_agenda_range(instances: list[dict]) -> tuple[int, int]:
 
 class AgendaPanel(Static):
     can_focus = True
-    """Agenda vertical com régua de 30min e blocos proporcionais."""
+    """Agenda vertical com régua de 15min e blocos contínuos."""
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -137,69 +136,89 @@ class AgendaPanel(Static):
         return col_of, total_cols_of
 
     def _build_lines(self) -> list[str]:
-        """Monta linhas da agenda com régua de 30min e sobreposição multi-coluna.
+        """Monta linhas da agenda com granularidade de 15min (BR-TUI-032).
 
-        Formato: horário ─┼─ nome · ícone  ┆  nome · ícone
-        Eventos sobrepostos são renderizados lado a lado com separador ┆.
-        Bold exclusivo em running/paused. Background colorido nos fills.
-        Cada slot de 30min ocupa 2 linhas uniformes.
+        Cada linha visual = 15 minutos. Labels de hora a cada 30min.
+        Linha de início: título + ícone (texto limpo, sem accent bar).
+        Linhas de corpo: accent bar + fill char colorido.
+        R10: linha do end_minutes ainda tem cor.
+        R12: título de bloco consecutivo substitui corpo do anterior.
+        Sem linhas horizontais atravessando blocos (BR-TUI-032-R9).
         """
         instances = self._instances
         now = datetime.now()
         cur_h, cur_m = now.hour, now.minute
         out: list[str] = []
-        fw = 38  # fill width total
+        min_col_w = 18  # BR-TUI-032-R13: largura mínima por coluna
+        fw = 38  # largura total da área de conteúdo
 
         sorted_inst = sorted(instances, key=lambda x: x.get("start_minutes", 0))
         col_of, total_cols_of = self._assign_columns(sorted_inst)
 
-        # Mapeia slot → lista de (inst, role, col)
-        slot_info: dict[int, list[tuple[dict, str, int]]] = {}
+        # Mapa: linha de 15min → [(inst, role, col)]
+        # role: "start" (título) ou "body" (accent bar + fill)
+        line_info: dict[int, list[tuple[dict, str, int]]] = {}
         for inst in sorted_inst:
             sm = inst.get("start_minutes", 0)
             em = inst.get("end_minutes", sm + 60)
-            si = sm // 30
-            ei = max(si + 1, -(-em // 30))
             col = col_of[id(inst)]
-            for i, s in enumerate(range(si, ei)):
-                if s not in slot_info:
-                    slot_info[s] = []
-                slot_info[s].append((inst, "start" if i == 0 else "fill", col))
+            start_line = sm // 15
+            last_temporal = (em - 1) // 15
+            r10_line = em // 15
 
-        def _tl(h: int, m: int) -> str:
+            # R10 só se aplica quando o bloco tem linhas de corpo
+            # (bloco > 15min). Bloco mínimo de 15min = só título.
+            if last_temporal > start_line:
+                display_end = r10_line
+            else:
+                display_end = start_line
+
+            for li in range(start_line, display_end + 1):
+                if li not in line_info:
+                    line_info[li] = []
+                role = "start" if li == start_line else "body"
+                line_info[li].append((inst, role, col))
+
+        def _time_label(h: int, m: int) -> str:
+            """Label de hora com destaque no slot atual (BR-TUI-003-R16)."""
             if h == cur_h and m <= cur_m < m + 30:
                 return f"[bold {C_ACCENT}]{now.strftime('%H:%M')}[/bold {C_ACCENT}]"
             return f"[dim]{h:02d}:{m:02d}[/dim]"
 
+        # Converte range de 30min slots para linhas de 15min
         range_start, range_end = compute_agenda_range(instances)
-        sep = " [dim]┆[/dim] "
+        line_start = range_start * 2
+        line_end = range_end * 2 + 1
 
-        for idx in range(range_start, range_end + 1):
-            h = idx // 2
-            m = (idx % 2) * 30
-            tl = _tl(h, m)
+        for li in range(line_start, line_end + 1):
+            minute = li * 15
+            h = minute // 60
+            m = minute % 60
+            show_label = m % 30 == 0
 
-            entries = slot_info.get(idx, [])
+            if show_label:
+                prefix = f"  {_time_label(h, m)}  [dim]│[/dim]"
+            else:
+                prefix = "         [dim]│[/dim]"
+
+            entries = line_info.get(li, [])
 
             if not entries:
-                out.append(f"  {tl}  [dim]│[/dim]")
-                out.append("         [dim]│[/dim]")
+                out.append(prefix)
                 continue
 
-            # Colunas para este slot
+            # Total de colunas para esta linha
             n_cols = max(total_cols_of[id(e[0])] for e in entries)
-            sep_chars = 3 * (n_cols - 1)  # " ┆ " = 3 chars visuais
-            col_w = max(1, (fw - sep_chars) // n_cols)
+            gap = n_cols - 1  # BR-TUI-032-R14: 1 char entre colunas
+            col_w = max(min_col_w, (fw - gap) // n_cols)
 
-            # Indexar por coluna
+            # Indexar por coluna; "start" vence "body" (R12)
             col_map: dict[int, tuple[dict, str]] = {}
             for inst, role, col in entries:
-                col_map[col] = (inst, role)
+                if col not in col_map or role == "start":
+                    col_map[col] = (inst, role)
 
-            has_start = any(role == "start" for _, role, _ in entries)
-            header_parts: list[str] = []
-            fill_parts: list[str] = []
-
+            parts: list[str] = []
             for c in range(n_cols):
                 if c in col_map:
                     inst, role = col_map[c]
@@ -212,39 +231,34 @@ class AgendaPanel(Static):
                     bold = is_bold_status(st)
                     fcolor = fill_color(st, sub)
 
-                    fb = f"[{fcolor}]{fc * col_w}[/{fcolor}]"
-
                     if role == "start":
-                        max_nm = max(1, col_w - 4)
-                        display_nm = nm[:max_nm] if len(nm) > max_nm else nm
+                        # Título + ícone, sem accent bar (BR-TUI-032-R4)
+                        max_nm = max(1, col_w - 5)
+                        if len(nm) > max_nm:
+                            display_nm = nm[: max(1, max_nm - 1)] + "\u2026"
+                        else:
+                            display_nm = nm
                         if bold:
-                            header_parts.append(
+                            parts.append(
                                 f"[bold {color}]{display_nm}[/bold {color}]"
-                                f" [dim]·[/dim] "
+                                f" [dim]\u00b7[/dim] "
                                 f"[bold {color}]{icon}[/bold {color}]"
                             )
                         else:
-                            header_parts.append(
+                            parts.append(
                                 f"[{color}]{display_nm}[/{color}]"
-                                f" [dim]·[/dim] "
+                                f" [dim]\u00b7[/dim] "
                                 f"[{color}]{icon}[/{color}]"
                             )
                     else:
-                        header_parts.append(fb)
-
-                    fill_parts.append(fb)
+                        # Corpo: accent bar + fill (BR-TUI-032-R5)
+                        parts.append(
+                            f"[{color}]\u258c[/{color}][{fcolor}]{fc * (col_w - 1)}[/{fcolor}]"
+                        )
                 else:
-                    header_parts.append(" " * col_w)
-                    fill_parts.append(" " * col_w)
+                    parts.append(" " * col_w)
 
-            header_line = sep.join(header_parts)
-            fill_line = sep.join(fill_parts)
-
-            if has_start:
-                out.append(f"  {tl} [dim]─┼─[/dim] {header_line}")
-            else:
-                out.append(f"  {tl}  [dim]│[/dim] {header_line}")
-            out.append(f"         [dim]│[/dim] {fill_line}")
+            out.append(f"{prefix} {' '.join(parts)}")
 
         return out
 
@@ -260,10 +274,10 @@ class AgendaPanel(Static):
         slot_offset = current_slot - range_start
         if slot_offset < 0:
             return
-        # Cada slot = 2 linhas; terco superior = 1/3 do viewport
+        # Cada slot 30min = 2 linhas de 15min
         line_offset = slot_offset * 2
         # Scroll no container pai (VerticalScroll), não no Static
-        if self.parent is not None and hasattr(self.parent, "scroll_to"):
+        if isinstance(self.parent, Widget):
             self.parent.scroll_to(y=max(0, line_offset - 6), animate=False)
 
     @staticmethod
