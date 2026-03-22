@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.20.0
+**Versão:** 2.21.0
 
 **Status:** SSOT
 
@@ -59,6 +59,9 @@
 | DT053 | Timer start não muda visual do bloco/habit     | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT054 | Timer pause não para contagem (só muda status) | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT055 | v em hábito running não abre ConfirmDialog     | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical      |
+| DT056 | TUI conecta a banco sem tabelas — falha silenciosa  | CRITICA    | PENDENTE  | -            | fix/dt056-xdg      |
+| DT057 | Delete de rotina falha silenciosamente na TUI        | ALTA       | PENDENTE  | -            | Sprint futuro      |
+| DT058 | Logging ausente na CLI — apenas TUI loga             | MEDIA      | PENDENTE  | -            | Sprint futuro      |
 
 ## 1b. Quick Status
 
@@ -117,8 +120,16 @@
 - [x] DT053 — Timer start não muda visual do bloco/habit
 - [x] DT054 — Timer pause não para contagem (só muda status e cor)
 - [x] DT055 — v em hábito running não abre ConfirmDialog
+- [ ] DT056 — TUI conecta a banco sem tabelas — falha silenciosa total
+- [ ] DT057 — Delete de rotina falha silenciosamente na TUI
+- [ ] DT058 — Logging ausente na CLI — apenas TUI loga via service_action
+- [ ] DT059 — Mensagens de migração visíveis no stdout da TUI
+- [ ] DT060 — Sidebar ocupa ~15 cols desnecessariamente
+- [ ] DT061 — AgendaPanel sem scroll horizontal (bloqueador de multi-coluna)
+- [ ] DT062 — Linhas horizontais cortam blocos de tempo coloridos
+- [ ] DT063 — Agenda limitada ao dia atual (sem paginação -3/+3)
 
-**Resolvidos:** 49/55 | **Pendentes:** 5/55 | **Aceitos:** 1/55
+**Resolvidos:** 49/63 | **Pendentes:** 13/63 | **Aceitos:** 1/63
 
 ---
 
@@ -535,6 +546,116 @@
 
 ---
 
+### DT-059: Mensagens de migração visíveis no stdout da TUI
+
+Na primeira execução após criação do banco, a mensagem `[INFO] Migração 002 aplicada` aparece no terminal antes do dashboard abrir. Mensagens de startup/migração não devem poluir o stdout do usuário.
+
+- **Descoberto:** 2026-03-21 (Sessão 8)
+- **Severidade:** UX — MÉDIA
+- **Status:** PENDENTE
+- **Sprint planejado:** Futuro
+
+**Comportamento atual:** `run_pending_migrations()` e `create_db_and_tables()` emitem logs para stdout antes da TUI inicializar.
+
+**Comportamento esperado:**
+
+1. Stdout/stderr silenciados durante startup da TUI
+2. Logs registrados apenas em arquivo (`~/.local/share/atomvs/logs/atomvs.jsonl`)
+3. Erros críticos exibidos via `app.notify()` após TUI inicializar
+4. Mensagens informativas apenas no log em arquivo
+
+**Solução proposta:**
+
+- Verificar `configure_logging(console=False)` no entry point da TUI
+- Capturar output do migration runner com redirect de stdout/stderr
+- Usar `app.notify()` para erros críticos pós-inicialização
+
+---
+
+### DT-060: Sidebar ocupa ~15 cols desnecessariamente
+
+O sidebar vertical atual exibe labels textuais ("Dash", "Rotin", "Habit", "Tasks", "Timer") ocupando ~15 colunas (~12% de um terminal 120 cols). O conteúdo é exclusivamente navegação entre 5 screens, funcionalidade que não justifica espaço permanente.
+
+- **Descoberto:** 2026-03-22 (Sessão 9 — design review)
+- **Severidade:** UX — MÉDIA
+- **Status:** PENDENTE
+- **Sprint planejado:** Futuro (após ADR-042 aprovado)
+
+**Solução proposta:** Implementar `sidebar_mode` configurável conforme ADR-042:
+
+- `horizontal`: tabs no header (zero cols perdidas)
+- `hidden`: sem sidebar, navegação via atalhos
+- `vertical`: sidebar com ícones (3-4 cols)
+- Overlay via F1 em todos os modos
+
+**Referências:** ADR-042
+
+---
+
+### DT-061: AgendaPanel sem scroll horizontal
+
+AgendaPanel não tem scroll horizontal. Com 3+ colunas de sobreposição, blocos ficam com ~12 chars cada, truncando títulos severamente. A falta de scroll H é o bloqueador principal para multi-coluna legível.
+
+- **Descoberto:** 2026-03-22 (Sessão 9 — design review)
+- **Severidade:** UX — ALTA (bloqueador de multi-coluna legível)
+- **Status:** PENDENTE
+- **Sprint planejado:** Próximo (junto com ADR-041)
+
+**Solução proposta:**
+
+1. Separar margem de horas (`Static`) do conteúdo de blocos (`ScrollableContainer` com `scroll_x`)
+2. Layout: `Horizontal(horas_widget, blocos_scrollable)`
+3. Input: Shift+scroll wheel; Shift+h/l (vi-like)
+4. Largura mínima de coluna: 18 chars (não encolhe)
+5. Indicador de overflow (`→`/`←`) no BorderTitle do painel
+6. `←→` sem Shift SEMPRE muda dia (sem ambiguidade com scroll)
+
+**Referências:** ADR-041, BR-TUI-031
+
+---
+
+### DT-062: Linhas horizontais cortam blocos de tempo coloridos
+
+A renderização atual usa linhas horizontais (`───`) na régua de horário que atravessam os blocos de tempo coloridos, criando intersecções (`─┼─`) que quebram a continuidade visual. É o bug visual mais perceptível do dashboard.
+
+- **Descoberto:** 2026-03-22 (Sessão 9 — design review, análise da print)
+- **Severidade:** UX — ALTA (visual quebrado é o bug mais visível)
+- **Status:** PENDENTE
+- **Sprint planejado:** Próximo (junto com ADR-041)
+
+**Solução proposta:**
+
+1. Primeira linha do bloco: `{título} {ícone}` (sem cor, texto limpo)
+2. Linhas seguintes: `▌{cor_sólida}` (accent bar + preenchimento)
+3. Pontilhado (`· · ·`) onde não há bloco
+4. Remover linhas `───` e intersecções `─┼─`
+5. Cada linha = 15min (não 30min)
+6. Horário de término do bloco AINDA tem cor; linha seguinte é livre
+
+**Referências:** ADR-041, BR-TUI-032
+
+---
+
+### DT-063: Agenda limitada ao dia atual (sem paginação)
+
+Agenda exibe apenas o dia atual. Não há mecanismo para visualizar dias anteriores (revisar o que foi feito) ou futuros (planejar).
+
+- **Descoberto:** 2026-03-22 (Sessão 9 — design review)
+- **Severidade:** FEATURE — MÉDIA
+- **Status:** PENDENTE
+- **Sprint planejado:** Futuro
+
+**Solução proposta:**
+
+1. Keybindings `←→` para mudar dia
+2. Range: hoje -3 até hoje +3 (7 dias)
+3. Tecla `0` ou `Home` retorna para hoje
+4. `loader.ensure_instances(date)` para dia selecionado
+5. Indicador visual no header (`◀`/`▶` + data)
+6. Timer desabilitado em dias != hoje
+
+**Referências:** BR-TUI-030
+
 ## 4. Política de Gestão
 
 Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), severidade e sprint planejado para resolução. O inventário é revisado a cada release.
@@ -551,31 +672,32 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 ## 5. Changelog do Documento
 
-| Data       | Versão | Mudanças                                                    |
-| ---------- | ------ | ----------------------------------------------------------- |
-| 2026-03-19 | 2.19.0 | DT-026 resolvido (load_metrics com filtro de rotina)     |
-| 2026-03-19 | 2.18.0 | DT-009/010/011/041/042/043 resolvidos                    |
-| 2026-03-19 | 2.17.0 | DT-046/047/048/050/051/052 resolvidos (fix/loader-critical) |
-| 2026-03-19 | 2.16.0 | DT-049/053/054/055 resolvidos (fix/loader-critical)         |
-| 2026-03-14 | 2.6.0  | DT-017/018/020 resolvidos. Registra DT-026 a 033            |
-|            |        | (bugs TUI encontrados em teste manual)                      |
-| 2026-03-13 | 2.5.0  | DT-022 resolvido (feat/structured-logging mergeado).        |
-|            |        | Adicionado DT-025 (Pyright CI complementar)                 |
-| 2026-03-12 | 2.4.0  | Adicionados DT-023 e DT-024 (resolvidos): auto-geração      |
-|            |        | de instâncias diárias e keybindings VTE/GNOME               |
-| 2026-03-11 | 2.3.0  | Adicionado DT-022 (logging estruturado: escopo,             |
-|            |        | formato, ferramentas, plano de instrumentação)              |
-| 2026-03-11 | 2.2.0  | Adicionado DT-021 (loaders/CRUDs ORM fora da sessão),       |
-|            |        | resolvido na mesma sessão via auditoria preventiva          |
-| 2026-03-10 | 2.1.0  | DT-014 resolvido. Adicionados DT-015 a DT-020 (gaps de      |
-|            |        | integração: timer, agenda, métricas, command bar)           |
-| 2026-03-08 | 2.0.0  | DT-003 resolvido. Adicionados DT-008 a DT-014 (Sprint 4     |
-|            |        | Code Review + GitHub CI + keybindings divergentes)          |
-| 2026-02-03 | 1.1.0  | Atualiza status: DT-004, DT-005, DT-006 resolvidos          |
-| 2026-02-01 | 1.0.0  | Extração do roadmap.md para documento dedicado              |
+| Data       | Versão | Mudanças                                                               |
+| ---------- | ------ | ---------------------------------------------------------------------- |
+| 2026-03-19 | 2.19.0 | DT-026 resolvido (load_metrics com filtro de rotina)                   |
+| 2026-03-19 | 2.18.0 | DT-009/010/011/041/042/043 resolvidos                                  |
+| 2026-03-19 | 2.17.0 | DT-046/047/048/050/051/052 resolvidos (fix/loader-critical)            |
+| 2026-03-19 | 2.16.0 | DT-049/053/054/055 resolvidos (fix/loader-critical)                    |
+| 2026-03-14 | 2.6.0  | DT-017/018/020 resolvidos. Registra DT-026 a 033                       |
+|            |        | (bugs TUI encontrados em teste manual)                                 |
+| 2026-03-13 | 2.5.0  | DT-022 resolvido (feat/structured-logging mergeado).                   |
+|            |        | Adicionado DT-025 (Pyright CI complementar)                            |
+| 2026-03-12 | 2.4.0  | Adicionados DT-023 e DT-024 (resolvidos): auto-geração                 |
+|            |        | de instâncias diárias e keybindings VTE/GNOME                          |
+| 2026-03-11 | 2.3.0  | Adicionado DT-022 (logging estruturado: escopo,                        |
+|            |        | formato, ferramentas, plano de instrumentação)                         |
+| 2026-03-11 | 2.2.0  | Adicionado DT-021 (loaders/CRUDs ORM fora da sessão),                  |
+|            |        | resolvido na mesma sessão via auditoria preventiva                     |
+| 2026-03-10 | 2.1.0  | DT-014 resolvido. Adicionados DT-015 a DT-020 (gaps de                 |
+|            |        | integração: timer, agenda, métricas, command bar)                      |
+| 2026-03-08 | 2.0.0  | DT-003 resolvido. Adicionados DT-008 a DT-014 (Sprint 4                |
+|            |        | Code Review + GitHub CI + keybindings divergentes)                     |
+| 2026-02-03 | 1.1.0  | Atualiza status: DT-004, DT-005, DT-006 resolvidos                     |
+| 2026-02-01 | 1.0.0  | Extração do roadmap.md para documento dedicado                         |
+| 2026-03-22 | 2.21.0 | Registra DT-059 a DT-063 (redesign agenda, sidebar, scroll, paginação) |
 
 ---
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 19 de Março de 2026
+**Última atualização:** 22 de Março de 2026
