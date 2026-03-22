@@ -1461,6 +1461,7 @@ src/timeblock/tui/styles/
 10. Footer inclui `←→ dia` nos keybindings visíveis
 
 **Cenários BDD planejados:**
+
 ```gherkin
 Scenario: Navigate to previous day
   Given the dashboard is showing today's agenda
@@ -1571,4 +1572,3 @@ Scenario: Return to today
 - `test_br_tui_032_minimum_column_width_18`
 - `test_br_tui_032_empty_area_dotted`
 - `test_br_tui_032_granularity_15min`
-
