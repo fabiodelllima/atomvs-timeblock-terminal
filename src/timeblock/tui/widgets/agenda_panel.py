@@ -2,11 +2,13 @@
 
 BR-TUI-003-R13: Régua adaptativa 05:00-23:30.
 BR-TUI-003-R15: Auto-scroll na hora atual.
+BR-TUI-031: Scroll horizontal para multi-coluna.
 BR-TUI-032: Renderização de blocos contínuos com granularidade de 15min.
 """
 
 from datetime import datetime
 
+from textual.containers import ScrollableContainer
 from textual.widget import Widget
 from textual.widgets import Static
 
@@ -44,13 +46,19 @@ def compute_agenda_range(instances: list[dict]) -> tuple[int, int]:
     return range_start, range_end
 
 
-class AgendaPanel(Static):
+class AgendaPanel(Widget):
     can_focus = True
-    """Agenda vertical com régua de 15min e blocos contínuos."""
+    """Agenda com horas fixas e blocos scrolláveis horizontalmente (BR-TUI-031)."""
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self._instances: list[dict] = []
+
+    def compose(self):
+        """Estrutura interna: horas fixas + blocos scrolláveis (ADR-041-19)."""
+        yield Static(id="agenda-hours")
+        with ScrollableContainer(id="agenda-blocks-scroll", can_focus=False):
+            yield Static(id="agenda-blocks")
 
     def update_data(self, instances: list[dict]) -> None:
         """Recebe instâncias do coordinator e renderiza."""
@@ -58,9 +66,12 @@ class AgendaPanel(Static):
         self._refresh_content()
 
     def _refresh_content(self) -> None:
-        """Constrói régua + blocos e atualiza conteúdo."""
-        self.border_title = "Agenda do Dia"
-        self.update("\n".join(self._build_lines()))
+        """Atualiza horas e blocos nos widgets filhos."""
+        hours_lines, blocks_lines, content_width = self._build_content()
+        self.query_one("#agenda-hours", Static).update("\n".join(hours_lines))
+        blocks_widget = self.query_one("#agenda-blocks", Static)
+        blocks_widget.styles.min_width = content_width
+        blocks_widget.update("\n".join(blocks_lines))
 
     def _assign_columns(self, sorted_inst: list[dict]) -> tuple[dict[int, int], dict[int, int]]:
         """Atribui colunas para renderizar sobreposição (estilo Google Calendar).
@@ -135,28 +146,31 @@ class AgendaPanel(Static):
 
         return col_of, total_cols_of
 
-    def _build_lines(self) -> list[str]:
-        """Monta linhas da agenda com granularidade de 15min (BR-TUI-032).
+    def _build_content(self) -> tuple[list[str], list[str], int]:
+        """Monta conteúdo separando horas (fixas) e blocos (scrolláveis).
 
-        Cada linha visual = 15 minutos. Labels de hora a cada 30min.
-        Linha de início: título + ícone (texto limpo, sem accent bar).
-        Linhas de corpo: accent bar + fill char colorido.
+        Cada linha visual = 15 minutos (BR-TUI-032). Labels a cada 30min.
         R10: linha do end_minutes ainda tem cor.
         R12: título de bloco consecutivo substitui corpo do anterior.
-        Sem linhas horizontais atravessando blocos (BR-TUI-032-R9).
+
+        Returns:
+            hours_lines: linhas da coluna de horas
+            blocks_lines: linhas da coluna de blocos
+            content_width: largura total em chars da coluna de blocos
         """
         instances = self._instances
         now = datetime.now()
         cur_h, cur_m = now.hour, now.minute
-        out: list[str] = []
-        min_col_w = 18  # BR-TUI-032-R13: largura mínima por coluna
-        fw = 38  # largura total da área de conteúdo
+        hours_out: list[str] = []
+        blocks_out: list[str] = []
+        min_col_w = 18  # BR-TUI-032-R13
+        fw = 38  # largura ideal para coluna única
+        max_content_w = 0
 
         sorted_inst = sorted(instances, key=lambda x: x.get("start_minutes", 0))
         col_of, total_cols_of = self._assign_columns(sorted_inst)
 
-        # Mapa: linha de 15min → [(inst, role, col)]
-        # role: "start" (título) ou "body" (accent bar + fill)
+        # Mapa: linha de 15min -> [(inst, role, col)]
         line_info: dict[int, list[tuple[dict, str, int]]] = {}
         for inst in sorted_inst:
             sm = inst.get("start_minutes", 0)
@@ -166,8 +180,6 @@ class AgendaPanel(Static):
             last_temporal = (em - 1) // 15
             r10_line = em // 15
 
-            # R10 só se aplica quando o bloco tem linhas de corpo
-            # (bloco > 15min). Bloco mínimo de 15min = só título.
             if last_temporal > start_line:
                 display_end = r10_line
             else:
@@ -180,12 +192,10 @@ class AgendaPanel(Static):
                 line_info[li].append((inst, role, col))
 
         def _time_label(h: int, m: int) -> str:
-            """Label de hora com destaque no slot atual (BR-TUI-003-R16)."""
             if h == cur_h and m <= cur_m < m + 30:
                 return f"[bold {C_ACCENT}]{now.strftime('%H:%M')}[/bold {C_ACCENT}]"
             return f"[dim]{h:02d}:{m:02d}[/dim]"
 
-        # Converte range de 30min slots para linhas de 15min
         range_start, range_end = compute_agenda_range(instances)
         line_start = range_start * 2
         line_end = range_end * 2 + 1
@@ -196,21 +206,24 @@ class AgendaPanel(Static):
             m = minute % 60
             show_label = m % 30 == 0
 
+            # Coluna de horas (fixa, BR-TUI-031-R4)
             if show_label:
-                prefix = f"  {_time_label(h, m)}  [dim]│[/dim]"
+                hours_out.append(f"  {_time_label(h, m)}  [dim]\u2502[/dim]")
             else:
-                prefix = "         [dim]│[/dim]"
+                hours_out.append("         [dim]\u2502[/dim]")
 
+            # Coluna de blocos (scrollável H)
             entries = line_info.get(li, [])
 
             if not entries:
-                out.append(prefix)
+                blocks_out.append("")
                 continue
 
-            # Total de colunas para esta linha
             n_cols = max(total_cols_of[id(e[0])] for e in entries)
-            gap = n_cols - 1  # BR-TUI-032-R14: 1 char entre colunas
+            gap = n_cols - 1  # BR-TUI-032-R14
             col_w = max(min_col_w, (fw - gap) // n_cols)
+            line_w = n_cols * col_w + gap + 1  # +1 leading space
+            max_content_w = max(max_content_w, line_w)
 
             # Indexar por coluna; "start" vence "body" (R12)
             col_map: dict[int, tuple[dict, str]] = {}
@@ -232,51 +245,49 @@ class AgendaPanel(Static):
                     fcolor = fill_color(st, sub)
 
                     if role == "start":
-                        # Título + ícone, sem accent bar (BR-TUI-032-R4)
-                        max_nm = max(1, col_w - 5)
+                        separator_w = 3  # " · "
+                        icon_w = len(icon)
+                        max_nm = max(1, col_w - separator_w - icon_w)
                         if len(nm) > max_nm:
                             display_nm = nm[: max(1, max_nm - 1)] + "\u2026"
                         else:
                             display_nm = nm
+                        visual_w = len(display_nm) + separator_w + icon_w
+                        pad = " " * max(0, col_w - visual_w)
                         if bold:
                             parts.append(
                                 f"[bold {color}]{display_nm}[/bold {color}]"
                                 f" [dim]\u00b7[/dim] "
                                 f"[bold {color}]{icon}[/bold {color}]"
+                                f"{pad}"
                             )
                         else:
                             parts.append(
                                 f"[{color}]{display_nm}[/{color}]"
                                 f" [dim]\u00b7[/dim] "
                                 f"[{color}]{icon}[/{color}]"
+                                f"{pad}"
                             )
                     else:
-                        # Corpo: accent bar + fill (BR-TUI-032-R5)
                         parts.append(
                             f"[{color}]\u258c[/{color}][{fcolor}]{fc * (col_w - 1)}[/{fcolor}]"
                         )
                 else:
                     parts.append(" " * col_w)
 
-            out.append(f"{prefix} {' '.join(parts)}")
+            blocks_out.append(f" {' '.join(parts)}")
 
-        return out
+        return hours_out, blocks_out, max_content_w
 
     def scroll_to_current_time(self) -> None:
-        """Auto-scroll para posicionar hora atual no terco superior (BR-TUI-003-R15).
-
-        Calcula offset em linhas baseado no slot atual e faz scroll
-        no container pai (agenda-content tem overflow-y: auto).
-        """
+        """Auto-scroll para posicionar hora atual no terco superior (BR-TUI-003-R15)."""
         now = datetime.now()
         current_slot = (now.hour * 60 + now.minute) // 30
         range_start, _ = compute_agenda_range(self._instances)
         slot_offset = current_slot - range_start
         if slot_offset < 0:
             return
-        # Cada slot 30min = 2 linhas de 15min
         line_offset = slot_offset * 2
-        # Scroll no container pai (VerticalScroll), não no Static
         if isinstance(self.parent, Widget):
             self.parent.scroll_to(y=max(0, line_offset - 6), animate=False)
 
