@@ -6,7 +6,7 @@ Este mockup é a referência visual para implementação de ADR-041, DT-062 e BR
 
 ```
 CASO 1 — Linha é o INÍCIO do bloco:
-  → "{título} {ícone}"  (sem ▌, sem cor)
+  → "▌{título} · {ícone}" (▌ na cor do status, título em C_TEXT)
 
 CASO 2 — Linha está DENTRO do bloco (inclui linha do horário de término):
   → "▌{cor_sólida}"
@@ -24,11 +24,11 @@ CASO 3 — Linha está FORA de qualquer bloco:
  │         │                                                 │
  │  09:30  │ ·                                               │
  │         │                                                 │
- │  10:00  │ Leitura ·                                       │
+ │  10:00  │ ▌Leitura ·                                      │
  │         │ ▌░░░░░░░░░░░░░░                                 │
- │  10:30  │ ▌░░░░░░░░░░░░░░ Treino ·                      │
+ │  10:30  │ ▌░░░░░░░░░░░░░░ ▌Treino ·                       │
  │         │ ▌░░░░░░░░░░░░░░ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒                 │
- │  11:00  │ ▌░░░░░░░░░░░░░░ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒ Meditação ·    │
+ │  11:00  │ ▌░░░░░░░░░░░░░░ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒ ▌Meditação ·    │
  │         │ ▌░░░░░░░░░░░░░░ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒ ▌▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │
  │  11:30  │ ▌░░░░░░░░░░░░░░ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒ ▌▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │
  │         │ · · · · · · · · ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒ ▌▓▓▓▓▓▓▓▓▓▓▓▓▓▓ │
@@ -45,7 +45,7 @@ CASO 3 — Linha está FORA de qualquer bloco:
  └───────────────────────────────────────────────────────────┘
 
  Horários:
- - Leitura:        10:00 - 11:30 (░)
+ - Leitura:      10:00 - 11:30 (░)
  - Treino:       10:30 - 13:00 (▒)
  - Meditação:    11:00 - 12:30 (▓)
 ```
@@ -55,7 +55,7 @@ CASO 3 — Linha está FORA de qualquer bloco:
 ```
  │  10:30  │ ▌░░░░░░░░░░░░░░░░░░░░░░░ │    ← 10:30 (Leitura)
  │         │ ▌░░░░░░░░░░░░░░░░░░░░░░░ │    ← 10:45
- │  11:00  │ Exercício ·              │    ← bloco 1 termina, bloco 2 começa
+ │  11:00  │ ▌Exercício ·             │    ← bloco 1 termina, bloco 2 começa
  │         │ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │    ← 11:15
  │  11:30  │ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │    ← 11:30
  │         │ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │    ← bloco 2 termina 11:45
@@ -65,7 +65,7 @@ CASO 3 — Linha está FORA de qualquer bloco:
 ## Cenário: bloco alinhado (10:00 - 11:00)
 
 ```
- │  10:00  │ Leitura ·                 │    ← início do bloco
+ │  10:00  │ ▌Leitura ·                │    ← início do bloco
  │         │ ▌░░░░░░░░░░░░░░░░░░░░░░░░ │    ← 10:15
  │  10:30  │ ▌░░░░░░░░░░░░░░░░░░░░░░░░ │    ← 10:30
  │         │ ▌░░░░░░░░░░░░░░░░░░░░░░░░ │    ← 10:45
@@ -76,6 +76,7 @@ CASO 3 — Linha está FORA de qualquer bloco:
 ## Cenário: bloco mínimo 15min (10:00 - 10:15)
 
 ```
- │  10:00  │ Leitura ·                  │    ← título (única linha)
- │         │ ·                          │    ← 10:15 livre
+ │  10:00  │ ▌Leitura · ○                │    ← título (accent bar + C_TEXT)
+ │         │ ▌░░░░░░░░░░░░░░░░░░░░░░░░░░ │    ← 10:15 end line (R10: com cor)
+ │  10:30  │                             │    ← livre
 ```
