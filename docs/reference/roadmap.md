@@ -1,10 +1,8 @@
 # Roadmap
 
-**Versão:** 7.0.0
-
-**Status:** Single Source of Truth (SSOT)
-
-**Documentos relacionados:** architecture.md, business-rules.md, quality-metrics.md, technical-debt.md
+- **Versão:** 7.0.0
+- **Status:** Single Source of Truth (SSOT)
+- **Documentos relacionados:** architecture.md, business-rules.md, quality-metrics.md, technical-debt.md
 
 ---
 
@@ -84,11 +82,11 @@ As métricas atuais refletem medições reais executadas em 05/03/2026 (branch `
 
 | Métrica       | Atual | Meta v1.7.0 | Status     |
 | ------------- | ----- | ----------- | ---------- |
-| Cobertura     | ~81%  | 80%         | [OK]       |
+| Cobertura     | ~82%  | 80%         | [OK]       |
 | Erros mypy    | 0     | 0           | [OK]       |
-| Testes total  | 1156  | 1200+       | [OK]       |
-| BRs cobertas  | 104   | 110+        | [OK]       |
-| ADRs          | 35    | 35+         | [OK]       |
+| Testes total  | 1284  | 1200+       | [OK]       |
+| BRs cobertas  | ~110  | 110+        | [OK]       |
+| ADRs          | 42    | 35+         | [OK]       |
 | CLI funcional | 85%   | 100%        | [PENDENTE] |
 
 ### 3.2. Distribuição de Testes
@@ -96,12 +94,12 @@ As métricas atuais refletem medições reais executadas em 05/03/2026 (branch `
 A pirâmide de testes cresceu significativamente com a implementação do dashboard. Os 104 testes do dashboard cobrem: formatação de duração (2 formatos), localização de blocos, mapeamento status/substatus para cores/ícones/bold/fill/background, heat de proximidade para tasks, renderização ASCII art do timer, e validação estrutural de mock data.
 
 ```plaintext
-Unit:        869 (81.1%)
-Integration: 116 (10.8%)
-BDD:          56 (5.2%)
-E2E:          30 (2.8%)
+Unit:        ~960 (74.8%)
+Integration: ~150 (11.7%)
+BDD:           83 (6.5%)
+E2E:           91 (7.1%)
 ─────────────────────────
-TOTAL:      1156 testes
+TOTAL:       1284 testes
 ```
 
 ### 3.3. Infraestrutura CI/CD
@@ -238,11 +236,11 @@ O inventário completo está em `docs/reference/technical-debt.md`. A situação
 
 Um novo item de débito técnico foi identificado: o `dashboard.py` com 973 linhas viola SRP e deve ser refatorado em módulos separados (`colors.py`, `formatters.py`, `mock_data.py`). Este refactor está planejado como próximo commit após o fechamento visual.
 
-| Status    | Quantidade | Itens                                          |
-| --------- | ---------- | ---------------------------------------------- |
-| Resolvido | 6          | DT-001, DT-002, DT-003, DT-004, DT-005, DT-006 |
-| Aceito    | 1          | DT-007 (migration_001)                         |
-| Planejado | 1          | DT-008 (dashboard.py SRP - refactor SOLID)     |
+| Status    | Quantidade | Itens                                                  |
+| --------- | ---------- | ------------------------------------------------------ |
+| Resolvido | 55         | DT-001 a DT-062 (exceto aceitos e pendentes)           |
+| Aceito    | 1          | DT-007 (migration_001)                                 |
+| Pendente  | 7          | DT-012, DT-019, DT-025, DT-044, DT-058, DT-060, DT-063 |
 
 Nota: DT-003 (cobertura) resolvido — ~82% supera o threshold atual de 80%. Meta será elevada para 85% após Sprint 3.2 expandir cobertura TUI.
 
@@ -293,6 +291,5 @@ Working Documents:
 
 ---
 
-**Próxima Revisão:** Release v1.7.0
-
-**Última atualização:** 11 de Março de 2026
+- **Próxima revisão:** Release v1.7.0
+- **Última atualização:** 11 de Março de 2026

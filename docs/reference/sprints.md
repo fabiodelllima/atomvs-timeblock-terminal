@@ -444,7 +444,7 @@ A nomenclatura "4.5" reflete que este sprint é uma extensão direta da Sprint 4
 
 ---
 
-### Sprint 5.5 — Dashboard Integralmente Funcional [DONE]
+### Sprint 5.5 — Dashboard Integralmente Funcional [WIP]
 
 O Sprint 5.5 resolve todos os gaps de aderência entre implementação e BRs revelados pela revisão de testes e2e (15/03/2026). O objetivo é que cada interação do dashboard funcione conforme as regras de negócio documentadas, com modais de interação consistentes e substatus corretamente gerenciados.
 
