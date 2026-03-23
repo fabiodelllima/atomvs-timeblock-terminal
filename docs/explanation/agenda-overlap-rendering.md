@@ -1,12 +1,9 @@
 # Sobreposição e Renderização de Blocos na Agenda
 
-**Versão:** 1.0.0
-
-**Status:** Proposto
-
-**Decisão arquitetural:** ADR-041
-
-**Business rules:** BR-TUI-032 (renderização), BR-TUI-031 (scroll H), BR-TUI-030 (paginação)
+- **Versão:** 1.0.0
+- **Status:** Proposto
+- **Decisão arquitetural:** ADR-041
+- **Business rules:** BR-TUI-032 (renderização), BR-TUI-031 (scroll H), BR-TUI-030 (paginação)
 
 ---
 
@@ -89,7 +86,7 @@ A grade tem dois eixos. O eixo vertical são as linhas de 15 minutos, iteradas d
 
 Para cada linha de 15 minutos, a renderização consulta cada coluna e determina o estado do bloco naquele timeslot:
 
-- **Início do bloco.** A linha corresponde ao `start_minutes` do bloco. Renderiza `{título} {ícone_status}` — texto limpo, sem accent bar, sem cor de fundo. Se o título excede a largura da coluna, trunca o nome com reticências mas preserva o ícone (ex: `Medita… ·`).
+- **Início do bloco.** A linha corresponde ao `start_minutes` do bloco. Renderiza `▌{título} · {ícone_status}` — accent bar (`▌`) na cor do status, título em C_TEXT (branco), ícone na cor do status. Se o título excede a largura da coluna, trunca o nome com reticências mas preserva o ícone (ex: `▌Medita… · ○`).
 - **Corpo do bloco.** A linha está entre `start_minutes` (exclusivo) e `end_minutes` (inclusivo) do bloco. Renderiza `▌{fill_char × largura}` — accent bar (`▌`, U+258C) na cor saturada do status seguido de caracteres de preenchimento (`fill_char()`) na cor do status. O `▌` é um caractere literal colorido, não bgcolor.
 - **Fora de qualquer bloco (coluna vazia).** Se nenhuma outra coluna tem bloco ativo nessa linha, renderiza pontilhado sutil como representação de área livre. Se outra coluna tem bloco ativo, renderiza espaço vazio para não poluir visualmente.
 
@@ -106,7 +103,7 @@ Quando o bloco A termina em 11:00 e o bloco B começa em 11:00 na mesma coluna, 
 ```
  │  10:30  │ ▌░░░░░░░░░░░░░░░░░░░░░░░ │    ← Leitura corpo
  │         │ ▌░░░░░░░░░░░░░░░░░░░░░░░ │    ← Leitura corpo
- │  11:00  │ Exercício ·              │    ← título de B substitui corpo de A
+ │  11:00  │ ▌Exercício ·             │    ← título de B substitui corpo de A
  │         │ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │    ← Exercício corpo
 ```
 
@@ -129,11 +126,11 @@ Cada coluna resolve seu estado de forma autônoma. Numa mesma linha de 15 minuto
 Leitura 10:00-11:30, Treino 10:30-13:00, Meditação 11:00-12:30. Três colunas, grupo único com `total_cols = 3`.
 
 ```
- │  10:00  │ Leitura ·                                      │
+ │  10:00  │ ▌Leitura ·                                     │
  │         │ ▌░░░░░░░░░░░░░░                                │
- │  10:30  │ ▌░░░░░░░░░░░░░░ Treino ·                       │
+ │  10:30  │ ▌░░░░░░░░░░░░░░ ▌Treino ·                      │
  │         │ ▌░░░░░░░░░░░░░░ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒                │
- │  11:00  │ ▌░░░░░░░░░░░░░░ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒ Meditação ·    │
+ │  11:00  │ ▌░░░░░░░░░░░░░░ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒ ▌Meditação ·   │
  │         │ ▌░░░░░░░░░░░░░░ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒ ▌▓▓▓▓▓▓▓▓▓▓▓▓▓ │
  │  11:30  │ ▌░░░░░░░░░░░░░░ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒ ▌▓▓▓▓▓▓▓▓▓▓▓▓▓ │
  │         │ · · · · · · · · ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒ ▌▓▓▓▓▓▓▓▓▓▓▓▓▓ │
@@ -165,11 +162,11 @@ Análise linha a linha do trecho 11:00-13:15:
 Leitura 10:00-11:00, Exercício 11:00-12:00. Mesma coluna (sem sobreposição), `total_cols = 1`.
 
 ```
- │  10:00  │ Leitura ·                │
+ │  10:00  │ ▌Leitura ·               │
  │         │ ▌░░░░░░░░░░░░░░░░░░░░░░░ │
  │  10:30  │ ▌░░░░░░░░░░░░░░░░░░░░░░░ │
  │         │ ▌░░░░░░░░░░░░░░░░░░░░░░░ │
- │  11:00  │ Exercício ·              │    ← R12: título substitui corpo
+ │  11:00  │ ▌Exercício ·             │    ← R12: título substitui corpo
  │         │ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │
  │  11:30  │ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │
  │         │ ▌▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │
@@ -195,7 +192,7 @@ Um bloco de 15 minutos ocupa apenas uma linha: a de início. Não há corpo porq
 Leitura 10:00-10:30. `total_cols = 1`.
 
 ```
- │  10:00  │ Leitura ·                │    ← início
+ │  10:00  │ ▌Leitura ·               │    ← início
  │         │ ▌░░░░░░░░░░░░░░░░░░░░░░░ │    ← corpo
  │  10:30  │ ▌░░░░░░░░░░░░░░░░░░░░░░░ │    ← end line com cor
 ```
@@ -209,7 +206,7 @@ Três linhas: título na primeira (10:00), corpo na segunda (10:15), e corpo na 
 Estas propriedades devem ser verdadeiras em qualquer estado da agenda:
 
 1. Um bloco sempre ocupa pelo menos uma linha (a de início, com título).
-2. A linha de início nunca tem accent bar (`▌`) nem cor de fundo — sempre texto limpo.
+2. A linha de início tem accent bar (`▌`) na cor do status, título em C_TEXT, ícone na cor do status.
 3. Todas as linhas entre o início (exclusivo) e o término (inclusivo) exibem accent bar com cor.
 4. Nenhuma linha horizontal (`───`, `─┼─`, `─┬─`) atravessa um bloco de tempo.
 5. Blocos em colunas diferentes nunca interferem visualmente entre si.
