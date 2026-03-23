@@ -21,6 +21,7 @@ from timeblock.tui.colors import (
     C_ACCENT,
     C_BELOW,
     C_ERROR,
+    C_INFO,
     C_MUTED,
     C_OVERLIMIT,
     C_PASSIVE,
@@ -176,7 +177,7 @@ class TestBRTUI003StatusColor:
             ("not_done", "ignored", C_PASSIVE),
             ("running", None, C_ACCENT),
             ("paused", None, C_WARNING),
-            ("pending", None, C_MUTED),
+            ("pending", None, C_INFO),
         ],
     )
     def test_br_tui_003_status_color_mapping(self, status, substatus, expected_color):
@@ -217,7 +218,7 @@ class TestBRTUI003StatusIcon:
             ("not_done", "ignored", "✗?"),
             ("running", None, "▶"),
             ("paused", None, "⏸"),
-            ("pending", None, "·"),
+            ("pending", None, "○"),
         ],
     )
     def test_br_tui_003_status_icon_mapping(self, status, substatus, expected_icon):
@@ -276,7 +277,7 @@ class TestBRTUI003BlockStyle:
             ("not_done", "ignored", "✗? ignored"),
             ("running", None, "▶ running"),
             ("paused", None, "⏸ paused"),
-            ("pending", None, "· pending"),
+            ("pending", None, "○ pending"),
         ],
     )
     def test_br_tui_003_block_style_indicators(self, status, substatus, expected_indicator):
@@ -295,7 +296,7 @@ class TestBRTUI003BlockStyle:
             ("not_done", "ignored", C_PASSIVE),
             ("running", None, C_ACCENT),
             ("paused", None, C_WARNING),
-            ("pending", None, C_MUTED),
+            ("pending", None, C_INFO),
         ],
     )
     def test_br_tui_003_block_style_colors(self, status, substatus, expected_color):
