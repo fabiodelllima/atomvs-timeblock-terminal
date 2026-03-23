@@ -126,7 +126,7 @@
 - [x] DT054 — Timer pause não para contagem (só muda status e cor)
 - [x] DT055 — v em hábito running não abre ConfirmDialog
 - [x] DT056 — TUI conecta a banco sem tabelas — falha silenciosa total
-- [ ] DT057 — Delete de rotina falha silenciosamente na TUI
+- [x] DT057 — Delete de rotina falha silenciosamente na TUI
 - [ ] DT058 — Logging ausente na CLI — apenas TUI loga via service_action
 - [ ] DT059 — Mensagens de migração visíveis no stdout da TUI
 - [ ] DT060 — Sidebar ocupa ~15 cols desnecessariamente
