@@ -77,30 +77,36 @@ def open_delete_routine(
     routine_name: str,
     on_done: Callable[[], None],
 ) -> None:
-    """Abre ConfirmDialog para deletar rotina (BR-TUI-016 regra 3)."""
+    """Abre ConfirmDialog para desativar rotina (BR-TUI-016, BR-ROUTINE-006)."""
 
     def on_confirm() -> None:
-        service_action(lambda s: RoutineService(s).delete_routine(routine_id))
-        # DT-048: ativar próxima rotina disponível após deleção
-        service_action(lambda s: _activate_next_routine(s))
+        _, error = service_action(lambda s: RoutineService(s).delete_routine(routine_id))
+        if error:
+            app.notify(error, severity="error")
+            return
+        # DT-048: ativar próxima rotina disponível após desativação
+        service_action(lambda s: _activate_next_routine(s, exclude_id=routine_id))
         on_done()
 
     app.push_screen(
         ConfirmDialog(
-            title="Deletar Rotina",
-            message=f"Deletar '{routine_name}'?",
+            title="Desativar Rotina",
+            message=f"Desativar '{routine_name}'?\nHábitos permanecem vinculados.",
             on_confirm=on_confirm,
         )
     )
 
 
-def _activate_next_routine(s: Session) -> None:
+def _activate_next_routine(s: Session, exclude_id: int | None = None) -> None:
     """Ativa a próxima rotina existente, se houver (DT-048)."""
     from sqlmodel import select
 
     from timeblock.models.routine import Routine
 
-    remaining = s.exec(select(Routine)).first()
+    stmt = select(Routine)
+    if exclude_id is not None:
+        stmt = stmt.where(Routine.id != exclude_id)
+    remaining = s.exec(stmt).first()
     if remaining and remaining.id:
         RoutineService(s).activate_routine(remaining.id)
 
