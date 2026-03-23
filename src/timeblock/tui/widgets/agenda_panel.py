@@ -14,6 +14,7 @@ from textual.widgets import Static
 
 from timeblock.tui.colors import (
     C_ACCENT,
+    C_TEXT,
     fill_char,
     fill_color,
     is_bold_status,
@@ -206,13 +207,11 @@ class AgendaPanel(Widget):
             m = minute % 60
             show_label = m % 30 == 0
 
-            # Coluna de horas (fixa, BR-TUI-031-R4)
             if show_label:
                 hours_out.append(f"  {_time_label(h, m)}  [dim]\u2502[/dim]")
             else:
                 hours_out.append("         [dim]\u2502[/dim]")
 
-            # Coluna de blocos (scrollável H)
             entries = line_info.get(li, [])
 
             if not entries:
@@ -222,7 +221,7 @@ class AgendaPanel(Widget):
             n_cols = max(total_cols_of[id(e[0])] for e in entries)
             gap = n_cols - 1  # BR-TUI-032-R14
             col_w = max(min_col_w, (fw - gap) // n_cols)
-            line_w = n_cols * col_w + gap + 1  # +1 leading space
+            line_w = n_cols * col_w + gap + 1
             max_content_w = max(max_content_w, line_w)
 
             # Indexar por coluna; "start" vence "body" (R12)
@@ -245,30 +244,35 @@ class AgendaPanel(Widget):
                     fcolor = fill_color(st, sub)
 
                     if role == "start":
-                        separator_w = 3  # " · "
+                        # accent bar + título C_TEXT + ícone (BR-TUI-032-R4)
+                        accent_w = 1  # \u258c
+                        separator_w = 3  # " \u00b7 "
                         icon_w = len(icon)
-                        max_nm = max(1, col_w - separator_w - icon_w)
+                        max_nm = max(1, col_w - accent_w - separator_w - icon_w)
                         if len(nm) > max_nm:
                             display_nm = nm[: max(1, max_nm - 1)] + "\u2026"
                         else:
                             display_nm = nm
-                        visual_w = len(display_nm) + separator_w + icon_w
+                        visual_w = accent_w + len(display_nm) + separator_w + icon_w
                         pad = " " * max(0, col_w - visual_w)
                         if bold:
                             parts.append(
-                                f"[bold {color}]{display_nm}[/bold {color}]"
+                                f"[bold {color}]\u258c[/bold {color}]"
+                                f"[bold {C_TEXT}]{display_nm}[/bold {C_TEXT}]"
                                 f" [dim]\u00b7[/dim] "
                                 f"[bold {color}]{icon}[/bold {color}]"
                                 f"{pad}"
                             )
                         else:
                             parts.append(
-                                f"[{color}]{display_nm}[/{color}]"
+                                f"[{color}]\u258c[/{color}]"
+                                f"[{C_TEXT}]{display_nm}[/{C_TEXT}]"
                                 f" [dim]\u00b7[/dim] "
                                 f"[{color}]{icon}[/{color}]"
                                 f"{pad}"
                             )
                     else:
+                        # Corpo: accent bar + fill (BR-TUI-032-R5)
                         parts.append(
                             f"[{color}]\u258c[/{color}][{fcolor}]{fc * (col_w - 1)}[/{fcolor}]"
                         )
