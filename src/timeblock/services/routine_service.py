@@ -110,29 +110,34 @@ class RoutineService:
         routine.is_active = False
         self.session.add(routine)
 
-    def delete_routine(self, routine_id: int) -> None:
-        """
-        Soft delete de rotina (marca deleted_at).
+    def delete_routine(self, routine_id: int) -> Routine:
+        """Soft delete de rotina (desativa, mantém no banco).
 
-        MVP: Soft delete simples.
-        Fase 2: Implementar soft delete em cascata.
+        Hábitos permanecem vinculados. Rotina pode ser
+        reativada depois via activate_routine().
 
         Business Rules:
-            - BR-ROUTINE-002: Soft delete como padrão (preserva histórico)
+            - BR-ROUTINE-006: Soft delete como padrão
+            - BR-ROUTINE-002: Hábitos preservados (FK intacta)
+
+        Raises:
+            ValueError: Se rotina não existe.
+
+        Returns:
+            Routine desativada.
         """
         routine = self.session.get(Routine, routine_id)
         if routine is None:
             raise ValueError(f"Rotina {routine_id} não encontrada")
 
-        # TODO Fase 2: Implementar soft delete
-        # Por ora, fazer hard delete simples
-        self.session.delete(routine)
+        routine.is_active = False
+        self.session.add(routine)
+        return routine
 
     def hard_delete_routine(self, routine_id: int, force: bool = False) -> None:
-        """
-        Deleta rotina PERMANENTEMENTE (HARD DELETE).
+        """Deleta rotina PERMANENTEMENTE (hard delete / purge).
 
-        FK RESTRICT bloqueia delete se tiver habits.
+        Valida hábitos vinculados antes de deletar.
         Fase 2: force=True permite cascade delete.
 
         Args:
@@ -140,21 +145,25 @@ class RoutineService:
             force: Se True, permite cascade delete (Fase 2)
 
         Raises:
-            IntegrityError: Se rotina tem habits (FK RESTRICT do banco)
-            ValueError: Se rotina não existe
+            ValueError: Se rotina não existe ou possui hábitos vinculados.
 
         Business Rules:
-            - BR-ROUTINE-002: Hard delete bloqueia se tiver habits (FK RESTRICT)
-            - BR-HABIT-003: Delete routine com habits bloqueado pelo banco
+            - BR-ROUTINE-006: Purge bloqueia com habits
+            - BR-ROUTINE-002: Hábitos protegidos por FK RESTRICT
         """
         routine = self.session.get(Routine, routine_id)
         if routine is None:
             raise ValueError(f"Rotina {routine_id} não encontrada")
 
+        # DT-057: pre-check — mensagem legível antes do FK RESTRICT
+        habit_count = len(routine.habits)
+        if habit_count > 0:
+            raise ValueError(
+                f"Rotina possui {habit_count} hábito(s) vinculado(s). Delete os hábitos primeiro."
+            )
+
         # TODO Fase 2: Implementar cascade delete quando force=True
-        # Deixar FK RESTRICT do banco bloquear delete se tiver habits
         self.session.delete(routine)
-        self.session.commit()
 
     def update_routine(self, routine_id: int, name: str | None = None) -> Routine | None:
         """Atualiza nome da rotina."""
