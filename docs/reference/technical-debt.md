@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.21.0
+**Versão:** 2.22.0
 
 **Status:** SSOT
 
@@ -48,7 +48,7 @@
 | DT042 | BR-HABITINSTANCE-001 nao documenta undo            | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT043 | DEFAULT_CSS inline no FormModal                    | BAIXA      | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT044 | basedpyright standard: ~190 warnings               | MEDIA      | PENDENTE  | -            | Sprint futuro            |
-| DT045 | Blocos sobrepostos sem distinção na Agenda         | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT045 | Blocos sobrepostos sem distinção na Agenda         | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks       |
 | DT046 | Troca de rotina não atualiza Habits/Tasks          | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT047 | Sem mecanismo de seleção entre rotinas             | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT048 | Deleção de rotina não carrega outra nem limpa      | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
@@ -62,6 +62,11 @@
 | DT056 | TUI conecta a banco sem tabelas — falha silenciosa | CRITICA    | RESOLVIDO | Mar/2026     | fix/dt056-xdg            |
 | DT057 | Delete de rotina falha silenciosamente na TUI      | ALTA       | PENDENTE  | -            | Sprint futuro            |
 | DT058 | Logging ausente na CLI — apenas TUI loga           | MEDIA      | PENDENTE  | -            | Sprint futuro            |
+| DT059 | Mensagens de migração visíveis no stdout da TUI   | MEDIA      | PENDENTE  | -            | Sprint futuro            |
+| DT060 | Sidebar ocupa ~15 cols desnecessariamente           | MEDIA      | PENDENTE  | -            | Sprint futuro            |
+| DT061 | AgendaPanel sem scroll horizontal                  | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks       |
+| DT062 | Linhas horizontais cortam blocos de tempo           | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks       |
+| DT063 | Agenda limitada ao dia atual (sem paginação)       | MEDIA      | PENDENTE  | -            | Sprint futuro            |
 
 ## 1b. Quick Status
 
@@ -109,7 +114,7 @@
 - [x] DT042 — BR-HABITINSTANCE-001 não documenta undo
 - [x] DT043 — DEFAULT_CSS inline no FormModal
 - [ ] DT044 — basedpyright standard: ~190 warnings
-- [ ] DT045 — Blocos sobrepostos sem distinção visual na Agenda
+- [x] DT045 — Blocos sobrepostos sem distinção visual na Agenda
 - [x] DT046 — Troca de rotina não atualiza Habits/Tasks
 - [x] DT047 — Sem mecanismo de seleção entre rotinas
 - [x] DT048 — Deleção de rotina não carrega outra rotina e nem limpa panels
@@ -125,11 +130,11 @@
 - [ ] DT058 — Logging ausente na CLI — apenas TUI loga via service_action
 - [ ] DT059 — Mensagens de migração visíveis no stdout da TUI
 - [ ] DT060 — Sidebar ocupa ~15 cols desnecessariamente
-- [ ] DT061 — AgendaPanel sem scroll horizontal (bloqueador de multi-coluna)
-- [ ] DT062 — Linhas horizontais cortam blocos de tempo coloridos
+- [x] DT061 — AgendaPanel sem scroll horizontal (bloqueador de multi-coluna)
+- [x] DT062 — Linhas horizontais cortam blocos de tempo coloridos
 - [ ] DT063 — Agenda limitada ao dia atual (sem paginação -3/+3)
 
-**Resolvidos:** 50/63 | **Pendentes:** 12/63 | **Aceitos:** 1/63
+**Resolvidos:** 53/63 | **Pendentes:** 9/63 | **Aceitos:** 1/63
 
 ---
 
