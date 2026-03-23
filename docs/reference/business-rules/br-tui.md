@@ -1535,17 +1535,17 @@ Scenario: Return to today
 
 **Regras — Renderização de bloco:**
 
-4. Primeira linha do bloco (horário de início): `{título} {ícone_status}`. Sem `▌`, sem cor de fundo. Texto limpo
+4. Primeira linha do bloco (horário de início): `▌{título} · {ícone_status}`. Accent bar (`▌`) na cor do status, título em C_TEXT (branco), ícone na cor do status
 5. Linhas seguintes do bloco: `▌{cor_sólida}` — accent bar + preenchimento
 6. `▌` (half block esquerdo) na cor saturada do hábito (paleta Catppuccin Mocha)
 7. Fundo do bloco (após `▌`) na cor suave da mesma família
-8. Ícones de status preservam padrão existente: `·` pending, `▶` running, `✓` done, `⏭` skipped, `⏸` paused
+8. Ícones de status preservam padrão existente: `○` pending, `▶` running, `✓` done, `⏭` skipped, `⏸` paused
 9. Nenhuma linha horizontal (`───`) atravessa um bloco de tempo
 
 **Regras — Término de bloco:**
 
 10. A linha correspondente ao horário de término do bloco AINDA exibe cor (`▌░░░`). A linha seguinte é livre
-11. Se nenhum bloco inicia na linha seguinte ao término: exibe pontilhado (`· · ·`) ou vazio
+11. Se nenhum bloco inicia na linha seguinte ao término: área vazia (sem pontilhado)
 12. Se outro bloco inicia exatamente no horário de término: o título do novo bloco substitui diretamente — sem gap, sem cor residual do bloco anterior
 
 **Regras — Multi-coluna (sobreposição):**
@@ -1557,7 +1557,7 @@ Scenario: Return to today
 
 **Regras — Áreas vazias:**
 
-17. Linhas sem bloco em nenhuma coluna: pontilhado sutil (`· · · ·`)
+17. Linhas sem bloco em nenhuma coluna: área vazia (string vazia)
 18. Linhas sem bloco em uma coluna mas com bloco em outra: espaço vazio na coluna sem bloco
 
 **Exemplos de referência:** ver `docs/reference/agenda-panel-mockup-reference.md`
