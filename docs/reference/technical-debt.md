@@ -24,7 +24,7 @@
 | DT010 | FocusablePanel: flag \_showing_placehold.          | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT011 | FocusablePanel: count em dois lugares              | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT012 | DI inconsistente entre services                    | MÉDIA      | PENDENTE  | -            | v2.0                     |
-| DT013 | \_parse_time duplicado (crud_habits/tasks)         | BAIXA      | PENDENTE  | -            | v1.7.0                   |
+| DT013 | \_parse_time duplicado (crud_habits/tasks)         | BAIXA      | RESOLVIDO | Mar/2026     | fix/quick-dts            |
 | DT014 | Keybindings divergentes BR vs código               | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT015 | AgendaPanel sem auto-refresh (set_interval)        | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
 | DT016 | load_active_timer: elapsed int vs str MM:SS        | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
@@ -60,7 +60,7 @@
 | DT054 | Timer pause não para contagem (só muda status)     | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT055 | v em hábito running não abre ConfirmDialog         | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical      |
 | DT056 | TUI conecta a banco sem tabelas — falha silenciosa | CRITICA    | RESOLVIDO | Mar/2026     | fix/dt056-xdg            |
-| DT057 | Delete de rotina falha silenciosamente na TUI      | ALTA       | PENDENTE  | -            | Sprint futuro            |
+| DT057 | Delete de rotina falha silenciosamente na TUI      | ALTA       | RESOLVIDO | Mar/2026     | fix/quick-dts            |
 | DT058 | Logging ausente na CLI — apenas TUI loga           | MEDIA      | PENDENTE  | -            | Sprint futuro            |
 | DT059 | Mensagens de migração visíveis no stdout da TUI   | MEDIA      | PENDENTE  | -            | Sprint futuro            |
 | DT060 | Sidebar ocupa ~15 cols desnecessariamente           | MEDIA      | PENDENTE  | -            | Sprint futuro            |
