@@ -7,6 +7,7 @@
 ---
 
 ## 1. Camadas de Enforcement
+
 ```
 Desenvolvedor local     →  Editor (LSP, linters, formatters)
 Pre-commit hooks        →  ruff, mypy, testes rápidos
@@ -19,28 +20,28 @@ Post-merge              →  Smoke tests, canary deploy, monitoring
 
 ### Linters e Formatters Customizados
 
-| Empresa | Ferramenta | Propósito |
-| ------- | ---------- | --------- |
-| Google | buildifier, Error Prone, clang-tidy | Formatação BUILD, análise estática Java/C++ |
-| Meta | Infer | Análise estática inter-procedural |
-| Uber | NullAway | Eliminação de NullPointerException |
-| Airbnb | eslint-config-airbnb | Regras JS/TS opinativas |
+| Empresa | Ferramenta                          | Propósito                                   |
+| ------- | ----------------------------------- | ------------------------------------------- |
+| Google  | buildifier, Error Prone, clang-tidy | Formatação BUILD, análise estática Java/C++ |
+| Meta    | Infer                               | Análise estática inter-procedural           |
+| Uber    | NullAway                            | Eliminação de NullPointerException          |
+| Airbnb  | eslint-config-airbnb                | Regras JS/TS opinativas                     |
 
 ### Architectural Fitness Functions
 
-| Ferramenta | Linguagem | Propósito |
-| ---------- | --------- | --------- |
-| ArchUnit | Java | Testes de arquitetura |
-| import-linter | Python | Regras de importação entre camadas |
-| deptry | Python | Imports de dependências não declaradas |
+| Ferramenta    | Linguagem | Propósito                              |
+| ------------- | --------- | -------------------------------------- |
+| ArchUnit      | Java      | Testes de arquitetura                  |
+| import-linter | Python    | Regras de importação entre camadas     |
+| deptry        | Python    | Imports de dependências não declaradas |
 
 ### Coverage Gates
 
-| Abordagem | Descrição |
-| --------- | --------- |
+| Abordagem        | Descrição                        |
+| ---------------- | -------------------------------- |
 | Threshold global | Pipeline falha se cobertura < X% |
-| Diff coverage | Novo código deve ter >= 90% |
-| Ratchet | Threshold só sobe, nunca desce |
+| Diff coverage    | Novo código deve ter >= 90%      |
+| Ratchet          | Threshold só sobe, nunca desce   |
 
 ## 3. Recomendações para ATOMVS
 
