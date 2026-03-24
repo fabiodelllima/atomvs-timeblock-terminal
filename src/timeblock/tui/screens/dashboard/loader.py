@@ -61,6 +61,8 @@ def ensure_today_instances() -> int:
 
         created = 0
         for habit in habits:
+            if habit.id is None:
+                continue
             if habit.id in existing_ids:
                 continue
             if not HabitInstanceService._should_create_for_date(habit.recurrence, today):

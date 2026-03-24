@@ -94,8 +94,9 @@ class TimeBlockApp(App):
         new_screen = self.query_one(f"#{SCREEN_IDS[screen_name]}")
         new_screen.display = True
 
-        if hasattr(new_screen, "refresh_data"):
-            new_screen.refresh_data()
+        refresh = getattr(new_screen, "refresh_data", None)
+        if refresh is not None:
+            refresh()
         new_screen.focus()
 
         self.query_one(HeaderBar).update_screen(screen_name)

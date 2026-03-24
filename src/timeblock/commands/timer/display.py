@@ -12,6 +12,7 @@ from rich.text import Text
 from sqlmodel import Session
 
 from timeblock.database import get_engine_context
+from timeblock.models.enums import TimerStatus
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.services.task_service import TaskService
@@ -87,7 +88,7 @@ def display_timer(timelog_id: int) -> None:
                 text.append(activity, style="bold white")
                 text.append(" | ", style="dim")
 
-                if hasattr(timelog, "paused") and timelog.paused:
+                if timelog.status == TimerStatus.PAUSED:
                     text.append("[||] Pausado", style="yellow")
                 else:
                     text.append("[>] Em andamento", style="green")

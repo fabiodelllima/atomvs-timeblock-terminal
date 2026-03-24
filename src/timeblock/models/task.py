@@ -19,7 +19,7 @@ class Task(SQLModel, table=True):
       4. else                           → PENDING
     """
 
-    __tablename__ = "tasks"
+    __tablename__ = "tasks"  # pyright: ignore[reportAssignmentType]
 
     id: int | None = Field(default=None, primary_key=True)
     title: str = Field(index=True, min_length=1, max_length=200)
