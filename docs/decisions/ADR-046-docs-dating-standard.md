@@ -14,13 +14,13 @@ Regra geral: se o documento tem campo `Versão:`, deve ter `Última atualizaçã
 
 Por categoria Diátaxis:
 
-| Categoria | Campos obrigatórios |
-| --------- | ------------------- |
-| Reference (SSOT) | Versão, Última atualização, Changelog |
-| Reference (BRs) | Última atualização |
-| Decisions (ADRs) | Date (formato Nygard) |
-| Explanation | Criado em, Última revisão (se revisado) |
-| Tutorial/Howto | Criado em, Última validação |
+| Categoria        | Campos obrigatórios                     |
+| ---------------- | --------------------------------------- |
+| Reference (SSOT) | Versão, Última atualização, Changelog   |
+| Reference (BRs)  | Última atualização                      |
+| Decisions (ADRs) | Date (formato Nygard)                   |
+| Explanation      | Criado em, Última revisão (se revisado) |
+| Tutorial/Howto   | Criado em, Última validação             |
 
 Formato de data: `DD de Mês de AAAA` em cabeçalhos, `AAAA-MM-DD` (ISO 8601) em tabelas e ADRs.
 
