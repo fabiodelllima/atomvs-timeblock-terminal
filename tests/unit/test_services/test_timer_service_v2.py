@@ -310,3 +310,27 @@ class TestGetAnyActiveTimer:
         result = TimerService.get_any_active_timer(session)
 
         assert result is None
+
+
+class TestTimerServiceErrorPaths:
+    """Error paths adicionais para TimerService."""
+
+    def test_stop_timer_without_instance_id(self, session: Session):
+        """GAP-006: stop em TimeLog sem habit_instance_id levanta ValueError.
+
+        Edge case defensivo: TimeLog criado diretamente no banco sem FK.
+        O raise em stop_timer protege contra dados corrompidos.
+        """
+        from datetime import datetime
+
+        timelog = TimeLog(
+            habit_instance_id=None,
+            start_time=datetime.now(),
+            status=TimerStatus.RUNNING,
+        )
+        session.add(timelog)
+        session.commit()
+        session.refresh(timelog)
+
+        with pytest.raises(ValueError, match="must have habit_instance_id"):
+            TimerService.stop_timer(timelog.id, session)
