@@ -5,6 +5,7 @@
 **Criado:** 2026-03-23
 
 **Referências:**
+
 - pytest-textual-snapshot (Textualize, 2024)
 - Textual Testing Guide (textual.textualize.io/guide/testing)
 - ADR-037: Testes E2E com Textual Pilot
@@ -24,6 +25,7 @@ Snapshot testing preenche essa lacuna: captura SVGs da TUI em execução e compa
 O `pytest-textual-snapshot` é o plugin oficial da Textualize, mantido pela mesma equipe que desenvolve o Textual. Internamente, o Textual usa snapshot testing para validar todos os widgets builtin em cada release.
 
 **Instalação:**
+
 ```bash
 pip install pytest-textual-snapshot
 ```
@@ -38,6 +40,7 @@ pip install pytest-textual-snapshot
 6. Se diferir, gera report HTML com diff visual lado a lado
 
 **Exemplo básico:**
+
 ```python
 def test_dashboard_initial_state(snap_compare):
     """Snapshot: dashboard renderiza corretamente com rotina ativa."""
@@ -45,6 +48,7 @@ def test_dashboard_initial_state(snap_compare):
 ```
 
 **Com interação antes da captura:**
+
 ```python
 def test_dashboard_after_creating_habit(snap_compare):
     """Snapshot: dashboard após criar hábito via modal."""
@@ -63,6 +67,7 @@ def test_dashboard_after_creating_habit(snap_compare):
 ```
 
 **Atualizando baselines:**
+
 ```bash
 # Após validar visualmente que o output está correto:
 pytest tests/snapshot/ --snapshot-update
@@ -71,6 +76,7 @@ pytest tests/snapshot/ --snapshot-update
 ---
 
 ## 3. Organização no Projeto
+
 ```
 tests/
 ├── snapshot/                          # Snapshot tests
@@ -115,13 +121,14 @@ Os SVGs em `__snapshots__/` são rastreados pelo git. São a "verdade visual" do
 ---
 
 ## 5. Integração com CI
+
 ```yaml
 # .gitlab-ci.yml (proposta)
 test:snapshot:
   stage: test
   script:
     - python -m pytest tests/snapshot/ -v
-  allow_failure: true  # Remover quando baselines estiverem estáveis
+  allow_failure: true # Remover quando baselines estiverem estáveis
   artifacts:
     when: on_failure
     paths:
@@ -159,14 +166,14 @@ test:snapshot:
 
 ## 7. Relação com Outros Tipos de Teste
 
-| Tipo | Valida | Ferramenta |
-| ---- | ------ | ---------- |
-| Unit | Lógica de negócio isolada | pytest + mocks |
-| Integration | Service + DB | pytest + test engine |
-| E2E (pilot) | Fluxos de interação | pytest-asyncio + Textual pilot |
-| Snapshot | Renderização visual | pytest-textual-snapshot |
-| BDD | Cenários de aceite | pytest-bdd + Gherkin |
-| Visual (futuro) | Sessões gravadas | pexpect + asciinema |
+| Tipo            | Valida                    | Ferramenta                     |
+| --------------- | ------------------------- | ------------------------------ |
+| Unit            | Lógica de negócio isolada | pytest + mocks                 |
+| Integration     | Service + DB              | pytest + test engine           |
+| E2E (pilot)     | Fluxos de interação       | pytest-asyncio + Textual pilot |
+| Snapshot        | Renderização visual       | pytest-textual-snapshot        |
+| BDD             | Cenários de aceite        | pytest-bdd + Gherkin           |
+| Visual (futuro) | Sessões gravadas          | pexpect + asciinema            |
 
 Snapshot tests NÃO substituem testes com pilot. O pilot valida "pressionar Tab foca o próximo panel" (lógica). O snapshot valida "o panel focado tem borda branca e o desfocado tem borda cinza" (visual).
 
