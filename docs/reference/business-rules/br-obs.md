@@ -52,12 +52,12 @@
 
 **Configuração de logging:**
 
-| Modo | Console (stderr) | Arquivo (JSON Lines) | Nível mínimo |
-| ---- | ---------------- | -------------------- | ------------ |
-| CLI | Habilitado | Habilitado | INFO |
-| TUI | Desabilitado | Habilitado | INFO |
-| Testes | Desabilitado | Desabilitado | CRITICAL |
-| Debug | Habilitado | Habilitado | DEBUG |
+| Modo   | Console (stderr) | Arquivo (JSON Lines) | Nível mínimo |
+| ------ | ---------------- | -------------------- | ------------ |
+| CLI    | Habilitado       | Habilitado           | INFO         |
+| TUI    | Desabilitado     | Habilitado           | INFO         |
+| Testes | Desabilitado     | Desabilitado         | CRITICAL     |
+| Debug  | Habilitado       | Habilitado           | DEBUG        |
 
 **Evolução planejada:**
 
