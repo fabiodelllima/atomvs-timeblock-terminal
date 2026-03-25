@@ -4,8 +4,6 @@ Layout: [rotina ativa] | [keybindings do panel focado] | [timer + hora]
 O centro atualiza dinamicamente conforme o panel que recebe foco.
 """
 
-from datetime import datetime
-
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
@@ -65,13 +63,12 @@ class StatusBar(Widget):
         return f"[dim]{keys}[/dim]"
 
     def _build_right_section(self) -> str:
-        """Timer elapsed + hora atual."""
-        now = datetime.now().strftime("%H:%M")
+        """Timer elapsed."""
         if self.timer_elapsed and self.timer_status:
             icon = "▶" if self.timer_status == "running" else "⏸"
             color = "#CBA6F7" if self.timer_status == "running" else "#F9E2AF"
-            return f"[{color}]{icon} {self.timer_elapsed}[/{color}]  {now} "
-        return f"{now} "
+            return f"[{color}]{icon} {self.timer_elapsed}[/{color}] "
+        return ""
 
     # =========================================================================
     # Updates

@@ -4,7 +4,6 @@ BR-TUI-003 regra 6: Streak, barras 7d/30d, dot matrix semanal.
 Cores das barras: Green >= 80%, Yellow 50-79%, Red < 50%.
 """
 
-from datetime import datetime
 from typing import Any
 
 from textual.widgets import Static
@@ -25,7 +24,6 @@ class MetricsPanel(Static):
 
     def _refresh_content(self, data: dict) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
-        now = datetime.now()
         pct_7d = data.get("pct_7d", 0)
         pct_30d = data.get("pct_30d", 0)
         streak = data.get("streak", 0)
@@ -33,7 +31,7 @@ class MetricsPanel(Static):
         week_data = data.get("week_data", [])
 
         self.border_title = "Métricas"
-        self.border_subtitle = now.strftime("%H:%M")
+        self.border_subtitle = ""
 
         lines = [
             (
