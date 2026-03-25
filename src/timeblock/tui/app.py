@@ -1,7 +1,7 @@
 """AtomvsApp - Aplicação TUI principal."""
 
 from pathlib import PurePath
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -83,15 +83,15 @@ class TimeBlockApp(App):
         for name, screen_id in SCREEN_IDS.items():
             self.query_one(f"#{screen_id}").display = name == "dashboard"
 
-    async def action_switch_screen(self, screen_name: str) -> None:
+    async def action_switch_screen(self, screen: str) -> None:
         """Alterna a screen ativa via display toggle."""
-        if screen_name not in SCREENS or screen_name == self.active_screen:
+        if screen not in SCREENS or screen == self.active_screen:
             return
 
         self.query_one(f"#{SCREEN_IDS[self.active_screen]}").display = False
 
-        self.active_screen = screen_name
-        new_screen = self.query_one(f"#{SCREEN_IDS[screen_name]}")
+        self.active_screen = screen
+        new_screen = self.query_one(f"#{SCREEN_IDS[screen]}")
         new_screen.display = True
 
         refresh = getattr(new_screen, "refresh_data", None)
@@ -99,10 +99,10 @@ class TimeBlockApp(App):
             refresh()
         new_screen.focus()
 
-        self.query_one(HeaderBar).update_screen(screen_name)
-        self.query_one(NavBar).update_active(screen_name)
+        self.query_one(HeaderBar).update_screen(screen)
+        self.query_one(NavBar).update_active(screen)
 
-    def on_descendant_focus(self, event) -> None:
+    def on_descendant_focus(self, event: Any) -> None:
         """Atualiza footer quando foco muda entre panels."""
         widget = event.widget
         if widget and widget.id:
