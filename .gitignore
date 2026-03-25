@@ -66,3 +66,4 @@ run-overnight.sh
 
 # Design artifacts (box-drawing, themes, system-design)
 design/
+snapshot_report.html
