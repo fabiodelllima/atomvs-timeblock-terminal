@@ -133,8 +133,9 @@
 - [x] DT061 — AgendaPanel sem scroll horizontal (bloqueador de multi-coluna)
 - [x] DT062 — Linhas horizontais cortam blocos de tempo coloridos
 - [ ] DT063 — Agenda limitada ao dia atual (sem paginação -3/+3)
+- [ ] DT064 — CVE-2026-4539 pygments sem fix disponível
 
-**Resolvidos:** 53/63 | **Pendentes:** 9/63 | **Aceitos:** 1/63
+**Resolvidos:** 53/64 | **Pendentes:** 10/64 | **Aceitos:** 1/64
 
 ---
 
@@ -661,6 +662,23 @@ Agenda exibe apenas o dia atual. Não há mecanismo para visualizar dias anterio
 
 **Referências:** BR-TUI-030
 
+### DT-064: CVE-2026-4539 pygments sem fix disponível
+
+pip-audit falha no CI porque pygments 2.19.2 (última versão) tem CVE-2026-4539 — ReDoS local no AdlLexer (CVSS 3.3 LOW). Sem fix upstream. `--ignore-vuln` adicionado ao CI como workaround.
+
+- **Descoberto:** 2026-03-24 (Sessão 12 — pipeline bloqueado)
+- **Severidade:** BAIXA (CVE local-only, AdlLexer não usado no projeto)
+- **Status:** PENDENTE (aguardando pygments > 2.19.2)
+- **Sprint planejado:** Remover --ignore-vuln quando fix sair
+
+**Solução proposta:**
+1. Monitorar releases do pygments
+2. Quando > 2.19.2 sair: `pip install --upgrade pygments`, atualizar requirements.txt
+3. Remover `--ignore-vuln CVE-2026-4539` do .gitlab-ci.yml
+4. Marcar DT-064 como RESOLVIDO
+
+**Referências:** https://github.com/pygments/pygments/issues/3058
+
 ## 4. Política de Gestão
 
 Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), severidade e sprint planejado para resolução. O inventário é revisado a cada release.
@@ -705,4 +723,4 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 **Próxima Revisão:** Release v1.7.0
 
-**Última atualização:** 22 de Março de 2026
+**Última atualização:** 24 de Março de 2026
