@@ -106,8 +106,10 @@ security:deps:
   needs: []
   before_script: []
   script:
-    - pip-audit --format json --output pip-audit-report.json
-    - pip-audit
+    # CVE-2026-4539: pygments ReDoS no AdlLexer (CVSS 3.3 LOW, local-only)
+    # Sem fix disponível em 2026-03-24. Remover --ignore-vuln quando pygments > 2.19.2 sair.
+    - pip-audit --format json --output pip-audit-report.json --ignore-vuln CVE-2026-4539
+    - pip-audit --ignore-vuln CVE-2026-4539
   timeout: 10m
   artifacts:
     paths:
