@@ -5,6 +5,8 @@ BR-TUI-003-R25: Timer card compacto (sem ASCII art no dashboard v2).
 BR-TUI-003-R27: Cores por estado (Mauve running, Yellow paused, Overlay0 idle).
 """
 
+from typing import Any
+
 from textual.events import Key
 from textual.message import Message
 from textual.widgets import Static
@@ -17,7 +19,7 @@ class TimerPanel(Static):
     can_focus = True
     """Card do timer com elapsed em ASCII art grande."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._timer_info: dict | None = None
 

@@ -10,6 +10,8 @@ Referências:
     - A lógica pura de renderização está em agenda_renderer.py.
 """
 
+from typing import Any
+
 from textual.containers import ScrollableContainer
 from textual.widget import Widget
 from textual.widgets import Static
@@ -27,7 +29,7 @@ class AgendaPanel(Widget):
     can_focus = True
     """Agenda com horas fixas e blocos scrolláveis horizontalmente (BR-TUI-031)."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._instances: list[dict] = []
 

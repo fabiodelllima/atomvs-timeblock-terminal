@@ -7,6 +7,7 @@ from rich.console import Console
 from sqlmodel import Session
 
 from timeblock.database import get_engine_context
+from timeblock.models import TimeLog
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.services.task_service import TaskService
@@ -73,7 +74,9 @@ def start_timer(
         raise typer.Exit(1)
 
 
-def _start_with_flags(schedule: int | None, task: int | None, instance_service):
+def _start_with_flags(
+    schedule: int | None, task: int | None, instance_service: HabitInstanceService
+) -> TimeLog:
     """Inicia timer com flags --schedule ou --task."""
     if schedule:
         instance = instance_service.get_instance(schedule)
@@ -109,7 +112,7 @@ def _start_with_flags(schedule: int | None, task: int | None, instance_service):
     raise typer.Exit(1)
 
 
-def _start_via_select(instance_service):
+def _start_via_select(instance_service: HabitInstanceService) -> TimeLog:
     """Inicia timer via schedule selecionado."""
     selected = get_selected_schedule()
     if not selected:

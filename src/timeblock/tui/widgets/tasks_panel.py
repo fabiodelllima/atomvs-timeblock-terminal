@@ -8,6 +8,8 @@ BR-TUI-012: Navegação vertical com setas/j/k e highlight.
 BR-TUI-004: Quick actions — v completa task (ADR-037).
 """
 
+from typing import Any
+
 from textual.events import Key
 from textual.message import Message
 
@@ -23,7 +25,7 @@ from timeblock.tui.widgets.focusable_panel import FocusablePanel
 class TasksPanel(FocusablePanel):
     """Card de tarefas com 4 seções, heat de proximidade e navegação."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._tasks: list[dict] = []
         self._ordered: list[dict] = []

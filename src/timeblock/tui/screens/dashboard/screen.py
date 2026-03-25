@@ -11,6 +11,7 @@ Referências:
 """
 
 from datetime import date
+from typing import Any
 
 from sqlmodel import Session
 from textual.containers import Horizontal, Vertical, VerticalScroll
@@ -39,7 +40,7 @@ logger = get_logger(__name__)
 class DashboardScreen(Static):
     """Dashboard coordinator: compose + focus tracking + dispatch."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._focused_panel: str = ""
         self._active_routine_id: int | None = None
@@ -86,7 +87,7 @@ class DashboardScreen(Static):
         except Exception:
             pass  # Agenda pode nao estar montada ainda
 
-    def on_descendant_focus(self, event) -> None:
+    def on_descendant_focus(self, event: Any) -> None:
         """Rastreia panel focado para CRUD contextual."""
         if event.widget and event.widget.id:
             self._focused_panel = event.widget.id

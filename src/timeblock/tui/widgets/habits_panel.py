@@ -9,6 +9,8 @@ BR-TUI-004: Quick actions — v done, s skip (ADR-037).
 BR-TUI-021: t inicia timer para hábito selecionado (ADR-037).
 """
 
+from typing import Any
+
 from textual.events import Key
 from textual.message import Message
 
@@ -27,7 +29,7 @@ class HabitsPanel(FocusablePanel):
 
     HIGHLIGHT_COLOR: str = C_HIGHLIGHT
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._instances: list[dict] = []
 

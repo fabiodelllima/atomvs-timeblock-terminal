@@ -4,6 +4,8 @@ Adiciona foco, cursor interno e handlers de teclado (setas/j/k)
 sobre Static, preservando o padrão update() com Rich markup.
 """
 
+from typing import Any
+
 from textual.events import Key
 from textual.message import Message
 from textual.widgets import Static
@@ -22,7 +24,7 @@ class FocusablePanel(Static):
             self.panel_id = panel_id
             super().__init__()
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._cursor_index: int = 0
         self._item_count: int = 0

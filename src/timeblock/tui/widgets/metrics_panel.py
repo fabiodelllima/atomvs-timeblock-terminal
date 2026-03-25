@@ -5,6 +5,7 @@ Cores das barras: Green >= 80%, Yellow 50-79%, Red < 50%.
 """
 
 from datetime import datetime
+from typing import Any
 
 from textual.widgets import Static
 
@@ -15,7 +16,7 @@ class MetricsPanel(Static):
     can_focus = True
     """Card de métricas com streak, completude e heatmap semanal."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
     def update_data(self, data: dict) -> None:

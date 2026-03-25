@@ -249,7 +249,8 @@ def atom_log(
             instance_service = HabitInstanceService()
             instance = instance_service.get_instance(instance_id, session=session)
 
-            display_log_result(timelog, instance)
+            if instance is not None:
+                display_log_result(timelog, instance)
 
     except ValueError as e:
         handle_log_error(e, instance_id)

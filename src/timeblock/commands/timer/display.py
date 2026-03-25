@@ -12,6 +12,7 @@ from rich.text import Text
 from sqlmodel import Session
 
 from timeblock.database import get_engine_context
+from timeblock.models import TimeLog
 from timeblock.models.enums import TimerStatus
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
@@ -37,7 +38,7 @@ def get_selected_schedule():
         return None
 
 
-def get_activity_name(timelog) -> str:
+def get_activity_name(timelog: TimeLog) -> str:
     """Retorna nome da atividade do timelog."""
     instance_service = HabitInstanceService()
 
