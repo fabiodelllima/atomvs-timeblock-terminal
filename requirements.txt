@@ -56,3 +56,6 @@ typing_extensions==4.15.0
 uc-micro-py==1.0.3
 yarl==1.22.0
 python-json-logger==4.0.0
+requests==2.33.0
+pytest-textual-snapshot==1.1.0
+syrupy==4.8.0
