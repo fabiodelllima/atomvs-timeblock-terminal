@@ -238,6 +238,12 @@ class TestHabitsPanelComplete:
             assert len(instances) > 0, "Instância deve existir"
             assert instances[0]["status"] == "done", "Status deve ser done após v"
 
+            # Verificar ORM: done_substatus=FULL (default do Select)
+            raw = _query_instance_raw(instances[0]["id"])
+            assert raw is not None, "Instância deve existir no ORM"
+            assert raw.done_substatus is not None, "done_substatus preenchido"
+            assert raw.done_substatus.value == "full", "Default do modal é FULL"
+
             # Undo com u
             await pilot.press("u")
             await _wait(pilot)
@@ -245,6 +251,15 @@ class TestHabitsPanelComplete:
             instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
             assert instances[0]["status"] == "pending", "Status deve voltar a pending após u"
             assert instances[0]["substatus"] is None, "Substatus deve ser limpo após undo"
+
+            # Verificar ORM: TODOS os campos limpos (BR-HABITINSTANCE-007)
+            raw = _query_instance_raw(instances[0]["id"])
+            assert raw is not None
+            assert raw.done_substatus is None, "done_substatus None após undo"
+            assert raw.not_done_substatus is None, "not_done_substatus None após undo"
+            assert raw.skip_reason is None, "skip_reason None após undo"
+            assert raw.skip_note is None, "skip_note None após undo"
+            assert raw.completion_percentage is None, "completion_pct None após undo"
 
     @pytest.mark.asyncio
     async def test_habits_timer_full_flow(self):
@@ -314,6 +329,15 @@ class TestHabitsPanelComplete:
             assert len(instances) > 0
             assert instances[0]["status"] == "not_done", "Skip deve mudar status para not_done"
             assert instances[0]["substatus"] is not None, "Skip deve definir substatus"
+
+            # Verificar ORM: campos de skip (BR-HABIT-SKIP-001)
+            raw = _query_instance_raw(instances[0]["id"])
+            assert raw is not None
+            assert raw.not_done_substatus is not None, "not_done_substatus preenchido"
+            assert raw.not_done_substatus.value == "skipped_justified"
+            assert raw.skip_reason is not None, "skip_reason preenchido"
+            assert raw.skip_reason.value == "outro", "Default do Select é OTHER"
+            assert raw.done_substatus is None, "done_substatus deve ser None"
 
     @pytest.mark.asyncio
     async def test_habits_done_esc_cancels(self):
@@ -700,6 +724,14 @@ class TestTimerPanelComplete:
             done = [i for i in instances if i["status"] == "done"]
             assert len(done) > 0, "stop_timer deve marcar hábito como done"
             assert done[0]["substatus"] is not None, "stop_timer deve definir substatus"
+
+            # Verificar ORM: substatus calculado pelo timer (BR-TIMER-003)
+            raw = _query_instance_raw(done[0]["id"])
+            assert raw is not None
+            assert raw.done_substatus is not None, "done_substatus calculado pelo timer"
+            assert raw.done_substatus.value == "partial", "~0s vs 60min = PARTIAL"
+            assert raw.completion_percentage is not None, "completion_pct calculado"
+            assert raw.completion_percentage < 90, "~0s vs 60min = <90%"
 
 
 # =========================================================================
