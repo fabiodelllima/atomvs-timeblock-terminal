@@ -24,9 +24,12 @@ Referências:
 from pathlib import Path
 
 import pytest
+from sqlmodel import Session, select
 from textual.widgets import Input
 
+from timeblock.database import get_engine_context
 from timeblock.database.engine import create_db_and_tables
+from timeblock.models.habit_instance import HabitInstance
 from timeblock.tui.app import TimeBlockApp
 from timeblock.tui.screens.dashboard import loader
 from timeblock.tui.screens.dashboard.screen import DashboardScreen
@@ -130,6 +133,17 @@ async def _start_timer(pilot) -> None:
     await _wait(pilot)
     await pilot.press("t")
     await _wait(pilot)
+
+
+def _query_instance_raw(instance_id: int) -> HabitInstance | None:
+    """Acessa HabitInstance via ORM para validar campos completos.
+
+    O loader retorna dict simplificado (substatus unificado, sem skip_reason,
+    sem completion_percentage). Este helper permite verificar todos os campos
+    do modelo nos testes e2e sem acoplar o loader aos testes.
+    """
+    with get_engine_context() as engine, Session(engine) as session:
+        return session.exec(select(HabitInstance).where(HabitInstance.id == instance_id)).first()
 
 
 # =========================================================================
