@@ -437,6 +437,69 @@ class TestHabitsPanelComplete:
             await _wait(pilot)
             assert panel._cursor_index == 0, "Cursor não deve ir abaixo de 0"
 
+    @pytest.mark.asyncio
+    async def test_habits_navigation_arrows(self):
+        """up/down move cursor equivalente a i/j (BR-TUI-012)."""
+        async with TimeBlockApp().run_test() as pilot:
+            await _wait(pilot)
+            await _create_routine(pilot)
+            await _create_habit(pilot, "Arrow 1", "08:00", "30")
+            await _create_habit(pilot, "Arrow 2", "09:00", "30")
+
+            panel = pilot.app.query_one(HabitsPanel)
+            pilot.app.set_focus(panel)
+            await _wait(pilot)
+
+            assert panel._cursor_index == 0
+            await pilot.press("down")
+            await _wait(pilot)
+            assert panel._cursor_index == 1, "down deve mover cursor"
+            await pilot.press("up")
+            await _wait(pilot)
+            assert panel._cursor_index == 0, "up deve mover cursor"
+            await pilot.press("up")
+            await _wait(pilot)
+            assert panel._cursor_index == 0, "up no topo não vai negativo"
+
+    @pytest.mark.asyncio
+    async def test_habits_skip_undo_clears_all_fields(self):
+        """s (skip) → u (undo) → todos os campos limpos (BR-HABITINSTANCE-007)."""
+        async with TimeBlockApp().run_test() as pilot:
+            await _wait(pilot)
+            await _setup_routine_and_habit(pilot, "Skip Undo")
+
+            panel = pilot.app.query_one(HabitsPanel)
+            pilot.app.set_focus(panel)
+            await _wait(pilot)
+
+            # Skip
+            await pilot.press("s")
+            await _wait(pilot, 5)
+            await pilot.press("tab")
+            await _wait(pilot)
+            await pilot.press("enter")
+            await _wait(pilot)
+
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
+            assert instances[0]["status"] == "not_done"
+            raw = _query_instance_raw(instances[0]["id"])
+            assert raw is not None
+            assert raw.skip_reason is not None, "skip_reason preenchido"
+
+            # Undo
+            await pilot.press("u")
+            await _wait(pilot)
+
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
+            assert instances[0]["status"] == "pending", "Undo volta pending"
+            raw = _query_instance_raw(instances[0]["id"])
+            assert raw is not None
+            assert raw.not_done_substatus is None, "not_done_substatus limpo"
+            assert raw.skip_reason is None, "skip_reason limpo"
+            assert raw.skip_note is None, "skip_note limpo"
+            assert raw.done_substatus is None, "done_substatus limpo"
+            assert raw.completion_percentage is None, "completion_pct limpo"
+
 
 # =========================================================================
 # Tasks Panel — BR-TUI-018, BR-TUI-004, ADR-037
