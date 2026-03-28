@@ -11,7 +11,7 @@ Referências:
     - Sprint 5.5 Fase 5
 """
 
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
 import pytest
@@ -440,6 +440,119 @@ class TestDashboardStateSnapshots:
                 status=TimerStatus.RUNNING,
             )
             session.add(timelog)
+            session.commit()
+
+        assert snap_compare(
+            _make_app(),
+            terminal_size=(120, 40),
+        )
+
+
+# =========================================================================
+# Métricas com dados simulados (BR-TUI-003)
+# =========================================================================
+
+
+class TestMetricsSnapshots:
+    """Snapshots do MetricsPanel com dados realistas de 7 dias."""
+
+    def test_snapshot_metrics_7day_mixed(self, snap_compare) -> None:
+        """Dashboard com 7 dias de hábitos: streak, pct, heatmap."""
+        with get_engine_context() as engine, Session(engine) as session:
+            routine = Routine(name="Rotina Matinal", is_active=True)
+            session.add(routine)
+            session.commit()
+            session.refresh(routine)
+
+            habit = Habit(
+                routine_id=routine.id,
+                title="Leitura",
+                scheduled_start=time(9, 0),
+                scheduled_end=time(10, 0),
+                recurrence=Recurrence.EVERYDAY,
+            )
+            session.add(habit)
+            session.commit()
+            session.refresh(habit)
+
+            today = date.today()
+            statuses = [
+                # dia -6: done
+                (today - timedelta(days=6), Status.DONE, DoneSubstatus.FULL, None, None),
+                # dia -5: done
+                (today - timedelta(days=5), Status.DONE, DoneSubstatus.FULL, None, None),
+                # dia -4: skipped
+                (
+                    today - timedelta(days=4),
+                    Status.NOT_DONE,
+                    None,
+                    NotDoneSubstatus.SKIPPED_JUSTIFIED,
+                    SkipReason.HEALTH,
+                ),
+                # dia -3: done
+                (today - timedelta(days=3), Status.DONE, DoneSubstatus.PARTIAL, None, None),
+                # dia -2: done
+                (today - timedelta(days=2), Status.DONE, DoneSubstatus.FULL, None, None),
+                # dia -1: done
+                (today - timedelta(days=1), Status.DONE, DoneSubstatus.OVERDONE, None, None),
+                # hoje: pending
+                (today, Status.PENDING, None, None, None),
+            ]
+
+            for d, status, done_sub, notdone_sub, skip_r in statuses:
+                inst = HabitInstance(
+                    habit_id=habit.id,
+                    date=d,
+                    scheduled_start=time(9, 0),
+                    scheduled_end=time(10, 0),
+                    status=status,
+                    done_substatus=done_sub,
+                    not_done_substatus=notdone_sub,
+                    skip_reason=skip_r,
+                )
+                session.add(inst)
+
+            session.commit()
+
+        assert snap_compare(
+            _make_app(),
+            terminal_size=(120, 40),
+        )
+
+    def test_snapshot_metrics_perfect_streak(self, snap_compare) -> None:
+        """Dashboard com 7 dias consecutivos done — streak perfeito."""
+        with get_engine_context() as engine, Session(engine) as session:
+            routine = Routine(name="Rotina Matinal", is_active=True)
+            session.add(routine)
+            session.commit()
+            session.refresh(routine)
+
+            habit = Habit(
+                routine_id=routine.id,
+                title="Meditação",
+                scheduled_start=time(7, 0),
+                scheduled_end=time(7, 30),
+                recurrence=Recurrence.EVERYDAY,
+            )
+            session.add(habit)
+            session.commit()
+            session.refresh(habit)
+
+            today = date.today()
+            for i in range(7):
+                d = today - timedelta(days=6 - i)
+                status = Status.DONE if d != today else Status.PENDING
+                done_sub = DoneSubstatus.FULL if status == Status.DONE else None
+                inst = HabitInstance(
+                    habit_id=habit.id,
+                    date=d,
+                    scheduled_start=time(7, 0),
+                    scheduled_end=time(7, 30),
+                    status=status,
+                    done_substatus=done_sub,
+                )
+                session.add(inst)
+
             session.commit()
 
         assert snap_compare(
