@@ -190,7 +190,7 @@ def load_instances(routine_id: int | None = None) -> list[dict]:
                     "actual_minutes": getattr(inst, "actual_duration", None),
                 }
             )
-        return instances
+        return sorted(instances, key=lambda i: i["start_minutes"])
 
     try:
         result, error = service_action(_load)
@@ -371,7 +371,7 @@ def load_tasks() -> list[dict]:
         if remaining > 0:
             result.extend(recent_tasks[:remaining])
 
-        return result
+        return sorted(result, key=lambda t: (0 if t["status"] == "overdue" else 1, t["days"]))
 
     try:
         result, error = service_action(_load)
