@@ -1,6 +1,6 @@
 # Sprints
 
-- **Versão:** 5.0.0
+- **Versão:** 6.0.0
 - **Status:** Single Source of Truth (SSOT)
 
 ---
@@ -19,14 +19,15 @@ A v1.7.0 marca a transição do ATOMVS TimeBlock de ferramenta CLI pura para uma
 
 **Métricas de acompanhamento:**
 
-| Métrica               | Início (v1.6.0) | Atual (23/03)  | Meta v1.7.0 |
+| Métrica               | Início (v1.6.0) | Atual (27/03)  | Meta v1.7.0 |
 | --------------------- | --------------- | -------------- | ----------- |
 | Cobertura global      | 87%             | ~82%           | >= 80%      |
 | Cobertura tui/        | 0%              | ~70% (parcial) | >= 80%      |
-| Testes totais         | 778             | 1284           | 1200+       |
+| Testes totais         | 778             | ~1320          | 1200+       |
 | Erros mypy            | 0               | 0              | 0           |
+| Erros basedpyright    | —               | 0 (standard)   | 0           |
 | BRs TUI especificadas | 0               | 32             | 32/32       |
-| BRs TUI implementadas | 0               | ~20            | 32/32       |
+| BRs TUI implementadas | 0               | ~24            | 32/32       |
 | Screens funcionais    | 0/5             | 5/5            | 5/5         |
 
 ---
@@ -495,14 +496,20 @@ Branch: `docs/br-update`
 
 **Fase 5: Testes e2e fortalecidos**
 
-Branch: `test/dashboard-complete`
+Branch: `fix/error-paths-audit` (MR !51) + `test/e2e-assertions` (MR !52) + `test/e2e-snapshots` (MR !53)
 
-- [ ] Fortalecer asserções: verificar substatus, skip_reason, completion_percentage
-- [ ] Adicionar testes: Esc cancela FormModal, Esc cancela ConfirmDialog
-- [ ] Adicionar testes: setas (up/down) equivalentes a j/i
-- [ ] Adicionar teste: BR-TIMER-001 bloqueia segundo timer
-- [ ] Remover workarounds dos testes existentes
-- [ ] Validar: 1241+ testes passando, 0 xfail (exceto DT-026)
+- [x] Auditoria de error paths — 15 testes criados, cobertura 78%→~95% (sessão 12)
+- [x] Basedpyright standard — 0 errors, type annotations em 14 módulos (sessão 12)
+- [x] Snapshot baselines — 3 snapshots do dashboard (empty, routine, 80x24) (sessão 12)
+- [x] Testes: Esc cancela FormModal (test_habits_done_esc_cancels)
+- [x] Testes: Esc cancela ConfirmDialog (test_habits_skip_esc_cancels)
+- [x] Teste: BR-TIMER-001 bloqueia segundo timer (test_timer_second_blocked)
+- [x] Fortalece asserções: substatus, skip_reason, completion_pct (MR !52)
+- [x] Testes: setas (up/down) equivalentes a j/i (MR !52)
+- [x] Teste: skip→undo limpa todos os campos (MR !52)
+- [x] 14 snapshot tests CRUD: modais routines/habits/tasks + estados done/skip/timer (MR !53)
+- [x] Snapshot tests de métricas: 7 dias mixed + streak perfeito (MR !53)
+- [ ] Validar: ~1320 testes passando, 0 xfail
 
 ---
 
@@ -578,8 +585,11 @@ O Sprint 6 fecha a v1.7.0 com revisão de cobertura, audit de qualidade de códi
 |            |        | removida, BRs 016-020 + BR-TEST-001, métricas 1079 testes   |
 | 2026-03-15 | 5.0.0  | Sprint 5.5 planejada (Dashboard Funcional), métricas        |
 |            |        | 1284 testes, ADR-038, DT-034 a DT-042, BRs 022-026          |
+| 2026-03-27 | 6.0.0  | Sprint 4.5 DONE, Fase 5 progresso: error paths, snapshots,  |
+|            |        | asserções ORM, arrow keys, 16 snapshots CRUD+métricas,      |
+|            |        | basedpyright standard 0 errors, ~1320 testes                |
 
 ---
 
 - **Próxima revisão:** Após Sprint 5.5 concluída
-- **Última atualização:** 15 de Março de 2026
+- **Última atualização:** 27 de Março de 2026
