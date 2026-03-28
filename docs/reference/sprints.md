@@ -373,7 +373,7 @@ _Sprint 5+ / v2.0 (futuro):_
 
 ---
 
-### Sprint 4.5 — First Complete Loop [WIP]
+### Sprint 4.5 — First Complete Loop [DONE]
 
 O Sprint 4.5 implementa o menor conjunto de mudanças que conecta o fluxo completo de uso do ATOMVS no dashboard: criar rotina, criar hábito, ver na agenda, iniciar timer, pausar/retomar, parar timer (marca done), e ver resultado na agenda atualizada. Nenhuma feature é adicionada pela metade — o objetivo é que o usuário consiga completar um ciclo inteiro sem sair do dashboard.
 
@@ -421,14 +421,14 @@ A nomenclatura "4.5" reflete que este sprint é uma extensão direta da Sprint 4
 - [x] DashboardScreen.on_mount adiciona `set_interval(1, self._tick_timer)`
 - [x] `_tick_timer` recarrega timer do service e atualiza TimerPanel
 - [x] StatusBar atualiza elapsed globalmente
-- [ ] Teste: `test_timer_panel_updates_every_second` (mock time)
+- [x] Teste: `test_timer_panel_updates_every_second` (asyncio.sleep + set_interval)
 
 **Commit 4: feat(tui): Agenda auto-refresh a cada 60s (DT-015)**
 
 - [x] DashboardScreen.on_mount adiciona `set_interval(60, self._refresh_agenda)`
 - [x] `_refresh_agenda` recarrega instâncias e atualiza AgendaPanel + HabitsPanel
 - [x] Marcador de hora atual se move com o relógio
-- [ ] Teste: `test_agenda_refreshes_periodically`
+- [x] Teste: `test_agenda_refreshes_periodically` (integração _refresh_agenda)
 
 **Commit 5: feat(tui): Ctrl+Enter em hábito running → stop + done**
 
@@ -441,7 +441,7 @@ A nomenclatura "4.5" reflete que este sprint é uma extensão direta da Sprint 4
 
 - [x] Atualizar sprints.md com progresso
 - [x] Atualizar technical-debt.md (DT-015, DT-016 resolvidos)
-- [ ] Atualizar roadmap.md com estado pós-Sprint 4.5
+- [x] Atualizar roadmap.md com estado pós-Sprint 4.5
 
 ---
 

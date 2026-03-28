@@ -73,33 +73,33 @@ A versão v1.6.0 representou um ponto de inflexão na maturidade do projeto. A c
 A Sprint 4 entregou CRUD completo via dashboard com modais contextuais (ADR-034), quick actions via message pattern (RF-001), placeholders editáveis (BR-TUI-013), e widgets reutilizáveis (ConfirmDialog, FormModal). A Sprint 4.5 (First Complete Loop) conectou o fluxo de ponta a ponta no dashboard: criar rotina, criar hábito, iniciar timer, pausar/retomar, parar e marcar done — tudo sem sair do dashboard. O timer atualiza a cada segundo via set_interval, a agenda auto-refresh a cada 60 segundos, e os keybindings foram padronizados conforme ADR-035.
 
 - **Versão:** v1.7.0-dev
-- **Branch:** `feat/tui-dashboard-timer`
-- **Data:** 11 de Março de 2026
+- **Branch:** `develop`
+- **Data:** 28 de Março de 2026
 
 ### 3.1. Métricas Principais
 
-As métricas atuais refletem medições reais executadas em 05/03/2026 (branch `feat/tui-dashboard-interactive` pronta para MR → develop). Sprint 3.2 concluída com 1079 testes. Próxima branch: `feat/tui-crud-dashboard`.
+As métricas atuais refletem medições reais executadas em 28/03/2026 (branch `develop`). Sprints 0-4.5 concluídas. Sprint 5.5 Fase 5 quase completa. ~1340 testes, basedpyright 0 erros (standard), 70 debt items (53 resolvidos).
 
-| Métrica       | Atual | Meta v1.7.0 | Status     |
-| ------------- | ----- | ----------- | ---------- |
-| Cobertura     | ~82%  | 80%         | [OK]       |
-| Erros mypy    | 0     | 0           | [OK]       |
-| Testes total  | 1284  | 1200+       | [OK]       |
-| BRs cobertas  | ~110  | 110+        | [OK]       |
-| ADRs          | 42    | 35+         | [OK]       |
-| CLI funcional | 85%   | 100%        | [PENDENTE] |
+| Métrica            | Atual        | Meta v1.7.0 | Status     |
+| ------------------ | ------------ | ----------- | ---------- |
+| Cobertura          | ~82%         | 80%         | [OK]       |
+| Erros basedpyright | 0 (standard) | 0           | [OK]       |
+| Testes total       | ~1340        | 1200+       | [OK]       |
+| BRs cobertas       | ~110         | 110+        | [OK]       |
+| ADRs               | 45           | 35+         | [OK]       |
+| CLI funcional      | 85%          | 100%        | [PENDENTE] |
 
 ### 3.2. Distribuição de Testes
 
 A pirâmide de testes cresceu significativamente com a implementação do dashboard. Os 104 testes do dashboard cobrem: formatação de duração (2 formatos), localização de blocos, mapeamento status/substatus para cores/ícones/bold/fill/background, heat de proximidade para tasks, renderização ASCII art do timer, e validação estrutural de mock data.
 
 ```plaintext
-Unit:        ~960 (74.8%)
-Integration: ~150 (11.7%)
-BDD:           83 (6.5%)
-E2E:           91 (7.1%)
+Unit:        ~960 (71.6%)
+Integration: ~150 (11.2%)
+BDD:           83 (6.2%)
+E2E:          ~147 (11.0%)
 ─────────────────────────
-TOTAL:       1284 testes
+TOTAL:       ~1340 testes
 ```
 
 ### 3.3. Infraestrutura CI/CD
@@ -164,14 +164,14 @@ A estratégia de implementação prioriza as telas de maior impacto no uso diár
 | Release automation | 4h         | [PENDENTE] |
 | PyPI publish       | 2h         | [PENDENTE] |
 
-**Próximos passos imediatos (Sprint 4 — Dashboard-first CRUD):**
+**Próximos passos imediatos (Sprint 6 — Release):**
 
-1. MR `feat/tui-dashboard-interactive` → develop (--no-ff)
-2. Criar branch `feat/tui-crud-dashboard`
-3. Fixture optimization: scope="session" + rollback transacional (ADR-033, BR-TEST-001)
-4. Widgets base: ConfirmDialog (BR-TUI-019) + FormModal (BR-TUI-020)
-5. CRUD Rotinas via dashboard (BR-TUI-016), Hábitos (BR-TUI-017), Tarefas (BR-TUI-018)
-6. Refatorações R1-R5 aplicadas incrementalmente durante cada entrega
+1. Fechar Sprint 5.5 Fase 5 (validar ~1340 testes, 0 xfail)
+2. DT-060: Sidebar redesign (icons mode, ADR-042)
+3. DT-063: Paginação de dias na agenda
+4. DT-065: Responsividade 80x24
+5. DT-067: Auditar 16 diagramas em docs/diagrams/
+6. MkDocs publicado (GitLab Pages), release automation, PyPI publish
 
 **Refatorações em andamento (fundamentadas em literatura):**
 
