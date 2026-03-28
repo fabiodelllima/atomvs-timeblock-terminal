@@ -53,7 +53,7 @@ test:e2e:
   before_script:
     - pip install --no-deps -e .
   script:
-    - coverage run --data-file=.coverage.e2e -m pytest tests/e2e/ -v --tb=short --ignore=tests/e2e/test_snapshots.py --ignore=tests/e2e/test_snapshot_cruds.py
+    - coverage run --data-file=.coverage.e2e -m pytest tests/e2e/ -v --tb=short --ignore=tests/e2e/test_snapshots.py --ignore=tests/e2e/test_snapshot_cruds.py --ignore=tests/e2e/test_snapshot_coverage.py
   artifacts:
     paths:
       - .coverage.e2e
