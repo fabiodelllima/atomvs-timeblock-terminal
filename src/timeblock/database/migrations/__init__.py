@@ -12,6 +12,9 @@ from sqlmodel import SQLModel, create_engine
 
 from timeblock.database.engine import get_db_path
 from timeblock.models import Habit, HabitInstance, Routine, Task, TimeLog
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def migrate_v2(db_path: Path | None = None) -> None:
@@ -36,7 +39,7 @@ def migrate_v2(db_path: Path | None = None) -> None:
         ],
     )
 
-    print("[OK] Tabelas v2.0 criadas: Routine, Habit, HabitInstance, Task, TimeLog")
+    logger.info("Tabelas v2.0 criadas: Routine, Habit, HabitInstance, Task, TimeLog")
 
 
 def migrate_events_to_tasks() -> int:
