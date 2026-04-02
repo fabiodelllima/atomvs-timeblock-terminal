@@ -67,7 +67,7 @@
 | DT061 | AgendaPanel sem scroll horizontal                    | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks       |
 | DT062 | Linhas horizontais cortam blocos de tempo            | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks       |
 | DT063 | Agenda limitada ao dia atual (sem paginação)         | MEDIA      | PENDENTE  | -            | Sprint futuro            |
-| DT064 | CVE-2026-4539 pygments sem fix disponível            | BAIXA      | PENDENTE  | -            | Quando > 2.19.2 sair     |
+| DT064 | CVE-2026-4539 pygments sem fix disponível            | BAIXA      | RESOLVIDO | Sprint 6     | Pygments 2.20.0          |
 | DT065 | Responsividade em terminal 80x24                     | MEDIA      | PENDENTE  | -            | v1.7.0                   |
 | DT066 | Placeholders truncados nos panels                    | BAIXA      | PENDENTE  | -            | v1.7.0                   |
 | DT067 | README sem links para diagramas (~16 desatualizados) | MEDIA      | PENDENTE  | -            | v1.7.0                   |
@@ -139,7 +139,7 @@
 - [x] DT061 — AgendaPanel sem scroll horizontal (bloqueador de multi-coluna)
 - [x] DT062 — Linhas horizontais cortam blocos de tempo coloridos
 - [ ] DT063 — Agenda limitada ao dia atual (sem paginação -3/+3)
-- [ ] DT064 — CVE-2026-4539 pygments sem fix disponível
+- [x] DT064 — CVE-2026-4539 pygments sem fix disponível (Pygments 2.20.0)
 - [ ] DT065 — Responsividade em terminal 80x24
 - [ ] DT066 — Placeholders truncados nos panels
 - [ ] DT067 — README sem links para diagramas + 16 possivelmente desatualizados
@@ -675,37 +675,16 @@ Agenda exibe apenas o dia atual. Não há mecanismo para visualizar dias anterio
 
 ### DT-064: CVE-2026-4539 pygments sem fix disponível
 
-pip-audit falha no CI porque pygments 2.19.2 (última versão) tem CVE-2026-4539 — ReDoS local no AdlLexer (CVSS 3.3 LOW). Sem fix upstream. `--ignore-vuln` adicionado ao CI como workaround.
+pip-audit falhava no CI porque pygments 2.19.2 tinha CVE-2026-4539 — ReDoS local no AdlLexer (CVSS 3.3 LOW). Workaround `--ignore-vuln` foi adicionado ao CI temporariamente.
 
 - **Descoberto:** 2026-03-24 (Sessão 12 — pipeline bloqueado)
 - **Severidade:** BAIXA (CVE local-only, AdlLexer não usado no projeto)
-- **Status:** PENDENTE (aguardando pygments > 2.19.2)
-- **Sprint planejado:** Remover --ignore-vuln quando fix sair
-
-**Solução proposta:**
-
-1. Monitorar releases do pygments
-2. Quando > 2.19.2 sair: `pip install --upgrade pygments`, atualizar requirements.txt
-3. Remover `--ignore-vuln CVE-2026-4539` do .gitlab-ci.yml
-4. Marcar DT-064 como RESOLVIDO
+- **Status:** RESOLVIDO (Pygments 2.20.0 corrige CVE-2026-4539)
+- **Resolvido em:** 2026-04-02 — Pygments atualizado para 2.20.0, `--ignore-vuln` removido do CI
 
 **Referências:** https://github.com/pygments/pygments/issues/3058
 
-### DT-064: CVE-2026-4539 pygments sem fix disponível
 
-pip-audit falha no CI porque pygments 2.19.2 (última versão) tem CVE-2026-4539 — ReDoS local no AdlLexer (CVSS 3.3 LOW). Sem fix upstream. `--ignore-vuln` adicionado ao CI como workaround.
-
-- **Descoberto:** 2026-03-24 (Sessão 12 — pipeline bloqueado)
-- **Severidade:** BAIXA (CVE local-only, AdlLexer não usado no projeto)
-- **Status:** PENDENTE (aguardando pygments > 2.19.2)
-- **Sprint planejado:** Remover --ignore-vuln quando fix sair
-
-**Solução proposta:**
-
-1. Monitorar releases do pygments
-2. Quando > 2.19.2 sair: `pip install --upgrade pygments`, atualizar requirements.txt
-3. Remover `--ignore-vuln CVE-2026-4539` do .gitlab-ci.yml
-4. Marcar DT-064 como RESOLVIDO
 
 ### DT-065: Responsividade em terminal 80x24
 
@@ -766,7 +745,41 @@ Novos débitos técnicos devem ser registrados aqui com ID sequencial (DT-XXX), 
 
 ---
 
-## 5. Changelog do Documento
+## 5. Catálogo de Refatorações
+
+Refatorações catalogadas seguem nomenclatura RF-XXX com referência a Fowler (2018). Itens resolvidos são mantidos como registro histórico. Novos itens seguem ID sequencial.
+
+| RF     | Descrição                           | Fowler (2018)                | Status            | DT relacionado |
+| ------ | ----------------------------------- | ---------------------------- | ----------------- | -------------- |
+| RF-001 | Extract Delegate (quick actions)    | Extract Class, p. 182        | Pendente          | —              |
+| RF-002 | C_HIGHLIGHT → colors.py             | Extract Variable, p. 119     | RESOLVIDO         | DT-009         |
+| RF-003 | Split Phase (data loading)          | Split Phase, p. 154          | Pendente          | —              |
+| RF-004 | Remove @staticmethod duplicado      | Remove Dead Code, p. 237     | RESOLVIDO         | —              |
+| RF-005 | Dict → dataclass nos panels         | Parameter Object, p. 140     | Pendente          | —              |
+| RF-006 | Polimorfismo por status             | Replace Conditional, p. 272  | Adiado (Sprint 6) | —              |
+| RF-007 | Empty state centralizado            | Parameterize Function, p.310 | RESOLVIDO         | DT-010/011     |
+| RF-008 | Counter em _refresh_content         | Consolidate Cond., p. 263    | Pendente          | —              |
+| RF-009 | Imports lazy eliminados             | Encapsulate Variable, p.132  | RESOLVIDO         | —              |
+| RF-010 | Split timer_service.py (549 linhas) | Separate Query/Mod., p. 306  | Adiado (Sprint 5) | —              |
+
+**Resumo:** 4 resolvidos, 4 pendentes, 2 adiados por design.
+
+### 5b. Quick Status
+
+- [x] RF-001 — Extract Delegate (quick actions).............. Pendente
+- [x] RF-002 — C_HIGHLIGHT → colors.py...................... RESOLVIDO
+- [ ] RF-003 — Split Phase (data loading)................... Pendente
+- [x] RF-004 — Remove @staticmethod duplicado............... RESOLVIDO
+- [ ] RF-005 — Dict → dataclass nos panels.................. Pendente
+- [ ] RF-006 — Polimorfismo por status...................... Adiado (Sprint 6)
+- [x] RF-007 — Empty state centralizado..................... RESOLVIDO
+- [ ] RF-008 — Counter em _refresh_content.................. Pendente
+- [x] RF-009 — Imports lazy eliminados...................... RESOLVIDO
+- [ ] RF-010 — Split timer_service.py (549 linhas).......... Adiado (Sprint 5)
+
+---
+
+## 6. Changelog do Documento
 
 | Data       | Versão | Mudanças                                                               |
 | ---------- | ------ | ---------------------------------------------------------------------- |
