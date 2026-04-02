@@ -766,7 +766,9 @@ Refatorações catalogadas seguem nomenclatura RF-XXX com referência a Fowler (
 
 ### 5b. Quick Status
 
-- [x] RF-001 — Extract Delegate (quick actions).............. Pendente
+### 5b. Quick Status
+
+- [ ] RF-001 — Extract Delegate (quick actions)............. Pendente
 - [x] RF-002 — C_HIGHLIGHT → colors.py...................... RESOLVIDO
 - [ ] RF-003 — Split Phase (data loading)................... Pendente
 - [x] RF-004 — Remove @staticmethod duplicado............... RESOLVIDO
@@ -776,6 +778,7 @@ Refatorações catalogadas seguem nomenclatura RF-XXX com referência a Fowler (
 - [ ] RF-008 — Counter em _refresh_content.................. Pendente
 - [x] RF-009 — Imports lazy eliminados...................... RESOLVIDO
 - [ ] RF-010 — Split timer_service.py (549 linhas).......... Adiado (Sprint 5)
+
 
 ---
 

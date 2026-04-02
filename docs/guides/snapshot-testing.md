@@ -1,12 +1,15 @@
 # Estratégia de Snapshot Testing para TUI
 
-**Status:** RASCUNHO — aguardando revisão e aprovação
+**Status:** Implementado (local-only, excluído do CI)
 
 **Criado:** 2026-03-23
 
+**Atualizado:** 2026-04-02
+
 **Referências:**
 
-- pytest-textual-snapshot (Textualize, 2024)
+- pytest-textual-snapshot 1.1.0 (Textualize, 2024)
+- syrupy 4.8.0
 - Textual Testing Guide (textual.textualize.io/guide/testing)
 - ADR-037: Testes E2E com Textual Pilot
 
@@ -14,7 +17,7 @@
 
 ## 1. Contexto e Motivação
 
-O ATOMVS Time Planner Terminal possui 1284 testes (mar/2026), com cobertura extensiva de lógica via `pilot.press()` + asserções de estado. Porém, esses testes não validam renderização visual — é possível que um bloco de agenda renderize com cores trocadas, alinhamento quebrado ou accent bar ausente sem que nenhum teste falhe.
+O ATOMVS Time Planner Terminal possui ~1320 testes (mar/2026), com cobertura extensiva de lógica via `pilot.press()` + asserções de estado. Porém, esses testes não validam renderização visual — é possível que um bloco de agenda renderize com cores trocadas, alinhamento quebrado ou accent bar ausente sem que nenhum teste falhe.
 
 Snapshot testing preenche essa lacuna: captura SVGs da TUI em execução e compara com baselines aprovadas. Mudanças visuais — intencionais ou acidentais — geram falhas com diff visual, permitindo detecção automática de regressões visuais.
 
@@ -53,7 +56,7 @@ def test_dashboard_initial_state(snap_compare):
 def test_dashboard_after_creating_habit(snap_compare):
     """Snapshot: dashboard após criar hábito via modal."""
     async def run_before(pilot):
-        await pilot.press("tab", "tab")  # Foca panel hábitos
+        await pilot.press("tab", "tab")   # Foca panel hábitos
         await pilot.press("n")            # Abre FormModal
         await pilot.pause()
         await pilot.press("enter")
@@ -70,7 +73,7 @@ def test_dashboard_after_creating_habit(snap_compare):
 
 ```bash
 # Após validar visualmente que o output está correto:
-pytest tests/snapshot/ --snapshot-update
+pytest tests/e2e/test_snapshots.py --snapshot-update
 ```
 
 ---
@@ -78,110 +81,144 @@ pytest tests/snapshot/ --snapshot-update
 ## 3. Organização no Projeto
 
 ```
-tests/
-├── snapshot/                          # Snapshot tests
-│   ├── __snapshots__/                 # SVGs gerados (gittracked)
-│   ├── test_dashboard_snapshots.py    # Dashboard states
-│   ├── test_agenda_snapshots.py       # Agenda rendering
-│   └── test_modal_snapshots.py        # Modais (FormModal, ConfirmDialog)
-├── unit/                              # Lógica pura
-├── integration/                       # Service + DB
-├── e2e/                               # Fluxos completos com pilot
-└── bdd/                               # Cenários Gherkin
+tests/e2e/
+├── __snapshots__/
+│   ├── test_snapshots/                # Dashboard states básicos
+│   │   ├── TestDashboardSnapshots.test_snapshot_dashboard_80x24.svg
+│   │   ├── TestDashboardSnapshots.test_snapshot_dashboard_empty.svg
+│   │   └── TestDashboardSnapshots.test_snapshot_dashboard_with_routine.svg
+│   └── test_snapshot_cruds/           # CRUD modais + estados + métricas
+│       ├── TestDashboardStateSnapshots.test_snapshot_dashboard_habit_done.svg
+│       ├── TestDashboardStateSnapshots.test_snapshot_dashboard_habit_skipped.svg
+│       ├── TestDashboardStateSnapshots.test_snapshot_dashboard_timer_running.svg
+│       ├── TestHabitCrudSnapshots.test_snapshot_habit_*.svg (5 SVGs)
+│       ├── TestMetricsSnapshots.test_snapshot_metrics_*.svg (2 SVGs)
+│       ├── TestRoutineCrudSnapshots.test_snapshot_routine_*.svg (2 SVGs)
+│       └── TestTaskCrudSnapshots.test_snapshot_task_*.svg (2 SVGs)
+├── test_snapshots.py                  # 3 testes — dashboard básico
+├── test_snapshot_cruds.py             # 14 testes — CRUD + estados + métricas
+└── test_snapshot_coverage.py          # 9 testes — cobertura comportamental
 ```
 
 Os SVGs em `__snapshots__/` são rastreados pelo git. São a "verdade visual" do projeto — qualquer mudança neles deve ser revisada no MR.
 
 ---
 
-## 4. O que Testar com Snapshots
+## 4. Inventário de Baselines
 
-### Prioridade alta (implementar primeiro)
+| Categoria                               | Testes | Baselines |
+| --------------------------------------- | ------ | --------- |
+| Dashboard (empty, routine, 80x24)       | 3      | 3 SVGs    |
+| CRUD modais (routines, habits, tasks)   | 8      | 8 SVGs    |
+| Quick actions (done, skip modals)       | 2      | 2 SVGs    |
+| Dashboard states (done, skipped, timer) | 3      | 3 SVGs    |
+| Metrics (7-day mixed, streak perfeito)  | 2      | 3 SVGs    |
+| **Total**                               | **17** | **19**    |
+
+---
+
+## 5. Limitação de CI — Incompatibilidade de Versionamento
+
+Snapshots estão **excluídos de todo CI** (GitLab, GitHub, pre-push hook):
+
+```
+Python 3.14 -> pytest 8.4.2 (reportinfo() retorna str | PathLike)
+    -> pytest-textual-snapshot 1.1.0 (espera só str) -> CRASH
+```
+
+- Monkey-patch em `tests/e2e/conftest.py` resolve localmente
+- pytest-textual-snapshot não lançou fix upstream
+- **Decisão:** aceitar como limitação — snapshots continuam local-only
+
+**Exclusões configuradas:**
+
+- `.gitlab-ci.yml`: `--ignore=tests/e2e/test_snapshots.py --ignore=tests/e2e/test_snapshot_cruds.py --ignore=tests/e2e/test_snapshot_coverage.py`
+- `.github/workflows`: mesmas exclusões
+- `pre-push hook`: mesmas exclusões
+
+---
+
+## 6. Gaps sem Baseline
+
+1. **Agenda panel com blocos renderizados** — alta prioridade
+2. **Help overlay** — baixa prioridade
+3. **Telas secundárias** (Routines, Habits, Tasks, Timer screens)
+4. **Layout responsivo 160 colunas**
+5. **Timer live updates** — removido por flakiness
+
+---
+
+## 7. Monitoramento
+
+Acompanhar releases de `pytest-textual-snapshot` no PyPI. Quando versao >1.1.0 sair com fix:
+
+1. Remover monkey-patch do conftest.py
+2. Remover `--ignore` dos CIs
+3. Adicionar job `test:snapshots` no pipeline
+4. Definir politica de aprovação (PR review para diff de baseline)
+
+---
+
+## 8. O que Testar com Snapshots
+
+### Prioridade alta (implementado)
 
 - Dashboard vazio (sem rotina) — placeholder com hint
-- Dashboard com rotina ativa + 3 hábitos + 2 tasks — estado padrão
-- Agenda com blocos sobrepostos (3 colunas) — cenário principal
-- Agenda com blocos consecutivos — transição título a título
-- Bloco mínimo 15min — 2 linhas (título + end line)
+- Dashboard com rotina ativa + hábitos + tasks — estado padrão
+- Dashboard 80x24 — responsividade mínima
+- Modais CRUD (create, edit, delete, done, skip) para habits e tasks
+- Dashboard states (done, skipped, timer running)
+- Métricas (7-day mixed, streak perfeito)
 
-### Prioridade média
+### Prioridade média (futuro)
 
-- FormModal aberto (criação de hábito) — layout do modal
-- ConfirmDialog aberto (deleção) — layout do modal
-- Timer ativo com elapsed visível — atualização live
-- Metrics panel com dados reais — formatação de streaks
+- Agenda com blocos sobrepostos (3 colunas)
+- Agenda com blocos consecutivos
+- Timer ativo com elapsed visível
 
 ### Prioridade baixa (futuro)
 
 - Cada screen (Routines, Habits, Tasks, Timer) em estado padrão
 - Help overlay (?) aberto
 - Sidebar navigation highlights
-- Responsividade em 80, 120, 160 colunas
+- Layout responsivo em terminais menores (80x24 single-column, DT-065)
+- Layout responsivo em 160 colunas (wide-screen)
 
 ---
 
-## 5. Integração com CI
-
-```yaml
-# .gitlab-ci.yml (proposta)
-test:snapshot:
-  stage: test
-  script:
-    - python -m pytest tests/snapshot/ -v
-  allow_failure: true # Remover quando baselines estiverem estáveis
-  artifacts:
-    when: on_failure
-    paths:
-      - tests/snapshot/__snapshots__/
-    expire_in: 7 days
-```
-
----
-
-## 6. Fluxo de Trabalho
+## 9. Fluxo de Trabalho
 
 ### Ao criar novo snapshot test
 
-1. Escrever o teste em `tests/snapshot/`
-2. Rodar `pytest tests/snapshot/test_novo.py` — vai falhar (sem baseline)
+1. Escrever o teste em `tests/e2e/`
+2. Rodar `pytest tests/e2e/test_novo.py` — vai falhar (sem baseline)
 3. Abrir o report HTML, verificar visualmente
-4. Se correto: `pytest tests/snapshot/test_novo.py --snapshot-update`
+4. Se correto: `pytest tests/e2e/test_novo.py --snapshot-update`
 5. Commitar o SVG junto com o teste
 
 ### Ao alterar renderização visual
 
-1. Rodar `pytest tests/snapshot/` — falhas esperadas
+1. Rodar `pytest tests/e2e/test_snapshots.py tests/e2e/test_snapshot_cruds.py` — falhas esperadas
 2. Verificar cada diff no report HTML
-3. Se todas as mudanças são intencionais: `pytest tests/snapshot/ --snapshot-update`
+3. Se todas as mudanças são intencionais: `pytest tests/e2e/ --snapshot-update`
 4. Commitar SVGs atualizados com mensagem descritiva
 
-### Ao receber falha inesperada no CI
+### Ao receber falha local inesperada
 
-1. Baixar artifacts do job
-2. Comparar SVGs — identificar a mudança visual
-3. Se regressão: corrigir código
-4. Se mudança intencional esquecida: atualizar baselines
+1. Comparar SVGs — identificar a mudança visual
+2. Se regressão: corrigir código
+3. Se mudança intencional esquecida: atualizar baselines
 
 ---
 
-## 7. Relação com Outros Tipos de Teste
+## 10. Relação com Outros Tipos de Teste
 
-| Tipo            | Valida                    | Ferramenta                     |
-| --------------- | ------------------------- | ------------------------------ |
-| Unit            | Lógica de negócio isolada | pytest + mocks                 |
-| Integration     | Service + DB              | pytest + test engine           |
-| E2E (pilot)     | Fluxos de interação       | pytest-asyncio + Textual pilot |
-| Snapshot        | Renderização visual       | pytest-textual-snapshot        |
-| BDD             | Cenários de aceite        | pytest-bdd + Gherkin           |
-| Visual (futuro) | Sessões gravadas          | pexpect + asciinema            |
+| Tipo        | Valida                    | Ferramenta                     |
+| ----------- | ------------------------- | ------------------------------ |
+| Unit        | Lógica de negócio isolada | pytest + mocks                 |
+| Integration | Service + DB              | pytest + test engine           |
+| E2E (pilot) | Fluxos de interação       | pytest-asyncio + Textual pilot |
+| Snapshot    | Renderização visual       | pytest-textual-snapshot        |
+| BDD         | Cenários de aceite        | pytest-bdd + Gherkin           |
 
 Snapshot tests NÃO substituem testes com pilot. O pilot valida "pressionar Tab foca o próximo panel" (lógica). O snapshot valida "o panel focado tem borda branca e o desfocado tem borda cinza" (visual).
-
----
-
-## 8. Decisões Pendentes
-
-- Job CI separado ou dentro de `test:unit`?
-- `terminal_size` padrão para todos os snapshots (proposta: 120x40)
-- Política de atualização de baselines — quem aprova?
-- Frequência mínima de snapshot tests por BR-TUI?

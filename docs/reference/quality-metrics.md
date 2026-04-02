@@ -193,6 +193,21 @@ A priorização segue dois critérios: gravidade do gap (domínios com 0% ou 25%
 
 ---
 
+### 5.3. Anotações no Código
+
+Rastreamento de marcadores que indicam trabalho pendente ou concessões técnicas. Valores medidos em 30/03/2026 na branch develop.
+
+| Tipo         | Quantidade | Observação                               |
+| ------------ | ---------- | ---------------------------------------- |
+| TODO         | 9          | Todos são features futuras, sem bloqueio |
+| type: ignore | 36         | Majoritariamente ORM/SQLAlchemy          |
+| Any usage    | 65         | Concentrado na camada TUI (Textual)      |
+| Deprecated   | 2          | timer_service, habit_instance_service    |
+
+A contagem de `type: ignore` e `Any` é consequência direta da interação com bibliotecas que não oferecem tipagem completa (SQLAlchemy ORM, Textual widgets). O DT-044 (basedpyright strict) endereçará a maior parte desses itens na v2.0.
+
+---
+
 ## 6. Automação e CI/CD
 
 A automação de qualidade opera em dois níveis complementares. O pre-commit hook fornece feedback local imediato — em menos de 25 segundos, o desenvolvedor sabe se o commit é seguro. O pipeline CI/CD no GitLab fornece validação autoritativa — jobs paralelos verificam testes, linting, types, cobertura e segurança em ambiente isolado Docker. Essa defesa em duas camadas significa que problemas de qualidade são detectados antes de entrar no repositório (pre-commit) e antes de serem aceitos em merge requests (CI/CD).
