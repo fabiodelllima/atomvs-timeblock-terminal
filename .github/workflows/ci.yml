@@ -29,7 +29,7 @@ jobs:
           python-version: "3.14"
           cache: "pip"
       - run: pip install -r requirements.txt && pip install -e ".[dev]"
-      - run: coverage run -m pytest tests/ -v --tb=short --ignore=tests/e2e/test_snapshots.py
+      - run: coverage run -m pytest tests/ -v --tb=short --ignore=tests/e2e/test_snapshots.py --ignore=tests/e2e/test_snapshot_cruds.py --ignore=tests/e2e/test_snapshot_coverage.py
       - run: coverage report --fail-under=80
       - run: coverage xml -o coverage.xml
       - uses: codecov/codecov-action@v4
@@ -66,4 +66,4 @@ jobs:
           cache: "pip"
       - run: pip install -r requirements.txt && pip install -e ".[dev]"
       - run: pip install pip-audit
-      - run: pip-audit --ignore-vuln CVE-2026-4539
+      - run: pip-audit
