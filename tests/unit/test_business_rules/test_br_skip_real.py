@@ -24,7 +24,6 @@ from timeblock.models.enums import (
 from timeblock.models.habit_instance import HabitInstance
 from timeblock.services.habit_instance_service import HabitInstanceService
 
-
 # =========================================================================
 # Helpers
 # =========================================================================
@@ -274,8 +273,9 @@ class TestBRSkip004Real:
         instance = _create_routine_and_instance(session)
 
         # Primeiro: mark_completed
+        assert instance.id is not None
         HabitInstanceService.mark_completed(
-            habit_instance_id=instance.id,
+            instance_id=instance.id,
             done_substatus=DoneSubstatus.FULL,
             session=session,
         )

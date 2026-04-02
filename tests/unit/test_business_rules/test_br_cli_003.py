@@ -7,27 +7,24 @@ estão em Português Brasileiro conforme ADR-018.
 import re
 from pathlib import Path
 
-import pytest
-
-
 COMMANDS_DIR = Path("src/timeblock/commands")
 
 # Palavras inglesas que indicam mensagem não traduzida
 ENGLISH_MARKERS = re.compile(
-    r'\b(Error|Warning|Success|Failed|Created|Updated|Deleted'
-    r'|Not found|Invalid input|Cannot|Please|Already exists'
-    r'|must be|should be|is required)\b',
+    r"\b(Error|Warning|Success|Failed|Created|Updated|Deleted"
+    r"|Not found|Invalid input|Cannot|Please|Already exists"
+    r"|must be|should be|is required)\b",
     re.IGNORECASE,
 )
 
 # Contextos onde inglês é esperado (exceções BR-CLI-003)
 SKIP_LINE_PATTERNS = [
-    r'^\s*(import |from |class |def |#|@|logger\.|raise )',
-    r'__tablename__',
-    r'\.exception\(',
-    r'\.warning\(',
-    r'\.debug\(',
-    r'\.info\(',
+    r"^\s*(import |from |class |def |#|@|logger\.|raise )",
+    r"__tablename__",
+    r"\.exception\(",
+    r"\.warning\(",
+    r"\.debug\(",
+    r"\.info\(",
 ]
 
 
@@ -71,7 +68,7 @@ class TestBRCli003:
                 help_matches = re.findall(r'help=["\']([^"\']+)["\']', line)
                 for help_text in help_matches:
                     if ENGLISH_MARKERS.search(help_text):
-                        violations.append(f"{py_file.name}:{i}: help=\"{help_text}\"")
+                        violations.append(f'{py_file.name}:{i}: help="{help_text}"')
 
         assert not violations, (
             f"BR-CLI-003: {len(violations)} help strings em inglês encontradas:\n"
@@ -88,13 +85,9 @@ class TestBRCli003:
                 if "Typer(help=" in line:
                     help_match = re.search(r'help=["\']([^"\']+)["\']', line)
                     if help_match and ENGLISH_MARKERS.search(help_match.group(1)):
-                        violations.append(
-                            f"{py_file.name}:{i}: Typer help=\"{help_match.group(1)}\""
-                        )
+                        violations.append(f'{py_file.name}:{i}: Typer help="{help_match.group(1)}"')
 
-        assert not violations, (
-            f"BR-CLI-003: Typer app helps em inglês:\n" + "\n".join(violations)
-        )
+        assert not violations, "BR-CLI-003: Typer app helps em inglês:\n" + "\n".join(violations)
 
     def test_br_cli_003_no_english_user_messages(self):
         """BR-CLI-003: console.print/typer.echo sem mensagens em inglês."""
@@ -112,9 +105,8 @@ class TestBRCli003:
                     if ENGLISH_MARKERS.search(clean):
                         violations.append(f"{py_file.name}:{i}: {line.strip()[:80]}")
 
-        assert not violations, (
-            f"BR-CLI-003: {len(violations)} mensagens em inglês:\n"
-            + "\n".join(violations)
+        assert not violations, f"BR-CLI-003: {len(violations)} mensagens em inglês:\n" + "\n".join(
+            violations
         )
 
     def test_br_cli_003_lint_i18n_script_exists(self):

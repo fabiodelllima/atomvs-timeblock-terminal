@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.25.0
+**Versão:** 2.26.0
 
 **Status:** SSOT
 
@@ -10,69 +10,69 @@
 
 ## 1. Inventário
 
-| ID    | Descrição                                            | Severidade | Status    | Resolvido em | Sprint planejado         |
-| ----- | ---------------------------------------------------- | ---------- | --------- | ------------ | ------------------------ |
-| DT001 | 156 erros mypy                                       | CRÍTICA    | RESOLVIDO | Jan/2026     | v1.4.0 S1-S3             |
-| DT002 | 15 testes skipped                                    | ALTA       | RESOLVIDO | Jan/2026     | v1.4.0 S4                |
-| DT003 | Cobertura abaixo de 80%                              | ALTA       | RESOLVIDO | Mar/2026     | v1.6.0                   |
-| DT004 | EventReordering parcial (61%)                        | MÉDIA      | RESOLVIDO | Fev/2026     | -                        |
-| DT005 | Código morto                                         | BAIXA      | RESOLVIDO | Fev/2026     | -                        |
-| DT006 | Idioma misto EN/PT em CLI                            | MÉDIA      | RESOLVIDO | Fev/2026     | v1.5.0                   |
-| DT007 | migration_001 sem cobertura                          | BAIXA      | ACEITO    | -            | -                        |
-| DT008 | GitHub Actions --fail-under divergente               | MÉDIA      | RESOLVIDO | Mar/2026     | v1.7.0                   |
-| DT009 | FocusablePanel: C_HIGHLIGHT na base                  | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT010 | FocusablePanel: flag \_showing_placehold.            | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT011 | FocusablePanel: count em dois lugares                | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT012 | DI inconsistente entre services                      | MÉDIA      | PENDENTE  | -            | v2.0                     |
-| DT013 | \_parse_time duplicado (crud_habits/tasks)           | BAIXA      | RESOLVIDO | Mar/2026     | fix/quick-dts            |
-| DT014 | Keybindings divergentes BR vs código                 | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT015 | AgendaPanel sem auto-refresh (set_interval)          | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT016 | load_active_timer: elapsed int vs str MM:SS          | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT017 | MetricsPanel stub — load_metrics não existe          | MÉDIA      | RESOLVIDO | Mar/2026     | feat/metrics-panel       |
-| DT018 | load_tasks omite completed/cancelled                 | BAIXA      | RESOLVIDO | Mar/2026     | feat/task-lifecycle      |
-| DT019 | command_bar.py stub vazio (0 bytes)                  | BAIXA      | PENDENTE  | -            | Sprint 6+                |
-| DT020 | Agenda: viewport cortada, sem auto-scroll            | BAIXA      | RESOLVIDO | Mar/2026     | feat/agenda-viewport     |
-| DT021 | Loaders/CRUDs: ORM fora da sessão (frágil)           | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT022 | Logging: adoção zero fora de habit_inst_svc          | MÉDIA      | RESOLVIDO | Mar/2026     | feat/structured-logging  |
-| DT023 | Instâncias diárias: geração manual obrigatória       | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT024 | Keybindings Ctrl+N inoperantes em VTE/GNOME          | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer |
-| DT025 | Pyright como job CI complementar                     | BAIXA      | PENDENTE  | -            | Sprint futuro            |
-| DT034 | mark_completed sem done_substatus                    | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT035 | Undo handler nao limpa skip_reason/skip_note         | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT036 | TimerStopAndDoneRequest sem handler                  | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT037 | v (done) deveria abrir modal de substatus            | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT038 | s (postpone) deveria abrir FormModal de edit         | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT039 | s (skip) deveria abrir modal de SkipReason           | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT040 | n sem rotina: silent no-op ao inves de modal         | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality    |
-| DT041 | BR-TUI-004/017/018/021 keybindings obsoletos         | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT042 | BR-HABITINSTANCE-001 nao documenta undo              | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT043 | DEFAULT_CSS inline no FormModal                      | BAIXA      | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT044 | basedpyright strict: ~647 warnings (bulk libs)       | MEDIA      | PENDENTE  | -            | v2.0                     |
-| DT045 | Blocos sobrepostos sem distinção na Agenda           | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks       |
-| DT046 | Troca de rotina não atualiza Habits/Tasks            | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT047 | Sem mecanismo de seleção entre rotinas               | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT048 | Deleção de rotina não carrega outra nem limpa        | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT049 | Habit criado sem vínculo com rotina ativa            | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT050 | FormModal de habit sem Select de recorrência         | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT051 | Edit habit não atualiza render frontend              | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT052 | Skip habit não atualiza render frontend              | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT053 | Timer start não muda visual do bloco/habit           | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT054 | Timer pause não para contagem (só muda status)       | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT055 | v em hábito running não abre ConfirmDialog           | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical      |
-| DT056 | TUI conecta a banco sem tabelas — falha silenciosa   | CRITICA    | RESOLVIDO | Mar/2026     | fix/dt056-xdg            |
-| DT057 | Delete de rotina falha silenciosamente na TUI        | ALTA       | RESOLVIDO | Mar/2026     | fix/quick-dts            |
-| DT058 | Logging ausente na CLI — apenas TUI loga             | MEDIA      | PENDENTE  | -            | Sprint futuro            |
-| DT059 | Mensagens de migração visíveis no stdout da TUI      | MEDIA      | PENDENTE  | -            | Sprint futuro            |
-| DT060 | Sidebar ocupa ~15 cols desnecessariamente            | MEDIA      | PENDENTE  | -            | Sprint futuro            |
-| DT061 | AgendaPanel sem scroll horizontal                    | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks       |
-| DT062 | Linhas horizontais cortam blocos de tempo            | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks       |
-| DT063 | Agenda limitada ao dia atual (sem paginação)         | MEDIA      | PENDENTE  | -            | Sprint futuro            |
-| DT064 | CVE-2026-4539 pygments sem fix disponível            | BAIXA      | RESOLVIDO | Sprint 6     | Pygments 2.20.0          |
-| DT065 | Responsividade em terminal 80x24                     | MEDIA      | PENDENTE  | -            | v1.7.0                   |
-| DT066 | Placeholders truncados nos panels                    | BAIXA      | PENDENTE  | -            | v1.7.0                   |
-| DT067 | README sem links para diagramas (~16 desatualizados) | MEDIA      | PENDENTE  | -            | v1.7.0                   |
-| DT068 | Habits não ordenados por scheduled_start             | MEDIA      | PENDENTE  | -            | Sprint futuro            |
-| DT069 | Tela de configurações não documentada/planejada      | BAIXA      | PENDENTE  | -            | Sprint futuro            |
+| ID    | Descrição                                            | Severidade | Status    | Resolvido em | Sprint planejado            |
+| ----- | ---------------------------------------------------- | ---------- | --------- | ------------ | --------------------------- |
+| DT001 | 156 erros mypy                                       | CRÍTICA    | RESOLVIDO | Jan/2026     | v1.4.0 S1-S3                |
+| DT002 | 15 testes skipped                                    | ALTA       | RESOLVIDO | Jan/2026     | v1.4.0 S4                   |
+| DT003 | Cobertura abaixo de 80%                              | ALTA       | RESOLVIDO | Mar/2026     | v1.6.0                      |
+| DT004 | EventReordering parcial (61%)                        | MÉDIA      | RESOLVIDO | Fev/2026     | -                           |
+| DT005 | Código morto                                         | BAIXA      | RESOLVIDO | Fev/2026     | -                           |
+| DT006 | Idioma misto EN/PT em CLI                            | MÉDIA      | RESOLVIDO | Fev/2026     | v1.5.0                      |
+| DT007 | migration_001 sem cobertura                          | BAIXA      | ACEITO    | -            | -                           |
+| DT008 | GitHub Actions --fail-under divergente               | MÉDIA      | RESOLVIDO | Mar/2026     | v1.7.0                      |
+| DT009 | FocusablePanel: C_HIGHLIGHT na base                  | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT010 | FocusablePanel: flag \_showing_placehold.            | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT011 | FocusablePanel: count em dois lugares                | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT012 | DI inconsistente entre services                      | MÉDIA      | PENDENTE  | -            | v2.0                        |
+| DT013 | \_parse_time duplicado (crud_habits/tasks)           | BAIXA      | RESOLVIDO | Mar/2026     | fix/quick-dts               |
+| DT014 | Keybindings divergentes BR vs código                 | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer    |
+| DT015 | AgendaPanel sem auto-refresh (set_interval)          | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer    |
+| DT016 | load_active_timer: elapsed int vs str MM:SS          | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer    |
+| DT017 | MetricsPanel stub — load_metrics não existe          | MÉDIA      | RESOLVIDO | Mar/2026     | feat/metrics-panel          |
+| DT018 | load_tasks omite completed/cancelled                 | BAIXA      | RESOLVIDO | Mar/2026     | feat/task-lifecycle         |
+| DT019 | command_bar.py stub vazio (0 bytes)                  | BAIXA      | PENDENTE  | -            | Sprint 6+                   |
+| DT020 | Agenda: viewport cortada, sem auto-scroll            | BAIXA      | RESOLVIDO | Mar/2026     | feat/agenda-viewport        |
+| DT021 | Loaders/CRUDs: ORM fora da sessão (frágil)           | MÉDIA      | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer    |
+| DT022 | Logging: adoção zero fora de habit_inst_svc          | MÉDIA      | RESOLVIDO | Mar/2026     | feat/structured-logging     |
+| DT023 | Instâncias diárias: geração manual obrigatória       | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer    |
+| DT024 | Keybindings Ctrl+N inoperantes em VTE/GNOME          | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer    |
+| DT025 | Pyright como job CI complementar                     | BAIXA      | PENDENTE  | -            | Sprint futuro               |
+| DT034 | mark_completed sem done_substatus                    | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality       |
+| DT035 | Undo handler nao limpa skip_reason/skip_note         | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality       |
+| DT036 | TimerStopAndDoneRequest sem handler                  | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality       |
+| DT037 | v (done) deveria abrir modal de substatus            | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality       |
+| DT038 | s (postpone) deveria abrir FormModal de edit         | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality       |
+| DT039 | s (skip) deveria abrir modal de SkipReason           | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality       |
+| DT040 | n sem rotina: silent no-op ao inves de modal         | MEDIA      | RESOLVIDO | Mar/2026     | fix/dashboard-quality       |
+| DT041 | BR-TUI-004/017/018/021 keybindings obsoletos         | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT042 | BR-HABITINSTANCE-001 nao documenta undo              | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT043 | DEFAULT_CSS inline no FormModal                      | BAIXA      | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT044 | basedpyright strict: ~647 warnings (bulk libs)       | MEDIA      | PENDENTE  | -            | v2.0                        |
+| DT045 | Blocos sobrepostos sem distinção na Agenda           | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks          |
+| DT046 | Troca de rotina não atualiza Habits/Tasks            | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT047 | Sem mecanismo de seleção entre rotinas               | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT048 | Deleção de rotina não carrega outra nem limpa        | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT049 | Habit criado sem vínculo com rotina ativa            | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT050 | FormModal de habit sem Select de recorrência         | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT051 | Edit habit não atualiza render frontend              | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT052 | Skip habit não atualiza render frontend              | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT053 | Timer start não muda visual do bloco/habit           | ALTA       | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT054 | Timer pause não para contagem (só muda status)       | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT055 | v em hábito running não abre ConfirmDialog           | CRITICA    | RESOLVIDO | Mar/2026     | fix/loader-critical         |
+| DT056 | TUI conecta a banco sem tabelas — falha silenciosa   | CRITICA    | RESOLVIDO | Mar/2026     | fix/dt056-xdg               |
+| DT057 | Delete de rotina falha silenciosamente na TUI        | ALTA       | RESOLVIDO | Mar/2026     | fix/quick-dts               |
+| DT058 | Logging ausente na CLI — apenas TUI loga             | MEDIA      | PENDENTE  | -            | Sprint futuro               |
+| DT059 | Mensagens de migração visíveis no stdout da TUI      | MEDIA      | RESOLVIDO | Abr/2026     | fix/cherry-pick-code-review |
+| DT060 | Sidebar ocupa ~15 cols desnecessariamente            | MEDIA      | PENDENTE  | -            | Sprint futuro               |
+| DT061 | AgendaPanel sem scroll horizontal                    | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks          |
+| DT062 | Linhas horizontais cortam blocos de tempo            | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks          |
+| DT063 | Agenda limitada ao dia atual (sem paginação)         | MEDIA      | PENDENTE  | -            | Sprint futuro               |
+| DT064 | CVE-2026-4539 pygments sem fix disponível            | BAIXA      | RESOLVIDO | Sprint 6     | Pygments 2.20.0             |
+| DT065 | Responsividade em terminal 80x24                     | MEDIA      | PENDENTE  | -            | v1.7.0                      |
+| DT066 | Placeholders truncados nos panels                    | BAIXA      | PENDENTE  | -            | v1.7.0                      |
+| DT067 | README sem links para diagramas (~16 desatualizados) | MEDIA      | PENDENTE  | -            | v1.7.0                      |
+| DT068 | Habits não ordenados por scheduled_start             | MEDIA      | RESOLVIDO | Mar/2026     | fix/habit-sort-dt068        |
+| DT069 | Tela de configurações não documentada/planejada      | BAIXA      | PENDENTE  | -            | Sprint futuro               |
 
 ## 1b. Quick Status
 
@@ -134,7 +134,7 @@
 - [x] DT056 — TUI conecta a banco sem tabelas — falha silenciosa total
 - [x] DT057 — Delete de rotina falha silenciosamente na TUI
 - [ ] DT058 — Logging ausente na CLI — apenas TUI loga via service_action
-- [ ] DT059 — Mensagens de migração visíveis no stdout da TUI
+- [x] DT059 — Mensagens de migração visíveis no stdout da TUI
 - [ ] DT060 — Sidebar ocupa ~15 cols desnecessariamente
 - [x] DT061 — AgendaPanel sem scroll horizontal (bloqueador de multi-coluna)
 - [x] DT062 — Linhas horizontais cortam blocos de tempo coloridos
@@ -143,10 +143,10 @@
 - [ ] DT065 — Responsividade em terminal 80x24
 - [ ] DT066 — Placeholders truncados nos panels
 - [ ] DT067 — README sem links para diagramas + 16 possivelmente desatualizados
-- [ ] DT068 — Habits não ordenados por scheduled_start no dashboard
+- [x] DT068 — Habits não ordenados por scheduled_start no dashboard
 - [ ] DT069 — Tela de configurações não documentada/planejada
 
-**Resolvidos:** 53/70 | **Pendentes:** 16/70 | **Aceitos:** 1/70
+**Resolvidos:** 49/62 | **Pendentes:** 11/62 | **Aceitos:** 1/62
 
 ---
 
@@ -684,8 +684,6 @@ pip-audit falhava no CI porque pygments 2.19.2 tinha CVE-2026-4539 — ReDoS loc
 
 **Referências:** https://github.com/pygments/pygments/issues/3058
 
-
-
 ### DT-065: Responsividade em terminal 80x24
 
 Snapshot de 80x24 mostra apenas sidebar + agenda. Hábitos, Tarefas, Timer e Métricas invisíveis. A TUI deveria ter layout adaptativo: >=120 cols (2 colunas), 80-119 (1 coluna com scroll/tabs), <80 (unsupported com aviso).
@@ -758,7 +756,7 @@ Refatorações catalogadas seguem nomenclatura RF-XXX com referência a Fowler (
 | RF-005 | Dict → dataclass nos panels         | Parameter Object, p. 140     | Pendente          | —              |
 | RF-006 | Polimorfismo por status             | Replace Conditional, p. 272  | Adiado (Sprint 6) | —              |
 | RF-007 | Empty state centralizado            | Parameterize Function, p.310 | RESOLVIDO         | DT-010/011     |
-| RF-008 | Counter em _refresh_content         | Consolidate Cond., p. 263    | Pendente          | —              |
+| RF-008 | Counter em \_refresh_content        | Consolidate Cond., p. 263    | Pendente          | —              |
 | RF-009 | Imports lazy eliminados             | Encapsulate Variable, p.132  | RESOLVIDO         | —              |
 | RF-010 | Split timer_service.py (549 linhas) | Separate Query/Mod., p. 306  | Adiado (Sprint 5) | —              |
 
@@ -775,10 +773,9 @@ Refatorações catalogadas seguem nomenclatura RF-XXX com referência a Fowler (
 - [ ] RF-005 — Dict → dataclass nos panels.................. Pendente
 - [ ] RF-006 — Polimorfismo por status...................... Adiado (Sprint 6)
 - [x] RF-007 — Empty state centralizado..................... RESOLVIDO
-- [ ] RF-008 — Counter em _refresh_content.................. Pendente
+- [ ] RF-008 — Counter em \_refresh_content.................. Pendente
 - [x] RF-009 — Imports lazy eliminados...................... RESOLVIDO
 - [ ] RF-010 — Split timer_service.py (549 linhas).......... Adiado (Sprint 5)
-
 
 ---
 

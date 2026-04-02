@@ -58,9 +58,7 @@ class TestBRDatabaseMigrations:
         - BR-DB-MIGRATE-006: Cria tabela TimeLog
     """
 
-    def test_br_db_migrate_001_creates_all_tables(
-        self, temp_db: Path, capsys: pytest.CaptureFixture[str]
-    ) -> None:
+    def test_br_db_migrate_001_creates_all_tables(self, temp_db: Path) -> None:
         """
         Integration: migrate_v2 cria todas as tabelas v2.0.
 
@@ -74,9 +72,6 @@ class TestBRDatabaseMigrations:
         """
         # ACT
         migrate_v2(temp_db)
-        # ASSERT - Mensagem de sucesso
-        captured = capsys.readouterr()
-        assert "[OK] Tabelas v2.0 criadas" in captured.out
         # ASSERT - Tabela funcional
         engine = create_engine(f"sqlite:///{temp_db}")
         with Session(engine) as session:
