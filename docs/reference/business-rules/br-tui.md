@@ -1572,3 +1572,51 @@ Scenario: Return to today
 - `test_br_tui_032_minimum_column_width_18`
 - `test_br_tui_032_empty_area_dotted`
 - `test_br_tui_032_granularity_15min`
+
+---
+
+### BR-TUI-033: MetricsPanel — Exibição de Métricas de Hábitos (NOVA 03/04/2026)
+
+**Descrição:** Painel de métricas agrega dados de completude da rotina ativa com streak, completude percentual e heatmap semanal.
+
+**Decisão arquitetural:** ADR-047
+
+**Regras — Dados exibidos:**
+
+1. O MetricsPanel exibe: streak atual, best streak, completude 7d (%), completude 30d (%), e heatmap semanal com contagem done/total por dia
+2. Escopo: métricas agregadas de todos os hábitos da rotina ativa. Métricas por hábito individual deferidas para v2.0
+
+**Regras — Streak:**
+
+3. Streak conta dias consecutivos (do mais recente para o mais antigo) em que pelo menos 1 hábito da rotina foi marcado como DONE
+4. Skip e ausência de registro têm o mesmo efeito para o streak: o hábito não foi praticado naquele dia
+5. Um dia sem nenhum DONE pausa o streak. Dois dias consecutivos sem DONE quebram o streak (regra "nunca quebre duas vezes" — CLEAR, 2018)
+6. Best streak: maior streak já alcançado para a rotina ativa. Persistido no banco para sobreviver a limites de query temporal
+
+**Regras — Heatmap semanal:**
+
+7. Exibe os últimos 7 dias (padrão) com formato `DIA done/total`
+8. Total corresponde ao número de hábitos ativos na rotina naquele dia. Dias sem instâncias exibem `0/N`, não `0/0`
+9. Geração retroativa: ao abrir o dashboard, dias sem instâncias para hábitos que já existiam naquela data recebem instâncias PENDING para que o denominador reflita o real
+
+**Regras — Completude percentual:**
+
+10. `pct_7d = média(done/total * 100)` dos últimos 7 dias. `pct_30d` idem para 30 dias
+11. Dias sem instâncias contam como 0% para o cálculo (penaliza inatividade)
+
+**Regras — Interação:**
+
+12. Marcar um hábito como DONE, SKIP ou UNDO recalcula e atualiza o MetricsPanel imediatamente
+13. Keybinding `f` no MetricsPanel alterna entre 7d, 14d e 30d. Informação do atalho exibida no footer contextual (status_bar) quando o panel está focado
+14. Texto mock `[f] 7d/14d/30d` removido do corpo do painel
+
+**Testes:**
+
+- `test_br_tui_033_streak_consecutive_done_days`
+- `test_br_tui_033_streak_skip_breaks_like_miss`
+- `test_br_tui_033_streak_two_misses_breaks`
+- `test_br_tui_033_heatmap_shows_total_habits`
+- `test_br_tui_033_heatmap_retroactive_pending`
+- `test_br_tui_033_completude_7d_calculation`
+- `test_br_tui_033_reactive_update_on_done`
+- `test_br_tui_033_keybinding_f_cycles_period`
