@@ -527,3 +527,110 @@ class TestBRTUI033Completude14d:
 
         assert "pct_14d" in metrics, "load_metrics deveria retornar pct_14d"
         assert metrics["pct_14d"] > 0, "pct_14d deveria ser > 0 com 10 dias DONE"
+
+
+# =========================================================================
+# BR-TUI-033-R3: best_streak persistido
+# =========================================================================
+
+
+class TestBRTUI033R3BestStreakPersisted:
+    """BR-TUI-033-R3: best_streak persiste o maior valor no banco."""
+
+    @patch("timeblock.tui.screens.dashboard.loader.service_action")
+    def test_br_tui_033_best_streak_from_db_when_higher(self, mock_sa):
+        """best_streak retornado é o persistido quando maior que o da janela."""
+        from timeblock.tui.screens.dashboard.loader import load_metrics
+
+        today = date.today()
+        # Janela atual: 2 dias DONE (streak=2, window_best=2)
+        instances = [
+            _make_instance(
+                inst_id=i + 1,
+                habit_id=1,
+                inst_date=today - timedelta(days=i),
+                status=Status.DONE,
+            )
+            for i in range(2)
+        ]
+
+        # Routine com best_streak=15 persistido (de meses atrás)
+        routine_obj = _make_routine(routine_id=1)
+        routine_obj.best_streak = 15
+
+        def side_effect(fn):
+            session = MagicMock()
+            call_count = {"n": 0}
+
+            def exec_side(query):
+                call_count["n"] += 1
+                result = MagicMock()
+                if call_count["n"] == 1:
+                    result.all.return_value = [_make_habit()]
+                else:
+                    result.all.return_value = instances
+                return result
+
+            session.exec.side_effect = exec_side
+            session.get.return_value = routine_obj
+            return fn(session), None
+
+        mock_sa.side_effect = side_effect
+        metrics = load_metrics(routine_id=1)
+
+        assert metrics["best_streak"] == 15, (
+            f"best_streak deveria ser 15 (persistido), obteve {metrics['best_streak']}"
+        )
+
+    @patch("timeblock.tui.screens.dashboard.loader.service_action")
+    def test_br_tui_033_best_streak_updates_db_when_new_record(self, mock_sa):
+        """Atualiza best_streak no banco quando streak atual supera o persistido."""
+        from timeblock.tui.screens.dashboard.loader import load_metrics
+
+        today = date.today()
+        # 5 dias consecutivos DONE
+        instances = [
+            _make_instance(
+                inst_id=i + 1,
+                habit_id=1,
+                inst_date=today - timedelta(days=i),
+                status=Status.DONE,
+            )
+            for i in range(5)
+        ]
+
+        # Routine com best_streak=3 (inferior ao atual)
+        routine_obj = _make_routine(routine_id=1)
+        routine_obj.best_streak = 3
+
+        def side_effect(fn):
+            session = MagicMock()
+            call_count = {"n": 0}
+
+            def exec_side(query):
+                call_count["n"] += 1
+                result = MagicMock()
+                if call_count["n"] == 1:
+                    result.all.return_value = [_make_habit()]
+                else:
+                    result.all.return_value = instances
+                return result
+
+            session.exec.side_effect = exec_side
+            session.get.return_value = routine_obj
+
+            def track_commit():
+                pass
+
+            session.commit.side_effect = track_commit
+            return fn(session), None
+
+        mock_sa.side_effect = side_effect
+        metrics = load_metrics(routine_id=1)
+
+        assert metrics["best_streak"] == 5, (
+            f"best_streak deveria ser 5 (novo recorde), obteve {metrics['best_streak']}"
+        )
+        assert routine_obj.best_streak == 5, (
+            "Routine.best_streak deveria ter sido atualizado para 5"
+        )
