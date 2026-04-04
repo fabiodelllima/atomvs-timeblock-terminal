@@ -73,6 +73,8 @@ class DashboardScreen(Static):
         """Inicializa o dashboard (DT-023: garante instâncias do dia)."""
         create_db_and_tables()
         loader.ensure_today_instances()
+        routine_id, _ = loader.load_active_routine()
+        loader.ensure_period_instances(routine_id, days=7)
         self.refresh_data()
         self.app.set_focus(None)
         # BR-TUI-003-R15: auto-scroll na hora atual
