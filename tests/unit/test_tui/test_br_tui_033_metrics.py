@@ -385,3 +385,145 @@ class TestBRTUI033R1HeatmapTotalHabits:
         _day_name, done, total, _checks = today_entry
         assert total == 2, f"Total deveria ser 2, obteve {total}"
         assert done == 0, f"Done deveria ser 0, obteve {done}"
+
+
+# =========================================================================
+# BR-TUI-033-R7/R13/R14: Keybinding f, footer contextual, mock text
+# =========================================================================
+
+
+class TestBRTUI033R14MockTextRemoved:
+    """BR-TUI-033-R14: Texto mock [f] 7d/14d/30d removido do corpo do panel."""
+
+    def test_br_tui_033_no_mock_text_in_panel(self):
+        """Renderização do MetricsPanel não contém texto mock [f]."""
+        from timeblock.tui.widgets.metrics_panel import MetricsPanel
+
+        panel = MetricsPanel()
+        captured: list[str] = []
+        panel.update = lambda text: captured.append(text)  # type: ignore[assignment]
+        panel.border_title = ""
+        panel.border_subtitle = ""
+
+        panel._refresh_content(
+            {
+                "pct_7d": 50,
+                "pct_14d": 30,
+                "pct_30d": 40,
+                "streak": 3,
+                "best_streak": 5,
+                "week_data": [],
+            }
+        )
+
+        assert captured, "Panel deveria ter chamado update()"
+        assert "[f]" not in captured[0], "Texto mock [f] deveria ter sido removido (R14)"
+
+
+class TestBRTUI033R7KeybindingPeriod:
+    """BR-TUI-033-R7: Keybinding f alterna período entre 7d/14d/30d."""
+
+    def test_br_tui_033_keybinding_f_cycles_period(self):
+        """_cycle_period alterna 7 -> 14 -> 30 -> 7."""
+        from timeblock.tui.widgets.metrics_panel import MetricsPanel
+
+        panel = MetricsPanel()
+        assert panel._period_days == 7, "Período inicial deveria ser 7"
+
+        panel._cycle_period()
+        assert panel._period_days == 14
+
+        panel._cycle_period()
+        assert panel._period_days == 30
+
+        panel._cycle_period()
+        assert panel._period_days == 7, "Deveria voltar para 7 após 30"
+
+    def test_br_tui_033_panel_shows_selected_period_bar(self):
+        """Panel exibe barra de completude do período selecionado."""
+        from timeblock.tui.widgets.metrics_panel import MetricsPanel
+
+        panel = MetricsPanel()
+        captured: list[str] = []
+        panel.update = lambda text: captured.append(text)  # type: ignore[assignment]
+        panel.border_title = ""
+        panel.border_subtitle = ""
+
+        data = {
+            "pct_7d": 80,
+            "pct_14d": 60,
+            "pct_30d": 40,
+            "streak": 3,
+            "best_streak": 5,
+            "week_data": [],
+        }
+
+        # Período padrão: 7d
+        panel._refresh_content(data)
+        assert "80%" in captured[-1], "Deveria mostrar pct_7d (80%)"
+
+        # Cicla para 14d
+        panel._period_days = 14
+        captured.clear()
+        panel._refresh_content(data)
+        assert "60%" in captured[-1], "Deveria mostrar pct_14d (60%)"
+
+        # Cicla para 30d
+        panel._period_days = 30
+        captured.clear()
+        panel._refresh_content(data)
+        assert "40%" in captured[-1], "Deveria mostrar pct_30d (40%)"
+
+
+class TestBRTUI033R13FooterContextual:
+    """BR-TUI-033-R13: Footer mostra hint de keybinding f para MetricsPanel."""
+
+    def test_br_tui_033_status_bar_has_metrics_keybindings(self):
+        """PANEL_KEYBINDINGS para panel-metrics inclui keybinding f."""
+        from timeblock.tui.widgets.status_bar import PANEL_KEYBINDINGS
+
+        keys = PANEL_KEYBINDINGS.get("panel-metrics", "")
+        assert "f" in keys, "panel-metrics deveria listar keybinding f no footer"
+
+
+class TestBRTUI033Completude14d:
+    """BR-TUI-033: load_metrics retorna pct_14d além de pct_7d e pct_30d."""
+
+    @patch("timeblock.tui.screens.dashboard.loader.service_action")
+    def test_br_tui_033_completude_14d_in_metrics(self, mock_sa):
+        """load_metrics retorna pct_14d calculado corretamente."""
+        from timeblock.tui.screens.dashboard.loader import load_metrics
+
+        today = date.today()
+        # 10 dias de instâncias DONE, restante sem instância
+        instances = [
+            _make_instance(
+                inst_id=i + 1,
+                habit_id=1,
+                inst_date=today - timedelta(days=i),
+                status=Status.DONE,
+            )
+            for i in range(10)
+        ]
+
+        def side_effect(fn):
+            session = MagicMock()
+            call_count = {"n": 0}
+
+            def exec_side(query):
+                call_count["n"] += 1
+                result = MagicMock()
+                if call_count["n"] == 1:
+                    result.all.return_value = [_make_habit()]
+                else:
+                    result.all.return_value = instances
+                return result
+
+            session.exec.side_effect = exec_side
+            return fn(session), None
+
+        mock_sa.side_effect = side_effect
+        metrics = load_metrics(routine_id=1)
+
+        assert "pct_14d" in metrics, "load_metrics deveria retornar pct_14d"
+        assert metrics["pct_14d"] > 0, "pct_14d deveria ser > 0 com 10 dias DONE"
