@@ -74,6 +74,41 @@ def _make_routine(
     )
 
 
+def _mock_period_session(
+    routine: SimpleNamespace,
+    habits: list[SimpleNamespace],
+    existing_ids_per_call: list[list[int]] | None = None,
+) -> MagicMock:
+    """Cria mock de Session para ensure_period_instances.
+
+    Sequência de session.exec():
+      1. select(Routine) → .first() retorna routine
+      2. select(Habit) → .all() retorna habits
+      3+. select(HabitInstance.habit_id) por data → .all() retorna IDs existentes
+    """
+    session = MagicMock()
+    call_count = {"n": 0}
+    _existing = existing_ids_per_call or []
+
+    def exec_side(query):
+        call_count["n"] += 1
+        result = MagicMock()
+        if call_count["n"] == 1:
+            result.first.return_value = routine
+        elif call_count["n"] == 2:
+            result.all.return_value = habits
+        else:
+            idx = call_count["n"] - 3
+            if idx < len(_existing):
+                result.all.return_value = _existing[idx]
+            else:
+                result.all.return_value = []
+        return result
+
+    session.exec.side_effect = exec_side
+    return session
+
+
 # =========================================================================
 # BR-TUI-033-R8: Geração retroativa de instâncias
 # =========================================================================
@@ -82,46 +117,25 @@ def _make_routine(
 class TestBRTUI033R8RetroactiveInstances:
     """BR-TUI-033-R8: Dias sem instâncias recebem PENDING retroativo."""
 
-    @patch("timeblock.tui.screens.dashboard.loader.HabitInstanceService")
     @patch("timeblock.tui.screens.dashboard.loader.service_action")
-    def test_br_tui_033_creates_pending_for_missing_days(self, mock_sa, mock_his):
+    def test_br_tui_033_creates_pending_for_missing_days(self, mock_sa):
         """Dias sem instância para hábito EVERYDAY geram PENDING retroativo."""
         from timeblock.tui.screens.dashboard.loader import ensure_period_instances
 
         habit = _make_habit(habit_id=1, recurrence=Recurrence.EVERYDAY)
         routine = _make_routine(created_at=datetime.now() - timedelta(days=10))
-
-        # Simula: instância existe apenas para hoje, faltam 6 dias anteriores
         added_instances = []
 
         def side_effect(fn):
-            session = MagicMock()
-            # RoutineService.get_active_routine
-            routine_svc = MagicMock()
-            routine_svc.get_active_routine.return_value = routine
-
-            # select(Habit).where(routine_id)
-            # select(HabitInstance) para datas existentes
-            def exec_side(query):
-                result = MagicMock()
-                result.all.return_value = [habit]
-                return result
-
-            session.exec.side_effect = exec_side
-
-            # Captura session.add() calls
-            def add_side(obj):
-                added_instances.append(obj)
-
-            session.add.side_effect = add_side
-
+            session = _mock_period_session(routine, [habit])
+            session.add.side_effect = lambda obj: added_instances.append(obj)
             return fn(session), None
 
         mock_sa.side_effect = side_effect
         result = ensure_period_instances(routine_id=1, days=7)
 
-        # Deve criar instâncias PENDING para os 6 dias faltantes
         assert result >= 1, "Deveria criar instâncias retroativas"
+        assert len(added_instances) >= 1
 
     @patch("timeblock.tui.screens.dashboard.loader.service_action")
     def test_br_tui_033_respects_recurrence_on_retroactive(self, mock_sa):
@@ -129,29 +143,17 @@ class TestBRTUI033R8RetroactiveInstances:
         from timeblock.tui.screens.dashboard.loader import ensure_period_instances
 
         habit = _make_habit(habit_id=1, recurrence=Recurrence.WEEKDAYS)
-
+        routine = _make_routine(created_at=datetime.now() - timedelta(days=10))
         added_instances = []
 
         def side_effect(fn):
-            session = MagicMock()
-
-            def exec_side(query):
-                result = MagicMock()
-                result.all.return_value = [habit]
-                return result
-
-            session.exec.side_effect = exec_side
-
-            def add_side(obj):
-                added_instances.append(obj)
-
-            session.add.side_effect = add_side
+            session = _mock_period_session(routine, [habit])
+            session.add.side_effect = lambda obj: added_instances.append(obj)
             return fn(session), None
 
         mock_sa.side_effect = side_effect
         ensure_period_instances(routine_id=1, days=7)
 
-        # Verifica que nenhuma instância criada cai em fim de semana
         for inst in added_instances:
             weekday = inst.date.weekday()
             assert weekday < 5, (
@@ -164,23 +166,13 @@ class TestBRTUI033R8RetroactiveInstances:
         from timeblock.tui.screens.dashboard.loader import ensure_period_instances
 
         habit = _make_habit(habit_id=1, recurrence=Recurrence.EVERYDAY)
+        routine = _make_routine(created_at=datetime.now() - timedelta(days=10))
+
+        # Todas as datas já têm habit_id=1
+        all_existing = [[1]] * 7
 
         def side_effect(fn):
-            session = MagicMock()
-
-            call_count = {"n": 0}
-
-            def exec_side(query):
-                call_count["n"] += 1
-                result = MagicMock()
-                if call_count["n"] == 1:
-                    result.all.return_value = [habit]
-                else:
-                    # Retorna habit_ids existentes para cada data
-                    result.all.return_value = [1]  # habit_id=1 já existe
-                return result
-
-            session.exec.side_effect = exec_side
+            session = _mock_period_session(routine, [habit], existing_ids_per_call=all_existing)
             return fn(session), None
 
         mock_sa.side_effect = side_effect
@@ -193,26 +185,13 @@ class TestBRTUI033R8RetroactiveInstances:
         """Não gera instâncias para datas anteriores ao created_at da rotina."""
         from timeblock.tui.screens.dashboard.loader import ensure_period_instances
 
-        # Rotina criada há 3 dias, pedindo 7 dias de retroativo
         routine = _make_routine(created_at=datetime.now() - timedelta(days=3))
         habit = _make_habit(habit_id=1, recurrence=Recurrence.EVERYDAY)
-
         added_instances = []
 
         def side_effect(fn):
-            session = MagicMock()
-
-            def exec_side(query):
-                result = MagicMock()
-                result.all.return_value = [habit]
-                return result
-
-            session.exec.side_effect = exec_side
-
-            def add_side(obj):
-                added_instances.append(obj)
-
-            session.add.side_effect = add_side
+            session = _mock_period_session(routine, [habit])
+            session.add.side_effect = lambda obj: added_instances.append(obj)
             return fn(session), None
 
         mock_sa.side_effect = side_effect
@@ -246,27 +225,23 @@ class TestBRTUI033R2StreakCalculation:
         from timeblock.tui.screens.dashboard.loader import load_metrics
 
         today = date.today()
-        # 3 dias consecutivos com DONE
-        instances = []
-        for i in range(3):
-            d = today - timedelta(days=i)
-            instances.append(
-                _make_instance(inst_id=i + 1, habit_id=1, inst_date=d, status=Status.DONE)
+        instances = [
+            _make_instance(
+                inst_id=i + 1, habit_id=1, inst_date=today - timedelta(days=i), status=Status.DONE
             )
+            for i in range(3)
+        ]
 
         def side_effect(fn):
             session = MagicMock()
-
             call_count = {"n": 0}
 
             def exec_side(query):
                 call_count["n"] += 1
                 result = MagicMock()
                 if call_count["n"] == 1:
-                    # select(Habit)
                     result.all.return_value = [_make_habit()]
                 else:
-                    # select(HabitInstance) para 30 dias
                     result.all.return_value = instances
                 return result
 
@@ -285,9 +260,7 @@ class TestBRTUI033R2StreakCalculation:
 
         today = date.today()
         instances = [
-            # Hoje: DONE
             _make_instance(inst_id=1, habit_id=1, inst_date=today, status=Status.DONE),
-            # Ontem: SKIPPED (NOT_DONE)
             _make_instance(
                 inst_id=2,
                 habit_id=1,
@@ -295,7 +268,6 @@ class TestBRTUI033R2StreakCalculation:
                 status=Status.NOT_DONE,
                 not_done_substatus=NotDoneSubstatus.SKIPPED_JUSTIFIED,
             ),
-            # Anteontem: DONE
             _make_instance(
                 inst_id=3,
                 habit_id=1,
@@ -306,7 +278,6 @@ class TestBRTUI033R2StreakCalculation:
 
         def side_effect(fn):
             session = MagicMock()
-
             call_count = {"n": 0}
 
             def exec_side(query):
@@ -324,7 +295,6 @@ class TestBRTUI033R2StreakCalculation:
         mock_sa.side_effect = side_effect
         metrics = load_metrics(routine_id=1)
 
-        # Skip ontem quebra streak: apenas hoje conta
         assert metrics["streak"] == 1
 
     @patch("timeblock.tui.screens.dashboard.loader.service_action")
@@ -334,16 +304,13 @@ class TestBRTUI033R2StreakCalculation:
 
         today = date.today()
         instances = [
-            # Hoje: PENDING (não fez)
             _make_instance(inst_id=1, habit_id=1, inst_date=today, status=Status.PENDING),
-            # Ontem: PENDING (não fez) — segundo dia consecutivo
             _make_instance(
                 inst_id=2,
                 habit_id=1,
                 inst_date=today - timedelta(days=1),
                 status=Status.PENDING,
             ),
-            # D-2 a D-5: DONE (streak anterior de 4)
             *[
                 _make_instance(
                     inst_id=i + 3,
@@ -357,7 +324,6 @@ class TestBRTUI033R2StreakCalculation:
 
         def side_effect(fn):
             session = MagicMock()
-
             call_count = {"n": 0}
 
             def exec_side(query):
@@ -375,7 +341,6 @@ class TestBRTUI033R2StreakCalculation:
         mock_sa.side_effect = side_effect
         metrics = load_metrics(routine_id=1)
 
-        # Dois dias sem DONE quebram: streak = 0
         assert metrics["streak"] == 0
 
 
@@ -388,7 +353,6 @@ class TestBRTUI033R1HeatmapTotalHabits:
         from timeblock.tui.screens.dashboard.loader import load_metrics
 
         today = date.today()
-        # 2 hábitos, ambos PENDING hoje
         instances = [
             _make_instance(inst_id=1, habit_id=1, inst_date=today, status=Status.PENDING),
             _make_instance(inst_id=2, habit_id=2, inst_date=today, status=Status.PENDING),
@@ -396,7 +360,6 @@ class TestBRTUI033R1HeatmapTotalHabits:
 
         def side_effect(fn):
             session = MagicMock()
-
             call_count = {"n": 0}
 
             def exec_side(query):
@@ -417,9 +380,8 @@ class TestBRTUI033R1HeatmapTotalHabits:
         mock_sa.side_effect = side_effect
         metrics = load_metrics(routine_id=1)
 
-        # week_data para hoje deve mostrar (day, 0, 2, "..") — total=2, não 0
         assert metrics.get("week_data"), "week_data não pode ser vazio"
-        today_entry = metrics["week_data"][-1]  # último = hoje
+        today_entry = metrics["week_data"][-1]
         _day_name, done, total, _checks = today_entry
         assert total == 2, f"Total deveria ser 2, obteve {total}"
         assert done == 0, f"Done deveria ser 0, obteve {done}"

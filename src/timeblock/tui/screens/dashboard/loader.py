@@ -16,6 +16,7 @@ from sqlmodel import Session, col, select
 from timeblock.models.enums import Status, TimerStatus
 from timeblock.models.habit import Habit
 from timeblock.models.habit_instance import HabitInstance
+from timeblock.models.routine import Routine
 from timeblock.models.time_log import TimeLog
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.routine_service import RoutineService
@@ -87,6 +88,84 @@ def ensure_today_instances() -> int:
         return result
     except Exception:
         logger.exception("Falha em ensure_today_instances")
+        return 0
+
+
+def ensure_period_instances(routine_id: int | None = None, days: int = 7) -> int:
+    """Gera instâncias PENDING retroativas para dias sem registro (BR-TUI-033-R8).
+
+    Para cada dia no período [today - days, yesterday], verifica hábitos
+    da rotina que deveriam ter instâncias (conforme recurrence) mas não têm.
+    Cria instâncias PENDING para esses dias.
+
+    Não cria para hoje (ensure_today_instances cuida disso).
+    Não cria para datas anteriores ao created_at da rotina.
+    Idempotente.
+
+    Args:
+        routine_id: ID da rotina. None retorna 0.
+        days: Número de dias para olhar no passado (default: 7).
+
+    Returns:
+        Número de instâncias criadas.
+    """
+    if routine_id is None:
+        return 0
+
+    def _ensure(s: Session) -> int:
+        routine = s.exec(select(Routine).where(Routine.id == routine_id)).first()
+        if not routine:
+            return 0
+
+        habits = list(s.exec(select(Habit).where(Habit.routine_id == routine_id)).all())
+        if not habits:
+            return 0
+
+        today = date.today()
+        boundary = routine.created_at.date()
+        habit_ids = [h.id for h in habits if h.id is not None]
+
+        created = 0
+        for day_offset in range(1, days + 1):
+            d = today - timedelta(days=day_offset)
+            if d < boundary:
+                break
+
+            existing_ids = set(
+                s.exec(
+                    select(HabitInstance.habit_id)
+                    .where(HabitInstance.date == d)
+                    .where(col(HabitInstance.habit_id).in_(habit_ids))
+                ).all()
+            )
+
+            for habit in habits:
+                if habit.id is None:
+                    continue
+                if habit.id in existing_ids:
+                    continue
+                if not HabitInstanceService._should_create_for_date(habit.recurrence, d):
+                    continue
+                s.add(
+                    HabitInstance(
+                        habit_id=habit.id,
+                        date=d,
+                        scheduled_start=habit.scheduled_start,
+                        scheduled_end=habit.scheduled_end,
+                        status=Status.PENDING,
+                    )
+                )
+                created += 1
+
+        return created
+
+    try:
+        result, error = service_action(_ensure)
+        if error or result is None:
+            return 0
+        return result
+    except Exception:
+        logger.exception("Falha em ensure_period_instances")
         return 0
 
 
