@@ -36,17 +36,14 @@ class TestBRTUI013PlaceholderShown:
         """FocusablePanel define método _enter_placeholder_mode (RF-007)."""
         assert hasattr(FocusablePanel, "_enter_placeholder_mode")
 
-    def test_br_tui_013_enter_placeholder_mode_returns_count_plus_hint(self):
-        """_enter_placeholder_mode retorna count placeholders + linha vazia + hint."""
-
-        # Instância mínima para testar o método
+    def test_br_tui_013_enter_placeholder_mode_returns_count_and_stores_hint(self):
+        """_enter_placeholder_mode retorna placeholders e armazena hint (DT-066)."""
         panel = HabitsPanel()
         lines = panel._enter_placeholder_mode("---", "Crie algo", count=3)
-        # 3 placeholders + 1 vazia + 1 hint = 5
-        assert len(lines) == 5
-        assert all("---" in line for line in lines[:3])
-        assert lines[3] == ""
-        assert "Crie algo" in lines[4]
+        # 3 placeholders apenas — hint migrou para footer (DT-066)
+        assert len(lines) == 3
+        assert all("---" in line for line in lines)
+        assert panel._placeholder_hint == "Crie algo"
 
     def test_br_tui_013_habits_panel_empty_sets_placeholders_flag(self):
         """HabitsPanel com lista vazia ativa _showing_placeholders."""

@@ -29,6 +29,7 @@ class FocusablePanel(Static):
         self._cursor_index: int = 0
         self._item_count: int = 0
         self._showing_placeholders: bool = False
+        self._placeholder_hint: str = ""
 
     @property
     def cursor_index(self) -> int:
@@ -80,8 +81,10 @@ class FocusablePanel(Static):
 
         Unifica _showing_placeholders e _set_item_count em chamada única,
         eliminando risco de divergência entre count visual e count do cursor.
+        Hint é armazenado para exibição no footer contextual (DT-066).
         """
         self._showing_placeholders = True
+        self._placeholder_hint = hint
         self._set_item_count(count)
         lines: list[str] = []
         for i in range(self._item_count):
@@ -89,8 +92,6 @@ class FocusablePanel(Static):
             if i == self._cursor_index and self.has_focus:
                 line = f"[on {self.HIGHLIGHT_COLOR}]{line}[/on {self.HIGHLIGHT_COLOR}]"
             lines.append(line)
-        lines.append("")
-        lines.append(f"  [dim]{hint}[/dim]")
         return lines
 
     def _refresh_content(self) -> None:

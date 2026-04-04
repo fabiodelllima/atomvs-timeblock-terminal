@@ -55,7 +55,10 @@ class StatusBar(Widget):
         return " [dim][Sem rotina][/dim]"
 
     def _build_center_section(self) -> str:
-        """Keybindings contextuais do panel focado."""
+        """Keybindings contextuais do panel focado (DT-066)."""
+        hint = getattr(self, "_context_hint", "")
+        if hint:
+            return f"[dim]{hint}[/dim]"
         panel_id = self.focused_panel
         keys = PANEL_KEYBINDINGS.get(panel_id, DEFAULT_KEYBINDINGS)
         if not keys:
@@ -90,8 +93,9 @@ class StatusBar(Widget):
         except Exception:
             pass
 
-    def update_focused_panel(self, panel_id: str) -> None:
-        """Chamado pelo app quando foco muda entre panels."""
+    def update_focused_panel(self, panel_id: str, context_hint: str = "") -> None:
+        """Chamado pelo app quando foco muda entre panels (DT-066)."""
+        self._context_hint = context_hint
         self.focused_panel = panel_id
 
     # =========================================================================

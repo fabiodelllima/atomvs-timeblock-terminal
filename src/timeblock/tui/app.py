@@ -103,11 +103,14 @@ class TimeBlockApp(App):
         self.query_one(NavBar).update_active(screen)
 
     def on_descendant_focus(self, event: Any) -> None:
-        """Atualiza footer quando foco muda entre panels."""
+        """Atualiza footer quando foco muda entre panels (DT-066)."""
         widget = event.widget
         if widget and widget.id:
             try:
-                self.query_one(StatusBar).update_focused_panel(widget.id)
+                hint = ""
+                if getattr(widget, "_showing_placeholders", False):
+                    hint = getattr(widget, "_placeholder_hint", "")
+                self.query_one(StatusBar).update_focused_panel(widget.id, context_hint=hint)
             except Exception:
                 pass
 
