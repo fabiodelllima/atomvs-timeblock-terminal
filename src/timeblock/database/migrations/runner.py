@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # Registro ordenado de migrações disponíveis
 MIGRATIONS: list[tuple[str, str]] = [
     ("002", "timeblock.database.migrations.migration_002_task_lifecycle"),
+    ("003", "timeblock.database.migrations.migration_003_best_streak"),
 ]
 
 

@@ -323,14 +323,23 @@ def load_metrics(routine_id: int | None = None) -> dict:
                 check_date -= timedelta(days=1)
             else:
                 break
-        best_streak = 0
+        window_best = 0
         current_streak = 0
         for d in sorted(day_pcts.keys()):
             if day_pcts[d] == 100:
                 current_streak += 1
-                best_streak = max(best_streak, current_streak)
+                window_best = max(window_best, current_streak)
             else:
                 current_streak = 0
+
+        # BR-TUI-033-R3: best_streak persistido no banco
+        routine = s.get(Routine, routine_id)
+        persisted_best = getattr(routine, "best_streak", 0) or 0
+        best_streak = max(persisted_best, window_best)
+        if routine and best_streak > persisted_best:
+            routine.best_streak = best_streak
+            s.add(routine)
+            s.commit()
         start_7d = today - timedelta(days=6)
         start_14d = today - timedelta(days=13)
         pcts_7d = [day_pcts[d] for d in day_pcts if d >= start_7d]

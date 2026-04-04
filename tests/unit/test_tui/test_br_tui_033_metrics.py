@@ -71,6 +71,7 @@ def _make_routine(
         name="Rotina Teste",
         is_active=True,
         created_at=created_at or datetime.now() - timedelta(days=30),
+        best_streak=0,
     )
 
 
@@ -246,6 +247,7 @@ class TestBRTUI033R2StreakCalculation:
                 return result
 
             session.exec.side_effect = exec_side
+            session.get.return_value = _make_routine()
             return fn(session), None
 
         mock_sa.side_effect = side_effect
@@ -290,6 +292,7 @@ class TestBRTUI033R2StreakCalculation:
                 return result
 
             session.exec.side_effect = exec_side
+            session.get.return_value = _make_routine()
             return fn(session), None
 
         mock_sa.side_effect = side_effect
@@ -336,6 +339,7 @@ class TestBRTUI033R2StreakCalculation:
                 return result
 
             session.exec.side_effect = exec_side
+            session.get.return_value = _make_routine()
             return fn(session), None
 
         mock_sa.side_effect = side_effect
@@ -375,6 +379,7 @@ class TestBRTUI033R1HeatmapTotalHabits:
                 return result
 
             session.exec.side_effect = exec_side
+            session.get.return_value = _make_routine()
             return fn(session), None
 
         mock_sa.side_effect = side_effect
@@ -520,6 +525,7 @@ class TestBRTUI033Completude14d:
                 return result
 
             session.exec.side_effect = exec_side
+            session.get.return_value = _make_routine()
             return fn(session), None
 
         mock_sa.side_effect = side_effect
