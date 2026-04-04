@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.26.0
+**Versão:** 2.27.0
 
 **Status:** SSOT
 
@@ -73,6 +73,8 @@
 | DT067 | README sem links para diagramas (~16 desatualizados) | MEDIA      | PENDENTE  | -            | v1.7.0                      |
 | DT068 | Habits não ordenados por scheduled_start             | MEDIA      | RESOLVIDO | Mar/2026     | fix/habit-sort-dt068        |
 | DT069 | Tela de configurações não documentada/planejada      | BAIXA      | PENDENTE  | -            | Sprint futuro               |
+| DT070 | 46 ADRs com headers em inglês (Context/Decision)     | BAIXA      | PENDENTE  | -            | Sprint futuro               |
+| DT071 | Sem padrão de header/footer em documentação          | BAIXA      | PENDENTE  | -            | Sprint futuro               |
 
 ## 1b. Quick Status
 
@@ -143,10 +145,12 @@
 - [ ] DT065 — Responsividade em terminal 80x24
 - [ ] DT066 — Placeholders truncados nos panels
 - [ ] DT067 — README sem links para diagramas + 16 possivelmente desatualizados
+- [ ] DT070 — 46 ADRs com headers em inglês (Context → Contexto, Decision → Decisão)
+- [ ] DT071 — Sem padrão de header/footer em documentação (datas, versão, status)
 - [x] DT068 — Habits não ordenados por scheduled_start no dashboard
 - [ ] DT069 — Tela de configurações não documentada/planejada
 
-**Resolvidos:** 49/62 | **Pendentes:** 11/62 | **Aceitos:** 1/62
+**Resolvidos:** 49/64 | **Pendentes:** 13/64 | **Aceitos:** 1/64
 
 ---
 
