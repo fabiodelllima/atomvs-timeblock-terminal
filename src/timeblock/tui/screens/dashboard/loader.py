@@ -332,9 +332,12 @@ def load_metrics(routine_id: int | None = None) -> dict:
             else:
                 current_streak = 0
         start_7d = today - timedelta(days=6)
+        start_14d = today - timedelta(days=13)
         pcts_7d = [day_pcts[d] for d in day_pcts if d >= start_7d]
+        pcts_14d = [day_pcts[d] for d in day_pcts if d >= start_14d]
         pcts_30d = list(day_pcts.values())
         pct_7d = int(sum(pcts_7d) / len(pcts_7d)) if pcts_7d else 0
+        pct_14d = int(sum(pcts_14d) / len(pcts_14d)) if pcts_14d else 0
         pct_30d = int(sum(pcts_30d) / len(pcts_30d)) if pcts_30d else 0
         day_names = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sab", "Dom"]
         week_data = []
@@ -350,6 +353,7 @@ def load_metrics(routine_id: int | None = None) -> dict:
             "streak": streak,
             "best_streak": best_streak,
             "pct_7d": pct_7d,
+            "pct_14d": pct_14d,
             "pct_30d": pct_30d,
             "week_data": week_data,
         }

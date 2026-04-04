@@ -13,7 +13,7 @@ PANEL_KEYBINDINGS: dict[str, str] = {
     "panel-habits": "j/i navegar  v done  s skip  t timer",
     "panel-tasks": "j/i navegar  v concluir  s adiar  c cancelar",
     "panel-timer": "space pausar  s parar  c cancelar",
-    "panel-metrics": "",
+    "panel-metrics": "f período",
 }
 
 DEFAULT_KEYBINDINGS = "Tab navegar  ? ajuda  Ctrl+Q sair"
