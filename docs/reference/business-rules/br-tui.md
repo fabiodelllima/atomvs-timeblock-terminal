@@ -1590,7 +1590,7 @@ Scenario: Return to today
 
 3. Streak conta dias consecutivos (do mais recente para o mais antigo) em que pelo menos 1 hábito da rotina foi marcado como DONE
 4. Skip e ausência de registro têm o mesmo efeito para o streak: o hábito não foi praticado naquele dia
-5. Um dia sem nenhum DONE pausa o streak. Dois dias consecutivos sem DONE quebram o streak (regra "nunca quebre duas vezes" — CLEAR, 2018)
+5. Streak conta dias consecutivos com todos os hábitos DONE (100%). Qualquer dia sem conclusão total — skip, pending ou ausência — quebra o streak. A regra "nunca quebre duas vezes" (CLEAR, 2018) é diretriz comportamental, não lógica de cálculo
 6. Best streak: maior streak já alcançado para a rotina ativa. Persistido no banco para sobreviver a limites de query temporal
 
 **Regras — Heatmap semanal:**
