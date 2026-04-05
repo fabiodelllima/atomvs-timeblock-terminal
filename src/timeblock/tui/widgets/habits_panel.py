@@ -5,12 +5,17 @@ BR-TUI-003-R18: Effort bar proporcional.
 BR-TUI-003-R19: Ordenação por start_time.
 BR-TUI-003-R27: Nome herda cor do status.
 BR-TUI-012: Navegação vertical com setas/j/k e highlight.
-BR-TUI-004: Quick actions — Ctrl+Enter done, Ctrl+S skip.
+BR-TUI-004: Quick actions — v done, s skip (ADR-037).
+BR-TUI-021: t inicia timer para hábito selecionado (ADR-037).
 """
 
+from typing import Any
+
 from textual.events import Key
+from textual.message import Message
 
 from timeblock.tui.colors import (
+    C_HIGHLIGHT,
     is_bold_status,
     status_color,
     status_icon,
@@ -18,20 +23,22 @@ from timeblock.tui.colors import (
 from timeblock.tui.formatters import format_duration_card
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
 
-C_HIGHLIGHT = "#313244"  # Surface0 — cursor background
-
 
 class HabitsPanel(FocusablePanel):
     """Card de hábitos com substatus, barra de progresso e navegação."""
 
-    def __init__(self, **kwargs) -> None:
+    HIGHLIGHT_COLOR: str = C_HIGHLIGHT
+
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._instances: list[dict] = []
 
     def update_data(self, instances: list[dict]) -> None:
         """Recebe instâncias do coordinator e renderiza."""
         self._instances = instances
-        self._set_item_count(len(instances))
+        if instances:
+            self._showing_placeholders = False
+            self._set_item_count(len(instances))
         self._refresh_content()
 
     def get_selected_item(self) -> dict | None:
@@ -42,46 +49,90 @@ class HabitsPanel(FocusablePanel):
 
     def on_key(self, event: Key) -> None:
         """Captura navegação e quick actions."""
-        if event.key == "ctrl+s":
+        if event.key == "s":
             self._action_skip()
             event.stop()
-        elif event.key == "ctrl+enter":
+        elif event.key == "v":
             self._action_done()
             event.stop()
-        else:
-            super().on_key(event)
+        elif event.key == "t":
+            self._action_start_timer()
+            event.stop()
+        elif event.key == "u":
+            self._action_undo()
+            event.stop()
+
+    class HabitDoneRequest(Message):
+        """Solicita marcação de hábito como done ao coordinator (RF-001)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
+    class HabitSkipRequest(Message):
+        """Solicita marcação de hábito como skipped ao coordinator (RF-001)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
+    class TimerStartRequest(Message):
+        """Solicita início de timer para hábito ao coordinator (BR-TUI-021)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
+    class TimerStopAndDoneRequest(Message):
+        """Solicita parada do timer e marcação como done (BR-TUI-021)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
 
     def _action_done(self) -> None:
-        """Marca hábito selecionado como done (BR-TUI-004)."""
+        """Emite HabitDoneRequest ou TimerStopAndDoneRequest conforme status.
+
+        Se o hábito está running (timer ativo), para o timer e marca done.
+        Caso contrário, marca done diretamente (BR-TUI-004, BR-TUI-021).
+        """
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        from timeblock.services.habit_instance_service import HabitInstanceService
-        from timeblock.tui.session import service_action
-
-        result, error = service_action(
-            lambda s: HabitInstanceService.mark_completed(item["id"], session=s)
-        )
-        if not error and result:
-            item["status"] = "done"
-            item["substatus"] = "full"
-            self._refresh_content()
+        if item.get("status") in ("running", "paused"):
+            self.post_message(self.TimerStopAndDoneRequest(item["id"]))
+        else:
+            self.post_message(self.HabitDoneRequest(item["id"]))
 
     def _action_skip(self) -> None:
-        """Marca hábito selecionado como skipped (BR-TUI-004)."""
+        """Emite HabitSkipRequest para o coordinator (BR-TUI-004, RF-001)."""
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        from timeblock.services.habit_instance_service import HabitInstanceService
-        from timeblock.tui.session import service_action
+        self.post_message(self.HabitSkipRequest(item["id"]))
 
-        result, error = service_action(
-            lambda s: HabitInstanceService.mark_skipped(item["id"], session=s)
-        )
-        if not error and result:
-            item["status"] = "not_done"
-            item["substatus"] = "skipped"
-            self._refresh_content()
+    class HabitUndoRequest(Message):
+        """Solicita reverter hábito para pending (ADR-037)."""
+
+        def __init__(self, instance_id: int) -> None:
+            self.instance_id = instance_id
+            super().__init__()
+
+    def _action_undo(self) -> None:
+        """Emite HabitUndoRequest (ADR-037)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        self.post_message(self.HabitUndoRequest(item["id"]))
+
+    def _action_start_timer(self) -> None:
+        """Emite TimerStartRequest para o coordinator (BR-TUI-021)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        if item.get("status") not in ("pending", "running"):
+            return
+        self.post_message(self.TimerStartRequest(item["id"]))
 
     def _refresh_content(self) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
@@ -104,16 +155,15 @@ class HabitsPanel(FocusablePanel):
         lines: list[str] = []
         max_bars = 4
         if not instances:
-            lines.append("  [dim]---              · --:-- · --min[/dim]")
-            lines.append("  [dim]---              · --:-- · --min[/dim]")
-            lines.append("  [dim]---              · --:-- · --min[/dim]")
-            lines.append("")
-            lines.append("  [dim]Crie uma rotina: atomvs routine add[/dim]")
+            return self._enter_placeholder_mode(
+                "---              · --:-- · --min",
+                "Crie uma rotina: atomvs routine add",
+            )
         else:
             for idx, inst in enumerate(instances[:12]):
                 line = self._format_instance(inst, max_bars)
                 if idx == self._cursor_index and self.has_focus:
-                    line = f"[on {C_HIGHLIGHT}]{line}[/on {C_HIGHLIGHT}]"
+                    line = f"[on {self.HIGHLIGHT_COLOR}]{line}[/on {self.HIGHLIGHT_COLOR}]"
                 lines.append(line)
         return lines
 
@@ -123,9 +173,9 @@ class HabitsPanel(FocusablePanel):
         st = inst["status"]
         sub = inst.get("substatus")
         actual = inst.get("actual_minutes")
-        sh = inst.get("start_hour", 0)
-        eh = inst.get("end_hour", 0)
-        est_min = (eh - sh) * 60
+        sm = inst.get("start_minutes", 0)
+        em = inst.get("end_minutes", 0)
+        est_min = em - sm
         minutes = actual if actual else est_min
         dur = format_duration_card(minutes)
         color = status_color(st, sub)
@@ -141,7 +191,9 @@ class HabitsPanel(FocusablePanel):
             nm_fmt = f"[bold {color}]{name:<16s}[/bold {color}]"
         else:
             nm_fmt = f"[{color}]{name:<16s}[/{color}]"
-        time_fmt = f"[dim]{sh:02d}:00 - {eh:02d}:00[/dim]"
+        sh, s_min = divmod(sm, 60)
+        eh, e_min = divmod(em, 60)
+        time_fmt = f"[dim]{sh:02d}:{s_min:02d} - {eh:02d}:{e_min:02d}[/dim]"
         if bold:
             dur_fmt = f"[{color}]{dur:>7s}[/{color}]"
         else:

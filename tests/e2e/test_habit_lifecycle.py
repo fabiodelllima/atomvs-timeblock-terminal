@@ -218,6 +218,7 @@ class TestBREventConflictWorkflow:
             task = Task(
                 title="Meeting",
                 scheduled_datetime=datetime.combine(date.today(), time(7, 30)),
+                original_scheduled_datetime=datetime.combine(date.today(), time(7, 30)),
             )
             session.add(task)
             session.commit()

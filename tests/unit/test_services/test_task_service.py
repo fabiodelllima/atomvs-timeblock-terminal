@@ -179,3 +179,71 @@ class TestDeleteTask:
     def test_delete_task_not_found(self) -> None:
         """Retorna False se não existe."""
         assert TaskService.delete_task(9999) is False
+
+
+class TestUpdateTask:
+    """Testes para update_task. Validates BR-TASK-005."""
+
+    def test_update_task_not_found(self) -> None:
+        """GAP-001: update_task com ID inexistente retorna (None, None)."""
+        result, _conflicts = TaskService.update_task(
+            task_id=9999,
+            title="Ghost",
+        )
+        assert result is None
+
+    def test_update_task_empty_title(self) -> None:
+        """GAP-005: update_task com título vazio levanta ValueError."""
+        task = TaskService.create_task(
+            title="Original",
+            scheduled_datetime=datetime(2025, 11, 1, 10, 0),
+        )
+        with pytest.raises(ValueError, match="cannot be empty"):
+            TaskService.update_task(task.id, title="   ")
+
+    def test_update_task_title_too_long(self) -> None:
+        """Error path: update_task com título > 200 chars levanta ValueError."""
+        task = TaskService.create_task(
+            title="Original",
+            scheduled_datetime=datetime(2025, 11, 1, 10, 0),
+        )
+        with pytest.raises(ValueError, match="cannot exceed 200"):
+            TaskService.update_task(task.id, title="X" * 201)
+
+
+class TestCancelTask:
+    """Testes para cancel_task. Validates BR-TASK-009."""
+
+    def test_cancel_task_not_found(self) -> None:
+        """GAP-002: cancel_task com ID inexistente retorna None."""
+        assert TaskService.cancel_task(9999) is None
+
+
+class TestReopenTask:
+    """Testes para reopen_task. Validates BR-TASK-009."""
+
+    def test_reopen_task_not_found(self) -> None:
+        """GAP-003: reopen_task com ID inexistente retorna None."""
+        assert TaskService.reopen_task(9999) is None
+
+
+class TestCompleteTaskErrorPaths:
+    """Error paths para complete_task. Validates BR-TASK-002."""
+
+    def test_complete_task_already_completed(self) -> None:
+        """GAP-004: complete_task em task já completada sobrescreve timestamp.
+
+        Documenta comportamento atual: idempotente (não levanta erro).
+        O segundo complete_datetime é diferente do primeiro.
+        """
+        task = TaskService.create_task(
+            title="Task",
+            scheduled_datetime=datetime(2025, 10, 20, 10, 0),
+        )
+        first = TaskService.complete_task(task.id)
+        first_dt = first.completed_datetime
+
+        second = TaskService.complete_task(task.id)
+        assert second is not None
+        assert second.completed_datetime is not None
+        assert second.completed_datetime >= first_dt

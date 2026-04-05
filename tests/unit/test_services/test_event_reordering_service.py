@@ -22,7 +22,11 @@ class TestDetectConflicts:
         """No conflicts when events don't overlap."""
         mock_context.return_value.__enter__.return_value = test_engine
 
-        task = Task(title="Task 1", scheduled_datetime=datetime(2025, 10, 24, 10, 0))
+        task = Task(
+            title="Task 1",
+            scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+            original_scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+        )
         session.add(task)
         session.commit()
         session.refresh(task)
@@ -42,8 +46,16 @@ class TestDetectConflicts:
         """Detects conflict between two overlapping tasks."""
         mock_context.return_value.__enter__.return_value = test_engine
 
-        task1 = Task(title="Task 1", scheduled_datetime=datetime(2025, 10, 24, 10, 0))
-        task2 = Task(title="Task 2", scheduled_datetime=datetime(2025, 10, 24, 10, 30))
+        task1 = Task(
+            title="Task 1",
+            scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+            original_scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+        )
+        task2 = Task(
+            title="Task 2",
+            scheduled_datetime=datetime(2025, 10, 24, 10, 30),
+            original_scheduled_datetime=datetime(2025, 10, 24, 10, 30),
+        )
         session.add(task1)
         session.add(task2)
         session.commit()
@@ -59,7 +71,11 @@ class TestGetEventTimes:
 
     def test_task_times(self) -> None:
         """Gets correct start/end for Task."""
-        task = Task(title="Task 1", scheduled_datetime=datetime(2025, 10, 24, 10, 0))
+        task = Task(
+            title="Task 1",
+            scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+            original_scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+        )
         start, end = EventReorderingService._get_event_times(task, "task")
         assert start == datetime(2025, 10, 24, 10, 0)
         assert end == datetime(2025, 10, 24, 11, 0)
@@ -130,8 +146,16 @@ class TestGetConflictsForDay:
         from datetime import date
 
         # Criar eventos sem overlap
-        task1 = Task(title="Task 1", scheduled_datetime=datetime(2025, 10, 24, 10, 0))
-        task2 = Task(title="Task 2", scheduled_datetime=datetime(2025, 10, 24, 12, 0))
+        task1 = Task(
+            title="Task 1",
+            scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+            original_scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+        )
+        task2 = Task(
+            title="Task 2",
+            scheduled_datetime=datetime(2025, 10, 24, 12, 0),
+            original_scheduled_datetime=datetime(2025, 10, 24, 12, 0),
+        )
         session.add(task1)
         session.add(task2)
         session.commit()
@@ -146,8 +170,16 @@ class TestGetConflictsForDay:
         from datetime import date
 
         # Criar tasks que se sobrepõem
-        task1 = Task(title="Task 1", scheduled_datetime=datetime(2025, 10, 24, 10, 0))
-        task2 = Task(title="Task 2", scheduled_datetime=datetime(2025, 10, 24, 10, 30))
+        task1 = Task(
+            title="Task 1",
+            scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+            original_scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+        )
+        task2 = Task(
+            title="Task 2",
+            scheduled_datetime=datetime(2025, 10, 24, 10, 30),
+            original_scheduled_datetime=datetime(2025, 10, 24, 10, 30),
+        )
         session.add(task1)
         session.add(task2)
         session.commit()
@@ -162,8 +194,16 @@ class TestGetConflictsForDay:
         from datetime import date
 
         # Criar 2 tasks sobrepostas
-        task1 = Task(title="Task 1", scheduled_datetime=datetime(2025, 10, 24, 10, 0))
-        task2 = Task(title="Task 2", scheduled_datetime=datetime(2025, 10, 24, 10, 30))
+        task1 = Task(
+            title="Task 1",
+            scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+            original_scheduled_datetime=datetime(2025, 10, 24, 10, 0),
+        )
+        task2 = Task(
+            title="Task 2",
+            scheduled_datetime=datetime(2025, 10, 24, 10, 30),
+            original_scheduled_datetime=datetime(2025, 10, 24, 10, 30),
+        )
         session.add(task1)
         session.add(task2)
         session.commit()
@@ -207,7 +247,11 @@ class TestGetConflictsForDay:
         session.commit()
 
         # Criar task sobreposta
-        task = Task(title="Task", scheduled_datetime=datetime(2025, 10, 24, 10, 30))
+        task = Task(
+            title="Task",
+            scheduled_datetime=datetime(2025, 10, 24, 10, 30),
+            original_scheduled_datetime=datetime(2025, 10, 24, 10, 30),
+        )
         session.add(task)
         session.commit()
 

@@ -5,10 +5,13 @@ BR-TUI-003-R22: Strikethrough em done/cancelled.
 BR-TUI-003-R23: Subtítulo com contadores por status.
 BR-TUI-003-R27: Nome herda cor do status.
 BR-TUI-012: Navegação vertical com setas/j/k e highlight.
-BR-TUI-004: Quick actions — Ctrl+K completa task.
+BR-TUI-004: Quick actions — v completa task (ADR-037).
 """
 
+from typing import Any
+
 from textual.events import Key
+from textual.message import Message
 
 from timeblock.tui.colors import (
     C_ERROR,
@@ -18,13 +21,11 @@ from timeblock.tui.colors import (
 )
 from timeblock.tui.widgets.focusable_panel import FocusablePanel
 
-C_HIGHLIGHT = "#313244"  # Surface0 — cursor background
-
 
 class TasksPanel(FocusablePanel):
     """Card de tarefas com 4 seções, heat de proximidade e navegação."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._tasks: list[dict] = []
         self._ordered: list[dict] = []
@@ -33,7 +34,9 @@ class TasksPanel(FocusablePanel):
         """Recebe tasks do coordinator e renderiza."""
         self._tasks = tasks
         self._order_tasks()
-        self._set_item_count(len(self._ordered))
+        if self._ordered:
+            self._showing_placeholders = False
+            self._set_item_count(len(self._ordered))
         self._refresh_content()
 
     def get_selected_item(self) -> dict | None:
@@ -44,24 +47,74 @@ class TasksPanel(FocusablePanel):
 
     def on_key(self, event: Key) -> None:
         """Captura navegação e quick actions."""
-        if event.key == "ctrl+k":
+        if event.key == "v":
             self._action_complete()
             event.stop()
-        else:
-            super().on_key(event)
+        elif event.key == "s":
+            self._action_postpone()
+            event.stop()
+        elif event.key == "c":
+            self._action_cancel()
+            event.stop()
+        elif event.key == "u":
+            self._action_reopen()
+            event.stop()
+
+    class TaskCompleteRequest(Message):
+        """Solicita conclusão de task ao coordinator (RF-001)."""
+
+        def __init__(self, task_id: int) -> None:
+            super().__init__()
+            self.task_id = task_id
+
+    class TaskPostponeRequest(Message):
+        """Solicita adiamento de task (ADR-037)."""
+
+        def __init__(self, task_id: int) -> None:
+            self.task_id = task_id
+            super().__init__()
+
+    class TaskCancelRequest(Message):
+        """Solicita cancelamento de task (ADR-037)."""
+
+        def __init__(self, task_id: int) -> None:
+            self.task_id = task_id
+            super().__init__()
+
+    class TaskReopenRequest(Message):
+        """Solicita reabertura de task cancelada (ADR-037)."""
+
+        def __init__(self, task_id: int) -> None:
+            self.task_id = task_id
+            super().__init__()
 
     def _action_complete(self) -> None:
-        """Completa task selecionada (BR-TUI-004)."""
+        """Emite TaskCompleteRequest para o coordinator (BR-TUI-004, RF-001)."""
         item = self.get_selected_item()
         if not item or not item.get("id"):
             return
-        from timeblock.services.task_service import TaskService
-        from timeblock.tui.session import service_action
+        self.post_message(self.TaskCompleteRequest(item["id"]))
 
-        result, error = service_action(lambda s: TaskService.complete_task(item["id"], session=s))
-        if not error and result:
-            item["status"] = "completed"
-            self._refresh_content()
+    def _action_postpone(self) -> None:
+        """Emite TaskPostponeRequest (ADR-037)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        self.post_message(self.TaskPostponeRequest(item["id"]))
+
+    def _action_cancel(self) -> None:
+        """Emite TaskCancelRequest (ADR-037)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        self.post_message(self.TaskCancelRequest(item["id"]))
+
+    def _action_reopen(self) -> None:
+        """Emite TaskReopenRequest (ADR-037)."""
+        item = self.get_selected_item()
+        if not item or not item.get("id"):
+            return
+        self.post_message(self.TaskReopenRequest(item["id"]))
 
     def _order_tasks(self) -> None:
         """Ordena: overdue > pending > completed > cancelled."""
@@ -70,18 +123,18 @@ class TasksPanel(FocusablePanel):
 
     def _refresh_content(self) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
+        from collections import Counter
+
         tasks = self._tasks
-        pending = [t for t in tasks if t.get("status") == "pending"]
-        completed = [t for t in tasks if t.get("status") == "completed"]
-        cancelled = [t for t in tasks if t.get("status") == "cancelled"]
-        overdue = [t for t in tasks if t.get("status") == "overdue"]
-        counts = f"{len(pending)} pend."
-        if completed:
-            counts += f" {len(completed)} done"
-        if cancelled:
-            counts += f" {len(cancelled)} canc."
-        if overdue:
-            counts += f" {len(overdue)} over."
+        # Counter substitui 4 list comprehensions separadas (RF-008)
+        status_counts: Counter[str] = Counter(t.get("status", "pending") for t in tasks)
+        counts = f"{status_counts['pending']} pend."
+        if status_counts["completed"]:
+            counts += f" {status_counts['completed']} done"
+        if status_counts["cancelled"]:
+            counts += f" {status_counts['cancelled']} canc."
+        if status_counts["overdue"]:
+            counts += f" {status_counts['overdue']} over."
         self.border_title = "Tarefas"
         self.border_subtitle = counts
         self.update("\n".join(self._build_lines()))
@@ -90,15 +143,16 @@ class TasksPanel(FocusablePanel):
         """Monta linhas ordenadas com highlight no cursor."""
         lines: list[str] = []
         if not self._ordered:
-            lines.append("  [dim]---                --/--   --:--[/dim]")
-            lines.append("  [dim]---                --/--   --:--[/dim]")
-            lines.append("")
-            lines.append("  [dim]Crie uma task: atomvs task add[/dim]")
+            return self._enter_placeholder_mode(
+                "---                --/--   --:--",
+                "Crie uma task: atomvs task add",
+                count=2,
+            )
         else:
             for idx, task in enumerate(self._ordered):
                 line = self._format_task(task)
                 if idx == self._cursor_index and self.has_focus:
-                    line = f"[on {C_HIGHLIGHT}]{line}[/on {C_HIGHLIGHT}]"
+                    line = f"[on {self.HIGHLIGHT_COLOR}]{line}[/on {self.HIGHLIGHT_COLOR}]"
                 lines.append(line)
         return lines
 

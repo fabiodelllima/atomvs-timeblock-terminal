@@ -14,6 +14,7 @@ from timeblock.commands import (
     task,
     timer,
 )
+from timeblock.utils.logger import configure_logging
 
 app = typer.Typer(
     name="timeblock",
@@ -43,6 +44,13 @@ def version():
 
 def launch_tui() -> bool:
     """Importa e executa a TUI. Raises ImportError se textual não instalado."""
+    from timeblock.database.migrations.runner import run_pending_migrations
+
+    try:
+        run_pending_migrations()
+    except Exception:
+        pass  # Banco pode nao existir (primeiro uso)
+
     from timeblock.tui.app import TimeBlockApp
 
     TimeBlockApp().run()
@@ -52,6 +60,7 @@ def launch_tui() -> bool:
 def main():
     """Entry point unificado: sem args abre TUI, com args executa CLI."""
     if len(sys.argv) <= 1:
+        configure_logging(console=False)
         try:
             launch_tui()
         except ImportError:
@@ -59,6 +68,7 @@ def main():
             print("       Instale: pip install atomvs-timeblock-terminal[tui]")
             print("       Uso CLI: timeblock --help")
     else:
+        configure_logging(console=True)
         app()
 
 

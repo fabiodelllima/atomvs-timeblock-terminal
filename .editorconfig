@@ -9,7 +9,10 @@ trim_trailing_whitespace = true
 [*.py]
 indent_style = space
 indent_size = 4
-max_line_length = 100
 
 [*.{toml,yml,yaml,json}]
+indent_size = 2
+
+[*.{html,css,js,ts,jsx,tsx,svg}]
+indent_style = space
 indent_size = 2

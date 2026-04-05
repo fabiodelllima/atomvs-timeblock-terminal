@@ -18,6 +18,7 @@ class Routine(SQLModel, table=True):
     name: str = Field(index=True, max_length=200)
     is_active: bool = Field(default=False)  # BR-ROUTINE-001: Não ativa por padrão
     created_at: datetime = Field(default_factory=datetime.now)
+    best_streak: int = Field(default=0)
 
     # Relationships
     habits: list["Habit"] = Relationship(back_populates="routine")

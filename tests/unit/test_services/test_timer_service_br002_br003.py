@@ -350,3 +350,38 @@ class TestBRTimer003:
         assert timelog2 is not None
         assert timelog2.id != timelog1.id
         assert timelog2.status == TimerStatus.RUNNING
+
+
+class TestBRTimer002ErrorPaths:
+    """Error paths adicionais para BR-TIMER-002."""
+
+    def test_br_timer_002_stop_done_timer_raises(
+        self, session: Session, habit_instance: HabitInstance
+    ):
+        """GAP-010: stop em timer já DONE levanta ValueError.
+
+        Estado inicial: DONE (após stop anterior)
+        Ação: stop_timer()
+        Resultado: ValueError("Timer not active")
+        """
+        timelog = TimerService.start_timer(habit_instance.id, session)
+        TimerService.stop_timer(timelog.id, session)
+
+        session.refresh(timelog)
+        assert timelog.status == TimerStatus.DONE
+
+        with pytest.raises(ValueError, match="not active"):
+            TimerService.stop_timer(timelog.id, session)
+
+    def test_br_timer_002_stop_cancelled_timer_raises(
+        self, session: Session, habit_instance: HabitInstance
+    ):
+        """Error path: stop em timer CANCELLED levanta ValueError."""
+        timelog = TimerService.start_timer(habit_instance.id, session)
+        TimerService.reset_timer(timelog.id, session)
+
+        session.refresh(timelog)
+        assert timelog.status == TimerStatus.CANCELLED
+
+        with pytest.raises(ValueError, match="not active"):
+            TimerService.stop_timer(timelog.id, session)

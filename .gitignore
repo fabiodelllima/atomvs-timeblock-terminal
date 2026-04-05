@@ -13,6 +13,7 @@ build/
 cli/data/
 
 # IDE
+.zed/
 .vscode/*
 .idea/
 
@@ -53,3 +54,16 @@ htmlcov/
 
 # Migration scripts (one-time use)
 migrate_*.py
+
+# Others
+docs/core/ci-optimization.md
+docs/sysdesign/
+
+# Claude Code automation (local only)
+CLAUDE.md
+TASK.md
+run-overnight.sh
+
+# Design artifacts (box-drawing, themes, system-design)
+design/
+snapshot_report.html

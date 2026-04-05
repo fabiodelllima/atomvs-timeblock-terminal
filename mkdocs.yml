@@ -1,15 +1,14 @@
-# MkDocs Configuration - TimeBlock Planner
-# Atualizado: 2026-01-28 (alinhado com estrutura consolidada)
-# Referência: ADR-027 (Documentation Tooling)
+# MkDocs Configuration - ATOMVS Time Planner Terminal
+# Atualizado: 2026-03-19 (ADR-039 Fases 1-3 — Diátaxis)
+# Referência: ADR-027 (Tooling), ADR-039 (Framework)
 
-site_name: ATOMVS TimeBlock Planner
-site_description: CLI para gerenciamento de tempo baseada em Time Blocking e Atomic Habits
+site_name: ATOMVS Time Planner Terminal
+site_description: Terminal app para gerenciamento de tempo baseada em Time Blocking e Atomic Habits
 site_author: Fábio de Lima
-site_url: https://github.com/fabiodelllima/timeblock-organizer
-
-repo_name: timeblock-organizer
-repo_url: https://github.com/fabiodelllima/timeblock-organizer
-edit_uri: edit/main/docs/
+site_url: https://gitlab.com/delimafabio/atomvs-timeblock-terminal
+repo_name: atomvs-timeblock-terminal
+repo_url: https://github.com/fabiodelllima/atomvs-timeblock-terminal
+# edit_uri removido — GitHub é mirror read-only
 
 # ==============================================================================
 # THEME
@@ -46,22 +45,75 @@ theme:
     code: Roboto Mono
 
 # ==============================================================================
-# NAVIGATION - Alinhado com estrutura real em docs/
+# NAVIGATION — Quadrantes Diátaxis (ADR-039)
 # ==============================================================================
 nav:
   - Home: README.md
 
-  - Core (SSOT):
-      - Arquitetura: core/architecture.md
-      - Regras de Negócio: core/business-rules.md
-      - Referência CLI: core/cli-reference.md
-      - Métricas de Qualidade: core/quality-metrics.md
-      - Roadmap: core/roadmap.md
-      - Workflows: core/workflows.md
+  # --------------------------------------------------------------------------
+  # TUTORIALS — Aprendizado guiado (Diátaxis)
+  # --------------------------------------------------------------------------
+  # Fase 4: tutorials/getting-started.md
 
+  # --------------------------------------------------------------------------
+  # GUIDES — How-to práticos (Diátaxis)
+  # --------------------------------------------------------------------------
+  - Guides:
+      - Workflow de Desenvolvimento: guides/development-workflow.md
+      - Padrões de Teste: guides/testing-patterns.md
+      - Checklist de Teste Manual: guides/manual-testing-checklist.md
+      - Catálogo de Refatorações: guides/refactoring-catalog.md
+      - Otimização CI: guides/ci-optimization.md
+      - Fluxo CI/CD: guides/cicd-flow.md
+
+  # --------------------------------------------------------------------------
+  # REFERENCE — Consulta factual (Diátaxis)
+  # --------------------------------------------------------------------------
+  - Reference:
+      - Regras de Negócio:
+          - Índice: reference/business-rules/index.md
+          - Routine: reference/business-rules/br-routine.md
+          - Habit: reference/business-rules/br-habit.md
+          - HabitInstance: reference/business-rules/br-habitinstance.md
+          - Skip: reference/business-rules/br-skip.md
+          - Streak: reference/business-rules/br-streak.md
+          - Task: reference/business-rules/br-task.md
+          - Timer: reference/business-rules/br-timer.md
+          - Event Reordering: reference/business-rules/br-event.md
+          - Validações Globais: reference/business-rules/br-validation.md
+          - CLI: reference/business-rules/br-cli.md
+          - Tag: reference/business-rules/br-tag.md
+          - TUI: reference/business-rules/br-tui.md
+          - Data: reference/business-rules/br-data.md
+          - Testing: reference/business-rules/br-testing.md
+      - Referência CLI: reference/cli-reference.md
+      - Dívida Técnica: reference/technical-debt.md
+      - Métricas de Qualidade: reference/quality-metrics.md
+      - Workflows: reference/workflows.md
+      - Sprints: reference/sprints.md
+      - Histórico Sprints: reference/sprints-archive.md
+      - Roadmap: reference/roadmap.md
+      - TUI:
+          - Color System: reference/tui/color-system.md
+          - Dashboard Cards Spec: reference/tui/dashboard-cards-spec.md
+          - Dashboard Mockup v4: reference/tui/dashboard-mockup-v4.md
+          - Box Drawing: reference/tui/box-drawing.md
+          - Sprint Notes: reference/tui/dashboard-sprint-notes.md
+          - Routines Weekly Mockup: reference/tui/routines-weekly-mockup.md
+          - Routines Weekly v1: reference/tui/routines-weekly-mockup-v1.md
+
+  # --------------------------------------------------------------------------
+  # EXPLANATION — Entendimento conceitual (Diátaxis)
+  # --------------------------------------------------------------------------
+  - Explanation:
+      - Arquitetura: explanation/architecture.md
+      - Metodologia de Desenvolvimento: explanation/development-methodology.md
+      - Conceitos do Domínio: explanation/domain-concepts.md
+
+  # --------------------------------------------------------------------------
+  # DECISIONS — arc42 §9 (transversal)
+  # --------------------------------------------------------------------------
   - Decisões (ADRs):
-      - Índice: decisions/README.md
-      - Template: decisions/template.md
       - Fundacionais:
           - "ADR-001: SQLModel ORM": decisions/ADR-001-sqlmodel-orm.md
           - "ADR-002: Typer CLI": decisions/ADR-002-typer-cli.md
@@ -71,12 +123,14 @@ nav:
           - "ADR-006: Textual TUI": decisions/ADR-006-textual-tui.md
           - "ADR-007: Service Layer": decisions/ADR-007-service-layer.md
           - "ADR-008: Tuple Returns": decisions/ADR-008-tuple-returns.md
+          - "ADR-029: Package by Feature": decisions/ADR-029-package-by-feature.md
       - Modelos e Dados:
           - "ADR-009: Flags Consolidation": decisions/ADR-009-flags-consolidation.md
           - "ADR-010: Recurrence Model": decisions/ADR-010-recurrence-model.md
           - "ADR-015: HabitInstance Naming": decisions/ADR-015-habitinstance-naming.md
           - "ADR-021: Status/Substatus": decisions/ADR-021-status-substatus-refactoring.md
           - "ADR-022: Pause Tracking": decisions/ADR-022-pause-tracking-simplification.md
+          - "ADR-036: Task Lifecycle Evolution": decisions/ADR-036-task-lifecycle-evolution.md
       - Sincronização:
           - "ADR-011: Conflict Philosophy": decisions/ADR-011-conflict-philosophy.md
           - "ADR-012: Sync Strategy": decisions/ADR-012-sync-strategy.md
@@ -87,6 +141,7 @@ nav:
           - "ADR-017: Environment Strategy": decisions/ADR-017-environment-strategy.md
           - "ADR-023: Microservices Ecosystem": decisions/ADR-023-microservices-ecosystem.md
           - "ADR-024: Homelab Infrastructure": decisions/ADR-024-homelab-infrastructure.md
+          - "ADR-030: Multiplatform Architecture": decisions/ADR-030-multiplatform-architecture.md
       - Padrões e Qualidade:
           - "ADR-018: Language Standards": decisions/ADR-018-language-standards.md
           - "ADR-019: Test Naming Convention": decisions/ADR-019-test-naming-convention.md
@@ -94,9 +149,21 @@ nav:
           - "ADR-025: Development Methodology": decisions/ADR-025-development-methodology.md
           - "ADR-026: Test Database Isolation": decisions/ADR-026-test-database-isolation.md
           - "ADR-027: Documentation Tooling": decisions/ADR-027-documentation-tooling.md
+          - "ADR-028: Remove Legacy Commands": decisions/ADR-028-remove-legacy-commands.md
+          - "ADR-032: Branding/Repository Naming": decisions/ADR-032-branding-repository-naming.md
+          - "ADR-033: Fixture Session Rollback": decisions/ADR-033-fixture-session-rollback.md
+          - "ADR-039: Documentation Framework": decisions/ADR-039-documentation-framework.md
+      - TUI e Dashboard:
+          - "ADR-031: TUI Implementation": decisions/ADR-031-tui-implementation.md
+          - "ADR-034: Dashboard-First CRUD": decisions/ADR-034-dashboard-first-crud.md
+          - "ADR-035: Keybindings Standardization": decisions/ADR-035-keybindings-standardization.md
+          - "ADR-037: TUI Keybindings Standard": decisions/ADR-037-tui-keybindings-standard.md
+          - "ADR-038: Dashboard Interaction Patterns": decisions/ADR-038-dashboard-interaction-patterns.md
 
+  # --------------------------------------------------------------------------
+  # DIAGRAMS — arc42 §5-7 (transversal)
+  # --------------------------------------------------------------------------
   - Diagramas:
-      - Visão Geral: diagrams/README.md
       - C4 Model:
           - "L1: System Context": diagrams/c4-model/L1-system-context.md
           - "L2: Containers": diagrams/c4-model/L2-containers.md
@@ -120,24 +187,7 @@ nav:
       - Infraestrutura:
           - Deployment: diagrams/infrastructure/deployment.md
 
-  - Testes:
-      - Visão Geral: testing/README.md
-      - Filosofia: testing/testing-philosophy.md
-      - Estratégia: testing/test-strategy.md
-      - Matriz de Rastreabilidade: testing/requirements-traceability-matrix.md
-      - Cenários E2E: testing/e2e-scenarios.md
-      - Cenários:
-          - Conflict Detection: testing/scenarios/conflict-detection.md
-          - Event Creation: testing/scenarios/event-creation.md
-          - Event Reordering: testing/scenarios/event-reordering.md
-          - Habit Generation: testing/scenarios/habit-generation.md
-          - Timer Lifecycle: testing/scenarios/timer-lifecycle.md
-      - Fixtures:
-          - Visão Geral: testing/fixtures/README.md
-          - Database: testing/fixtures/database.md
-          - Time: testing/fixtures/time.md
-
-  # API Reference - Preparado para mkdocstrings (v1.5.0)
+  # API Reference — preparado para mkdocstrings (v1.5.0+)
   # - API Reference:
   #     - Services: api/services.md
   #     - Models: api/models.md
@@ -150,16 +200,6 @@ plugins:
       lang:
         - pt
         - en
-  # mkdocstrings - Descomentar quando implementar API Reference (v1.5.0)
-  # - mkdocstrings:
-  #     handlers:
-  #       python:
-  #         options:
-  #           docstring_style: google
-  #           show_source: true
-  #           show_root_heading: true
-  #           members_order: source
-  #           heading_level: 2
 
 # ==============================================================================
 # MARKDOWN EXTENSIONS
@@ -200,5 +240,7 @@ markdown_extensions:
 # ==============================================================================
 extra:
   social:
+    - icon: fontawesome/brands/gitlab
+      link: https://gitlab.com/delimafabio/atomvs-timeblock-terminal
     - icon: fontawesome/brands/github
-      link: https://github.com/fabiodelllima/timeblock-organizer
+      link: https://github.com/fabiodelllima/atomvs-timeblock-terminal

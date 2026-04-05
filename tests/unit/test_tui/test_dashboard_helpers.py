@@ -21,6 +21,7 @@ from timeblock.tui.colors import (
     C_ACCENT,
     C_BELOW,
     C_ERROR,
+    C_INFO,
     C_MUTED,
     C_OVERLIMIT,
     C_PASSIVE,
@@ -113,9 +114,9 @@ class TestBRTUI003FindBlockAt:
     def setup_method(self):
         """Instâncias mock para testes."""
         self.instances = [
-            {"name": "Meditação", "start_hour": 6, "end_hour": 7},
-            {"name": "Deep Work", "start_hour": 9, "end_hour": 11},
-            {"name": "Almoço", "start_hour": 12, "end_hour": 13},
+            {"name": "Meditação", "start_minutes": 360, "end_minutes": 420},
+            {"name": "Deep Work", "start_minutes": 540, "end_minutes": 660},
+            {"name": "Almoço", "start_minutes": 720, "end_minutes": 780},
         ]
 
     def test_br_tui_003_find_block_at_start(self):
@@ -176,7 +177,7 @@ class TestBRTUI003StatusColor:
             ("not_done", "ignored", C_PASSIVE),
             ("running", None, C_ACCENT),
             ("paused", None, C_WARNING),
-            ("pending", None, C_MUTED),
+            ("pending", None, C_INFO),
         ],
     )
     def test_br_tui_003_status_color_mapping(self, status, substatus, expected_color):
@@ -217,7 +218,7 @@ class TestBRTUI003StatusIcon:
             ("not_done", "ignored", "✗?"),
             ("running", None, "▶"),
             ("paused", None, "⏸"),
-            ("pending", None, "·"),
+            ("pending", None, "○"),
         ],
     )
     def test_br_tui_003_status_icon_mapping(self, status, substatus, expected_icon):
@@ -276,7 +277,7 @@ class TestBRTUI003BlockStyle:
             ("not_done", "ignored", "✗? ignored"),
             ("running", None, "▶ running"),
             ("paused", None, "⏸ paused"),
-            ("pending", None, "· pending"),
+            ("pending", None, "○ pending"),
         ],
     )
     def test_br_tui_003_block_style_indicators(self, status, substatus, expected_indicator):
@@ -295,7 +296,7 @@ class TestBRTUI003BlockStyle:
             ("not_done", "ignored", C_PASSIVE),
             ("running", None, C_ACCENT),
             ("paused", None, C_WARNING),
-            ("pending", None, C_MUTED),
+            ("pending", None, C_INFO),
         ],
     )
     def test_br_tui_003_block_style_colors(self, status, substatus, expected_color):
@@ -376,8 +377,8 @@ class TestBRTUI003MockData:
         """Mock instances têm campos obrigatórios."""
         required_keys = {
             "name",
-            "start_hour",
-            "end_hour",
+            "start_minutes",
+            "end_minutes",
             "status",
             "substatus",
             "actual_minutes",
@@ -388,9 +389,9 @@ class TestBRTUI003MockData:
     def test_br_tui_003_mock_instances_valid_hours(self):
         """Horários dos mocks são válidos (0-23, start < end)."""
         for inst in MOCK_INSTANCES:
-            assert 0 <= inst["start_hour"] < 24
-            assert 0 < inst["end_hour"] <= 24
-            assert inst["start_hour"] < inst["end_hour"]
+            assert 0 <= inst["start_minutes"] < 1440
+            assert 0 < inst["end_minutes"] <= 1440
+            assert inst["start_minutes"] < inst["end_minutes"]
 
     def test_br_tui_003_mock_instances_valid_status(self):
         """Status dos mocks são valores válidos."""
@@ -400,9 +401,9 @@ class TestBRTUI003MockData:
 
     def test_br_tui_003_mock_instances_no_overlap(self):
         """Mock instances não têm sobreposição (BR-REORDER-001)."""
-        sorted_inst = sorted(MOCK_INSTANCES, key=lambda x: x["start_hour"])
+        sorted_inst = sorted(MOCK_INSTANCES, key=lambda x: x["start_minutes"])
         for i in range(len(sorted_inst) - 1):
-            assert sorted_inst[i]["end_hour"] <= sorted_inst[i + 1]["start_hour"], (
+            assert sorted_inst[i]["end_minutes"] <= sorted_inst[i + 1]["start_minutes"], (
                 f"Sobreposição: {sorted_inst[i]['name']} e {sorted_inst[i + 1]['name']}"
             )
 

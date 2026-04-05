@@ -1,4 +1,16 @@
-"""Fixtures para testes de integração."""
+"""Fixtures para testes de integração (BR-TEST-001, ADR-033).
+
+Engine e schema criados uma vez por sessão de teste (scope="session").
+Cada teste roda em transação isolada com rollback automático.
+Services chamam commit() internamente — join_transaction_mode="conditional_savepoint"
+converte commits em savepoint releases, mantendo o rollback funcional.
+
+Referências:
+    - ADR-033: Fixture scope="session" com rollback transacional
+    - BR-TEST-001: Isolamento por rollback
+    - HUMBLE; FARLEY, 2010, p. 375
+    - SQLAlchemy 2.0: Joining a Session into an External Transaction
+"""
 
 from datetime import UTC, datetime, time
 from typing import Any
@@ -10,14 +22,17 @@ from sqlmodel import Session, SQLModel, create_engine
 from timeblock.models import Habit, Recurrence, Routine, Task
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def integration_engine():
-    """Engine de DB em memória para testes de integração."""
+    """Engine de DB em memória, criada uma vez por sessão de teste.
+
+    Schema criado uma vez (O(1) em vez de O(N) por teste).
+    Compatível com pytest-xdist: cada worker recebe engine independente.
+    """
     engine = create_engine(
         "sqlite:///:memory:", connect_args={"check_same_thread": False}, echo=False
     )
 
-    # CRÍTICO: Habilitar foreign keys no SQLite
     @event.listens_for(engine, "connect")
     def set_sqlite_pragma(
         dbapi_conn: Any,
@@ -28,7 +43,6 @@ def integration_engine():
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
 
-    # Criar todas as tabelas
     SQLModel.metadata.create_all(engine)
     yield engine
     SQLModel.metadata.drop_all(engine)
@@ -37,9 +51,20 @@ def integration_engine():
 
 @pytest.fixture
 def integration_session(integration_engine: Engine):
-    """Sessão de DB para testes de integração."""
-    with Session(integration_engine) as session:
-        yield session
+    """Sessão com rollback transacional por teste.
+
+    Cada teste recebe sessão dentro de transação externa.
+    join_transaction_mode="conditional_savepoint" faz com que session.commit()
+    nos services vire savepoint release (não commit real).
+    Ao final do teste, a transação externa é revertida.
+    """
+    connection = integration_engine.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection, join_transaction_mode="conditional_savepoint")
+    yield session
+    session.close()
+    transaction.rollback()
+    connection.close()
 
 
 @pytest.fixture
@@ -53,7 +78,7 @@ def sample_routine(integration_session: Session):
     """Rotina de exemplo para testes de integração."""
     routine = Routine(name="Test Routine", is_active=True)
     integration_session.add(routine)
-    integration_session.commit()
+    integration_session.flush()
     integration_session.refresh(routine)
     return routine
 
@@ -77,7 +102,7 @@ def sample_habits(integration_session: Session, sample_routine: Routine):
     )
     integration_session.add(habit1)
     integration_session.add(habit2)
-    integration_session.commit()
+    integration_session.flush()
     integration_session.refresh(habit1)
     integration_session.refresh(habit2)
     return [habit1, habit2]
@@ -89,8 +114,9 @@ def sample_task(integration_session: Session):
     task = Task(
         title="Dentist Appointment",
         scheduled_datetime=datetime.now(UTC),
+        original_scheduled_datetime=datetime.now(UTC),
     )
     integration_session.add(task)
-    integration_session.commit()
+    integration_session.flush()
     integration_session.refresh(task)
     return task

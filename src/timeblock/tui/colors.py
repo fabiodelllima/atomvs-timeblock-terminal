@@ -54,7 +54,9 @@ def status_color(status: str, substatus: str | None = None) -> str:
         return C_ACCENT
     if status == "paused":
         return C_WARNING
-    return C_MUTED  # pending
+    if status == "pending":
+        return C_INFO
+    return C_MUTED  # cancelled, unknown
 
 
 def status_bg(status: str, substatus: str | None = None) -> str:
@@ -96,7 +98,7 @@ def status_icon(status: str, substatus: str | None = None) -> str:
         return "▶"
     if status == "paused":
         return "⏸"
-    return "·"  # pending
+    return "○"  # pending
 
 
 def status_label(status: str, substatus: str | None = None) -> str:
@@ -167,3 +169,6 @@ def task_proximity_color(days: int | None) -> str:
     if days <= 28:
         return C_SUBTEXT0
     return C_MUTED
+
+
+C_HIGHLIGHT = "#313244"  # Surface0: cursor background

@@ -13,6 +13,7 @@ from sqlalchemy.engine import Engine
 from sqlmodel import Session
 
 from timeblock.models import Habit, Recurrence, Routine, Status
+from timeblock.models.enums import DoneSubstatus
 from timeblock.services.habit_instance_service import HabitInstanceService
 
 
@@ -138,14 +139,17 @@ class TestMarkCompleted:
         )
         instance_id = instances[0].id
 
-        updated = HabitInstanceService.mark_completed(instance_id)
+        updated = HabitInstanceService.mark_completed(
+            instance_id, done_substatus=DoneSubstatus.FULL
+        )
 
         assert updated is not None
         assert updated.status == Status.DONE
+        assert updated.done_substatus == DoneSubstatus.FULL
 
     def test_mark_completed_nonexistent(self) -> None:
         """Marcar instância inexistente retorna None."""
-        result = HabitInstanceService.mark_completed(99999)
+        result = HabitInstanceService.mark_completed(99999, done_substatus=DoneSubstatus.FULL)
         assert result is None
 
 

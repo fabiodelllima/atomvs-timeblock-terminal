@@ -4,18 +4,16 @@ Layout: [rotina ativa] | [keybindings do panel focado] | [timer + hora]
 O centro atualiza dinamicamente conforme o panel que recebe foco.
 """
 
-from datetime import datetime
-
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
 PANEL_KEYBINDINGS: dict[str, str] = {
     "agenda-content": "↑↓ navegar",
-    "panel-habits": "↑↓ navegar  Ctrl+Enter done  Ctrl+S skip",
-    "panel-tasks": "↑↓ navegar  Ctrl+K concluir",
-    "panel-timer": "Ctrl+S start  Ctrl+P pause  Ctrl+W cancel",
-    "panel-metrics": "",
+    "panel-habits": "j/k navegar  v done  s skip  t timer",
+    "panel-tasks": "j/k navegar  v concluir  s adiar  c cancelar",
+    "panel-timer": "space pausar  s parar  c cancelar",
+    "panel-metrics": "f período",
 }
 
 DEFAULT_KEYBINDINGS = "Tab navegar  ? ajuda  Ctrl+Q sair"
@@ -57,7 +55,10 @@ class StatusBar(Widget):
         return " [dim][Sem rotina][/dim]"
 
     def _build_center_section(self) -> str:
-        """Keybindings contextuais do panel focado."""
+        """Keybindings contextuais do panel focado (DT-066)."""
+        hint = getattr(self, "_context_hint", "")
+        if hint:
+            return f"[dim]{hint}[/dim]"
         panel_id = self.focused_panel
         keys = PANEL_KEYBINDINGS.get(panel_id, DEFAULT_KEYBINDINGS)
         if not keys:
@@ -65,13 +66,12 @@ class StatusBar(Widget):
         return f"[dim]{keys}[/dim]"
 
     def _build_right_section(self) -> str:
-        """Timer elapsed + hora atual."""
-        now = datetime.now().strftime("%H:%M")
+        """Timer elapsed."""
         if self.timer_elapsed and self.timer_status:
             icon = "▶" if self.timer_status == "running" else "⏸"
             color = "#CBA6F7" if self.timer_status == "running" else "#F9E2AF"
-            return f"[{color}]{icon} {self.timer_elapsed}[/{color}]  {now} "
-        return f"{now} "
+            return f"[{color}]{icon} {self.timer_elapsed}[/{color}] "
+        return ""
 
     # =========================================================================
     # Updates
@@ -93,8 +93,9 @@ class StatusBar(Widget):
         except Exception:
             pass
 
-    def update_focused_panel(self, panel_id: str) -> None:
-        """Chamado pelo app quando foco muda entre panels."""
+    def update_focused_panel(self, panel_id: str, context_hint: str = "") -> None:
+        """Chamado pelo app quando foco muda entre panels (DT-066)."""
+        self._context_hint = context_hint
         self.focused_panel = panel_id
 
     # =========================================================================

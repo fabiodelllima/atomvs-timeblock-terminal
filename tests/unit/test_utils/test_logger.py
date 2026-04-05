@@ -1,248 +1,263 @@
-"""Testes para módulo de logging."""
+"""Testes para módulo de logging estruturado (DT-022).
 
+Referências:
+    - DT-022: Logging estruturado
+    - ADR-019: Test Naming Convention
+"""
+
+import json
 import logging
+import os
 import tempfile
-from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from timeblock.utils.logger import disable_logging, enable_logging, get_logger, setup_logger
+import pytest
+
+from timeblock.utils.logger import (
+    _reset_for_testing,
+    configure_logging,
+    disable_logging,
+    enable_logging,
+    get_logger,
+)
 
 
-class TestSetupLogger:
-    """Testa configuração de loggers."""
+@pytest.fixture(autouse=True)
+def _reset_logging():
+    """Reseta estado do logging entre cada teste."""
+    _reset_for_testing()
+    yield
+    _reset_for_testing()
+    enable_logging()
 
-    def test_setup_logger_console_only(self):
-        """Configura logger apenas para console.
 
-        DADO: Sem arquivo de log especificado
-        QUANDO: Configurar logger
-        ENTÃO: Deve ter handler de console apenas
-        """
-        # Ação: Configura logger console only
-        logger = setup_logger("test.console", level="INFO")
+class TestConfigureLogging:
+    """Testa configure_logging() com diferentes parâmetros."""
 
-        # Verificação: Tem exatamente 1 handler (console)
-        assert len(logger.handlers) == 1
-        assert isinstance(logger.handlers[0], logging.StreamHandler)
-        assert logger.level == logging.INFO
+    def test_configure_console_only(self):
+        """Console habilitado, arquivo desabilitado."""
+        configure_logging(console=True, log_file=False)
+        root = logging.getLogger("timeblock")
+        assert len(root.handlers) == 1
+        assert isinstance(root.handlers[0], logging.StreamHandler)
 
-    def test_setup_logger_with_file(self):
-        """Configura logger com arquivo de log.
-
-        DADO: Arquivo de log especificado
-        QUANDO: Configurar logger
-        ENTÃO: Deve ter handlers de console e arquivo
-        """
-        # Preparação: Cria arquivo temporário
+    def test_configure_file_only(self):
+        """Arquivo habilitado, console desabilitado."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            log_file = Path(tmpdir) / "test.log"
+            log_path = Path(tmpdir) / "test.jsonl"
+            os.environ["ATOMVS_LOG_FILE"] = str(log_path)
+            try:
+                configure_logging(console=False, log_file=True)
+                root = logging.getLogger("timeblock")
+                assert len(root.handlers) == 1
+                assert log_path.parent.exists()
+            finally:
+                os.environ.pop("ATOMVS_LOG_FILE", None)
 
-            # Ação: Configura logger com arquivo
-            logger = setup_logger("test.file", level="DEBUG", log_file=log_file)
-
-            # Verificação: Tem 2 handlers (console + arquivo)
-            assert len(logger.handlers) == 2
-            assert logger.level == logging.DEBUG
-
-            # Verificação: Arquivo foi criado
-            assert log_file.exists()
-
-    def test_setup_logger_without_console(self):
-        """Configura logger sem console (apenas arquivo).
-
-        DADO: console=False e arquivo especificado
-        QUANDO: Configurar logger
-        ENTÃO: Deve ter apenas handler de arquivo (RotatingFileHandler)
-        """
-        # Preparação: Cria arquivo temporário
+    def test_configure_dual(self):
+        """Console e arquivo habilitados simultaneamente."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            log_file = Path(tmpdir) / "test.log"
+            log_path = Path(tmpdir) / "test.jsonl"
+            os.environ["ATOMVS_LOG_FILE"] = str(log_path)
+            try:
+                configure_logging(console=True, log_file=True)
+                root = logging.getLogger("timeblock")
+                assert len(root.handlers) == 2
+            finally:
+                os.environ.pop("ATOMVS_LOG_FILE", None)
 
-            # Ação: Configura logger sem console
-            logger = setup_logger("test.nocons", level="INFO", log_file=log_file, console=False)
+    def test_configure_idempotent(self):
+        """Segunda chamada não altera configuração."""
+        configure_logging(console=True, log_file=False)
+        root = logging.getLogger("timeblock")
+        handler_count = len(root.handlers)
+        configure_logging(console=True, log_file=True)
+        assert len(root.handlers) == handler_count
 
-            # Verificação: Apenas 1 handler
-            assert len(logger.handlers) == 1
+    def test_configure_level_from_env(self):
+        """Nível lido de ATOMVS_LOG_LEVEL."""
+        os.environ["ATOMVS_LOG_LEVEL"] = "DEBUG"
+        try:
+            configure_logging(log_file=False)
+            root = logging.getLogger("timeblock")
+            assert root.level == logging.DEBUG
+        finally:
+            os.environ.pop("ATOMVS_LOG_LEVEL", None)
 
-            # Verificação: É especificamente RotatingFileHandler
-            assert isinstance(logger.handlers[0], RotatingFileHandler)
-
-    def test_log_levels(self):
-        """Testa diferentes níveis de log.
-
-        DADO: Logger configurado em diferentes níveis
-        QUANDO: Logar mensagens
-        ENTÃO: Apenas mensagens acima do nível devem passar
-        """
-        with tempfile.TemporaryDirectory() as tmpdir:
-            log_file = Path(tmpdir) / "test.log"
-
-            # Preparação: Logger em WARNING
-            logger = setup_logger("test.levels", level="WARNING", log_file=log_file, console=False)
-
-            # Ação: Loga em diferentes níveis
-            logger.debug("Debug message")
-            logger.info("Info message")
-            logger.warning("Warning message")
-            logger.error("Error message")
-
-            # Verificação: Arquivo contém apenas WARNING e ERROR
-            content = log_file.read_text()
-            assert "Debug message" not in content
-            assert "Info message" not in content
-            assert "Warning message" in content
-            assert "Error message" in content
-
-    def test_log_rotation(self):
-        """Testa rotação de logs quando arquivo atinge tamanho máximo.
-
-        DADO: Logger com max_bytes=100
-        QUANDO: Escrever mais de 100 bytes
-        ENTÃO: Deve criar arquivo de backup
-
-        Regra de Negócio: Rotação automática previne arquivos gigantes.
-        """
-        with tempfile.TemporaryDirectory() as tmpdir:
-            log_file = Path(tmpdir) / "test.log"
-
-            # Preparação: Logger com limite pequeno
-            logger = setup_logger(
-                "test.rotation",
-                level="INFO",
-                log_file=log_file,
-                max_bytes=100,  # Muito pequeno para forçar rotação
-                backup_count=2,
-                console=False,
-            )
-
-            # Ação: Escreve muitas mensagens
-            for i in range(50):
-                logger.info(f"Mensagem de teste número {i} com texto extra")
-
-            # Verificação: Arquivos de backup criados
-            backup_files = list(Path(tmpdir).glob("test.log.*"))
-            assert len(backup_files) > 0, "Backup files devem ser criados"
+    def test_configure_level_parameter(self):
+        """Parâmetro level tem prioridade sobre default."""
+        configure_logging(level="WARNING", log_file=False)
+        root = logging.getLogger("timeblock")
+        assert root.level == logging.WARNING
 
 
 class TestGetLogger:
-    """Testa obtenção de loggers existentes."""
+    """Testa get_logger() e namespace hierárquico."""
 
-    def test_get_logger_new(self):
-        """Obtém logger novo (cria com padrão).
+    def test_get_logger_returns_child(self):
+        """Logger retornado é filho do namespace timeblock."""
+        logger = get_logger("timeblock.services.timer")
+        assert logger.name == "timeblock.services.timer"
 
-        DADO: Logger não existe
-        QUANDO: Chamar get_logger
-        ENTÃO: Deve criar com configuração padrão
-        """
-        # Ação: Obtém logger inexistente
-        logger = get_logger("test.new.logger")
-
-        # Verificação: Logger criado com padrão
+    def test_get_logger_auto_configures(self):
+        """get_logger sem configure_logging prévio configura defaults."""
+        logger = get_logger("timeblock.test.auto")
         assert logger is not None
-        assert logger.level == logging.INFO
-        assert len(logger.handlers) > 0
+        root = logging.getLogger("timeblock")
+        assert len(root.handlers) > 0
 
-    def test_get_logger_existing(self):
-        """Obtém logger existente.
+    def test_get_logger_inherits_level(self):
+        """Logger filho herda nível do root timeblock."""
+        configure_logging(level="DEBUG", log_file=False)
+        logger = get_logger("timeblock.services.test")
+        assert logger.getEffectiveLevel() == logging.DEBUG
 
-        DADO: Logger já configurado
-        QUANDO: Chamar get_logger novamente
-        ENTÃO: Deve retornar mesmo logger
-        """
-        # Preparação: Cria logger
-        logger1 = setup_logger("test.existing", level="DEBUG")
 
-        # Ação: Obtém logger existente
-        logger2 = get_logger("test.existing")
+class TestJsonFormat:
+    """Testa formato JSON Lines no arquivo."""
 
-        # Verificação: Mesmo logger
-        assert logger1 is logger2
-        assert logger2.level == logging.DEBUG
+    def test_json_lines_format(self):
+        """Cada linha do arquivo é JSON válido."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            log_path = Path(tmpdir) / "test.jsonl"
+            os.environ["ATOMVS_LOG_FILE"] = str(log_path)
+            try:
+                configure_logging(console=False, log_file=True)
+                logger = get_logger("timeblock.test.json")
+                logger.info("Mensagem de teste")
+
+                for handler in logging.getLogger("timeblock").handlers:
+                    handler.flush()
+
+                content = log_path.read_text().strip()
+                record = json.loads(content)
+                assert record["message"] == "Mensagem de teste"
+                assert record["levelname"] == "INFO"
+                assert "asctime" in record
+            finally:
+                os.environ.pop("ATOMVS_LOG_FILE", None)
+
+    def test_json_extra_fields(self):
+        """Campos extra são incluídos no JSON."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            log_path = Path(tmpdir) / "test.jsonl"
+            os.environ["ATOMVS_LOG_FILE"] = str(log_path)
+            try:
+                configure_logging(console=False, log_file=True)
+                logger = get_logger("timeblock.test.extra")
+                logger.info("Operação", extra={"habit_id": 42})
+
+                for handler in logging.getLogger("timeblock").handlers:
+                    handler.flush()
+
+                content = log_path.read_text().strip()
+                record = json.loads(content)
+                assert record["habit_id"] == 42
+            finally:
+                os.environ.pop("ATOMVS_LOG_FILE", None)
+
+
+class TestLogRotation:
+    """Testa rotação automática de arquivos."""
+
+    def test_rotation_creates_backup(self):
+        """Rotação cria backups ao atingir max_bytes."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            log_path = Path(tmpdir) / "test.jsonl"
+            os.environ["ATOMVS_LOG_FILE"] = str(log_path)
+            try:
+                configure_logging(
+                    console=False,
+                    log_file=True,
+                    max_bytes=100,
+                    backup_count=2,
+                )
+                logger = get_logger("timeblock.test.rotation")
+                for i in range(50):
+                    logger.info(f"Mensagem de teste número {i} com texto extra")
+
+                backups = list(Path(tmpdir).glob("test.jsonl.*"))
+                assert len(backups) > 0
+            finally:
+                os.environ.pop("ATOMVS_LOG_FILE", None)
 
 
 class TestDisableEnableLogging:
     """Testa desabilitar/habilitar logs globalmente."""
 
-    def test_disable_logging(self):
-        """Desabilita todos os logs.
-
-        DADO: Logging habilitado
-        QUANDO: Chamar disable_logging
-        ENTÃO: Nenhuma mensagem deve ser logada
-
-        Caso de Uso: Silenciar logs durante testes.
-        """
+    def test_disable_suppresses_output(self):
+        """disable_logging suprime todas as mensagens."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            log_file = Path(tmpdir) / "test.log"
+            log_path = Path(tmpdir) / "test.jsonl"
+            os.environ["ATOMVS_LOG_FILE"] = str(log_path)
+            try:
+                configure_logging(console=False, log_file=True)
+                logger = get_logger("timeblock.test.disable")
+                disable_logging()
+                logger.error("Mensagem suprimida")
 
-            # Preparação: Logger normal
-            logger = setup_logger("test.disable", level="INFO", log_file=log_file, console=False)
+                for handler in logging.getLogger("timeblock").handlers:
+                    handler.flush()
 
-            # Ação: Desabilita logging
-            disable_logging()
-            logger.info("Esta mensagem NÃO deve aparecer")
-            logger.error("Esta mensagem também NÃO deve aparecer")
+                if log_path.exists():
+                    assert log_path.read_text().strip() == ""
+            finally:
+                os.environ.pop("ATOMVS_LOG_FILE", None)
+                enable_logging()
 
-            # Verificação: Arquivo vazio ou inexistente
-            if log_file.exists():
-                content = log_file.read_text()
-                assert len(content) == 0 or content.strip() == ""
-
-            # Limpeza: Reabilita para outros testes
-            enable_logging()
-
-    def test_enable_logging(self):
-        """Reabilita logs após desabilitar.
-
-        DADO: Logging desabilitado
-        QUANDO: Chamar enable_logging
-        ENTÃO: Logs devem voltar a funcionar
-        """
+    def test_enable_restores_output(self):
+        """enable_logging restaura mensagens após disable."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            log_file = Path(tmpdir) / "test.log"
+            log_path = Path(tmpdir) / "test.jsonl"
+            os.environ["ATOMVS_LOG_FILE"] = str(log_path)
+            try:
+                configure_logging(console=False, log_file=True)
+                logger = get_logger("timeblock.test.enable")
+                disable_logging()
+                logger.info("Suprimida")
+                enable_logging()
+                logger.info("Visível")
 
-            # Preparação: Logger normal
-            logger = setup_logger("test.enable", level="INFO", log_file=log_file, console=False)
+                for handler in logging.getLogger("timeblock").handlers:
+                    handler.flush()
 
-            # Ação: Desabilita e reabilita
-            disable_logging()
-            logger.info("Mensagem durante desabilitado")
-            enable_logging()
-            logger.info("Mensagem após reabilitar")
-
-            # Verificação: Apenas segunda mensagem aparece
-            content = log_file.read_text()
-            assert "durante desabilitado" not in content
-            assert "após reabilitar" in content
+                content = log_path.read_text()
+                assert "Suprimida" not in content
+                assert "Visível" in content
+            finally:
+                os.environ.pop("ATOMVS_LOG_FILE", None)
 
 
-class TestLogFormat:
-    """Testa formato das mensagens de log."""
+class TestXDGPaths:
+    """Testa resolução de caminhos XDG."""
 
-    def test_log_format_structure(self):
-        """Verifica estrutura do formato de log.
-
-        DADO: Logger configurado
-        QUANDO: Logar mensagem
-        ENTÃO: Formato deve ser [timestamp] [level] [module] message
-        """
+    def test_xdg_data_home_respected(self):
+        """XDG_DATA_HOME é usado quando definido."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            log_file = Path(tmpdir) / "test.log"
+            os.environ["XDG_DATA_HOME"] = tmpdir
+            os.environ.pop("ATOMVS_LOG_FILE", None)
+            try:
+                configure_logging(console=False, log_file=True)
+                expected = Path(tmpdir) / "atomvs" / "logs" / "atomvs.jsonl"
+                assert expected.parent.exists()
+            finally:
+                os.environ.pop("XDG_DATA_HOME", None)
 
-            # Preparação: Logger
-            logger = setup_logger("test.format", level="INFO", log_file=log_file, console=False)
+    def test_atomvs_log_file_overrides_xdg(self):
+        """ATOMVS_LOG_FILE tem prioridade sobre XDG."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            custom_path = Path(tmpdir) / "custom.jsonl"
+            os.environ["ATOMVS_LOG_FILE"] = str(custom_path)
+            os.environ["XDG_DATA_HOME"] = "/should/not/be/used"
+            try:
+                configure_logging(console=False, log_file=True)
+                logger = get_logger("timeblock.test.override")
+                logger.info("test")
 
-            # Ação: Loga mensagem
-            logger.info("Mensagem de teste")
+                for handler in logging.getLogger("timeblock").handlers:
+                    handler.flush()
 
-            # Verificação: Formato correto
-            content = log_file.read_text()
-            assert "[INFO]" in content
-            assert "[test.format]" in content
-            assert "Mensagem de teste" in content
-
-            # Verifica presença de timestamp (formato: [YYYY-MM-DD HH:MM:SS])
-            import re
-
-            timestamp_pattern = r"\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\]"
-            assert re.search(timestamp_pattern, content), "Timestamp deve estar presente"
+                assert custom_path.exists()
+            finally:
+                os.environ.pop("ATOMVS_LOG_FILE", None)
+                os.environ.pop("XDG_DATA_HOME", None)

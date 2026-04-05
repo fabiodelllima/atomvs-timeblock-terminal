@@ -70,7 +70,7 @@ class TestBRTUI002ContentSwap:
     async def test_br_tui_002_escape_swaps_back_to_dashboard(self):
         """Escape troca conteúdo de volta para Dashboard."""
         async with TimeBlockApp().run_test() as pilot:
-            await pilot.press("r")
+            await pilot.press("2")
             assert pilot.app.query_one("#routines-view").display is True
 
             await pilot.press("escape")

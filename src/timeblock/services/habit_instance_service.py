@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 
 from timeblock.database import get_engine_context
 from timeblock.models import Habit, HabitInstance, Recurrence
-from timeblock.models.enums import NotDoneSubstatus, SkipReason, Status
+from timeblock.models.enums import DoneSubstatus, NotDoneSubstatus, SkipReason, Status
 from timeblock.models.time_log import TimeLog
 from timeblock.utils.logger import get_logger
 
@@ -316,10 +316,32 @@ class HabitInstanceService:
     @staticmethod
     def mark_completed(
         instance_id: int,
+        done_substatus: DoneSubstatus,
+        completion_percentage: int | None = None,
         session: Session | None = None,
     ) -> HabitInstance | None:
-        """Marca instância como completa."""
-        logger.debug(f"Marcando como completa: instance_id={instance_id}")
+        """Marca instância como completa com substatus (BR-HABITINSTANCE-002).
+
+        Args:
+            instance_id: ID da instância
+            done_substatus: Substatus obrigatório (FULL, PARTIAL, OVERDONE, EXCESSIVE)
+            completion_percentage: Percentual de conclusão (opcional, usado na restauração via TimeLog)
+            session: Optional session (for tests/transactions)
+
+        Returns:
+            HabitInstance atualizada, ou None se não encontrada
+
+        Side effects:
+            - status → DONE
+            - done_substatus → valor fornecido
+            - not_done_substatus → None
+            - skip_reason → None
+            - skip_note → None
+            - completion_percentage → valor fornecido ou None
+        """
+        logger.debug(
+            f"Marcando como completa: instance_id={instance_id}, substatus={done_substatus.value}"
+        )
 
         def _mark(sess: Session) -> HabitInstance | None:
             instance = sess.get(HabitInstance, instance_id)
@@ -330,11 +352,24 @@ class HabitInstanceService:
                 return None
 
             instance.status = Status.DONE
+            instance.done_substatus = done_substatus
+
+            # Limpar campos conflitantes
+            instance.not_done_substatus = None
+            instance.skip_reason = None
+            instance.skip_note = None
+            instance.completion_percentage = completion_percentage
+
+            # Validar consistência antes de persistir (BR-HABITINSTANCE-002)
+            instance.validate_status_consistency()
+
             sess.add(instance)
             sess.commit()
             sess.refresh(instance)
 
-            logger.info(f"Instância completada: instance_id={instance_id}")
+            logger.info(
+                f"Instância completada: instance_id={instance_id}, substatus={done_substatus.value}"
+            )
             return instance
 
         if session is not None:

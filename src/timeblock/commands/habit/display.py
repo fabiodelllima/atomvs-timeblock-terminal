@@ -4,6 +4,7 @@ from datetime import date
 
 from rich.console import Console
 
+from timeblock.models import HabitInstance, TimeLog
 from timeblock.models.enums import Status
 
 console = Console()
@@ -81,7 +82,7 @@ def display_instances(
         console.print()
 
 
-def _display_single_instance(inst) -> None:
+def _display_single_instance(inst: HabitInstance) -> None:
     """Exibe uma única instância formatada."""
     if inst.status == Status.DONE:
         marker, status_text = "[green][x][/green]", "concluída"
@@ -97,7 +98,7 @@ def _display_single_instance(inst) -> None:
     console.print(f"  {marker} {start}-{end} {title} [dim](ID: {inst.id}, {status_text})[/dim]")
 
 
-def display_log_result(timelog, instance) -> None:
+def display_log_result(timelog: TimeLog, instance: HabitInstance) -> None:
     """Exibe resultado do log manual."""
     duration_secs = timelog.duration_seconds or 0
     hours, remainder = divmod(duration_secs, 3600)

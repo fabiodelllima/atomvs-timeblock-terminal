@@ -1,7 +1,7 @@
 """AtomvsApp - Aplicação TUI principal."""
 
 from pathlib import PurePath
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -55,14 +55,9 @@ class TimeBlockApp(App):
         Binding("3", "switch_screen('habits')", "Hábitos", show=False),
         Binding("4", "switch_screen('tasks')", "Tasks", show=False),
         Binding("5", "switch_screen('timer')", "Timer", show=False),
-        Binding("d", "switch_screen('dashboard')", "Dashboard", show=False),
-        Binding("r", "switch_screen('routines')", "Rotinas", show=False),
-        Binding("h", "switch_screen('habits')", "Hábitos", show=False),
-        Binding("t", "switch_screen('tasks')", "Tasks", show=False),
-        Binding("m", "switch_screen('timer')", "Timer", show=False),
         Binding("?", "toggle_help", "Ajuda", show=False),
         Binding("escape", "handle_escape", "Voltar", show=False),
-        Binding("q", "quit", "Sair"),
+        Binding("ctrl+q", "quit", "Sair"),
     ]
 
     active_screen: str = "dashboard"
@@ -88,30 +83,34 @@ class TimeBlockApp(App):
         for name, screen_id in SCREEN_IDS.items():
             self.query_one(f"#{screen_id}").display = name == "dashboard"
 
-    async def action_switch_screen(self, screen_name: str) -> None:
+    async def action_switch_screen(self, screen: str) -> None:
         """Alterna a screen ativa via display toggle."""
-        if screen_name not in SCREENS or screen_name == self.active_screen:
+        if screen not in SCREENS or screen == self.active_screen:
             return
 
         self.query_one(f"#{SCREEN_IDS[self.active_screen]}").display = False
 
-        self.active_screen = screen_name
-        new_screen = self.query_one(f"#{SCREEN_IDS[screen_name]}")
+        self.active_screen = screen
+        new_screen = self.query_one(f"#{SCREEN_IDS[screen]}")
         new_screen.display = True
 
-        if hasattr(new_screen, "refresh_data"):
-            new_screen.refresh_data()
+        refresh = getattr(new_screen, "refresh_data", None)
+        if refresh is not None:
+            refresh()
         new_screen.focus()
 
-        self.query_one(HeaderBar).update_screen(screen_name)
-        self.query_one(NavBar).update_active(screen_name)
+        self.query_one(HeaderBar).update_screen(screen)
+        self.query_one(NavBar).update_active(screen)
 
-    def on_descendant_focus(self, event) -> None:
-        """Atualiza footer quando foco muda entre panels."""
+    def on_descendant_focus(self, event: Any) -> None:
+        """Atualiza footer quando foco muda entre panels (DT-066)."""
         widget = event.widget
         if widget and widget.id:
             try:
-                self.query_one(StatusBar).update_focused_panel(widget.id)
+                hint = ""
+                if getattr(widget, "_showing_placeholders", False):
+                    hint = getattr(widget, "_placeholder_hint", "")
+                self.query_one(StatusBar).update_focused_panel(widget.id, context_hint=hint)
             except Exception:
                 pass
 

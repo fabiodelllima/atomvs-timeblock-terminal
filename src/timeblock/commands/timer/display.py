@@ -12,10 +12,15 @@ from rich.text import Text
 from sqlmodel import Session
 
 from timeblock.database import get_engine_context
+from timeblock.models import TimeLog
+from timeblock.models.enums import TimerStatus
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.services.task_service import TaskService
 from timeblock.services.timer_service import TimerService
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 console = Console()
 
@@ -29,10 +34,11 @@ def get_selected_schedule():
         config = json.loads(config_path.read_text())
         return config.get("selected_schedule")
     except Exception:
+        logger.debug("Config de schedule não encontrada")
         return None
 
 
-def get_activity_name(timelog) -> str:
+def get_activity_name(timelog: TimeLog) -> str:
     """Retorna nome da atividade do timelog."""
     instance_service = HabitInstanceService()
 
@@ -83,7 +89,7 @@ def display_timer(timelog_id: int) -> None:
                 text.append(activity, style="bold white")
                 text.append(" | ", style="dim")
 
-                if hasattr(timelog, "paused") and timelog.paused:
+                if timelog.status == TimerStatus.PAUSED:
                     text.append("[||] Pausado", style="yellow")
                 else:
                     text.append("[>] Em andamento", style="green")
@@ -102,5 +108,6 @@ def display_timer(timelog_id: int) -> None:
                 )
                 return
             except Exception as e:
+                logger.exception("Erro no live display do timer")
                 console.print(f"\n[red]Erro: {e}[/red]")
                 return

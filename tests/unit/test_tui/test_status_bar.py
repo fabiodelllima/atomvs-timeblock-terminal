@@ -3,9 +3,6 @@
 Valida widget StatusBar com três seções: rotina ativa, timer e hora.
 """
 
-from datetime import datetime
-from unittest.mock import patch
-
 import pytest
 
 from timeblock.tui.widgets.status_bar import StatusBar
@@ -136,31 +133,6 @@ class TestBRTUI007R03FooterContextual:
         bar.timer_status = "running"
         rendered = bar._build_right_section()
         assert "00:45:30" in rendered
-
-
-class TestBRTUI007R04CurrentTime:
-    """BR-TUI-007 R04: Exibe hora atual HH:MM."""
-
-    def test_br_tui_007_r04_shows_formatted_time(self) -> None:
-        """Exibe hora no formato HH:MM."""
-        bar = StatusBar()
-        with patch("timeblock.tui.widgets.status_bar.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2025, 11, 14, 14, 30, 0)
-            rendered = bar._build_right_section()
-        assert "14:30" in rendered
-
-    def test_br_tui_007_r04_time_with_leading_zero(self) -> None:
-        """Hora com zero à esquerda."""
-        bar = StatusBar()
-        with patch("timeblock.tui.widgets.status_bar.datetime") as mock_dt:
-            mock_dt.now.return_value = datetime(2025, 11, 14, 8, 5, 0)
-            rendered = bar._build_right_section()
-        assert "08:05" in rendered
-
-
-# ============================================================
-# BR-TUI-007 R05/R06: Intervalos de atualização
-# ============================================================
 
 
 class TestBRTUI007R05R06UpdateIntervals:

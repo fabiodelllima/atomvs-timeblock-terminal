@@ -34,9 +34,10 @@ class TestBRTaskReordering:
         task = Task(
             title="Test Task",
             scheduled_datetime=datetime.combine(date.today(), time(10, 0)),
+            original_scheduled_datetime=datetime.combine(date.today(), time(10, 0)),
         )
         test_db.add(task)
-        test_db.commit()
+        test_db.flush()
         test_db.refresh(task)
         return task
 
@@ -46,9 +47,10 @@ class TestBRTaskReordering:
         task = Task(
             title="Another Task",
             scheduled_datetime=datetime.combine(date.today(), time(14, 0)),
+            original_scheduled_datetime=datetime.combine(date.today(), time(14, 0)),
         )
         test_db.add(task)
-        test_db.commit()
+        test_db.flush()
         test_db.refresh(task)
         return task
 
@@ -140,7 +142,7 @@ class TestBRTaskReordering:
         # ARRANGE - Criar routine, habit e instance
         routine = Routine(name="Test Routine", is_active=True)
         test_db.add(routine)
-        test_db.commit()
+        test_db.flush()
         test_db.refresh(routine)
         assert routine.id is not None
 
@@ -152,7 +154,7 @@ class TestBRTaskReordering:
             recurrence=Recurrence.EVERYDAY,
         )
         test_db.add(habit)
-        test_db.commit()
+        test_db.flush()
         test_db.refresh(habit)
         assert habit.id is not None
 
@@ -164,7 +166,7 @@ class TestBRTaskReordering:
             status=Status.PENDING,
         )
         test_db.add(instance)
-        test_db.commit()
+        test_db.flush()
 
         assert task.id is not None
 

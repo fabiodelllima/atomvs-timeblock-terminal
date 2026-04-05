@@ -7,8 +7,13 @@ from rich.console import Console
 
 from timeblock.services.event_reordering_service import EventReorderingService
 from timeblock.utils.conflict_display import display_conflicts
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 app = typer.Typer(help="Comandos de detecção de conflitos")
+
+
 console = Console()
 
 

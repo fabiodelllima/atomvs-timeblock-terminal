@@ -1,5 +1,7 @@
 """TasksScreen - Placeholder para tela de tarefas."""
 
+from typing import Any
+
 from textual.widgets import Static
 
 
@@ -13,7 +15,7 @@ class TasksScreen(Static):
     }
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
     def compose(self):

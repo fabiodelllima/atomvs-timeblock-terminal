@@ -7,8 +7,8 @@ HelpOverlay {
     width: 60;                /* Largura fixa: 60 chars */
     height: auto;             /* Altura adapta ao conteúdo */
     max-height: 80%;          /* Máximo 80% da tela */
-    background: #313244;    /* Surface0: fundo do modal */
-    border: solid #CBA6F7;  /* Mauve: borda accent do overlay */
+    background: #313244;      /* Surface0: fundo do modal */
+    border: solid #CBA6F7;    /* Mauve: borda accent do overlay */
     padding: 1 2;             /* Padding interno */
     layer: overlay;           /* Renderiza acima do conteúdo */
     dock: top;                /* Ancora no topo */
@@ -37,9 +37,14 @@ DashboardScreen {
 #agenda-column {
     width: 50%;                        /* Metade da largura */
     height: 100%;                      /* Altura total */
-    border: round #45475A;           /* Borda arredondada Surface1 */
-    border-title-color: #CDD6F4;     /* Título "Agenda do Dia" em Text */
-    background: #1E1E2E;             /* Fundo Base */
+    border: round #45475A;             /* Borda arredondada Surface1 */
+    border-title-color: #CDD6F4;       /* Título "Agenda do Dia" em Text */
+    background: #1E1E2E;               /* Fundo Base */
+    scrollbar-size-vertical: 1;
+    scrollbar-color: #1E1E2E;
+    scrollbar-background: #1E1E2E;
+    scrollbar-color-hover: #313244;
+    scrollbar-color-active: #45475A;
 }
 
 #agenda-header {
@@ -49,17 +54,55 @@ DashboardScreen {
 }
 
 #agenda-content {
+
+
     width: 100%;                       /* Largura total da coluna */
-    height: 1fr;                       /* Preenche espaço restante */
-    overflow-y: auto;                  /* Scroll vertical quando necessário */
+
+
+    height: auto;                      /* Expande ao conteudo */
+
+
     padding: 0 1 1 1;                  /* Padding: 0 top, 1 lados, 1 bottom */
+
+
 }
+
 
 #agenda-actions {
     width: 100%;                       /* Largura total */
     height: 1;                         /* 1 linha para ações */
     dock: bottom;                      /* Fixo no rodapé da agenda */
     padding: 0 1;                      /* Padding horizontal */
+}
+
+/* --- AgendaPanel: horas fixas + blocos scrolláveis (ADR-041, BR-TUI-031) --- */
+
+AgendaPanel {
+    layout: horizontal;
+    height: auto;
+    width: 100%;
+}
+
+#agenda-hours {
+    width: auto;
+    height: auto;
+}
+
+#agenda-blocks-scroll {
+    width: 1fr;
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-size-horizontal: 1;
+    scrollbar-color: #1E1E2E;
+    scrollbar-background: #1E1E2E;
+    scrollbar-color-hover: #313244;
+    scrollbar-color-active: #45475A;
+}
+
+#agenda-blocks {
+    width: auto;
+    height: auto;
 }
 
 /* --- Coluna Direita: Cards empilhados --- */
@@ -70,10 +113,10 @@ DashboardScreen {
     padding: 0 1;                        /* Padding horizontal */
     overflow-y: auto;                    /* Scroll vertical para cards */
     scrollbar-size-vertical: 1;          /* Scrollbar fina (1 caractere) */
-    scrollbar-color: #45475A;          /* Surface1: thumb */
-    scrollbar-background: #1E1E2E;     /* Base: fundo */
-    scrollbar-color-hover: #585B70;    /* Surface2: hover */
-    scrollbar-color-active: #7F849C;   /* Overlay1: ativo */
+    scrollbar-color: #45475A;            /* Surface1: thumb */
+    scrollbar-background: #1E1E2E;       /* Base: fundo */
+    scrollbar-color-hover: #585B70;      /* Surface2: hover */
+    scrollbar-color-active: #7F849C;     /* Overlay1: ativo */
 }
 
 /* --- Cards individuais: Hábitos, Tarefas, Timer, Métricas ---     */
@@ -82,45 +125,45 @@ DashboardScreen {
 
 #panel-habits {
     border-title-color: #CDD6F4;
-    border-subtitle-color: #CDD6F4;     /* Título em Text */
+    border-subtitle-color: #CDD6F4;    /* Título em Text */
     width: 100%;                       /* Largura total da coluna */
     height: auto;                      /* Altura adapta ao conteúdo */
-    border: round #45475A;           /* Borda arredondada Surface1 */
+    border: round #45475A;             /* Borda arredondada Surface1 */
     padding: 1 1;                      /* Padding uniforme */
     margin-bottom: 0;                  /* Sem espaço entre cards */
-    background: #1E1E2E;             /* Fundo Base */
+    background: #1E1E2E;               /* Fundo Base */
 }
 
 #panel-tasks {
     border-title-color: #CDD6F4;
-    border-subtitle-color: #CDD6F4;     /* Título em Text */
+    border-subtitle-color: #CDD6F4;    /* Título em Text */
     width: 100%;                       /* Largura total da coluna */
     height: auto;                      /* Altura adapta ao conteúdo */
-    border: round #45475A;           /* Borda arredondada Surface1 */
+    border: round #45475A;             /* Borda arredondada Surface1 */
     padding: 1 1;                      /* Padding uniforme */
     margin-bottom: 0;                  /* Sem espaço entre cards */
-    background: #1E1E2E;             /* Fundo Base */
+    background: #1E1E2E;               /* Fundo Base */
 }
 
 #panel-timer {
     border-title-color: #CDD6F4;
-    border-subtitle-color: #CDD6F4;     /* Título em Text */
+    border-subtitle-color: #CDD6F4;    /* Título em Text */
     width: 100%;                       /* Largura total da coluna */
     height: auto;                      /* Altura adapta ao conteúdo */
-    border: round #45475A;           /* Borda arredondada Surface1 */
+    border: round #45475A;             /* Borda arredondada Surface1 */
     padding: 1 1;                      /* Padding uniforme */
     margin-bottom: 0;                  /* Sem espaço entre cards */
-    background: #1E1E2E;             /* Fundo Base */
+    background: #1E1E2E;               /* Fundo Base */
 }
 
 #panel-metrics {
     border-title-color: #CDD6F4;
-    border-subtitle-color: #CDD6F4;     /* Título em Text */
+    border-subtitle-color: #CDD6F4;    /* Título em Text */
     width: 100%;                       /* Largura total da coluna */
     height: auto;                      /* Altura adapta ao conteúdo */
-    border: round #45475A;           /* Borda arredondada Surface1 */
+    border: round #45475A;             /* Borda arredondada Surface1 */
     padding: 1 1;                      /* Padding uniforme */
-    background: #1E1E2E;             /* Fundo Base (último card) */
+    background: #1E1E2E;               /* Fundo Base (último card) */
 }
 
 
@@ -129,14 +172,14 @@ DashboardScreen {
 #panel-tasks:focus,
 #panel-timer:focus,
 #panel-metrics:focus {
-    border: round #CDD6F4;           /* Text color indica foco */
-    border-title-color: #CDD6F4;     /* Título em Text */
-    border-subtitle-color: #CDD6F4;  /* Subtítulo em Text */
+    border: round #CDD6F4;             /* Text color indica foco */
+    border-title-color: #CDD6F4;       /* Título em Text */
+    border-subtitle-color: #CDD6F4;    /* Subtítulo em Text */
 }
 
 /* Agenda usa focus-within porque o foco fica no content, não na column */
 #agenda-column:focus-within {
-    border: round #CDD6F4;           /* Text color indica foco */
-    border-title-color: #CDD6F4;     /* Título em Text */
-    border-subtitle-color: #CDD6F4;  /* Subtítulo em Text */
+    border: round #CDD6F4;            /* Text color indica foco */
+    border-title-color: #CDD6F4;      /* Título em Text */
+    border-subtitle-color: #CDD6F4;   /* Subtítulo em Text */
 }

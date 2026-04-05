@@ -10,6 +10,9 @@ from timeblock.database import get_engine_context
 from timeblock.models.enums import SkipReason
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.utils.conflict_display import display_conflicts
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 console = Console()
 
@@ -40,6 +43,7 @@ def adjust_instance(
             display_conflicts(conflicts, console)
 
     except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
         console.print(f"[red]Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -72,6 +76,7 @@ def skip_instance(
         try:
             skip_reason = SkipReason[category.upper()]
         except KeyError:
+            logger.warning("Opção inválida selecionada")
             console.print(f"[red]Categoria inválida: {category}[/red]")
             console.print("\nCategorias válidas:")
             console.print("  HEALTH, WORK, FAMILY, TRAVEL, WEATHER,")

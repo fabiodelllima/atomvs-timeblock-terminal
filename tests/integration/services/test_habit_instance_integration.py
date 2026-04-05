@@ -1,5 +1,4 @@
-"""
-Integration tests - HabitInstanceService + EventReorderingService.
+"""Integration tests - HabitInstanceService + EventReorderingService.
 
 Testa integração entre HabitInstanceService e EventReorderingService,
 validando ajustes de horário, detecção de conflitos e propostas de reorganização.
@@ -7,16 +6,19 @@ validando ajustes de horário, detecção de conflitos e propostas de reorganiza
 Referências:
     - ADR-019: Test Naming Convention
     - BR-REORDER-001 a BR-REORDER-005
+    - BR-HABITINSTANCE-007: Undo com preservação de TimeLog
     - Sprint 2.4: HabitInstance + EventReordering integration
 """
+
+from __future__ import annotations
 
 from datetime import date, datetime, time
 
 import pytest
 from sqlmodel import Session
 
-from timeblock.models import Habit, HabitInstance, Recurrence, Routine, Task
-from timeblock.models.enums import Status
+from timeblock.models import Habit, HabitInstance, Recurrence, Routine, Task, TimeLog
+from timeblock.models.enums import DoneSubstatus, Status, TimerStatus
 from timeblock.services.habit_instance_service import HabitInstanceService
 
 
@@ -33,7 +35,7 @@ class TestBRHabitInstanceReordering:
         """Cria rotina para testes."""
         routine = Routine(name="Test Routine", is_active=True)
         test_db.add(routine)
-        test_db.commit()
+        test_db.flush()
         test_db.refresh(routine)
         return routine
 
@@ -49,7 +51,7 @@ class TestBRHabitInstanceReordering:
             recurrence=Recurrence.EVERYDAY,
         )
         test_db.add(habit)
-        test_db.commit()
+        test_db.flush()
         test_db.refresh(habit)
         return habit
 
@@ -65,7 +67,7 @@ class TestBRHabitInstanceReordering:
             status=Status.PENDING,
         )
         test_db.add(instance)
-        test_db.commit()
+        test_db.flush()
         test_db.refresh(instance)
         return instance
 
@@ -136,9 +138,10 @@ class TestBRHabitInstanceReordering:
         task = Task(
             title="Conflicting Task",
             scheduled_datetime=datetime.combine(date.today(), time(10, 30)),
+            original_scheduled_datetime=datetime.combine(date.today(), time(10, 30)),
         )
         test_db.add(task)
-        test_db.commit()
+        test_db.flush()
 
         assert instance.id is not None
 
@@ -184,9 +187,107 @@ class TestBRHabitInstanceReordering:
         # ACT
         result = HabitInstanceService.mark_completed(
             instance_id=instance.id,
+            done_substatus=DoneSubstatus.FULL,
             session=test_db,
         )
 
         # ASSERT
         assert result is not None
         assert result.status == Status.DONE
+        assert result.done_substatus == DoneSubstatus.FULL
+
+
+class TestBRHabitinstance007UndoPreservesTimelog:
+    """Integration: reset_to_pending() não altera TimeLog (BR-HABITINSTANCE-007).
+
+    TimeLog é registro factual imutável de tempo dedicado.
+    Undo da instância reverte status mas preserva sessões gravadas.
+    """
+
+    @pytest.fixture
+    def routine(self, test_db: Session) -> Routine:
+        """Cria rotina para testes."""
+        routine = Routine(name="Test Routine", is_active=True)
+        test_db.add(routine)
+        test_db.flush()
+        test_db.refresh(routine)
+        return routine
+
+    @pytest.fixture
+    def habit(self, test_db: Session, routine: Routine) -> Habit:
+        """Cria hábito para testes."""
+        assert routine.id is not None
+        habit = Habit(
+            title="Test Habit",
+            routine_id=routine.id,
+            scheduled_start=time(8, 0),
+            scheduled_end=time(9, 0),
+            recurrence=Recurrence.EVERYDAY,
+        )
+        test_db.add(habit)
+        test_db.flush()
+        test_db.refresh(habit)
+        return habit
+
+    @pytest.fixture
+    def done_instance_with_timelog(
+        self, test_db: Session, habit: Habit
+    ) -> tuple[HabitInstance, TimeLog]:
+        """Cria instância DONE com TimeLog DONE associado."""
+
+        assert habit.id is not None
+        instance = HabitInstance(
+            habit_id=habit.id,
+            date=date.today(),
+            scheduled_start=time(8, 0),
+            scheduled_end=time(9, 0),
+            status=Status.DONE,
+            done_substatus=DoneSubstatus.FULL,
+            completion_percentage=92,
+        )
+        test_db.add(instance)
+        test_db.flush()
+        test_db.refresh(instance)
+
+        timelog = TimeLog(
+            habit_instance_id=instance.id,
+            status=TimerStatus.DONE,
+            start_time=datetime.combine(date.today(), time(8, 0)),
+            end_time=datetime.combine(date.today(), time(8, 55)),
+            duration_seconds=3300,
+        )
+        test_db.add(timelog)
+        test_db.flush()
+        test_db.refresh(timelog)
+        return instance, timelog
+
+    def test_br_habitinstance_007_undo_preserves_timelog(
+        self,
+        test_db: Session,
+        done_instance_with_timelog: tuple[HabitInstance, TimeLog],
+    ) -> None:
+        """DADO instância DONE com TimeLog DONE associado,
+        QUANDO reset_to_pending() é chamado na instância,
+        ENTÃO instância volta a PENDING,
+        E TimeLog permanece inalterado (status=DONE, duration preservada).
+        """
+
+        instance, timelog = done_instance_with_timelog
+        timelog_id = timelog.id
+
+        # ACT
+        instance.reset_to_pending()
+        test_db.add(instance)
+        test_db.flush()
+
+        # ASSERT - instância resetada
+        assert instance.status == Status.PENDING
+        assert instance.done_substatus is None
+        assert instance.completion_percentage is None
+
+        # ASSERT - TimeLog intacto
+        preserved_timelog = test_db.get(TimeLog, timelog_id)
+        assert preserved_timelog is not None
+        assert preserved_timelog.status == TimerStatus.DONE
+        assert preserved_timelog.duration_seconds == 3300
+        assert preserved_timelog.end_time is not None

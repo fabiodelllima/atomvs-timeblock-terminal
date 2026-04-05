@@ -124,8 +124,8 @@ class TestBRRoutine001:
 class TestBRRoutine002:
     """Valida BR-ROUTINE-002: Soft delete preserva histórico."""
 
-    def test_br_routine_002_delete_removes_routine(self, session: Session) -> None:
-        """BR-ROUTINE-002: Delete remove rotina do banco (MVP: hard delete)."""
+    def test_br_routine_002_delete_deactivates_routine(self, session: Session) -> None:
+        """BR-ROUTINE-006: Soft delete desativa rotina, mantém no banco."""
         service = RoutineService(session)
 
         routine = service.create_routine("Temporária")
@@ -135,8 +135,9 @@ class TestBRRoutine002:
         service.delete_routine(routine_id)
         session.commit()
 
-        deleted = service.get_routine(routine_id)
-        assert deleted is None
+        persisted = service.get_routine(routine_id)
+        assert persisted is not None
+        assert persisted.is_active is False
 
     def test_br_routine_002_delete_nonexistent_raises_error(self, session: Session) -> None:
         """BR-ROUTINE-002: Deletar rotina inexistente lança ValueError."""
@@ -145,8 +146,8 @@ class TestBRRoutine002:
         with pytest.raises(ValueError, match="não encontrada"):
             service.delete_routine(9999)
 
-    def test_br_routine_002_delete_active_routine_succeeds(self, session: Session) -> None:
-        """BR-ROUTINE-002: Deletar rotina ativa é permitido."""
+    def test_br_routine_002_delete_active_routine_deactivates(self, session: Session) -> None:
+        """BR-ROUTINE-006: Soft delete de rotina ativa desativa."""
         service = RoutineService(session)
 
         routine = service.create_routine("Ativa")
@@ -154,11 +155,13 @@ class TestBRRoutine002:
         routine_id = routine.id
         session.commit()
 
-        service.delete_routine(routine_id)
+        result = service.delete_routine(routine_id)
         session.commit()
 
-        deleted = service.get_routine(routine_id)
-        assert deleted is None
+        assert result.is_active is False
+        persisted = service.get_routine(routine_id)
+        assert persisted is not None
+        assert persisted.is_active is False
 
 
 # ============================================================

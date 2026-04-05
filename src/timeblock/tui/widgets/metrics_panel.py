@@ -1,38 +1,58 @@
 """MetricsPanel - Card de métricas com streak, completude e heatmap (BR-TUI-003).
 
 BR-TUI-003 regra 6: Streak, barras 7d/30d, dot matrix semanal.
+BR-TUI-033-R7: Keybinding f alterna período (7d/14d/30d).
+BR-TUI-033-R14: Texto mock removido do corpo do panel.
 Cores das barras: Green >= 80%, Yellow 50-79%, Red < 50%.
 """
 
-from datetime import datetime
+from typing import Any
 
+from textual.events import Key
 from textual.widgets import Static
 
 from timeblock.tui.colors import C_ERROR, C_MUTED, C_SUCCESS, C_SURFACE, C_WARNING
+
+PERIOD_CYCLE = [7, 14, 30]
 
 
 class MetricsPanel(Static):
     can_focus = True
     """Card de métricas com streak, completude e heatmap semanal."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
+        self._period_days: int = 7
+        self._last_data: dict = {}
+
+    def _cycle_period(self) -> None:
+        """Alterna período entre 7d/14d/30d (BR-TUI-033-R7)."""
+        idx = PERIOD_CYCLE.index(self._period_days)
+        self._period_days = PERIOD_CYCLE[(idx + 1) % len(PERIOD_CYCLE)]
+
+    def on_key(self, event: Key) -> None:
+        """Handler de teclado — f alterna período."""
+        if event.key == "f":
+            self._cycle_period()
+            if self._last_data:
+                self._refresh_content(self._last_data)
+            event.stop()
 
     def update_data(self, data: dict) -> None:
         """Recebe dados de métricas do coordinator e renderiza."""
+        self._last_data = data
         self._refresh_content(data)
 
     def _refresh_content(self, data: dict) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
-        now = datetime.now()
-        pct_7d = data.get("pct_7d", 0)
-        pct_30d = data.get("pct_30d", 0)
+        pct_key = f"pct_{self._period_days}d"
+        pct = data.get(pct_key, 0)
         streak = data.get("streak", 0)
         best_streak = data.get("best_streak", 0)
         week_data = data.get("week_data", [])
 
         self.border_title = "Métricas"
-        self.border_subtitle = now.strftime("%H:%M")
+        self.border_subtitle = ""
 
         lines = [
             (
@@ -40,8 +60,7 @@ class MetricsPanel(Static):
                 f"[{C_MUTED}]{streak} dias[/{C_MUTED}]  "
                 f"[dim](best: {best_streak})[/dim]"
             ),
-            f"  Completude 7d [dim]··[/dim]  {self._bar(pct_7d)}",
-            f"  Completude 30d [dim]·[/dim]  {self._bar(pct_30d)}",
+            f"  Completude {self._period_days}d {self._dots()}  {self._bar(pct)}",
             "",
         ]
 
@@ -60,8 +79,13 @@ class MetricsPanel(Static):
             lines.append(f"  [{C_MUTED}]Sem dados de atividade[/{C_MUTED}]")
 
         lines.append("")
-        lines.append(r"  [dim]\[f] 7d/14d/30d[/dim]")
         self.update("\n".join(lines))
+
+    def _dots(self) -> str:
+        """Alinhamento de pontos conforme comprimento do label."""
+        if self._period_days < 10:
+            return "[dim]···[/dim]"
+        return "[dim]··[/dim]"
 
     @staticmethod
     def _bar(pct: int) -> str:
