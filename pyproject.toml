@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "atomvs-timeplanner-tui"
-version = "1.7.0-dev"
+version = "1.7.0"
 description = "Terminal-based time management with CLI and TUI interfaces"
 requires-python = ">=3.13"
 

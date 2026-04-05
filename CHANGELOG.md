@@ -1,92 +1,132 @@
 # Changelog
 
-All notable changes to TimeBlock Planner will be documented in this file.
+All notable changes to ATOMVS Time Planner will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-04-05
+
 ### Added
 
-- TUI: Complete Phase 1 implementation with Textual framework (ADR-031)
-  - Dashboard screen with 6 interactive panels (agenda, habits, tasks, metrics, timer, header)
-  - Screen navigation: Dashboard, Routines, Habits, Tasks, Timer
-  - Widget system: NavBar, CommandBar, HelpOverlay, StatusBar, TimeblockGrid
-  - Color system with semantic tokens and WCAG-compliant palette
-  - Session management for TUI state persistence
-  - Formatters module for consistent data presentation
-  - CSS-like styling via Textual stylesheets
-  - Card/Panel base widget for uniform panel layout
-  - CRUD screen pattern for reusable list/detail views
-- TUI: Sprint 3.2 — Dashboard interativo com dados reais
-  - Real data via session-per-action (RoutineService, HabitInstanceService, TaskService, TimerService)
-  - Panel navigation with Tab/Shift+Tab and FocusablePanel with internal cursor (j/k)
-  - Contextual footer with dynamic keybindings per focused panel (on_descendant_focus)
-  - Quick actions: Ctrl+Enter (done), Ctrl+S (skip), Ctrl+K (complete task)
-  - TCSS modularization: theme.tcss decomposed into 7 modules (base, layout, cards, dashboard, statusbar, timer, forms)
-  - BackupService with rotation (MAX_BACKUPS=10) on TUI shutdown (BR-DATA-001)
-- TUI: Empty state handling with placeholder guidance in all panels
-  - Header: "[Sem rotina]" with zeroed metrics
-  - Habits panel: "--- . --:-- . --min" orientation
-  - Tasks panel: "--- . --/-- . --:--" orientation
-  - Metrics panel: streak 0, completude 0%
-  - Timer panel: idle 00:00 default state
-- CLI: `atomvs demo create` command with 3 mock routines and 8 tasks (BR-TUI-003-R28)
-  - "Semanal Mock" (WEEKDAYS, 8 habits)
-  - "Fim de Semana Mock" (WEEKENDS, 6 habits)
-  - "Ferias Mock" (EVERYDAY, 5 habits)
-  - 8 tasks with relative dates (overdue, today, future)
-- CLI: `atomvs demo clear` command to remove demo data (respects FK constraints)
-- BDD: TUI scenarios in Gherkin format
-  - tui_status_bar.feature (8 scenarios)
-  - tui_timer_screen.feature (10 scenarios)
-  - tui_crud_pattern.feature (8 scenarios)
-  - tui_screen_navigation.feature (8 scenarios)
-  - tui_visual_consistency.feature (9 scenarios)
-  - tui_habit_actions.feature (9 scenarios)
-  - tui_service_layer.feature (6 scenarios)
-  - tui_routines_screen.feature (11 scenarios)
-- ADR-031: TUI Implementation with horizontal navigation and proportional timeblocks
-- ADR-032: Branding and Repository Naming (atomvs-timeblock-terminal)
-- ADR-033: Fixture scope="session" with transactional rollback (HUMBLE; FARLEY, 2010, p. 375)
-- ADR-034: Dashboard-first CRUD with contextual modals (FOWLER, 2002, p. 133)
-- docs: BR-TUI-016 to BR-TUI-020 (Dashboard CRUD), BR-TEST-001 (fixture optimization)
-- docs: Refactoring plan R1-R8 based on Fowler (2002) and Humble & Farley (2010)
+- TUI: Complete interactive dashboard with 5 functional panels (Habits, Tasks, Timer, Metrics, Agenda)
+  - Textual framework with Tab/Shift+Tab navigation and internal cursor (j/k)
+  - FocusablePanel as base for interactive panels with keyboard navigation
+  - Color system with semantic tokens and WCAG-compliant palette (Catppuccin Mocha)
+  - TCSS modularized into 7 files (base, layout, cards, dashboard, statusbar, timer, forms)
+- TUI: Dashboard-first CRUD with contextual modals (ADR-034)
+  - Create, edit and delete routines, habits and tasks via keybindings (n/e/x)
+  - Reusable FormModal and ConfirmDialog widgets
+  - PlaceholderActivated message for creation from empty state (BR-TUI-013)
+- TUI: Quick actions on HabitsPanel — done (v), skip (s), timer (t), undo (u)
+- TUI: Live timer with per-second updates, pause/resume/stop/cancel
+- TUI: MetricsPanel with streak, completeness and weekly heatmap (BR-TUI-033, ADR-047)
+  - Persistent best_streak via migration_003 (best_streak column on routines)
+  - Retroactive PENDING instance generation for days without records (R8)
+  - Keybinding f cycles display period between 7d/14d/30d (R7/R13)
+  - Completeness calculated for 7d, 14d and 30d windows
+  - Heatmap shows done/total per day with check marks
+- TUI: Contextual footer with dynamic keybindings per focused panel (BR-TUI-007)
+- TUI: Agenda with auto-refresh every 60s and auto-scroll to current time (BR-TUI-003-R15)
+- TUI: StatusBar with active routine, contextual keybindings and timer elapsed
+- TUI: Empty state with placeholder guidance in all panels
+- TUI: Screen navigation — Dashboard, Routines, Habits, Tasks, Timer
+- TUI: Widget system — NavBar, CommandBar, HelpOverlay, StatusBar, TimeblockGrid
+- CLI: `atomvs demo create` with 3 mock routines and 8 tasks (BR-TUI-003-R28)
+- CLI: `atomvs demo clear` to remove demo data (respects FK constraints)
+- BDD: 8 TUI feature files in Gherkin format (61 scenarios)
+- migration_003: best_streak column on routines table
+- ADR-031 through ADR-047: 17 new architectural decisions documented
+- docs: BR-TUI-001 through BR-TUI-033 (33 TUI business rules)
+- docs: Refactoring plan RF-001 through RF-010 based on Fowler (2018) and Humble & Farley (2010)
 
 ### Changed
 
 - CLI: Entry point changed from `timeblock.main:app` to `timeblock.main:main` (TUI opens with `atomvs` without args)
-- CI/CD: Consolidated test jobs into single test:all (4 jobs to 1)
-- CI/CD: Optimized pipeline from 10 to 6 jobs
-- CI/CD: Aligned GitHub Actions with GitLab consolidation
-- CI/CD: Expanded sync:github to all branches (contribution graph)
-- CI/CD: Removed parallel=true from coverage (incompatible with test:all)
-- CI/CD: sync:github restricted to develop/main/tags
+- CI/CD: Pipeline optimized from 10 to 8 jobs
+- CI/CD: GitHub Actions aligned with GitLab CI consolidation
 - CI/CD: Test timeout increased to 45min for test:all, 60min for integration
-- CI/CD: pytest-xdist added for parallel integration tests (-n auto --dist=loadfile)
-- CI/CD: CodeQL manual workflow removed (default setup active)
-- refactor: Mock fallbacks removed from all dashboard panels, replaced with zero-state placeholders
-- refactor: TCSS decomposed from single theme.tcss (479 lines) into 7 modular files
-- Presentation layer: `commands/` updated to include `demo` subcommand group
+- Navigation keybinding changed from j/i to j/k (vim industry standard)
+- Contextual footer displays placeholder hints when empty panel is focused (DT-066)
+- Snapshot testing guide rewritten with real data (17 tests / 19 baselines)
+- BR-TUI-033-R5: Streak semantics corrected — no grace period, streak breaks on first non-100% day
 
 ### Fixed
 
-- CI/CD: GitHub remote added dynamically in CI container
-- CI/CD: Fixed GITHUB_TOKEN variable escaping in sync job
-- CI/CD: Full refspec (refs/heads/) for GitHub sync push
-- CLI: Entry point `app` vs `main` causing "Missing command" error when invoking `atomvs` without args
+- DT-059: Migration messages on stdout replaced with logger
+- DT-064: CVEs resolved (aiohttp 3.13.5, Pygments 2.20.0)
+- DT-066: Placeholder hints moved from panel body to contextual footer
+- DT-068: Habits not sorted by scheduled_start
 
 ### Metrics
 
-- Total tests: 1079 (+301 since v1.6.0)
-- Distribution: Unit ~869 (81%), Integration ~116 (11%), BDD ~56 (5%), E2E ~30 (3%)
-- Global coverage: ~81% (threshold 80%)
-- TUI coverage: ~60%
-- BRs formalized: 104 (+23 since v1.6.0, including 20 TUI-specific + BR-TEST-001)
-- ADRs: 35 documented (+3: ADR-033, ADR-034)
-- Source files: 60+ Python modules (23 TUI-specific)
-- Pipeline: 8 jobs (~3min local, ~10min CI)
+- Total tests: ~1,340 (1,336 passed, +558 since v1.6.0)
+- Distribution: Unit ~1,050 (78%), Integration ~130 (10%), BDD ~61 (5%), E2E ~95 (7%)
+- Global coverage: ~82% (threshold 80%)
+- BRs formalized: 115+ (+34 TUI since v1.6.0)
+- ADRs: 47 documented (+15 since v1.6.0)
+- DTs: 51 resolved / 66 total (77%)
+- Pipeline: 8 jobs (~10min CI)
+
+## [1.7.0] - 2026-04-05
+
+### Added
+
+- TUI: Dashboard interativo com 5 painéis funcionais (Habits, Tasks, Timer, Metrics, Agenda)
+  - Textual framework com navegação Tab/Shift+Tab e cursor interno (j/k)
+  - FocusablePanel como base para painéis interativos
+  - Color system com semantic tokens e paleta WCAG-compliant
+  - TCSS modularizado em 7 arquivos (base, layout, cards, dashboard, statusbar, timer, forms)
+- TUI: Dashboard-first CRUD com modais contextuais (ADR-034)
+  - Criação, edição e deleção de rotinas, hábitos e tasks via keybindings (n/e/x)
+  - FormModal e ConfirmDialog reutilizáveis
+  - PlaceholderActivated para criação a partir de empty state (BR-TUI-013)
+- TUI: Quick actions no HabitsPanel — done (v), skip (s), timer (t), undo (u)
+- TUI: Timer live com atualização a cada segundo, pause/resume/stop/cancel
+- TUI: MetricsPanel com streak, completude e heatmap semanal (BR-TUI-033, ADR-047)
+  - Streak persistido no banco via migration_003 (best_streak em routines)
+  - Geração retroativa de instâncias PENDING para dias sem registro (R8)
+  - Keybinding f alterna período entre 7d/14d/30d (R7/R13)
+  - Completude calculada para 7d, 14d e 30d
+  - Heatmap mostra done/total por dia com check marks
+- TUI: Footer contextual com keybindings dinâmicos por painel focado (BR-TUI-007)
+- TUI: Agenda com auto-refresh a cada 60s e auto-scroll na hora atual (BR-TUI-003-R15)
+- TUI: StatusBar com rotina ativa, keybindings e timer elapsed
+- TUI: Empty state com placeholders orientativos em todos os painéis
+- CLI: `atomvs demo create` com 3 rotinas mock e 8 tasks (BR-TUI-003-R28)
+- CLI: `atomvs demo clear` para remover dados de demonstração
+- BDD: 8 features TUI em formato Gherkin (61 scenarios)
+- migration_003: campo best_streak na tabela routines
+- ADR-031 a ADR-047: 17 novas decisões arquiteturais documentadas
+- docs: BR-TUI-001 a BR-TUI-033 (33 regras de negócio TUI)
+
+### Changed
+
+- CLI: Entry point alterado para abrir TUI com `atomvs` sem argumentos
+- CI/CD: Pipeline otimizado de 10 para 8 jobs
+- CI/CD: GitHub Actions sincronizado com GitLab CI
+- Footer contextual exibe hints de placeholder quando painel vazio está focado (DT-066)
+- Documentação: snapshot-testing.md reescrito com dados reais
+- BR-TUI-033-R5: Semântica do streak corrigida — sem grace period
+
+### Fixed
+
+- DT-059: Mensagens de migração no stdout substituídas por logger
+- DT-064: CVEs resolvidos (aiohttp 3.13.5, Pygments 2.20.0)
+- DT-066: Hints de placeholder movidos do corpo dos painéis para footer contextual
+- DT-068: Hábitos não ordenados por scheduled_start
+
+### Metrics
+
+- Testes: ~1.340 (1336 passed, +558 desde v1.6.0)
+- Distribuição: Unit ~1050 (78%), Integration ~130 (10%), BDD ~61 (5%), E2E ~95 (7%)
+- Cobertura global: ~82% (threshold 80%)
+- BRs formalizadas: 115+ (+34 TUI desde v1.6.0)
+- ADRs: 47 documentados (+15 desde v1.6.0)
+- DTs: 51 resolvidos / 66 total (77%)
+- Pipeline: 8 jobs (~10min CI)
 
 ## [1.6.0] - 2026-02-12
 
