@@ -24,7 +24,7 @@ class CRUDScreen(Widget):
         Binding("x", "open_delete", "Deletar", show=True),
         Binding("enter", "view_details", "Detalhes", show=True),
         Binding("j", "move_down", "Baixo", show=False),
-        Binding("i", "move_up", "Cima", show=False),
+        Binding("k", "move_up", "Cima", show=False),
     ]
 
     mode: reactive[str] = reactive("list")

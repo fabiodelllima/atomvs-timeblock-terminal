@@ -505,7 +505,7 @@ Branch: `fix/error-paths-audit` (MR !51) + `test/e2e-assertions` (MR !52) + `tes
 - [x] Testes: Esc cancela ConfirmDialog (test_habits_skip_esc_cancels)
 - [x] Teste: BR-TIMER-001 bloqueia segundo timer (test_timer_second_blocked)
 - [x] Fortalece asserções: substatus, skip_reason, completion_pct (MR !52)
-- [x] Testes: setas (up/down) equivalentes a j/i (MR !52)
+- [x] Testes: setas (up/down) equivalentes a j/k (MR !52)
 - [x] Teste: skip→undo limpa todos os campos (MR !52)
 - [x] 14 snapshot tests CRUD: modais routines/habits/tasks + estados done/skip/timer (MR !53)
 - [x] Snapshot tests de métricas: 7 dias mixed + streak perfeito (MR !53)

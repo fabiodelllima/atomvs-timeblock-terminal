@@ -10,8 +10,8 @@ from textual.widgets import Static
 
 PANEL_KEYBINDINGS: dict[str, str] = {
     "agenda-content": "↑↓ navegar",
-    "panel-habits": "j/i navegar  v done  s skip  t timer",
-    "panel-tasks": "j/i navegar  v concluir  s adiar  c cancelar",
+    "panel-habits": "j/k navegar  v done  s skip  t timer",
+    "panel-tasks": "j/k navegar  v concluir  s adiar  c cancelar",
     "panel-timer": "space pausar  s parar  c cancelar",
     "panel-metrics": "f período",
 }

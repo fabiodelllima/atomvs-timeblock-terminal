@@ -401,7 +401,7 @@ class TestHabitsPanelComplete:
 
     @pytest.mark.asyncio
     async def test_habits_navigation_ji(self):
-        """j/i move cursor entre hábitos (BR-TUI-012, ADR-037)."""
+        """j/k move cursor entre hábitos (BR-TUI-012, ADR-037)."""
         async with TimeBlockApp().run_test() as pilot:
             await _wait(pilot)
             await _create_routine(pilot)
@@ -427,13 +427,13 @@ class TestHabitsPanelComplete:
             assert panel._cursor_index == 2, "j deve mover cursor para 2"
 
             # k move para cima
-            await pilot.press("i")
+            await pilot.press("k")
             await _wait(pilot)
             assert panel._cursor_index == 1, "i deve mover cursor para 1"
 
             # Bounds checking: i no topo não vai abaixo de 0
-            await pilot.press("i")
-            await pilot.press("i")
+            await pilot.press("k")
+            await pilot.press("k")
             await _wait(pilot)
             assert panel._cursor_index == 0, "Cursor não deve ir abaixo de 0"
 
@@ -652,7 +652,7 @@ class TestTasksPanelComplete:
 
     @pytest.mark.asyncio
     async def test_tasks_navigation_ji(self):
-        """j/i move cursor entre tasks (BR-TUI-012, ADR-037)."""
+        """j/k move cursor entre tasks (BR-TUI-012, ADR-037)."""
         async with TimeBlockApp().run_test() as pilot:
             await _wait(pilot)
 
@@ -671,7 +671,7 @@ class TestTasksPanelComplete:
             await _wait(pilot)
             assert panel._cursor_index == 1, "j deve mover cursor para baixo"
 
-            await pilot.press("i")
+            await pilot.press("k")
             await _wait(pilot)
             assert panel._cursor_index == 0, "i deve mover cursor para cima"
 

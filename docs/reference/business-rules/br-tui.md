@@ -207,7 +207,7 @@ PROIBIDOS (reservados pelo OS - ADR-035):
 **Regras:**
 
 1. 1..5 sem modificador troca screen (ADR-037)
-2. Tab cicla entre panels; j/i ou setas movem cursor dentro do panel
+2. Tab cicla entre panels; j/k ou setas movem cursor dentro do panel
 3. n/e/x sem modificador para CRUD - x sempre abre ConfirmDialog
 4. v e o binding de "concluir/done" - abre modal no habits, executa direto no tasks
 5. s e contextual: skip (habits), postpone/edit (tasks), stop (timer)

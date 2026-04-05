@@ -17,7 +17,7 @@ class HelpOverlay(Static):
             "\n"
             "[bold]Navegacao[/]\n"
             "\n"
-            "  j/i        Cursor baixo/cima\n"
+            "  j/k        Cursor baixo/cima\n"
             "  t/b        Topo / Base da lista\n"
             "\n"
             "[bold]CRUD (contextual)[/]\n"

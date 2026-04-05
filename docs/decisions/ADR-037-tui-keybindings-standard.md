@@ -107,7 +107,7 @@ completar item).
 
 | Tecla                    | Ação               |
 | ------------------------ | ------------------ |
-| j/i ou setas baixo/cimad | Scroll por slots   |
+| j/k ou setas baixo/cimad | Scroll por slots   |
 | a                        | Ir para hora atual |
 
 ### Princípios
