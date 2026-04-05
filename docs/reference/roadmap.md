@@ -91,15 +91,15 @@ As métricas atuais refletem medições reais executadas em 05/03/2026 (branch `
 
 ### 3.2. Distribuição de Testes
 
-A pirâmide de testes cresceu significativamente com a implementação do dashboard. Os 104 testes do dashboard cobrem: formatação de duração (2 formatos), localização de blocos, mapeamento status/substatus para cores/ícones/bold/fill/background, heat de proximidade para tasks, renderização ASCII art do timer, e validação estrutural de mock data.
+A pirâmide de testes cresceu significativamente ao longo da v1.7.0. A suíte cobre dashboard completo (5 painéis), CRUD contextual, timer live, métricas com streak/heatmap, snapshot testing e BDD com 61 cenários Gherkin.
 
 ```plaintext
-Unit:        ~960 (74.8%)
-Integration: ~150 (11.7%)
-BDD:           83 (6.5%)
-E2E:           91 (7.1%)
+Unit:        ~990 (74%)
+Integration: ~150 (11%)
+BDD:           83 (6%)
+E2E:          ~117 (9%)
 ─────────────────────────
-TOTAL:       1284 testes
+TOTAL:       ~1340 testes
 ```
 
 ### 3.3. Infraestrutura CI/CD
@@ -151,7 +151,7 @@ O dashboard utiliza mock data para renderização quando o banco está vazio. Os
 
 ## 4. Roadmap Futuro
 
-### v1.7.0 - TUI + Produção (Fevereiro-Março 2026)
+### v1.7.0 - TUI Completa (Entregue — Abril 2026)
 
 A introdução da TUI com Textual marca a transição do TimeBlock de ferramenta de linha de comando pura para uma aplicação interativa completa. A TUI e a CLI coexistem: a CLI permanece como interface para automação e scripts, enquanto a TUI oferece navegação visual para uso interativo. O design segue a paleta Catppuccin Mocha com sistema de cores semânticas (ADR-021) fundamentado em ISO 3864 e ANSI Z535, keybindings padronizados e responsividade para diferentes tamanhos de terminal (80, 120, 160+ colunas).
 
@@ -159,7 +159,7 @@ A estratégia de implementação prioriza as telas de maior impacto no uso diár
 
 | Feature            | Estimativa | Status     |
 | ------------------ | ---------- | ---------- |
-| TUI com Textual    | 16h        | [WIP]      |
+| TUI com Textual    | 16h        | [DONE]     |
 | MkDocs publicado   | 4h         | [PENDENTE] |
 | Release automation | 4h         | [PENDENTE] |
 | PyPI publish       | 2h         | [PENDENTE] |
@@ -236,11 +236,12 @@ O inventário completo está em `docs/reference/technical-debt.md`. A situação
 
 Um novo item de débito técnico foi identificado: o `dashboard.py` com 973 linhas viola SRP e deve ser refatorado em módulos separados (`colors.py`, `formatters.py`, `mock_data.py`). Este refactor está planejado como próximo commit após o fechamento visual.
 
-| Status    | Quantidade | Itens                                                  |
-| --------- | ---------- | ------------------------------------------------------ |
-| Resolvido | 55         | DT-001 a DT-062 (exceto aceitos e pendentes)           |
-| Aceito    | 1          | DT-007 (migration_001)                                 |
-| Pendente  | 7          | DT-012, DT-019, DT-025, DT-044, DT-058, DT-060, DT-063 |
+| Status    | Quantidade | Itens                                                           |
+| --------- | ---------- | --------------------------------------------------------------- |
+| Resolvido | 58         | DT-001 a DT-068 (exceto aceitos e pendentes)                    |
+| Aceito    | 1          | DT-007 (migration_001)                                          |
+| Pendente  | 12         | DT-012, DT-019, DT-025, DT-044, DT-058, DT-060, DT-063, DT-065, |
+|           |            | DT-067, DT-069, DT-070, DT-071                                  |
 
 Nota: DT-003 (cobertura) resolvido — ~82% supera o threshold atual de 80%. Meta será elevada para 85% após Sprint 3.2 expandir cobertura TUI.
 
@@ -288,8 +289,10 @@ Working Documents:
 | 2026-03-05 | 7.0.0  | Sprint 3.2 DONE, Sprint 4 dashboard-first CRUD (ADR-034),  |
 |            |        | 104 BRs, 35 ADRs, refatorações R1-R8 fundamentadas em      |
 |            |        | Fowler (2002) e Humble & Farley (2010)                     |
+| 2026-04-05 | 8.0.0  | v1.7.0 entregue. Métricas atualizadas: ~1340 testes,       |
+|            |        | 47 ADRs, 115+ BRs, 58/71 DTs resolvidos. TUI [DONE].       |
 
 ---
 
-- **Próxima revisão:** Release v1.7.0
-- **Última atualização:** 11 de Março de 2026
+- **Próxima revisão:** Release v1.7.1
+- **Última atualização:** 5 de Abril de 2026

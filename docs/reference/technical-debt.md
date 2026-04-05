@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.27.0
+**Versão:** 2.28.0
 
 **Status:** SSOT
 
@@ -68,9 +68,9 @@
 | DT062 | Linhas horizontais cortam blocos de tempo            | ALTA       | RESOLVIDO | Mar/2026     | feat/agenda-blocks          |
 | DT063 | Agenda limitada ao dia atual (sem paginação)         | MEDIA      | PENDENTE  | -            | Sprint futuro               |
 | DT064 | CVE-2026-4539 pygments sem fix disponível            | BAIXA      | RESOLVIDO | Sprint 6     | Pygments 2.20.0             |
-| DT065 | Responsividade em terminal 80x24                     | MEDIA      | PENDENTE  | -            | v1.7.0                      |
-| DT066 | Placeholders truncados nos panels                    | BAIXA      | PENDENTE  | -            | v1.7.0                      |
-| DT067 | README sem links para diagramas (~16 desatualizados) | MEDIA      | PENDENTE  | -            | v1.7.0                      |
+| DT065 | Responsividade em terminal 80x24                     | MEDIA      | PENDENTE  | -            | v1.7.1                      |
+| DT066 | Placeholders truncados nos panels                    | BAIXA      | RESOLVIDO | Abr/2026     | MR !64                      |
+| DT067 | README sem links para diagramas (~16 desatualizados) | MEDIA      | PENDENTE  | -            | v1.7.1                      |
 | DT068 | Habits não ordenados por scheduled_start             | MEDIA      | RESOLVIDO | Mar/2026     | fix/habit-sort-dt068        |
 | DT069 | Tela de configurações não documentada/planejada      | BAIXA      | PENDENTE  | -            | Sprint futuro               |
 | DT070 | 46 ADRs com headers em inglês (Context/Decision)     | BAIXA      | PENDENTE  | -            | Sprint futuro               |
@@ -143,14 +143,14 @@
 - [ ] DT063 — Agenda limitada ao dia atual (sem paginação -3/+3)
 - [x] DT064 — CVE-2026-4539 pygments sem fix disponível (Pygments 2.20.0)
 - [ ] DT065 — Responsividade em terminal 80x24
-- [ ] DT066 — Placeholders truncados nos panels
+- [x] DT066 — Placeholders truncados nos panels (MR !64)
 - [ ] DT067 — README sem links para diagramas + 16 possivelmente desatualizados
 - [ ] DT070 — 46 ADRs com headers em inglês (Context → Contexto, Decision → Decisão)
 - [ ] DT071 — Sem padrão de header/footer em documentação (datas, versão, status)
 - [x] DT068 — Habits não ordenados por scheduled_start no dashboard
 - [ ] DT069 — Tela de configurações não documentada/planejada
 
-**Resolvidos:** 49/64 | **Pendentes:** 13/64 | **Aceitos:** 1/64
+**Resolvidos:** 58/71 | **Pendentes:** 12/71 | **Aceitos:** 1/71
 
 ---
 
@@ -695,7 +695,7 @@ Snapshot de 80x24 mostra apenas sidebar + agenda. Hábitos, Tarefas, Timer e Mé
 - **Descoberto:** 2026-03-25 (Sessão 12 — snapshot 80x24)
 - **Severidade:** MÉDIA
 - **Status:** PENDENTE
-- **Sprint planejado:** v1.7.0
+- **Sprint planejado:** v1.7.1
 
 ### DT-066: Placeholders truncados nos panels
 
@@ -703,8 +703,8 @@ Mensagens "Crie uma rotina: atomvs routine ac..." cortadas dentro do panel body.
 
 - **Descoberto:** 2026-03-25 (Sessão 12 — snapshot 80x24)
 - **Severidade:** BAIXA
-- **Status:** PENDENTE
-- **Sprint planejado:** v1.7.0
+- **Status:** RESOLVIDO (Abr/2026, MR !64)
+- **Resolvido em:** Abr/2026 — Hints movidos para footer contextual via status_bar
 
 ### DT-067: README sem links para diagramas + diagramas possivelmente desatualizados
 
@@ -713,7 +713,7 @@ Mensagens "Crie uma rotina: atomvs routine ac..." cortadas dentro do panel body.
 - **Descoberto:** 2026-03-25 (Sessão 12)
 - **Severidade:** MÉDIA
 - **Status:** PENDENTE
-- **Sprint planejado:** v1.7.0
+- **Sprint planejado:** v1.7.1
 
 ### DT-068: Habits não ordenados por scheduled_start
 
@@ -811,9 +811,11 @@ Refatorações catalogadas seguem nomenclatura RF-XXX com referência a Fowler (
 | 2026-03-25 | 2.23.0 | DT-064 registrado (CVE pygments), DT-044 atualizado (basic->standard)  |
 | 2026-03-25 | 2.24.0 | Registra DT-065/066/067 (responsividade, placeholders, diagramas)      |
 | 2026-03-27 | 2.25.0 | Registra DT-068 (sort habits), DT-069 (tela configurações)             |
+| 2026-04-05 | 2.28.0 | DT-066 RESOLVIDO (MR !64), DT-065/DT-067 re-tagged para v1.7.1,        |
+|            |        | contagens atualizadas (58/71 resolvidos, 12 pendentes, 1 aceito)       |
 
 ---
 
-**Próxima Revisão:** Release v1.7.0
+**Próxima Revisão:** Release v1.7.1
 
-**Última atualização:** 27 de Março de 2026
+**Última atualização:** 5 de Abril de 2026
