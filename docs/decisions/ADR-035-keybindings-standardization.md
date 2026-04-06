@@ -1,12 +1,9 @@
 # ADR-035: Padronização de Keybindings
 
-**Status**: Amendado
-
-**Data original**: 2026-03-08
-
-**Data da emenda**: 2026-03-12
-
-**Relacionado**: ADR-034 (Dashboard-first CRUD), BR-TUI-004 (Global Keybindings), BR-TUI-021 (Timer no Dashboard)
+- **Status:** Amendado
+- **Data original:** 2026-03-08
+- **Data da emenda:** 2026-03-12
+- **Relacionado:** ADR-034 (Dashboard-first CRUD), BR-TUI-004 (Global Keybindings), BR-TUI-021 (Timer no Dashboard)
 
 ## Contexto
 

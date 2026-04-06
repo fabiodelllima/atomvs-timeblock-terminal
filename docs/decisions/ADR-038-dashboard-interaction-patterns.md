@@ -1,12 +1,13 @@
 # ADR-038: Padrões de Interação do Dashboard
 
 - **Status:** Aceito
-- **Data:** 15 de Março de 2026
-**Contexto:** Definir padrões de interação modal e fluxos de usuário para o dashboard plenamente funcional
+- **Data:** 2026-03-15
 
 ---
 
 ## Contexto
+
+**Contexto:** Definir padrões de interação modal e fluxos de usuário para o dashboard plenamente funcional
 
 A revisão de testes e2e (Sprint 4.5) revelou ambiguidades, gaps de BRs e bugs
 de aderência entre o código implementado e as regras documentadas. Esta ADR

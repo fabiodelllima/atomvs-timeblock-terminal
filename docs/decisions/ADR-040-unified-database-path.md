@@ -1,6 +1,7 @@
-# ADR-040: Unified Database Path
+# ADR-040: Caminho Unificado do Banco de Dados
 
 - **Status:** Aceito
+- **Data:** 2026-03-21
 
 ---
 
@@ -68,7 +69,3 @@ Uma mensagem de aviso é exibida na TUI e na CLI quando o banco antigo é detect
 - **XDG Base Directory Specification.** freedesktop.org. Disponível em: <https://specifications.freedesktop.org/basedir-spec/latest/\>.
 - **DT-056:** TUI conecta a banco sem tabelas — falha silenciosa total.
 - **BR-TUI-028:** Inicialização de banco no startup da TUI.
-
----
-
-- **Data:** 21 de Março de 2026

@@ -1,13 +1,13 @@
 # ADR-009: Consolidação de Flags Override
 
 - **Status:** Proposto
-- **Data:** 31 de Outubro de 2025
-- **Decisores:** Equipe Técnica
-**Contexto Técnico:** Python, SQLModel, SQLite
+- **Data:** 2025-10-31
 
 ---
 
 ## Contexto
+
+**Contexto Técnico:** Python, SQLModel, SQLite
 
 O modelo `HabitInstance` possui atualmente dois campos booleanos similares que causam confusão:
 

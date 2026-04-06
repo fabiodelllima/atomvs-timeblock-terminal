@@ -1,7 +1,7 @@
-# ADR-026: Test Database Isolation Strategy
+# ADR-026: Estratégia de Isolamento de Banco em Testes
 
 - **Status:** Aceito
-- **Data:** 19/JAN/2026
+- **Data:** 2026-01-19
 - **Relacionado:** ADR-007 (Service Layer), ADR-019 (Test Naming Convention)
 
 ---
@@ -142,7 +142,6 @@ def test_engine() -> Generator[Engine, None, None]:
     SQLModel.metadata.create_all(engine)
     yield engine
     engine.dispose()
-
 
 @pytest.fixture
 def session(test_engine: Engine) -> Generator[Session, None, None]:

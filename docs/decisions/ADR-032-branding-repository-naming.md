@@ -1,10 +1,8 @@
 # ADR-032: Branding ATOMVS e Nomenclatura de Repositórios
 
-**Status**: Aceito
-
-**Data**: 2026-02-05
-
-**Relacionado**: ADR-030 (Multiplatform Architecture)
+- **Status:** Aceito
+- **Data:** 2026-02-05
+- **Relacionado:** ADR-030 (Multiplatform Architecture)
 
 ## Contexto
 

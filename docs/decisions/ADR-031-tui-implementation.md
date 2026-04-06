@@ -1,14 +1,12 @@
-# ADR-031: TUI Implementation with Textual
+# ADR-031: Implementação da TUI com Textual
 
-**Status**: Aceito
-
-**Data**: 2026-02-05
-
-**Atualizado**: 2026-02-20 (dashboard redesign)
-
-**Supersedes**: ADR-006 (expande decisão original com detalhes de implementação)
+- **Status:** Aceito
+- **Data:** 2026-02-05
+- **Supersedes**: ADR-006 (expande decisão original com detalhes de implementação)
 
 ## Contexto
+
+**Atualizado:** 2026-02-20 (dashboard redesign)
 
 O TimeBlock Planner v1.6.0 possui CLI funcional com 95% dos comandos operacionais, 87% de cobertura e 778 testes. A interface CLI atende automação e uso pontual, mas a experiência interativa diária (consultar agenda, marcar hábitos, operar timer) requer navegação repetitiva entre comandos.
 

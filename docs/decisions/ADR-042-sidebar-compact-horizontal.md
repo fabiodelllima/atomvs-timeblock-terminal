@@ -1,6 +1,7 @@
 # ADR-042: Sidebar compacto — horizontal no header ou oculto com overlay
 
 - **Status:** Proposto
+- **Data:** 2026-03-22
 
 ## Contexto
 
@@ -52,7 +53,3 @@ Teclas numéricas 1-5 navegam entre screens em todos os modos:
 ## Referências
 
 - DT-060: Refatoração do sidebar para modo compacto/oculto
-
----
-
-- **Data:** 2026-03-22

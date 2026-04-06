@@ -2,12 +2,12 @@
 
 - **Status:** Aceito
 - **Data:** 2025-11-19
-- **Decisores:** TimeBlock Development Team
-- **Referência:** BR-HABIT-INSTANCE-STATUS-001
 
 ---
 
 ## Contexto
+
+**Referência:** BR-HABIT-INSTANCE-STATUS-001
 
 O modelo HabitInstance (v1.3.0) usa um único campo `status` (enum) com 5 valores:
 
@@ -178,7 +178,7 @@ Script `downgrade()` permite reverter:
 - `enums.py` (4 enums novos)
 - `__init__.py` (exports atualizados)
 
-**Database:**
+- **Database:**
 
 - `migration_001_status_substatus.py` (novo)
 

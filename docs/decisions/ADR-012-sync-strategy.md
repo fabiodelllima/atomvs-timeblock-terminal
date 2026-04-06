@@ -1,8 +1,7 @@
-# ADR-012: Sync Strategy - Queue-Based Architecture
+# ADR-012: Estratégia de Sincronização — Arquitetura Baseada em Filas
 
-**Status**: Accepted
-
-**Data**: 2025-11-05
+- **Status:** Aceito
+- **Data:** 2025-11-05
 
 ## Contexto
 

@@ -1,10 +1,8 @@
 # ADR-013: Offline-First Schema Migration
 
-**Status**: Accepted
-
-**Data**: 2025-11-05
-
-**Depende de**: ADR-012 (Sync Strategy)
+- **Status:** Aceito
+- **Data:** 2025-11-05
+- **Depende de:** ADR-012 (Sync Strategy)
 
 ## Contexto
 

@@ -1,11 +1,13 @@
 # ADR-037: Padrão de Keybindings da TUI
 
 - **Status:** Aceito
-**Contexto:** Definir padrão consistente de teclas para o ATOMVS Time Planner Terminal
+- **Data:** 2026-03-15
 
 ---
 
 ## Contexto
+
+**Contexto:** Definir padrão consistente de teclas para o ATOMVS Time Planner Terminal
 
 A TUI precisa de um mapa de teclas intuitivo para uso diário. A pesquisa
 cobriu calcurse, calcure, gitui, taskwarrior-tui, superfile, kabmat e
@@ -163,4 +165,3 @@ responde a input básico). A branch test/tui-panel-flows cobrirá isso.
 
 ---
 
-- **Data:** 2026-03-15

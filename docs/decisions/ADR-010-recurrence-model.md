@@ -1,13 +1,13 @@
 # ADR-010: Modelo de Recorrência de Hábitos
 
 - **Status:** Proposto
-- **Data:** 31 de Outubro de 2025
-- **Decisores:** Equipe Técnica
-**Contexto Técnico:** Python, SQLModel, iCalendar RRULE
+- **Data:** 2025-10-31
 
 ---
 
 ## Contexto
+
+**Contexto Técnico:** Python, SQLModel, iCalendar RRULE
 
 Existe inconsistência entre **documentação** e **implementação** no modelo de recorrência de hábitos.
 

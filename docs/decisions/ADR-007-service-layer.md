@@ -1,10 +1,11 @@
-# ADR-007: Service Layer Pattern
+# ADR-007: Padrão Service Layer
 
 - **Status:** Aceito
-
-**Atualização:** 2026-01-17 (Referência para API Contract)
+- **Data:** 2025-09-20
 
 ## Contexto
+
+**Atualização:** 2026-01-17
 
 Commands acessando models diretamente cria acoplamento e dificulta:
 

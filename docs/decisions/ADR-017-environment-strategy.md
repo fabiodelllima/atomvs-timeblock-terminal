@@ -1,12 +1,11 @@
-# ADR-008: Estratégia de Ambientes (dev/test/prod)
+# ADR-017: Estratégia de Ambientes (dev/test/prod)
 
 - **Status:** Aceito
+- **Data:** 2025-11-03
 
-- **Data:** 03 de Novembro de 2025
+## Contexto
 
 **Contexto:** v1.2.0 - Infraestrutura
-
-## Contexão
 
 Projeto visa ser showcase profissional. Necessidade de formalizar ambientes.
 
@@ -84,4 +83,4 @@ Android Termux: PRODUCTION (sync com Linux)
 
 ---
 
-**Relacionado:** ADR-007 (Alembic), v2.0 sync feature
+- **Relacionado:** ** ADR-007 (Alembic), v2.0 sync feature

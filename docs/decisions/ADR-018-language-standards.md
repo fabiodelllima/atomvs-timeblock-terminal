@@ -1,12 +1,11 @@
-# ADR-009: Padrões de Idioma no Projeto
+# ADR-018: Padrões de Idioma no Projeto
 
 - **Status:** Aceito
-
-- **Data:** 03 de Novembro de 2025
-
-**Contexto:** v1.2.0 Sprint 1.2
+- **Data:** 2025-11-03
 
 ## Contexto
+
+**Contexto:** v1.2.0 Sprint 1.2
 
 Projeto brasileiro em desenvolvimento com objetivos de:
 
@@ -51,8 +50,6 @@ def generate_instances(habit_id: int) -> list[HabitInstance]:
 
 ```markdown
 # CORRETO (fase atual)
-
-# ADR-006: Manter HabitInstance no Código
 
 ## Contexto
 
@@ -154,6 +151,6 @@ def test_generate_everyday_habit(self, everyday_habit):
 
 ---
 
-**Relacionado:** README.md, CONTRIBUTING.md
+- **Relacionado:** ** README.md, CONTRIBUTING.md
 
 **Revisão:** Após v1.3.0 (avaliar quando iniciar tradução)

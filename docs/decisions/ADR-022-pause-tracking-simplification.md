@@ -1,10 +1,11 @@
-# ADR-021: Simplificação de Pause Tracking para MVP
+# ADR-022: Simplificação de Pause Tracking para MVP
 
 - **Status:** Aceita
 - **Data:** 2025-11-23
-**Contexto:** Sprint 3.4 Fase 3 - Correção de débito técnico
 
 ## Contexto
+
+**Contexto:** Sprint 3.4 Fase 3 - Correção de débito técnico
 
 O sistema de timer precisa rastrear pausas durante sessões de trabalho. Duas abordagens foram consideradas para implementação.
 
