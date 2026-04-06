@@ -118,7 +118,7 @@ PROIBIDOS (reservados pelo OS):
 
 ## Emenda: Limitações VTE para Ctrl+Enter e Shift+Enter
 
-**Data:** 2026-03-12
+- **Data:** 2026-03-12
 
 **Descoberta:** Além de `Ctrl+digit` (DT-024), os terminais VTE também não emitem sequências distinguíveis para `Ctrl+Enter` e `Shift+Enter`. O Textual recebe `Enter` simples em ambos os casos, tornando as quick actions (done, timer start/pause) inacessíveis no GNOME Terminal.
 

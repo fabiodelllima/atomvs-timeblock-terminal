@@ -1,7 +1,7 @@
 # ADR-037: Padrão de Keybindings da TUI
 
 - **Status:** Aceito
-- **Contexto:** Definir padrão consistente de teclas para o ATOMVS Time Planner Terminal
+**Contexto:** Definir padrão consistente de teclas para o ATOMVS Time Planner Terminal
 
 ---
 
@@ -163,4 +163,4 @@ responde a input básico). A branch test/tui-panel-flows cobrirá isso.
 
 ---
 
-**Data:** 2026-03-15
+- **Data:** 2026-03-15

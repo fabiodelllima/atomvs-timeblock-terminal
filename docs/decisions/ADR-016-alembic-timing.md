@@ -1,8 +1,8 @@
 # ADR-007: Implementar Alembic em v1.3.0, Não v1.2.0
 
-**Status:** ACEITO
+- **Status:** Aceito
 
-**Data:** 03 de Novembro de 2025
+- **Data:** 03 de Novembro de 2025
 
 **Contexto:** v1.2.0 - Infraestrutura
 

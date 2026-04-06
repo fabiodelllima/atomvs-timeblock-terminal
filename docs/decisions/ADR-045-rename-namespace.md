@@ -1,6 +1,6 @@
 # ADR-045: Rename do Namespace timeblock para atomvs
 
-**Status:** Proposed (v2.0)
+- **Status:** Proposto (v2.0)
 
 **Date:** 2026-03-23
 

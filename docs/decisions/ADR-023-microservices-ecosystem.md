@@ -1,8 +1,8 @@
 # ADR-023: Microservices Ecosystem
 
-**Status:** Proposto
+- **Status:** Proposto
 
-**Data:** 21 de Dezembro de 2025
+- **Data:** 21 de Dezembro de 2025
 
 **Contexto:** v3.0.0 Planning
 

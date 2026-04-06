@@ -1,6 +1,6 @@
 # ADR-019: Test Naming Convention and BR Traceability
 
-- **Status:** Accepted
+- **Status:** Aceito
 - **Data:** 2025-11-10
 - **Decisores:** Felipe (Tech Lead)
 - **Relacionado:** ADR-018 (Language Standards)

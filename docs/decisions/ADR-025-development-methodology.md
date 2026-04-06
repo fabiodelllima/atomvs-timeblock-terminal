@@ -1,8 +1,8 @@
 # ADR-025: Engenharia de Requisitos
 
-**Status:** Aceito (Revisado)
+- **Status:** Aceito (Revisado)
 
-**Data:** 2026-02-08
+- **Data:** 2026-02-08
 
 **Supersedes:** Versão original (2025-11-08) que definia a hierarquia como "Docs > BDD > TDD > Code"
 

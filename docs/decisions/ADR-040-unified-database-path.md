@@ -1,6 +1,6 @@
 # ADR-040: Unified Database Path
 
-**Status:** Aceito
+- **Status:** Aceito
 
 ---
 
@@ -71,4 +71,4 @@ Uma mensagem de aviso é exibida na TUI e na CLI quando o banco antigo é detect
 
 ---
 
-**Data:** 21 de Março de 2026
+- **Data:** 21 de Março de 2026

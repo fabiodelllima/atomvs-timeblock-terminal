@@ -1,9 +1,9 @@
 # ADR-006: Textual para TUI
 
-- **Status:** Proposed
+- **Status:** Proposto
 - **Data:** 2025-10-01
 
-## Contextoo
+## Contexto
 
 CLI funcional, mas UX limitada para visualização de agenda e navegação.
 

@@ -1,13 +1,13 @@
 # ADR-010: Modelo de Recorrência de Hábitos
 
-**Status:** PROPOSTO
-**Data:** 31 de Outubro de 2025
-**Decisores:** Equipe Técnica
+- **Status:** Proposto
+- **Data:** 31 de Outubro de 2025
+- **Decisores:** Equipe Técnica
 **Contexto Técnico:** Python, SQLModel, iCalendar RRULE
 
 ---
 
-## Contextoo
+## Contexto
 
 Existe inconsistência entre **documentação** e **implementação** no modelo de recorrência de hábitos.
 
@@ -392,6 +392,5 @@ def downgrade():
 
 ---
 
-**Status:** PROPOSTO (aguardando aprovação)
 **Próximo Revisor:** Tech Lead
 **Implementação Estimada:** 1 hora (atualização de documentação + helper CLI)

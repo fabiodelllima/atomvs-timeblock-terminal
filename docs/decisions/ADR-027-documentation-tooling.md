@@ -1,8 +1,8 @@
 # ADR-027: MkDocs com mkdocstrings para Documentação
 
-**Status:** Aceito
+- **Status:** Aceito
 
-**Data:** 28 de Janeiro de 2026
+- **Data:** 28 de Janeiro de 2026
 
 **Contexto:** Definir stack de documentação para v1.5.0
 

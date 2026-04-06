@@ -1,6 +1,6 @@
 # ADR-041: Redesign da Agenda Panel — blocos contínuos, scroll horizontal e granularidade 15min
 
-**Status:** Proposto
+- **Status:** Proposto
 
 ## Contexto
 
@@ -69,4 +69,4 @@ Adicionalmente, a granularidade temporal da régua precisa ser redefinida: cada 
 
 ---
 
-**Data:** 2026-03-22
+- **Data:** 2026-03-22

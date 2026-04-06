@@ -2,7 +2,7 @@
 
 - **Status:** Aceita
 - **Data:** 2025-11-23
-- **Contexto:** Sprint 3.4 Fase 3 - Correção de débito técnico
+**Contexto:** Sprint 3.4 Fase 3 - Correção de débito técnico
 
 ## Contexto
 

@@ -1,9 +1,9 @@
 # ADR-005: Resource-first CLI
 
-- **Status:** Accepted
+- **Status:** Aceito
 - **Data:** 2025-09-22
 
-## Contextoo
+## Contexto
 
 Definir ordem dos comandos CLI: `<resource> <action>` vs `<action> <resource>`.
 

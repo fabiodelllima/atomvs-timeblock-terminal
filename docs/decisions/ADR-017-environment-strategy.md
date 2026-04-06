@@ -1,8 +1,8 @@
 # ADR-008: Estratégia de Ambientes (dev/test/prod)
 
-**Status:** ACEITO
+- **Status:** Aceito
 
-**Data:** 03 de Novembro de 2025
+- **Data:** 03 de Novembro de 2025
 
 **Contexto:** v1.2.0 - Infraestrutura
 

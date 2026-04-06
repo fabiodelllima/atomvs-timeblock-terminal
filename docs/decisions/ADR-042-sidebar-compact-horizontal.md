@@ -1,6 +1,6 @@
 # ADR-042: Sidebar compacto — horizontal no header ou oculto com overlay
 
-**Status:** Proposto
+- **Status:** Proposto
 
 ## Contexto
 
@@ -55,4 +55,4 @@ Teclas numéricas 1-5 navegam entre screens em todos os modos:
 
 ---
 
-**Data:** 2026-03-22
+- **Data:** 2026-03-22

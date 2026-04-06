@@ -1,8 +1,8 @@
 # ADR-036: Task Lifecycle Evolution
 
-**Data:** 2026-03-14
+- **Data:** 2026-03-14
 
-**Status:** Aceito
+- **Status:** Aceito
 
 **Contexto técnico:** ADR-036 amenda BR-TASK-001 (estrutura) e BR-TASK-002 (conclusão), evolui BR-TASK-006 (simplicidade mantida com extensões rastreáveis), e introduz BR-TASK-007 a BR-TASK-010.
 

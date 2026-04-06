@@ -1,6 +1,6 @@
 # ADR-021: Refatoração Status+Substatus para HabitInstance
 
-- **Status:** ACEITO
+- **Status:** Aceito
 - **Data:** 2025-11-19
 - **Decisores:** TimeBlock Development Team
 - **Referência:** BR-HABIT-INSTANCE-STATUS-001

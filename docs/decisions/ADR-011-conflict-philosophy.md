@@ -1,13 +1,13 @@
 # ADR-011: Filosofia de Não-Bloqueio de Conflitos
 
-**Status:** ACEITO
-**Data:** 31 de Outubro de 2025
-**Decisores:** Equipe Técnica + Product Owner
+- **Status:** Aceito
+- **Data:** 31 de Outubro de 2025
+- **Decisores:** Equipe Técnica + Product Owner
 **Impacto:** CRÍTICO - Decisão Arquitetural Fundamental
 
 ---
 
-## Contextoo
+## Contexto
 
 Sistemas de calendário e agendamento tradicionalmente **bloqueiam** criação de eventos sobrepostos:
 
@@ -309,7 +309,6 @@ Reavaliar decisão se:
 
 ---
 
-**Status:** ACEITO
 **Decisão Tomada Por:** Equipe Técnica + Product Owner
 **Aprovado Por:** Tech Lead
 **Data de Aprovação:** 31 de Outubro de 2025

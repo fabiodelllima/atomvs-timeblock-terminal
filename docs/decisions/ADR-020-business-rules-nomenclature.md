@@ -2,7 +2,7 @@
 
 - **Status:** Aceito
 - **Data:** 11 de Novembro de 2025
-- **Contexto:** Sprint 2 - Test Refactoring
+**Contexto:** Sprint 2 - Test Refactoring
 
 ## Contexto
 

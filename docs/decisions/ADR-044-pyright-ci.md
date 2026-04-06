@@ -1,6 +1,6 @@
 # ADR-044: Pyright como Job CI de Qualidade
 
-**Status:** Proposed
+- **Status:** Proposto
 
 **Date:** 2026-03-23
 

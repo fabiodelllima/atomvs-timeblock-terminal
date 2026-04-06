@@ -1,8 +1,8 @@
 # ADR-030: Arquitetura Multi-Plataforma e Organização de Repositórios
 
-**Status:** Proposto
+- **Status:** Proposto
 
-**Data:** 31 de Janeiro de 2026
+- **Data:** 31 de Janeiro de 2026
 
 **Contexto:** Planejamento v2.0+
 

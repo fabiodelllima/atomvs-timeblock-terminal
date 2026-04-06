@@ -1,6 +1,6 @@
 # ADR-046: Padrão de Datas e Versionamento em Documentos
 
-**Status:** Proposed
+- **Status:** Proposto
 
 **Date:** 2026-03-23
 

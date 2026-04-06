@@ -2,7 +2,7 @@
 
 - **Status:** Aceito
 - **Data:** 15 de Março de 2026
-- **Contexto:** Definir padrões de interação modal e fluxos de usuário para o dashboard plenamente funcional
+**Contexto:** Definir padrões de interação modal e fluxos de usuário para o dashboard plenamente funcional
 
 ---
 

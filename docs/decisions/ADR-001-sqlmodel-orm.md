@@ -1,9 +1,9 @@
 # ADR-001: SQLModel como ORM
 
-- **Status**: Accepted
-- **Data**: 2025-09-15
+- **Status:** Aceito
+- **Data:** 2025-09-15
 
-## Contextoo
+## Contexto
 
 Precisávamos escolher um ORM para o TimeBlock que atendesse:
 

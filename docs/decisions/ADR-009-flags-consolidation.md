@@ -1,13 +1,13 @@
 # ADR-009: Consolidação de Flags Override
 
-**Status:** PROPOSTO
-**Data:** 31 de Outubro de 2025
-**Decisores:** Equipe Técnica
+- **Status:** Proposto
+- **Data:** 31 de Outubro de 2025
+- **Decisores:** Equipe Técnica
 **Contexto Técnico:** Python, SQLModel, SQLite
 
 ---
 
-## Contextoo
+## Contexto
 
 O modelo `HabitInstance` possui atualmente dois campos booleanos similares que causam confusão:
 
@@ -260,6 +260,5 @@ Migration possui `downgrade()` que recria coluna. Dados podem não ser recuperad
 
 ---
 
-**Status:** PROPOSTO (aguardando aprovação para implementação)
 **Próximo Revisor:** Tech Lead
 **Implementação Estimada:** 3 horas (migration + testes + atualização de código)

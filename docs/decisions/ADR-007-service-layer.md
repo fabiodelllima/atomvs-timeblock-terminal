@@ -1,6 +1,6 @@
 # ADR-007: Service Layer Pattern
 
-**Status:** Accepted
+- **Status:** Aceito
 
 **Atualização:** 2026-01-17 (Referência para API Contract)
 

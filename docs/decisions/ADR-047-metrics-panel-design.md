@@ -1,8 +1,8 @@
 # ADR-047: Design do MetricsPanel — Filosofia e Padrões
 
-**Status:** Proposto
+- **Status:** Proposto
 
-**Data:** 2026-04-03
+- **Data:** 2026-04-03
 
 ## Contexto
 

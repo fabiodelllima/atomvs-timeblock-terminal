@@ -1,6 +1,6 @@
 # ADR-026: Test Database Isolation Strategy
 
-- **Status:** Accepted
+- **Status:** Aceito
 - **Data:** 19/JAN/2026
 - **Relacionado:** ADR-007 (Service Layer), ADR-019 (Test Naming Convention)
 

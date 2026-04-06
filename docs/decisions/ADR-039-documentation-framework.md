@@ -1,6 +1,6 @@
 # ADR-039: Framework de Documentação e Reestruturação
 
-**Status:** Aceito
+- **Status:** Aceito
 
 ---
 
@@ -221,4 +221,4 @@ A reestruturação será executada em fases, cada uma numa branch dedicada:
 
 ---
 
-**Data:** 16 de Março de 2026
+- **Data:** 16 de Março de 2026
