@@ -36,7 +36,7 @@
 | DT022 | Logging: adoção zero fora de habit_inst_svc           | MÉDIA      | RESOLVIDO | Mar/2026     | feat/structured-logging     |
 | DT023 | Instâncias diárias: geração manual obrigatória        | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer    |
 | DT024 | Keybindings Ctrl+N inoperantes em VTE/GNOME           | ALTA       | RESOLVIDO | Mar/2026     | feat/tui-dashboard-timer    |
-| DT025 | Pyright como job CI complementar                      | BAIXA      | PENDENTE  | -            | Sprint futuro               |
+| DT025 | Pyright como job CI complementar                      | BAIXA      | RESOLVIDO | Abr/2026     | chore/v1.7.1-snapshot       |
 | DT034 | mark_completed sem done_substatus                     | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality       |
 | DT035 | Undo handler nao limpa skip_reason/skip_note          | CRITICA    | RESOLVIDO | Mar/2026     | fix/dashboard-quality       |
 | DT036 | TimerStopAndDoneRequest sem handler                   | ALTA       | RESOLVIDO | Mar/2026     | fix/dashboard-quality       |
@@ -73,7 +73,7 @@
 | DT067 | README sem links para diagramas (~16 desatualizados)  | MEDIA      | PENDENTE  | -            | v1.7.1                      |
 | DT068 | Habits não ordenados por scheduled_start              | MEDIA      | RESOLVIDO | Mar/2026     | fix/habit-sort-dt068        |
 | DT069 | Tela de configurações não documentada/planejada       | BAIXA      | PENDENTE  | -            | Sprint futuro               |
-| DT070 | 46 ADRs com headers em inglês (Context/Decision)      | BAIXA      | PENDENTE  | -            | Sprint futuro               |
+| DT070 | 47 ADRs padronizados (headers, títulos, datas)        | BAIXA      | RESOLVIDO | Abr/2026     | chore/v1.7.1-snapshot       |
 | DT071 | Sem padrão de header/footer em documentação           | BAIXA      | PENDENTE  | -            | Sprint futuro               |
 | DT072 | Job sync:github substituído por GitLab Push Mirroring | BAIXA      | RESOLVIDO | Abr/2026     | chore/replace-sync-job      |
 
@@ -146,13 +146,13 @@
 - [ ] DT065 — Responsividade em terminal 80x24
 - [x] DT066 — Placeholders truncados nos panels (MR !64)
 - [ ] DT067 — README sem links para diagramas + 16 possivelmente desatualizados
-- [ ] DT070 — 46 ADRs com headers em inglês (Context → Contexto, Decision → Decisão)
+- [x] DT070 — 47 ADRs padronizados (headers, títulos, datas em PT-BR/ISO)
 - [ ] DT071 — Sem padrão de header/footer em documentação (datas, versão, status)
 - [x] DT072 — Job sync:github substituído por GitLab Push Mirroring nativo
 - [x] DT068 — Habits não ordenados por scheduled_start no dashboard
 - [ ] DT069 — Tela de configurações não documentada/planejada
 
-**Resolvidos:** 59/72 | **Pendentes:** 12/72 | **Aceitos:** 1/72
+**Resolvidos:** 60/72 | **Pendentes:** 11/72 | **Aceitos:** 1/72
 
 ---
 
