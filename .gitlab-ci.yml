@@ -3,7 +3,6 @@ stages:
   - test
   - coverage
   - security
-  - sync
 default:
   timeout: 10m
   retry:
@@ -114,22 +113,4 @@ security:deps:
     paths:
       - pip-audit-report.json
     when: always
-sync:github:
-  needs: ["test:unit", "test:integration", "test:e2e"]
-  stage: sync
-  before_script: []
-  script:
-    - git fetch --unshallow || true
-    - git remote add github https://x-access-token:${GITHUB_TOKEN}@github.com/fabiodelllima/atomvs-timeblock-terminal.git
-    - |
-      if [ "$CI_COMMIT_BRANCH" = "main" ] || [ "$CI_COMMIT_BRANCH" = "develop" ]; then
-        git push github HEAD:${CI_COMMIT_REF_NAME}
-      else
-        git push github HEAD:${CI_COMMIT_REF_NAME} --force
-      fi
-    - git push github --tags
-  rules:
-    - if: $CI_COMMIT_TAG
-      when: on_success
-    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
-      when: on_success
+
