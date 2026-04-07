@@ -43,6 +43,7 @@ def create_task(
         console.print()
 
     except ValueError as e:
+        logger.error("Erro de validação: %s", e)
         console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -92,6 +93,7 @@ def list_tasks(
         console.print()
 
     except ValueError as e:
+        logger.error("Erro de validação: %s", e)
         console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -125,6 +127,7 @@ def check_task(task_id: int = typer.Argument(..., help="ID da tarefa")):
         console.print()
 
     except ValueError as e:
+        logger.error("Erro de validação: %s", e)
         console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -171,6 +174,7 @@ def update_task(
             display_conflicts(conflicts, console)
 
     except ValueError as e:
+        logger.error("Erro de validação: %s", e)
         console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -199,5 +203,6 @@ def delete_task(
         )
 
     except ValueError as e:
+        logger.error("Erro de validação: %s", e)
         console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)

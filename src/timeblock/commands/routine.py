@@ -38,6 +38,7 @@ def create_routine(name: str = typer.Argument(..., help="Nome da rotina")):
                     console.print("[green]✓ Rotina ativada[/green]")
 
     except ValueError as e:
+        logger.error("Erro de validação: %s", e)
         console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -89,6 +90,7 @@ def activate_routine(routine_id: int = typer.Argument(..., help="ID da rotina"))
                 console.print(f"  [dim][bold]{current_active.name}[/bold] foi desativada[/dim]")
 
     except ValueError as e:
+        logger.error("Erro de validação: %s", e)
         console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -116,6 +118,7 @@ def deactivate_routine(routine_id: int = typer.Argument(..., help="ID da rotina"
             )
 
     except ValueError as e:
+        logger.error("Erro de validação: %s", e)
         console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
 
@@ -168,5 +171,6 @@ def delete_routine(
                 console.print(f"[green]✓ {len(habits)} hábito(s) deletado(s)[/green]")
 
     except ValueError as e:
+        logger.error("Erro de validação: %s", e)
         console.print(f"[red]✗ Erro: {e}[/red]")
         raise typer.Exit(1)
