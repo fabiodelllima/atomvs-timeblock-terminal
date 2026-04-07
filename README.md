@@ -53,29 +53,34 @@ A aplicação organiza o tempo através de três conceitos principais: Rotinas (
 A arquitetura do ATOMVS segue o padrão de camadas com separação clara de responsabilidades. A camada de apresentação (CLI e TUI) comunica-se exclusivamente com a camada de serviços, que encapsula toda a lógica de negócio. Os modelos de dados utilizam SQLModel para mapeamento objeto-relacional, combinando a expressividade do Pydantic com a robustez do SQLAlchemy. A TUI compartilha 100% da camada de services com a CLI — nenhuma lógica de negócio é duplicada.
 
 ```plaintext
-┌─────────────────────────────────────────────────────────┐
-│                   ATOMVS TIME PLANNER                   │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
-│  │   ROUTINE   │───>│    HABIT    │───>│   HABIT     │  │
-│  │  (coleção)  │    │  (template) │    │  INSTANCE   │  │
-│  └─────────────┘    └─────────────┘    └─────────────┘  │
-│         │                  │                  │         │
-│         │                  │                  v         │
-│         │                  │           ┌─────────────┐  │
-│         │                  │           │    TIMER    │  │
-│         │                  │           │  (tracking) │  │
-│         │                  │           └─────────────┘  │
-│         │                  │                            │
-│         v                  v                            │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │                      TASK                         │  │
-│  │               (evento pontual)                    │  │
-│  └───────────────────────────────────────────────────┘  │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                     ATOMVS TIME PLANNER                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│    ┌───────────┐     ┌────────────┐     ┌──────────────┐    │
+│    │  ROUTINE  │────>│  HABIT     │────>│   HABIT      │    │
+│    │ (coleção) │     │ (template) │     │   INSTANCE   │    │
+│    └───────────┘     └─────┬──────┘     └──────┬───────┘    │
+│                            │                   │            │
+│                         ┌──┘                   v            │
+│                         │               ┌──────────────┐    │
+│    ┌──────────┐         │               │   TIMELOG    │    │
+│    │   TAG    │··········               │  (tracking)  │    │
+│    │ (categ.) │··········               └──────────────┘    │
+│    └──────────┘         │                      ^            │
+│                         │                      │            │
+│                         v                      │            │
+│                 ┌───────────────┐              │            │
+│                 │     TASK      │──────────────┘            │
+│                 │ (evt pontual) │                           │
+│                 └───────────────┘                           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+**Diagramas detalhados em Mermaid:** [Visão Geral](docs/diagrams/architecture/system-overview.md) | [ER Diagram](docs/diagrams/data/er-diagram.md) | [Class Diagram](docs/diagrams/data/class-diagram.md)
+
+---
 
 ### Fluxo de Dados
 
@@ -93,6 +98,10 @@ O fluxo de dados segue uma direção unidirecional clara, desde a entrada do usu
                                   │          │     │    DB    │
                                   └──────────┘     └──────────┘
 ```
+
+**Diagrama detalhado em Mermaid:** [L2 Containers](docs/diagrams/c4-model/L2-containers.md)
+
+---
 
 ### Camadas
 
@@ -121,6 +130,8 @@ O fluxo de dados segue uma direção unidirecional clara, desde a entrada do usu
 ╚═══════════════════════════════════════════════════════════════════╝
 ```
 
+**Diagramas detalhados em Mermaid:** [L2 Containers](docs/diagrams/c4-model/L2-containers.md) | [L3 Components](docs/diagrams/c4-model/L3-components-core.md) | [Deployment](docs/diagrams/infrastructure/deployment.md)
+
 ---
 
 ## Estados do Sistema
@@ -131,28 +142,27 @@ O sistema de estados controla o ciclo de vida de cada entidade. HabitInstances t
 
 ```plaintext
                     ┌─────────────┐
-                    │   PENDING   │
+                    │   PENDING   │<──── undo (u)
                     │  (aguarda)  │
                     └──────┬──────┘
                            │
-           ┌───────────────┼───────────────┐
-           │               │               │
-           v               v               v
-    ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-    │    DONE     │ │  NOT_DONE   │ │   OVERDUE   │
-    │ (completo)  │ │  (pulado)   │ │  (atrasado) │
-    └─────────────┘ └─────────────┘ └─────────────┘
-           │               │
-           v               v
-    ┌─────────────┐ ┌─────────────────────┐
-    │  Substatus  │ │  Substatus          │
-    ├─────────────┤ ├─────────────────────┤
-    │ FULL        │ │ SKIPPED_JUSTIFIED   │
-    │ PARTIAL     │ │ SKIPPED_UNJUSTIFIED │
-    │ OVERDONE    │ │ IGNORED             │
-    │ EXCESSIVE   │ └─────────────────────┘
-    └─────────────┘
+                ┌──────────┴──────────┐
+                │                     │
+                v                     v
+    ┌────────────────────┐  ┌─────────────────────┐
+    │        DONE        │  │      NOT_DONE       │
+    │     (completo)     │  │      (pulado)       │
+    ├────────────────────┤  ├─────────────────────┤
+    │ FULL       90-110% │  │ SKIPPED_JUSTIFIED   │
+    │ PARTIAL       <90% │  │ SKIPPED_UNJUSTIFIED │
+    │ OVERDONE  110-150% │  │ IGNORED             │
+    │ EXCESSIVE    >150% │  └─────────────────────┘
+    └────────────────────┘
 ```
+
+**Diagramas detalhados em Mermaid:** [HabitInstance States](docs/diagrams/states/event-states.md) | [Task Lifecycle](docs/diagrams/states/task-lifecycle.md)
+
+---
 
 ### Timer Flow
 
@@ -180,6 +190,8 @@ O timer implementa uma máquina de estados simples que permite rastrear tempo de
 │   DONE   │ │ CANCELLED (c)  │
 └──────────┘ └────────────────┘
 ```
+
+**Diagramas detalhados em Mermaid:** [Timer States](docs/diagrams/states/timer-states.md) | [Timer Lifecycle](docs/diagrams/sequences/timer-flow.md) | [Habit Execution](docs/diagrams/activity/habit-execution.md) | [User Daily Flow](docs/diagrams/activity/user-daily-flow.md)
 
 ---
 
@@ -256,7 +268,7 @@ A interface de linha de comando foi projetada para ser intuitiva e consistente. 
 ### Exemplos
 
 ```bash
-# TUI (interface visual)
+# TUI
 atomvs                      # Sem argumentos abre a TUI
 
 # Rotinas
@@ -386,6 +398,8 @@ Referências:
 
 Código é desenvolvido seguindo Test-Driven Development. Testes referenciam BRs pela nomenclatura (test_br_xxx), mantendo rastreabilidade bidirecional entre requisitos, testes e implementação. A pirâmide de testes distribui validações em quatro níveis: unitário (~75%), integração (~11%), BDD (~10%) e end-to-end (~4%).
 
+**Nota:** A cobertura de cenários BDD necessita de revisão — nem todas as BRs possuem cenários Gherkin correspondentes. A auditoria de rastreabilidade BR → BDD está pendente.
+
 Referências:
 
 - Beck, K. Test-Driven Development: By Example. Addison-Wesley, 2002
@@ -404,6 +418,7 @@ python -m pytest tests/ --cov=src/timeblock
 # Qualidade
 ruff check .
 ruff format .
+mypy src/
 basedpyright src/
 ```
 
