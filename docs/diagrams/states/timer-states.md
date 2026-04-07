@@ -2,6 +2,7 @@
 
 - **Status:** Aceito
 - **Data:** 2026-04-06
+
 ```mermaid
 stateDiagram-v2
     [*] --> RUNNING: start
