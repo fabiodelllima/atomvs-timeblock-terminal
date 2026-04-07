@@ -1,6 +1,7 @@
-"""Entry point do TimeBlock Planner CLI/TUI."""
+"""Entry point do ATOMVS Time Planner CLI/TUI."""
 
 import sys
+from types import TracebackType
 
 import typer
 
@@ -14,7 +15,7 @@ from timeblock.commands import (
     task,
     timer,
 )
-from timeblock.utils.logger import configure_logging
+from timeblock.utils.logger import configure_logging, get_logger
 
 app = typer.Typer(
     name="timeblock",
@@ -42,14 +43,45 @@ def version():
     typer.echo("CLI para gerenciamento de tempo e hábitos")
 
 
+def _install_global_excepthook() -> None:
+    """Instala handler global para exceções não capturadas.
+
+    Garante que qualquer exceção que escape de todos os try/except
+    seja registrada no log antes de terminar o processo. Preserva
+    o comportamento padrão (traceback no stderr) após logar.
+    """
+    original_hook = sys.excepthook
+    crash_logger = get_logger("timeblock.crash")
+
+    def _hook(
+        exc_type: type[BaseException],
+        exc_value: BaseException,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        if not issubclass(exc_type, (KeyboardInterrupt, SystemExit)):
+            crash_logger.critical(
+                "Exceção não capturada: %s: %s",
+                exc_type.__name__,
+                exc_value,
+                exc_info=(exc_type, exc_value, exc_tb),
+            )
+        original_hook(exc_type, exc_value, exc_tb)
+
+    sys.excepthook = _hook
+
+
 def launch_tui() -> bool:
     """Importa e executa a TUI. Raises ImportError se textual não instalado."""
     from timeblock.database.migrations.runner import run_pending_migrations
 
+    tui_logger = get_logger(__name__)
+
     try:
-        run_pending_migrations()
+        count = run_pending_migrations()
+        if count > 0:
+            tui_logger.info("Migrations aplicadas no startup: %d", count)
     except Exception:
-        pass  # Banco pode nao existir (primeiro uso)
+        tui_logger.exception("Falha ao executar migrations no startup")
 
     from timeblock.tui.app import TimeBlockApp
 
@@ -61,6 +93,7 @@ def main():
     """Entry point unificado: sem args abre TUI, com args executa CLI."""
     if len(sys.argv) <= 1:
         configure_logging(console=False)
+        _install_global_excepthook()
         try:
             launch_tui()
         except ImportError:
@@ -69,6 +102,7 @@ def main():
             print("       Uso CLI: timeblock --help")
     else:
         configure_logging(console=True)
+        _install_global_excepthook()
         app()
 
 
