@@ -498,12 +498,10 @@
 - **Ação:** Enriquecer loader para incluir tasks recém-concluídas (últimas 24h) com status derivado.
 - **Sprint:** Sprint 5
 
-### DT-019: command_bar.py Stub Vazio
+### DT-019: Command Bar (RECLASSIFICADO → Feature)
 
-- **Descoberto:** 10/03/2026
-- **Impacto:** Arquivo de 0 bytes em `src/timeblock/tui/widgets/command_bar.py`. Nenhum mecanismo de barra de comandos (`/task`, `/habit`, etc.) implementado.
-- **Ação:** Implementar command bar com prefixo `/` ou atalho `Ctrl+P`. Feature planejada para sprint futura.
-- **Sprint:** Sprint 6+
+- **Status:** Movido para roadmap v1.8.0
+- **Ver:** `docs/reference/roadmap.md` seção v1.8.0
 
 ### DT-020: Régua Fixa 06:00-22:00, Sem Auto-Scroll (BR-TUI-003-R15)
 
@@ -595,23 +593,10 @@ Na primeira execução após criação do banco, a mensagem `[INFO] Migração 0
 
 ---
 
-### DT-060: Sidebar ocupa ~15 cols desnecessariamente
+### DT-060: Sidebar redesign (RECLASSIFICADO → Feature)
 
-O sidebar vertical atual exibe labels textuais ("Dash", "Rotin", "Habit", "Tasks", "Timer") ocupando ~15 colunas (~12% de um terminal 120 cols). O conteúdo é exclusivamente navegação entre 5 screens, funcionalidade que não justifica espaço permanente.
-
-- **Descoberto:** 2026-03-22 (Sessão 9 — design review)
-- **Severidade:** UX — MÉDIA
-- **Status:** PENDENTE
-- **Sprint planejado:** Futuro (após ADR-042 aprovado)
-
-**Solução proposta:** Implementar `sidebar_mode` configurável conforme ADR-042:
-
-- `horizontal`: tabs no header (zero cols perdidas)
-- `hidden`: sem sidebar, navegação via atalhos
-- `vertical`: sidebar com ícones (3-4 cols)
-- Overlay via F1 em todos os modos
-
-**Referências:** ADR-042
+- **Status:** Movido para roadmap v1.8.0
+- **Ver:** `docs/reference/roadmap.md` seção v1.8.0, ADR-042
 
 ---
 
@@ -659,25 +644,10 @@ A renderização atual usa linhas horizontais (`───`) na régua de horári
 
 ---
 
-### DT-063: Agenda limitada ao dia atual (sem paginação)
+### DT-063: Paginação de dias (RECLASSIFICADO → Feature)
 
-Agenda exibe apenas o dia atual. Não há mecanismo para visualizar dias anteriores (revisar o que foi feito) ou futuros (planejar).
-
-- **Descoberto:** 2026-03-22 (Sessão 9 — design review)
-- **Severidade:** FEATURE — MÉDIA
-- **Status:** PENDENTE
-- **Sprint planejado:** Futuro
-
-**Solução proposta:**
-
-1. Keybindings `←→` para mudar dia
-2. Range: hoje -3 até hoje +3 (7 dias)
-3. Tecla `0` ou `Home` retorna para hoje
-4. `loader.ensure_instances(date)` para dia selecionado
-5. Indicador visual no header (`◀`/`▶` + data)
-6. Timer desabilitado em dias != hoje
-
-**Referências:** BR-TUI-030
+- **Status:** Movido para roadmap v1.8.0
+- **Ver:** `docs/reference/roadmap.md` seção v1.8.0, BR-TUI-030
 
 ### DT-064: CVE-2026-4539 pygments sem fix disponível
 
@@ -690,14 +660,10 @@ pip-audit falhava no CI porque pygments 2.19.2 tinha CVE-2026-4539 — ReDoS loc
 
 **Referências:** https://github.com/pygments/pygments/issues/3058
 
-### DT-065: Responsividade em terminal 80x24
+### DT-065: Layout adaptativo (RECLASSIFICADO → Feature)
 
-Snapshot de 80x24 mostra apenas sidebar + agenda. Hábitos, Tarefas, Timer e Métricas invisíveis. A TUI deveria ter layout adaptativo: >=120 cols (2 colunas), 80-119 (1 coluna com scroll/tabs), <80 (unsupported com aviso).
-
-- **Descoberto:** 2026-03-25 (Sessão 12 — snapshot 80x24)
-- **Severidade:** MÉDIA
-- **Status:** PENDENTE
-- **Sprint planejado:** v1.7.1
+- **Status:** Movido para roadmap v1.8.0
+- **Ver:** `docs/reference/roadmap.md` seção v1.8.0
 
 ### DT-066: Placeholders truncados nos panels
 
@@ -726,14 +692,10 @@ O HabitsPanel exibe hábitos na ordem de criação (ID sequencial), não por hor
 - **Status:** PENDENTE
 - **Sprint planejado:** Sprint futuro
 
-### DT-069: Tela de configurações não documentada/planejada
+### DT-069: Settings screen (RECLASSIFICADO → Feature)
 
-Não existe BR nem ADR para tela de configurações. Candidatas: tema, atalhos, caminho do banco, formato de hora, idioma.
-
-- **Descoberto:** 2026-03-27 (Sessão 13)
-- **Severidade:** BAIXA
-- **Status:** PENDENTE
-- **Sprint planejado:** Sprint futuro
+- **Status:** Movido para roadmap v1.8.0
+- **Ver:** `docs/reference/roadmap.md` seção v1.8.0
 
 ## 4. Política de Gestão
 

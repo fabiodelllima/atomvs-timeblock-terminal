@@ -200,6 +200,22 @@ A estratégia de implementação prioriza as telas de maior impacto no uso diár
 
 ---
 
+### v1.8.0 - Agenda, Sidebar e UX (Planejado)
+
+Foco em tornar a TUI confortável para uso diário. Inclui features anteriormente registradas como débito técnico (DT-019, DT-060, DT-063, DT-065, DT-069) que foram reclassificadas — são funcionalidades novas, não dívida.
+
+| Feature                       | Origem | Descrição                                                                 | Dependência         |
+| ----------------------------- | ------ | ------------------------------------------------------------------------- | ------------------- |
+| AgendaPanel scroll horizontal | DT-061 | Separar margem de horas do conteúdo, `ScrollableContainer` com `scroll_x` | ADR-041             |
+| Blocos de tempo contínuos     | DT-062 | Accent bar + cor sólida, sem linhas cortando blocos                       | ADR-041             |
+| Paginação de dias             | DT-063 | Setas para navegar -3/+3 dias, `0`/`Home` retorna ao hoje                 | ADR-041, BR-TUI-030 |
+| Sidebar redesign              | DT-060 | Tabs horizontais no header ou modo oculto (zero cols perdidas)            | ADR-042             |
+| Layout adaptativo             | DT-065 | >=120 cols (2 colunas), 80-119 (1 coluna com scroll/tabs), <80 (aviso)    | —                   |
+| Command Bar                   | DT-019 | Barra de comandos com prefixo `/` ou `Ctrl+P`                             | —                   |
+| Settings screen               | DT-069 | Tela de configurações: tema, atalhos, caminho do banco, formato de hora   | —                   |
+
+---
+
 ### v2.0.0 - REST API (Q2 2026)
 
 A migração para API REST representa a mudança arquitetural mais significativa do projeto: separação entre frontend e backend, autenticação, e persistência em banco de dados relacional. A camada de services já existente — validada por 1071 testes e consumida tanto pela CLI quanto pela TUI — será exposta via endpoints RESTful, minimizando o risco de regressão na lógica de negócio.
