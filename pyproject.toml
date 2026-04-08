@@ -52,6 +52,8 @@ dev = [
     "mypy>=1.18.0",
     "types-python-dateutil>=2.9.0",
     "textual-dev>=1.7.0",
+    "pytest-textual-snapshot>=1.1.0",
+    "syrupy>=4.8.0",
 ]
 
 [project.scripts]
