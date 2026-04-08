@@ -11,6 +11,10 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
 SIDEBAR_ITEMS = {
     "dashboard": "Dash",
     "routines": "Rotin",
@@ -55,7 +59,7 @@ class NavBar(Widget):
                 "[bold #CBA6F7]◉ ATOMVS[/bold #CBA6F7]\n[#45475A]══════════════════[/#45475A]"
             )
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     def _render_nav(self) -> None:
         """Renderiza itens de navegação."""
@@ -69,7 +73,7 @@ class NavBar(Widget):
         try:
             self.query_one("#sidebar-nav", Static).update("\n".join(lines))
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     def _render_footer(self) -> None:
         """Renderiza keybindings de referência."""
@@ -78,4 +82,4 @@ class NavBar(Widget):
                 "[#45475A]───────────────────[/#45475A]\n[dim]Ctrl+Q quit[/dim]\n[dim]? help[/dim]"
             )
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
