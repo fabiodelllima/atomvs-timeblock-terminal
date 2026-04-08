@@ -19,6 +19,10 @@ from textual.containers import Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label, Select
 
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 class FormField:
     """Definição de um campo do formulário."""
@@ -165,6 +169,7 @@ class FormModal(ModalScreen[dict[str, Any] | None]):
                 if not (1 <= day <= 31 and 1 <= month <= 12 and year >= 1900):
                     return "Data inválida"
             except ValueError:
+                logger.debug("Exceção capturada", exc_info=True)
                 return "Formato: DD/MM ou DD/MM/YYYY"
 
         return ""
