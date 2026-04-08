@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.29.0
+**Versão:** 2.31.0
 
 **Status:** SSOT
 
@@ -97,7 +97,7 @@
 - [x] DT016 — load_active_timer elapsed/name
 - [x] DT017 — MetricsPanel stub
 - [x] DT018 — load_tasks omite completed/cancelled
-- [ ] DT019 — command_bar.py vazio
+- [→] DT019 — command_bar.py vazio (→ roadmap v1.8.0)
 - [x] DT020 — Agenda viewport cortada
 - [x] DT021 — Loaders/CRUDs: ORM fora da sessão
 - [x] DT022 — Logging: adoção zero fora de habit_instance_service
@@ -136,23 +136,23 @@
 - [x] DT055 — v em hábito running não abre ConfirmDialog
 - [x] DT056 — TUI conecta a banco sem tabelas — falha silenciosa total
 - [x] DT057 — Delete de rotina falha silenciosamente na TUI
-- [ ] DT058 — Logging ausente na CLI — apenas TUI loga via service_action
+- [x] DT058 — Logging completo: CLI, TUI, widgets, excepthook global (MR !73)
 - [x] DT059 — Mensagens de migração visíveis no stdout da TUI
-- [ ] DT060 — Sidebar ocupa ~15 cols desnecessariamente
+- [→] DT060 — Sidebar redesign (→ roadmap v1.8.0)
 - [x] DT061 — AgendaPanel sem scroll horizontal (bloqueador de multi-coluna)
 - [x] DT062 — Linhas horizontais cortam blocos de tempo coloridos
-- [ ] DT063 — Agenda limitada ao dia atual (sem paginação -3/+3)
+- [→] DT063 — Paginação de dias (→ roadmap v1.8.0)
 - [x] DT064 — CVE-2026-4539 pygments sem fix disponível (Pygments 2.20.0)
-- [ ] DT065 — Responsividade em terminal 80x24
+- [→] DT065 — Layout adaptativo (→ roadmap v1.8.0)
 - [x] DT066 — Placeholders truncados nos panels (MR !64)
-- [ ] DT067 — README sem links para diagramas + 16 possivelmente desatualizados
+- [x] DT067 — Diagramas auditados (14) + README atualizado (MR !72)
 - [x] DT070 — 47 ADRs padronizados (headers, títulos, datas em PT-BR/ISO)
 - [ ] DT071 — Sem padrão de header/footer em documentação (datas, versão, status)
 - [x] DT072 — Job sync:github substituído por GitLab Push Mirroring nativo
 - [x] DT068 — Habits não ordenados por scheduled_start no dashboard
-- [ ] DT069 — Tela de configurações não documentada/planejada
+- [→] DT069 — Settings screen (→ roadmap v1.8.0)
 
-**Resolvidos:** 60/72 | **Pendentes:** 11/72 | **Aceitos:** 1/72
+**Resolvidos:** 62/72 | **Pendentes:** 4/72 | **Aceitos:** 1/72 | **Reclassificados:** 5/72
 
 ---
 
@@ -338,9 +338,10 @@
 - **Correção:** (1) `on_confirm` em `crud_routines.py` deve verificar o retorno de `service_action` e exibir `app.notify(error)` se houver erro. (2) Avaliar se a TUI deve oferecer cascade delete (como a CLI) ou apenas informar que a rotina tem hábitos e não pode ser deletada.
 - **BRs afetadas:** BR-ROUTINE-002 (soft delete), BR-TUI-016 (CRUD de rotinas)
 
-### DT-058: Logging ausente na CLI — apenas TUI loga via service_action (MEDIA)
+### DT-058: Logging ausente na CLI — apenas TUI loga via service_action (RESOLVIDO)
 
 - **Descoberto:** 21/03/2026 (análise de logs)
+- **Resolvido em:** Abr/2026 (MR !73) — sys.excepthook global, TUI _handle_exception override, logger em todos os CLI commands e 21 except blocks de widgets/screens
 - **Impacto:** Apenas chamadas via `service_action` (exclusivo da TUI) geram log entries. Operações via CLI (commands Typer) não passam por esse wrapper e não geram nenhum log. Operações externas à TUI que modifiquem o banco (create, delete, update via CLI) são invisíveis nos logs, dificultando diagnóstico de inconsistências entre CLI e TUI.
 - **Correção:** Adicionar logging estruturado nos commands da CLI, idealmente via decorator ou middleware que capture entrada, saída e erros de cada comando.
 - **BRs afetadas:** Nenhuma diretamente — observabilidade.
@@ -674,7 +675,7 @@ Mensagens "Crie uma rotina: atomvs routine ac..." cortadas dentro do panel body.
 - **Status:** RESOLVIDO (Abr/2026, MR !64)
 - **Resolvido em:** Abr/2026 — Hints movidos para footer contextual via status_bar
 
-### DT-067: README sem links para diagramas + diagramas possivelmente desatualizados
+### DT-067: README sem links para diagramas + diagramas possivelmente desatualizados (RESOLVIDO)
 
 16 diagramas em `docs/diagrams/` sem referência no README. Auditar se refletem estado atual antes de linkar. Diagramas desatualizados geram mais dano que ausência deles.
 
@@ -741,7 +742,7 @@ Refatorações catalogadas seguem nomenclatura RF-XXX com referência a Fowler (
 - [ ] RF-005 — Dict → dataclass nos panels.................. Pendente
 - [ ] RF-006 — Polimorfismo por status...................... Adiado (Sprint 6)
 - [x] RF-007 — Empty state centralizado..................... RESOLVIDO
-- [ ] RF-008 — Counter em \_refresh_content.................. Pendente
+- [ ] RF-008 — Counter em \_refresh_content................. Pendente
 - [x] RF-009 — Imports lazy eliminados...................... RESOLVIDO
 - [ ] RF-010 — Split timer_service.py (549 linhas).......... Adiado (Sprint 5)
 
@@ -778,9 +779,10 @@ Refatorações catalogadas seguem nomenclatura RF-XXX com referência a Fowler (
 | 2026-04-05 | 2.28.0 | DT-066 RESOLVIDO (MR !64), DT-065/DT-067 re-tagged para v1.7.1,        |
 |            |        | contagens atualizadas (58/71 resolvidos, 12 pendentes, 1 aceito)       |
 | 2026-04-06 | 2.29.0 | DT-072 RESOLVIDO: sync:github substituído por GitLab Push Mirroring    |
+| 2026-04-08 | 2.31.0 | DT-058 RESOLVIDO (MR !73), DT-067 RESOLVIDO (MR !72), 5 DTs reclassificados como features (→ roadmap v1.8.0) |
 
 ---
 
-**Próxima Revisão:** Release v1.7.1
+**Próxima revisão:** Release v1.7.1
 
 **Última atualização:** 5 de Abril de 2026
