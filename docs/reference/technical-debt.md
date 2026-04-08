@@ -160,7 +160,7 @@
 
 ### DT-034: mark_completed sem done_substatus (CRITICA)
 
-- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Descoberto:** 15/03/2026 (revisão de testes e2e)
 - **Impacto:** `HabitInstanceService.mark_completed()` seta `status=DONE` sem setar `done_substatus`. Viola BR-HABITINSTANCE-002 regra 1.
 - **Correção:** Abrir modal de substatus ao pressionar `v` (ADR-038 D3).
 - **BRs afetadas:** BR-HABITINSTANCE-002, BR-TUI-004
@@ -168,7 +168,7 @@
 
 ### DT-035: Undo handler nao limpa skip_reason/skip_note (CRITICA)
 
-- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Descoberto:** 15/03/2026 (revisão de testes e2e)
 - **Impacto:** Handler undo limpa `done_substatus` e `not_done_substatus` mas nao limpa `skip_reason`, `skip_note`, `completion_percentage`. Viola `validate_status_consistency()`.
 - **Correção:** Limpar todos os campos no undo.
 - **BRs afetadas:** BR-SKIP-002, BR-HABITINSTANCE-002
@@ -176,7 +176,7 @@
 
 ### DT-036: TimerStopAndDoneRequest sem handler (ALTA)
 
-- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Descoberto:** 15/03/2026 (revisão de testes e2e)
 - **Impacto:** `v` em habito com timer ativo e silenciosamente ignorado.
 - **Correção:** Implementar handler com modal de opcoes (ADR-038 D4).
 - **BRs afetadas:** BR-TUI-021
@@ -184,7 +184,7 @@
 
 ### DT-037: v (done) deveria abrir modal de substatus (ALTA)
 
-- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Descoberto:** 15/03/2026 (revisão de testes e2e)
 - **Impacto:** `v` marca done sem substatus. Viola BR-HABITINSTANCE-002.
 - **Correção:** Abrir modal com Select de DoneSubstatus (ADR-038 D3).
 - **BRs afetadas:** BR-HABITINSTANCE-002, BR-HABITINSTANCE-003
@@ -192,7 +192,7 @@
 
 ### DT-038: s (postpone) deveria abrir FormModal de edit (MEDIA)
 
-- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Descoberto:** 15/03/2026 (revisão de testes e2e)
 - **Impacto:** Handler chama `update_task` sem parametros. Nenhuma acao visivel.
 - **Correção:** `s` abre mesmo FormModal que `e` (ADR-038 D5).
 - **BRs afetadas:** BR-TASK-008, BR-TUI-018
@@ -200,7 +200,7 @@
 
 ### DT-039: s (skip) deveria abrir modal de SkipReason (MEDIA)
 
-- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Descoberto:** 15/03/2026 (revisão de testes e2e)
 - **Impacto:** `s` aplica `SkipReason.OTHER` hardcoded. Viola BR-SKIP-001.
 - **Correção:** Abrir modal com Select de SkipReason (ADR-038 D6).
 - **BRs afetadas:** BR-SKIP-001, BR-SKIP-004
@@ -208,7 +208,7 @@
 
 ### DT-040: n sem rotina: silent no-op no habits panel (MEDIA)
 
-- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Descoberto:** 15/03/2026 (revisão de testes e2e)
 - **Impacto:** `n` com habits focado e sem rotina nao faz nada.
 - **Correção:** Redirecionar para criacao de rotina (ADR-038 D9).
 - **BRs afetadas:** BR-TUI-017
@@ -216,14 +216,14 @@
 
 ### DT-041: BR-TUI-004/017/018/021 keybindings obsoletos (ALTA)
 
-- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Descoberto:** 15/03/2026 (revisão de testes e2e)
 - **Impacto:** BRs documentam Ctrl+Enter, Ctrl+S, Shift+Enter. Codigo usa v, s, space, c (ADR-037).
 - **Correção:** Reescrever secoes de keybindings nas 4 BRs.
 - **BRs afetadas:** BR-TUI-004, BR-TUI-017, BR-TUI-018, BR-TUI-021
 
 ### DT-042: BR-HABITINSTANCE-001 nao documenta undo (ALTA)
 
-- **Descoberto:** 15/03/2026 (revisao de testes e2e)
+- **Descoberto:** 15/03/2026 (revisão de testes e2e)
 - **Impacto:** BR define DONE e NOT_DONE como [FINAL]. Codigo implementa undo.
 - **Correção:** Adicionar transicao undo + BR-HABITINSTANCE-007 (ADR-038 D1).
 - **BRs afetadas:** BR-HABITINSTANCE-001
@@ -232,14 +232,14 @@
 
 ### DT-043: DEFAULT_CSS inline no FormModal (BAIXA)
 
-- **Descoberto:** 17/03/2026 (revisao de codigo)
+- **Descoberto:** 17/03/2026 (revisão de codigo)
 - **Impacto:** FormModal define ~50 linhas de CSS via DEFAULT_CSS inline. O projeto usa pasta dedicada para TCSS modularizado.
 - **Correção:** Mover CSS para arquivo TCSS dedicado e usar CSS_PATH. Alinhar com padrao do projeto.
 - **BRs afetadas:** BR-TUI-020
 
 ### DT-044: basedpyright em modo standard gera ~190 warnings (MEDIA)
 
-- **Descoberto:** 17/03/2026 (configuracao basedpyright no Zed)
+- **Descoberto:** 17/03/2026 (configuração basedpyright no Zed)
 - **Impacto:** App[Unknown], dict[Unknown, Unknown], reportAny, reportUnusedCallResult em screen.py, crud_habits.py, form_modal.py e demais. Modo reduzido para basic temporariamente no pyproject.toml.
 - **Correção:** Adicionar type arguments a App, tipar dicts com TypedDict, resolver reportAny com casts explicitos. Restaurar typeCheckingMode = standard apos limpeza.
 - **BRs afetadas:** Nenhuma diretamente — qualidade de codigo.
