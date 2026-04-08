@@ -10,6 +10,9 @@ from textual.reactive import reactive
 from textual.widgets import Static
 
 from timeblock.tui.session import service_action
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 WEEKDAYS_FULL_PT = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
 MONTHS_FULL_PT = [
@@ -72,6 +75,7 @@ class HeaderBar(Static):
         try:
             available = self.size.width or 80
         except Exception:
+            logger.debug("Exceção capturada", exc_info=True)
             available = 80
         gap = max(2, available - len(screen_label) - len(date_str) - 2)
         self.border_title = f"{screen_label} [#45475A]{'─' * gap}[/#45475A] {date_str}"
@@ -110,6 +114,7 @@ class HeaderBar(Static):
                 f"[bold]{result.name}[/bold]  [dim]│[/dim]  0/0 [#45475A]░░░░░░░░░░[/#45475A]  0%"
             )
         except Exception:
+            logger.debug("Exceção capturada", exc_info=True)
             return "[dim][Sem rotina][/dim]  [dim]│[/dim]  0/0 [#45475A]░░░░░░░░░░[/#45475A]  0%"
 
     @staticmethod
@@ -123,6 +128,7 @@ class HeaderBar(Static):
                 return "[dim]0 tasks[/dim]"
             return f"{len(result)} tasks pendentes"
         except Exception:
+            logger.debug("Exceção capturada", exc_info=True)
             return "[dim]0 tasks[/dim]"
 
     @staticmethod
@@ -132,4 +138,5 @@ class HeaderBar(Static):
             # TODO: Integrar com TimerService (requer habit_instance_id)
             return "[dim]⏹ --:--[/dim]"
         except Exception:
+            logger.debug("Exceção capturada", exc_info=True)
             return "[dim]⏹ --:--[/dim]"
