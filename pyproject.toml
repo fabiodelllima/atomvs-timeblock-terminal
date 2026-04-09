@@ -3,7 +3,7 @@ requires = ["setuptools>=75.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "atomvs-timeplanner-terminal"
+name = "atomvs-timeblock-terminal"
 version = "1.7.1"
 description = "Terminal-based time management with CLI and TUI interfaces"
 readme = "README.md"
@@ -22,12 +22,6 @@ classifiers = [
     "Typing :: Typed",
 ]
 
-[project.urls]
-Repository = "https://gitlab.com/delimafabio/atomvs-timeblock-terminal"
-Mirror = "https://github.com/fabiodelllima/atomvs-timeblock-terminal"
-Documentation = "https://gitlab.com/delimafabio/atomvs-timeblock-terminal/-/tree/develop/docs"
-Changelog = "https://gitlab.com/delimafabio/atomvs-timeblock-terminal/-/blob/develop/CHANGELOG.md"
-
 dependencies = [
     "typer>=0.19.0",
     "rich>=14.0.0",
@@ -35,6 +29,13 @@ dependencies = [
     "python-dateutil>=2.9.0",
     "python-json-logger>=3.0.0",
 ]
+
+[project.urls]
+Repository = "https://gitlab.com/delimafabio/atomvs-timeblock-terminal"
+Mirror = "https://github.com/fabiodelllima/atomvs-timeblock-terminal"
+Documentation = "https://gitlab.com/delimafabio/atomvs-timeblock-terminal/-/tree/develop/docs"
+Changelog = "https://gitlab.com/delimafabio/atomvs-timeblock-terminal/-/blob/develop/CHANGELOG.md"
+
 
 [project.optional-dependencies]
 tui = [
