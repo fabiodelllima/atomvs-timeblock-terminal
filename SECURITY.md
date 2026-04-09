@@ -9,14 +9,15 @@
 
 ## Reporting a Vulnerability
 
-To report a security vulnerability, email **fabiodelllima@gmail.com** with:
+> [!CAUTION]
+> **Do not open public issues for security vulnerabilities.** Use the private disclosure process below.
+
+To report a security vulnerability, email **delimafabio@proton.me** with:
 
 - Description of the vulnerability
 - Steps to reproduce
 - Estimated impact and severity
 - Any suggested mitigation
-
-**Do not open public issues for security vulnerabilities.**
 
 ### Response Timeline
 
@@ -82,10 +83,11 @@ A pre-push hook runs the complete test suite (unit, integration, BDD, e2e) and m
 | Logs          | `~/.local/share/atomvs/logs/atomvs.jsonl`  | Local |
 | Configuration | Project root (`pyproject.toml`)            | Local |
 
+> [!NOTE]
+> No data leaves the machine. There is no network communication, no telemetry, no analytics. All paths follow XDG Base Directory conventions (Linux).
+
 - The database contains user-created routines, habits, tasks, and time logs
 - Logs use JSON Lines format with rotation (10MB, 5 backups) and contain timestamps of user operations — no PII beyond what the user types
-- No data leaves the machine. There is no network communication, no telemetry, no analytics
-- All paths follow XDG Base Directory conventions
 
 ## Dependency Policy
 
