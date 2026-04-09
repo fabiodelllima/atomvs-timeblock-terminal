@@ -476,10 +476,10 @@ def load_tasks() -> list[dict]:
 
 
 def load_active_timer() -> dict[str, Any] | None:
-    """Carrega timer ativo como dict com elapsed MM:SS e nome do hábito (DT-016).
+    """Carrega timer ativo como dict com elapsed MM:SS ou HH:MM:SS e nome do hábito (DT-016, #5).
 
     Retorna dict compatível com TimerPanel:
-        - id, status, elapsed (str MM:SS), name (str), habit_instance_id
+        - id, status, elapsed (str MM:SS ou HH:MM:SS), name (str), habit_instance_id
     Ou None se nenhum timer ativo.
     """
 
@@ -494,6 +494,7 @@ def load_active_timer() -> dict[str, Any] | None:
             paused_total += (datetime.now() - timer.pause_start).total_seconds()
         elapsed_secs = max(int(total_elapsed - paused_total), 0)
         minutes, seconds = divmod(elapsed_secs, 60)
+        hours, minutes = divmod(minutes, 60)
 
         name = ""
         if timer.habit_instance_id:
@@ -506,7 +507,9 @@ def load_active_timer() -> dict[str, Any] | None:
         return {
             "id": timer.id,
             "status": timer.status.value,
-            "elapsed": f"{minutes:02d}:{seconds:02d}",
+            "elapsed": f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+            if hours
+            else f"{minutes:02d}:{seconds:02d}",
             "elapsed_seconds": elapsed_secs,
             "name": name,
             "habit_instance_id": timer.habit_instance_id,
