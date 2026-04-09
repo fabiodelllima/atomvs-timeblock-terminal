@@ -319,3 +319,51 @@ PauseNote:
 - `test_br_timer_009_pause_note_saved_with_tag`
 - `test_br_timer_009_multiple_pauses_multiple_notes`
 - `test_br_timer_009_metrics_aggregate_by_tag`
+
+---
+
+### BR-TIMER-010: Rastreamento de Atividade Durante Pausa
+
+**Descrição:** Quando o usuário dá resume após uma pausa, o sistema oferece um modal para registrar o que foi feito durante o intervalo. Diferente de BR-TIMER-009 (que categoriza o _motivo_ da pausa), esta regra rastreia a _atividade realizada_ durante o intervalo — alinhado com o princípio de Atomic Habits (CLEAR, 2018, Cap. 16) de tornar o uso do tempo visível e rastreável.
+
+**Fases:**
+
+Fase 1 (v1.8.0): registro descritivo. Fase 2 (futuro, atrás de feature toggle): atribuição retroativa de tempo.
+
+**Regras — Fase 1:**
+
+1. Ao pressionar resume, exibir modal com três opções: (a) selecionar outro habit da rotina ativa, (b) selecionar uma task pendente, (c) nota livre (campo de texto)
+2. O modal é opcional — "Continuar sem registrar" fecha e resume imediatamente
+3. Registro salvo como `PauseLog` com campo `note: str | None` (novo campo)
+4. Cada `TimeLog` pode ter múltiplos `PauseLog` (múltiplas pausas por sessão)
+5. O timer resume imediatamente após fechar o modal
+6. AgendaPanel NÃO é alterado na Fase 1
+
+**Regras — Fase 2 (atrás de toggle, ADR-048):**
+
+7. Se o usuário selecionou habit/task, o tempo da pausa pode ser atribuído retroativamente como sessão daquele item
+8. Blocos atribuídos aparecem no AgendaPanel com indicador visual de "sessão durante pausa"
+9. Depende de ADR-041 (AgendaPanel redesign) para renderização dos blocos
+
+**Modelo de dados — alteração em PauseLog:**
+
+```python
+PauseLog:
+  id: int (PK)
+  timelog_id: int (FK -> time_log.id)
+  pause_start: datetime
+  pause_end: datetime | None
+  note: str | None          # NOVO — texto livre ou nome do item selecionado
+  activity_type: str | None # NOVO — "habit", "task", "free", None
+  activity_id: int | None   # NOVO — FK para habit_instance ou task (Fase 2)
+  created_at: datetime
+```
+
+**Testes:**
+
+- `test_br_timer_010_resume_shows_activity_modal`
+- `test_br_timer_010_skip_modal_resumes_immediately`
+- `test_br_timer_010_note_saved_to_pauselog`
+- `test_br_timer_010_select_habit_saves_reference`
+- `test_br_timer_010_select_task_saves_reference`
+- `test_br_timer_010_multiple_pauses_multiple_logs`
