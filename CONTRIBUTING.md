@@ -33,7 +33,10 @@ pip install -e ".[tui,dev]"
 
 ### Additional Test Dependencies
 
-The snapshot testing tools are not included in the `[dev]` extras and must be installed separately. The `pytest` version is pinned for compatibility with `pytest-textual-snapshot` 1.1.0 on Python 3.14:
+The snapshot testing tools are not included in the `[dev]` extras and must be installed separately.
+
+> [!IMPORTANT]
+> The `pytest` version must be pinned to `8.4.2` for compatibility with `pytest-textual-snapshot` 1.1.0 on Python 3.14. Using a different version will cause snapshot tests to fail.
 
 ```bash
 pip install "pytest-textual-snapshot>=1.1.0" "syrupy>=4.8.0" "pytest==8.4.2"
@@ -41,7 +44,8 @@ pip install "pytest-textual-snapshot>=1.1.0" "syrupy>=4.8.0" "pytest==8.4.2"
 
 ### Known Portability Issue
 
-Editable installs (`pip install -e .`) compile `.pyc` files with absolute paths. If you move the project directory, tests will fail with `FileNotFoundError`. The fix is:
+> [!WARNING]
+> Editable installs (`pip install -e .`) compile `.pyc` files with absolute paths. If you move the project directory, tests will fail with `FileNotFoundError`. You must recreate the venv:
 
 ```bash
 find . -name "__pycache__" -exec rm -rf {} +
@@ -173,16 +177,14 @@ basedpyright src/
 
 ### Snapshot Testing
 
-E2E snapshot tests live in `tests/e2e/` with snapshots stored in `tests/e2e/__snapshots__/`. To update snapshots after intentional visual changes:
+E2E snapshot tests live in `tests/e2e/` with snapshots stored in `tests/e2e/__snapshots__/`. Always run update and verify in sequence (`&&`) to catch date-sensitive drift:
 
 ```bash
 python -m pytest tests/e2e/test_snapshots.py --snapshot-update && \
 python -m pytest tests/e2e/test_snapshots.py
 ```
 
-Always run update and verify in sequence (`&&`) to catch date-sensitive drift. Test files use `App` instances (not file paths) to enable isolated test databases.
-
-Note: `pytest-textual-snapshot` 1.1.0 has a Python 3.14 compatibility issue. A monkey-patch in `tests/e2e/conftest.py` wraps `node.reportinfo()` with `Path()` to work around it.
+Test files use `App` instances (not file paths) to enable isolated test databases. Note that `pytest-textual-snapshot` 1.1.0 has a Python 3.14 compatibility issue — a monkey-patch in `tests/e2e/conftest.py` wraps `node.reportinfo()` with `Path()` to work around it.
 
 ## Documentation
 
@@ -233,6 +235,8 @@ docs/
 6. Push — the pre-push hook runs the full test suite automatically
 7. Open MR targeting `develop` — CI pipeline must pass (7 jobs)
 8. After review and green pipeline, merge with `--no-ff`
+
+The pre-push hook runs the full suite before each push. If you need to skip it temporarily (e.g., WIP push to a feature branch), use `git push --no-verify` — but never to `develop` or `main`.
 
 ### Code Review Criteria
 
