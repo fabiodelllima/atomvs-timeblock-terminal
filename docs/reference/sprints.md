@@ -1,6 +1,6 @@
 # Sprints
 
-- **Versão:** 7.0.0
+- **Versão:** 1.7.2
 - **Status:** Single Source of Truth (SSOT)
 
 ---
@@ -15,7 +15,7 @@ O histórico de sprints concluídas (v1.0.0 a v1.7.0) está arquivado em `docs/r
 
 ## v1.7.1 — Polish e Docs
 
-A v1.7.1 é um release de polimento pós-v1.7.0. Não adiciona funcionalidades novas — foca em documentação, auditoria de diagramas, padronização de ADRs e responsividade. O objetivo é consolidar a qualidade documental antes de avançar para v1.8.0 (Agenda e Sidebar).
+A v1.7.1 foi entregue em 2026-04-09 (tag `v1.7.1`, commit `723a41a`). Release de polimento pós-v1.7.0 focada em documentação, auditoria de diagramas e observabilidade. Sprint 7.3 (padronização ADRs) foi deferida para v1.8.0 como DT-070/DT-071.
 
 **Métricas de acompanhamento:**
 
@@ -28,7 +28,7 @@ A v1.7.1 é um release de polimento pós-v1.7.0. Não adiciona funcionalidades n
 
 ---
 
-### Sprint 7.1 — Documentação Pós-Release [WIP]
+### Sprint 7.1 — Documentação Pós-Release [DONE]
 
 O Sprint 7.1 atualiza toda a documentação de referência para refletir o estado pós-v1.7.0 e resolve DTs de baixa complexidade documentais.
 
@@ -44,7 +44,7 @@ O Sprint 7.1 atualiza toda a documentação de referência para refletir o estad
 
 ---
 
-### Sprint 7.2 — Auditoria de Diagramas e README [PENDENTE]
+### Sprint 7.2 — Auditoria de Diagramas e README [DONE]
 
 | Item  | Descrição                                              | DT     |
 | ----- | ------------------------------------------------------ | ------ |
@@ -55,13 +55,46 @@ O Sprint 7.1 atualiza toda a documentação de referência para refletir o estad
 
 ---
 
-### Sprint 7.3 — Padronização ADRs e Docs [PENDENTE]
+### Sprint 7.3 — Padronização ADRs e Docs [DEFERIDO → v1.8.0]
 
 | Item  | Descrição                                                | DT     |
 | ----- | -------------------------------------------------------- | ------ |
 | 7.3.1 | Script para padronizar headers de 46 ADRs (EN → PT-BR)   | DT-070 |
 | 7.3.2 | Definir e documentar padrão de header/footer para docs   | DT-071 |
 | 7.3.3 | Documentar responsividade 80x24 como limitação conhecida | DT-065 |
+
+---
+
+## v1.7.2 — Polish Visual e Correções Urgentes
+
+Release focada em bugs descobertos em uso real do dashboard e polish visual. Tracking via GitLab Issues (milestone v1.7.2). A migração de `technical-debt.md` + `sprints.md` para GitLab Issues foi decidida na Sessão 19.
+
+**Branch:** `chore/gitlab-issues-and-docs` (base: v1.7.1)
+
+**Critérios de conclusão:** pipeline verde, 0 erros basedpyright, sem regressão em snapshots e2e.
+
+### Bugs (prioridade alta)
+
+| Issue | Título                                              | Status  |
+| ----- | --------------------------------------------------- | ------- |
+| #5    | TimerPanel não converte >60min para H:MM:SS         | backlog |
+| #36   | Impossível iniciar nova sessão em habit já done     | backlog |
+| #33   | Header exibe placeholders em vez de dados dinâmicos | backlog |
+| #1    | update não propaga horários para instâncias         | backlog |
+| #2    | generate cria duplicatas                            | backlog |
+
+### Correções e polish (prioridade média/baixa)
+
+| Issue | Título                                              | Status  |
+| ----- | --------------------------------------------------- | ------- |
+| #30   | Corrigir title/subtitle no header                   | backlog |
+| #31   | Reordenar panels (timer > habits > tasks > metrics) | backlog |
+| #29   | Remover hint do TimerPanel                          | backlog |
+| #32   | Footer — cores dos hints e margem inferior          | backlog |
+| #34   | Remover régua no AgendaPanel                        | backlog |
+| #11   | DT-073: __pycache__ paths absolutos                 | backlog |
+
+**Ordem de implementação recomendada:** #5 (isolado, localização conhecida) -> #36 (investigar validação de estado) -> #33 (investigar widgets do header) -> #1/#2 (bugs pré-existentes) -> UI polish (#29, #30, #31, #32, #34) como batch -> #11.
 
 ---
 
@@ -96,5 +129,5 @@ A v1.8.0 implementa o redesign da agenda com blocos de tempo contínuos, scroll 
 
 ---
 
-- **Próxima revisão:** Após Sprint 7.1 concluída
-- **Última atualização:** 5 de Abril de 2026
+- **Próxima revisão:** Após v1.7.2 entregue
+- **Última atualização:** 9 de Abril de 2026

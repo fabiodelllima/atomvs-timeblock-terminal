@@ -1,6 +1,6 @@
 # Roadmap
 
-- **Versão:** 9.0.0
+- **Versão:** 1.7.2
 - **Status:** Single Source of Truth (SSOT)
 - **Documentos relacionados:** architecture.md, business-rules.md, quality-metrics.md, technical-debt.md
 
@@ -14,7 +14,7 @@ A v1.7.0 completou a TUI com dashboard interativo, CRUD contextual via modais, t
 
 **Estado Atual (Abril 2026):**
 
-- Versão: v1.7.1 (release em preparação)
+- Versão: v1.7.1 (entregue), v1.7.2 (em desenvolvimento)
 - Qualidade: ~82% cobertura (threshold 80%), 0 erros basedpyright (standard), 1345 testes
 - Funcionalidade: CLI completa, TUI dashboard interativo com CRUD, timer, métricas
 - Infraestrutura: CI/CD dual-repo com Docker, DevSecOps, 7 jobs paralelos
@@ -62,6 +62,7 @@ Cada versão expandiu funcionalidade enquanto manteve ou melhorou métricas de q
 | v1.5.0 | 2026-02    | CI/CD Dual-Repo, i18n            | CHANGELOG.md |
 | v1.6.0 | 2026-02    | Docker, DevSecOps, 87% cobertura | CHANGELOG.md |
 | v1.7.0 | 2026-04-05 | TUI Completa, 1340+ testes       | CHANGELOG.md |
+| v1.7.1 | 2026-04-09 | Consolidação, Logging, Docs      | CHANGELOG.md |
 
 O detalhamento de métricas por release está disponível em `docs/reference/quality-metrics.md`.
 
@@ -129,7 +130,7 @@ A introdução da TUI com Textual marcou a transição de ferramenta de linha de
 
 Entregas: dashboard com 5 painéis (Agenda, Habits, Tasks, Timer, Metrics), CRUD contextual via modais (ADR-034), quick actions via message pattern, timer live com `set_interval`, MetricsPanel com streak/heatmap (BR-TUI-033), 61 cenários BDD, 117 testes e2e com snapshot testing.
 
-### v1.7.1 — Consolidação e Qualidade (Em preparação)
+### v1.7.1 — Consolidação e Qualidade (Entregue — 2026-04-09)
 
 Release focada em observabilidade, documentação técnica e housekeeping. Sem features novas — apenas qualidade e preparação para v1.8.0.
 
@@ -142,6 +143,26 @@ Release focada em observabilidade, documentação técnica e housekeeping. Sem f
 | `technical-debt.md` reorganizado    | chore/v1.7.1-release-prep |
 | Dev deps corrigidas (pyproject)     | chore/v1.7.1-release-prep |
 | CONTRIBUTING.md e SECURITY.md       | chore/v1.7.1-release-prep |
+
+### v1.7.2 — Polish Visual e Correções Urgentes (Planejado)
+
+Release focada em correções de bugs descobertos em uso real do dashboard e polish visual. Primeira release planejada inteiramente via GitLab Issues (milestone v1.7.2, 11 issues). O tracking migrou de `technical-debt.md` + `sprints.md` para GitLab Issues com labels estruturadas e milestones — decisão documentada no handoff da Sessão 19.
+
+| Issue | Título                                              | Tipo    | Prioridade |
+| ----- | --------------------------------------------------- | ------- | ---------- |
+| #5    | TimerPanel não converte >60min para H:MM:SS         | bug     | high       |
+| #36   | Impossível iniciar nova sessão em habit já done     | bug     | high       |
+| #33   | Header exibe placeholders em vez de dados dinâmicos | bug     | high       |
+| #1    | update não propaga horários para instâncias         | bug     | high       |
+| #2    | generate cria duplicatas                            | bug     | high       |
+| #30   | Corrigir title/subtitle no header                   | bug     | medium     |
+| #31   | Reordenar panels (timer > habits > tasks > metrics) | feature | medium     |
+| #29   | Remover hint do TimerPanel                          | feature | low        |
+| #32   | Footer — cores dos hints e margem inferior          | feature | low        |
+| #34   | Remover régua no AgendaPanel                        | feature | low        |
+| #11   | DT-073: **pycache** paths absolutos                 | debt    | low        |
+
+**Critérios de release:** pipeline verde (8 jobs), 0 erros basedpyright standard, todos os testes passando, sem regressão visual nos snapshots e2e.
 
 ### v1.8.0 — Agenda, Sidebar e UX (Planejado)
 
@@ -158,6 +179,9 @@ Foco em tornar a TUI confortável para uso diário prolongado. Inclui features a
 | Settings screen               | DT-069  | Tela de configurações: tema, atalhos, caminho do banco, formato de hora                            | —                   |
 | Rename repositório            | —       | `atomvs-timeblock-terminal` → `atomvs-timeplanner-terminal` (GitLab, GitHub, Mirroring, URLs, etc) | ADR-045             |
 | Rename src/                   | ADR-045 | `src/timeblock/` → `src/atomvs/` (481 imports em 161 arquivos)                                     | Rename repo         |
+| Backup do banco               | #22     | Fase 1: CLI `atomvs backup/restore`, Fase 2: automático na inicialização                           | —                   |
+| Rastreamento de pausas        | #21     | Fase 1: modal no resume com nota/tag, Fase 2: atribuição retroativa a habit/task                   | ADR-049, PauseLog   |
+| Feature toggles               | #28     | Runtime config via SQLite ou TOML para ocultar features incompletas                                | ADR-048             |
 
 **Features candidatas (v1.8.0+ ou v1.9.0):**
 
@@ -239,5 +263,5 @@ Documentação (Diataxis):
 
 ---
 
-- **Próxima revisão:** Release v1.8.0
-- **Última atualização:** 8 de Abril de 2026
+- **Próxima revisão:** Release v1.7.2
+- **Última atualização:** 9 de Abril de 2026
