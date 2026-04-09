@@ -59,11 +59,12 @@ migrate_*.py
 docs/core/ci-optimization.md
 docs/sysdesign/
 
-# Claude Code automation (local only)
+# CC automation (local only)
 CLAUDE.md
 TASK.md
 run-overnight.sh
 
 # Design artifacts (box-drawing, themes, system-design)
 design/
+docs/wiki/
 snapshot_report.html
