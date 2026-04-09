@@ -1,4 +1,4 @@
-"""AtomvsApp - Aplicação TUI principal."""
+"""ATOMVS - Aplicação TUI"""
 
 from pathlib import PurePath
 from typing import Any, ClassVar
@@ -17,6 +17,9 @@ from timeblock.tui.widgets.header_bar import HeaderBar
 from timeblock.tui.widgets.help_overlay import HelpOverlay
 from timeblock.tui.widgets.nav_bar import NavBar
 from timeblock.tui.widgets.status_bar import StatusBar
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 SCREENS = {
     "dashboard": "Dashboard",
@@ -80,8 +83,24 @@ class TimeBlockApp(App):
 
     def on_mount(self) -> None:
         """Oculta todas as screens exceto Dashboard."""
+        logger.info("TUI inicializada — screen: dashboard")
         for name, screen_id in SCREEN_IDS.items():
             self.query_one(f"#{screen_id}").display = name == "dashboard"
+
+    def _handle_exception(self, error: Exception) -> None:
+        """Loga exceções não capturadas antes de delegar ao Textual.
+
+        O Textual exibe traceback visual e encerra o app. Este override
+        garante que o erro também fique registrado no arquivo JSON Lines
+        para consulta posterior.
+        """
+        logger.critical(
+            "Exceção não capturada na TUI: %s: %s",
+            type(error).__name__,
+            error,
+            exc_info=True,
+        )
+        super()._handle_exception(error)
 
     async def action_switch_screen(self, screen: str) -> None:
         """Alterna a screen ativa via display toggle."""
@@ -101,6 +120,7 @@ class TimeBlockApp(App):
 
         self.query_one(HeaderBar).update_screen(screen)
         self.query_one(NavBar).update_active(screen)
+        logger.debug("Screen alterada: %s", screen)
 
     def on_descendant_focus(self, event: Any) -> None:
         """Atualiza footer quando foco muda entre panels (DT-066)."""
@@ -112,7 +132,7 @@ class TimeBlockApp(App):
                     hint = getattr(widget, "_placeholder_hint", "")
                 self.query_one(StatusBar).update_focused_panel(widget.id, context_hint=hint)
             except Exception:
-                pass
+                logger.debug("Falha ao atualizar status bar para widget %s", widget.id)
 
     async def action_toggle_help(self) -> None:
         """Exibe ou fecha o overlay de ajuda."""
@@ -134,5 +154,6 @@ class TimeBlockApp(App):
 
     async def action_quit(self) -> None:
         """Faz backup e encerra a aplicação."""
+        logger.info("Encerrando TUI — backup de shutdown")
         create_backup(label="shutdown")
         self.exit()

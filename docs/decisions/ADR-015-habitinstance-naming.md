@@ -1,12 +1,11 @@
-# ADR-006: Manter HabitInstance no Código, "Hábitos Atômicos" no Marketing
+# ADR-015: Manter HabitInstance no Código, "Hábitos Atômicos" no Marketing
 
-**Status:** ACEITO
-
-**Data:** 03 de Novembro de 2025
-
-**Contexto:** v1.2.0 - Refatoração HabitAtom
+- **Status:** Aceito
+- **Data:** 2025-11-03
 
 ## Contexto
+
+**Contexto:** v1.2.0 - Refatoração HabitAtom
 
 Debate sobre renomear `HabitInstance` → `HabitAtom` em todo o código (26 arquivos, 141 referências) para alinhar com filosofia "Atomic Habits" de James Clear.
 
@@ -75,4 +74,4 @@ class HabitInstance(SQLModel):
 
 ---
 
-**Relacionado:** PHILOSOPHY.md, README.md, v1.2.0 Sprint 1.4
+- **Relacionado:** ** PHILOSOPHY.md, README.md, v1.2.0 Sprint 1.4

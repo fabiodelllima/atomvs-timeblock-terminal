@@ -13,6 +13,10 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 class CRUDScreen(Widget):
     """Base reutilizável para screens com operações CRUD."""
@@ -156,7 +160,7 @@ class CRUDScreen(Widget):
                     "[dim]y[/dim] Confirmar  [dim]n/esc[/dim] Cancelar"
                 )
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     # ==================== Watchers ====================
 

@@ -1,10 +1,11 @@
 # ADR-020: Padrão de Nomenclatura de Regras de Negócio
 
 - **Status:** Aceito
-- **Data:** 11 de Novembro de 2025
-- **Contexto:** Sprint 2 - Test Refactoring
+- **Data:** 2025-11-10
 
 ## Contexto
+
+**Contexto:** Sprint 2 - Test Refactoring
 
 Durante o refactoring de testes (Sprint 2), identificamos que a nomenclatura de Business Rules evoluiu de forma inconsistente:
 
@@ -131,6 +132,6 @@ Novo:   BR-TASK-CREATE-001 (criação de task - claro!)
 
 ---
 
-**Relacionado:** ADR-018 (Language Standards), ADR-019 (Test Naming)
+- **Relacionado:** ** ADR-018 (Language Standards), ADR-019 (Test Naming)
 
 **Revisão:** Após conclusão da migração de docs

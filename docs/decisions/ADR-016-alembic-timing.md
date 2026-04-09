@@ -1,12 +1,11 @@
-# ADR-007: Implementar Alembic em v1.3.0, Não v1.2.0
+# ADR-016: Implementar Alembic em v1.3.0, Não v1.2.0
 
-**Status:** ACEITO
-
-**Data:** 03 de Novembro de 2025
-
-**Contexto:** v1.2.0 - Infraestrutura
+- **Status:** Aceito
+- **Data:** 2025-11-03
 
 ## Contexto
+
+**Contexto:** v1.2.0 - Infraestrutura
 
 Projeto com 1 usuário (desenvolvedor). Debate sobre quando implementar Alembic (versionamento de schema de banco).
 
@@ -70,4 +69,4 @@ Demonstra:
 
 ---
 
-**Relacionado:** ADR-008 (Ambientes), v1.3.0 roadmap
+- **Relacionado:** ** ADR-008 (Ambientes), v1.3.0 roadmap

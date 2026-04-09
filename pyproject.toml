@@ -3,10 +3,24 @@ requires = ["setuptools>=75.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "atomvs-timeplanner-tui"
-version = "1.7.0"
+name = "atomvs-timeblock-terminal"
+version = "1.7.1"
 description = "Terminal-based time management with CLI and TUI interfaces"
+readme = "README.md"
 requires-python = ">=3.13"
+authors = [
+    { name = "Fábio de Lima", email = "fabiodelllima@gmail.com" },
+]
+keywords = ["time-management", "habits", "terminal", "tui", "cli", "atomic-habits"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Office/Business :: Scheduling",
+    "Typing :: Typed",
+]
 
 dependencies = [
     "typer>=0.19.0",
@@ -15,6 +29,13 @@ dependencies = [
     "python-dateutil>=2.9.0",
     "python-json-logger>=3.0.0",
 ]
+
+[project.urls]
+Repository = "https://gitlab.com/delimafabio/atomvs-timeblock-terminal"
+Mirror = "https://github.com/fabiodelllima/atomvs-timeblock-terminal"
+Documentation = "https://gitlab.com/delimafabio/atomvs-timeblock-terminal/-/tree/develop/docs"
+Changelog = "https://gitlab.com/delimafabio/atomvs-timeblock-terminal/-/blob/develop/CHANGELOG.md"
+
 
 [project.optional-dependencies]
 tui = [
@@ -32,6 +53,8 @@ dev = [
     "mypy>=1.18.0",
     "types-python-dateutil>=2.9.0",
     "textual-dev>=1.7.0",
+    "pytest-textual-snapshot>=1.1.0",
+    "syrupy>=4.8.0",
 ]
 
 [project.scripts]

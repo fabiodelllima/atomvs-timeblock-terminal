@@ -1,10 +1,8 @@
 # ADR-014: Sync UX Flow - Connect Paradigm
 
-**Status**: Accepted
-
-**Data**: 2025-11-05
-
-**Depende de**: ADR-012, ADR-013
+- **Status:** Aceito
+- **Data:** 2025-11-05
+- **Depende de:** ADR-012, ADR-013
 
 ## Contexto
 

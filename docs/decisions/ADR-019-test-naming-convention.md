@@ -1,8 +1,7 @@
-# ADR-019: Test Naming Convention and BR Traceability
+# ADR-019: Convenção de Nomenclatura de Testes e Rastreabilidade de BRs
 
-- **Status:** Accepted
+- **Status:** Aceito
 - **Data:** 2025-11-10
-- **Decisores:** Felipe (Tech Lead)
 - **Relacionado:** ADR-018 (Language Standards)
 
 ---

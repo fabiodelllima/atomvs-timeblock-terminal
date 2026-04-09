@@ -1,6 +1,7 @@
 # ADR-039: Framework de Documentação e Reestruturação
 
-**Status:** Aceito
+- **Status:** Aceito
+- **Data:** 2026-03-16
 
 ---
 
@@ -218,7 +219,3 @@ A reestruturação será executada em fases, cada uma numa branch dedicada:
 - RED HAT. **Modular Documentation Reference Guide.** Disponível em: <https://redhat-documentation.github.io/modular-docs/>. Acesso em: 16 mar. 2026.
 - RED HAT. **Red Hat Technical Writing Style Guide.** Disponível em: <https://stylepedia.net/style/>. Acesso em: 16 mar. 2026.
 - NYGARD, M. Documenting Architecture Decisions. **Cognitect Blog**, 2011. Disponível em: <https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions>.
-
----
-
-**Data:** 16 de Março de 2026

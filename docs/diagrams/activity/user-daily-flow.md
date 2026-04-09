@@ -1,36 +1,46 @@
 # Fluxo de Atividade: Dia Típico do Usuário
 
-- **Versão:** 1.0.0
-- **Data:** 31 de Outubro de 2025
+- **Status:** Aceito
+- **Data:** 2026-04-06
 
 ```mermaid
 flowchart TD
-    Start([Início do dia]) --> Check[Verificar agenda]
-    Check --> HasEvents{Tem eventos<br/>planejados?}
+    Start([Inicio do dia]) --> Open["Abrir ATOMVS (comando atomvs)"]
+    Open --> Dashboard[Dashboard: AgendaPanel + HabitsPanel + TasksPanel]
 
-    HasEvents -->|Não| Plan[Planejar dia]
-    HasEvents -->|Sim| Review[Revisar eventos]
+    Dashboard --> HasPending{Tem habitos/tasks pendentes?}
 
-    Plan --> Create[Criar tasks/ajustar hábitos]
-    Review --> Conflicts{Conflitos<br/>detectados?}
+    HasPending -->|Nao| Plan[Criar tasks ou habitos via modais CRUD]
+    HasPending -->|Sim| Review[Revisar agenda do dia]
 
-    Conflicts -->|Sim| Decide{Aceitar<br/>proposta?}
-    Conflicts -->|Não| Execute
+    Review --> Execute[Selecionar habito no HabitsPanel]
 
-    Decide -->|Sim| Apply[Aplicar reorganização]
-    Decide -->|Não| Manual[Ajustar manualmente]
+    Plan --> Execute
 
-    Apply --> Execute[Executar eventos]
-    Manual --> Execute
-    Create --> Execute
+    Execute --> StartTimer["t: iniciar timer"]
+    StartTimer --> Work[TimerPanel exibe contagem]
+    Work --> Action{Acao}
 
-    Execute --> Timer[Iniciar timer]
-    Timer --> Work[Trabalhar no hábito/task]
-    Work --> Complete[Completar]
+    Action -->|"s - stop"| Complete[Completar: status=DONE + substatus automatico]
+    Action -->|"space - pause"| Pause[Pausar timer]
+    Action -->|"c - cancel"| Cancel[Cancelar sessao]
 
-    Complete --> Log[Registrar no TimeLog]
-    Log --> More{Mais eventos<br/>hoje?}
+    Pause --> Resume["space - retomar"]
+    Resume --> Work
+
+    Complete --> Metrics[MetricsPanel atualiza streak e stats]
+    Metrics --> More{Mais itens pendentes?}
 
     More -->|Sim| Execute
-    More -->|Não| End([Fim])
+    More -->|Nao| End([Fim do dia])
+
+    Cancel --> More
 ```
+
+**Atalhos alternativos (HabitsPanel):** `s` skip, `v` done (sem timer), `u` undo.
+
+**Referências:**
+
+- ADR-034: Dashboard-first CRUD
+- ADR-037: TUI keybindings standard
+- ADR-038: Dashboard interaction patterns

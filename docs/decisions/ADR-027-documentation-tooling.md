@@ -1,14 +1,13 @@
 # ADR-027: MkDocs com mkdocstrings para Documentação
 
-**Status:** Aceito
-
-**Data:** 28 de Janeiro de 2026
-
-**Contexto:** Definir stack de documentação para v1.5.0
+- **Status:** Aceito
+- **Data:** 2026-01-28
 
 ---
 
 ## Decisão
+
+**Contexto:** Definir stack de documentação para v1.5.0
 
 Usar **MkDocs** com **mkdocstrings** para toda documentação do projeto, incluindo extração automática de docstrings.
 

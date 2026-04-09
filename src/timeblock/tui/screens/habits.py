@@ -14,6 +14,9 @@ from textual.widget import Widget
 from textual.widgets import Static
 
 from timeblock.models.enums import DoneSubstatus, SkipReason
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class HabitsScreen(Widget):
@@ -243,7 +246,7 @@ class HabitsScreen(Widget):
             else:
                 self.query_one("#habits-action", Static).update("")
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     # ==================== Watchers ====================
 

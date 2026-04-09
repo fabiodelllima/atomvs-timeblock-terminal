@@ -1,8 +1,7 @@
 # ADR-028: Remoção de Comandos Legados (add/list)
 
-**Status:** Aceito
-
-**Data:** 2026-01-30
+- **Status:** Aceito
+- **Data:** 2026-01-30
 
 ## Contexto
 

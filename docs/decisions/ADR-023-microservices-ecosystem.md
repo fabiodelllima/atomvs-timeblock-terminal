@@ -1,14 +1,13 @@
-# ADR-023: Microservices Ecosystem
+# ADR-023: Ecossistema de Microsserviços
 
-**Status:** Proposto
-
-**Data:** 21 de Dezembro de 2025
-
-**Contexto:** v3.0.0 Planning
+- **Status:** Proposto
+- **Data:** 2025-12-21
 
 ---
 
 ## Contexto
+
+**Contexto:** v3.0.0 Planning
 
 O TimeBlock Core atende bem ao gerenciamento de hábitos e rotinas. Casos de uso adjacentes (medicamentos, compromissos, listas) requerem lógica especializada que não pertence ao core.
 

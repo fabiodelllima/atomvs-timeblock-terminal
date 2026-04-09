@@ -1,12 +1,9 @@
 # ADR-035: Padronização de Keybindings
 
-**Status**: Amendado
-
-**Data original**: 2026-03-08
-
-**Data da emenda**: 2026-03-12
-
-**Relacionado**: ADR-034 (Dashboard-first CRUD), BR-TUI-004 (Global Keybindings), BR-TUI-021 (Timer no Dashboard)
+- **Status:** Amendado
+- **Data original:** 2026-03-08
+- **Data da emenda:** 2026-03-12
+- **Relacionado:** ADR-034 (Dashboard-first CRUD), BR-TUI-004 (Global Keybindings), BR-TUI-021 (Timer no Dashboard)
 
 ## Contexto
 
@@ -118,7 +115,7 @@ PROIBIDOS (reservados pelo OS):
 
 ## Emenda: Limitações VTE para Ctrl+Enter e Shift+Enter
 
-**Data:** 2026-03-12
+- **Data:** 2026-03-12
 
 **Descoberta:** Além de `Ctrl+digit` (DT-024), os terminais VTE também não emitem sequências distinguíveis para `Ctrl+Enter` e `Shift+Enter`. O Textual recebe `Enter` simples em ambos os casos, tornando as quick actions (done, timer start/pause) inacessíveis no GNOME Terminal.
 

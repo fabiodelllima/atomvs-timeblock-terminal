@@ -10,6 +10,9 @@ from timeblock.models.habit import Recurrence
 from timeblock.services.habit_service import HabitService
 from timeblock.services.routine_service import RoutineService
 from timeblock.services.task_service import TaskService
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 app = typer.Typer(help="Cria dados de demonstração para showcase da TUI.")
 console = Console()

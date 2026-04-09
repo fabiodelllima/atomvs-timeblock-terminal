@@ -1,9 +1,9 @@
 # ADR-004: Separação Habit vs HabitInstance
 
-- **Status:** Accepted
+- **Status:** Aceito
 - **Data:** 2025-09-20
 
-## Contextoo
+## Contexto
 
 Sistema precisa representar tanto templates de hábitos recorrentes quanto suas ocorrências específicas.
 

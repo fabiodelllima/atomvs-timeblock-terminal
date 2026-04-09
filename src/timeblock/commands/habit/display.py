@@ -6,6 +6,9 @@ from rich.console import Console
 
 from timeblock.models import HabitInstance, TimeLog
 from timeblock.models.enums import Status
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 console = Console()
 

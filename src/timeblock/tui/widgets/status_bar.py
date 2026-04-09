@@ -8,6 +8,10 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
 PANEL_KEYBINDINGS: dict[str, str] = {
     "agenda-content": "↑↓ navegar",
     "panel-habits": "j/k navegar  v done  s skip  t timer",
@@ -84,14 +88,14 @@ class StatusBar(Widget):
             self.query_one("#status-center", Static).update(self._build_center_section())
             self.query_one("#status-right", Static).update(self._build_right_section())
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     def _update_clock(self) -> None:
         """Atualiza seção direita a cada minuto."""
         try:
             self.query_one("#status-right", Static).update(self._build_right_section())
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     def update_focused_panel(self, panel_id: str, context_hint: str = "") -> None:
         """Chamado pelo app quando foco muda entre panels (DT-066)."""
@@ -107,25 +111,25 @@ class StatusBar(Widget):
         try:
             self.query_one("#status-left", Static).update(self._build_left_section())
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     def watch_focused_panel(self, _value: str) -> None:
         """Reage à mudança de panel focado."""
         try:
             self.query_one("#status-center", Static).update(self._build_center_section())
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     def watch_timer_elapsed(self, _value: str) -> None:
         """Reage à mudança de timer."""
         try:
             self.query_one("#status-right", Static).update(self._build_right_section())
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     def watch_timer_status(self, _value: str) -> None:
         """Reage à mudança de status do timer."""
         try:
             self.query_one("#status-right", Static).update(self._build_right_section())
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)

@@ -12,6 +12,10 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
+from timeblock.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 class TimerScreen(Widget):
     """Tela de Timer com display live."""
@@ -137,7 +141,7 @@ class TimerScreen(Widget):
                 actions = "[dim]p[/dim] Resume  [dim]enter[/dim] Stop  [dim]c[/dim] Cancel"
             self.query_one("#timer-actions", Static).update(actions)
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     def _update_status_bar(self) -> None:
         """Propaga estado do timer para StatusBar global."""
@@ -147,7 +151,7 @@ class TimerScreen(Widget):
             status_bar.timer_habit = data["habit"]  # type: ignore[attr-defined]
             status_bar.timer_elapsed = data["elapsed"]  # type: ignore[attr-defined]
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
 
     # ==================== Watchers ====================
 
@@ -194,7 +198,7 @@ class TimerScreen(Widget):
         try:
             self.query_one("#timer-display", Static).update(summary)
         except Exception:
-            pass
+            logger.debug("Ignorado: %s", "Exception", exc_info=True)
         self.timer_state = "idle"
         self.current_habit = ""
         self.elapsed_seconds = 0

@@ -1,14 +1,13 @@
-# ADR-036: Task Lifecycle Evolution
+# ADR-036: Evolução do Ciclo de Vida de Tasks
 
-**Data:** 2026-03-14
-
-**Status:** Aceito
-
-**Contexto técnico:** ADR-036 amenda BR-TASK-001 (estrutura) e BR-TASK-002 (conclusão), evolui BR-TASK-006 (simplicidade mantida com extensões rastreáveis), e introduz BR-TASK-007 a BR-TASK-010.
+- **Status:** Aceito
+- **Data:** 2026-03-14
 
 ---
 
 ## 1. Contexto
+
+**Contexto técnico:** ADR-036 amenda BR-TASK-001 (estrutura) e BR-TASK-002 (conclusão), evolui BR-TASK-006 (simplicidade mantida com extensões rastreáveis), e introduz BR-TASK-007 a BR-TASK-010.
 
 O modelo `Task` foi projetado como "checkbox com data" (BR-TASK-006), intencionalmente simples para o MVP. O status era derivado de um único campo:
 

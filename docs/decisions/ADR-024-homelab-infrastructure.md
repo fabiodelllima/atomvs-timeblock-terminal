@@ -1,8 +1,7 @@
-# ADR-024: Homelab Infrastructure Strategy
+# ADR-024: Estratégia de Infraestrutura Homelab
 
-## Status
-
-Proposto
+- **Status:** Proposto
+- **Data:** 2025-12-21
 
 ## Contexto
 
@@ -88,4 +87,3 @@ $ timeblock connect
 
 ---
 
-**Data:** 21 de Dezembro de 2025

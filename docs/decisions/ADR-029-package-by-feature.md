@@ -1,6 +1,7 @@
 # ADR-029: Package by Feature para Organização de Código
 
-**Status**: Aceito
+- **Status:** Aceito
+- **Data:** 2026-01-30
 
 ## Contexto
 

@@ -87,6 +87,7 @@ class DashboardScreen(Static):
         try:
             self.query_one(AgendaPanel).scroll_to_current_time()
         except Exception:
+            logger.debug("Exceção capturada", exc_info=True)
             pass  # Agenda pode nao estar montada ainda
 
     def on_descendant_focus(self, event: Any) -> None:

@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-04-08
+
+### Added
+
+- Logging: sys.excepthook global for uncaught exceptions (CRITICAL level)
+- Logging: TUI \_handle_exception override logs before Textual crash handler
+- Logging: All CLI commands now log errors to JSON Lines file
+- Logging: 21 bare-pass except blocks in TUI widgets/screens replaced with logger.debug
+- Architecture diagram: docs/diagrams/architecture/system-overview.md (Mermaid)
+
+### Changed
+
+- README: Updated to ATOMVS Time Planner branding, badges (1345 tests, 82% coverage), stack, docs structure (Diataxis), roadmap
+- README: ASCII diagrams corrected (TAG added, OVERDUE removed, CANCELLED in timer, keybindings)
+- README: Mermaid diagram links below each ASCII diagram
+- Diagrams: 14 diagrams audited — 2 removed, 5 updated, 9 rewritten to match v1.7.0 codebase
+- technical-debt.md: 5 DTs reclassified as features (DT-019, DT-060, DT-063, DT-065, DT-069) moved to roadmap v1.8.0
+- roadmap.md: New v1.8.0 section with 7 planned features
+
+### Fixed
+
+- main.py: launch_tui() no longer silences migration exceptions (was except:pass)
+- main.py: Migration success now logged with count
+
 ## [1.7.0] - 2026-04-05
 
 ### Added
@@ -475,7 +499,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.1...HEAD
+[1.7.1]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.0...v1.7.1
+[1.7.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.4.0...v1.4.1

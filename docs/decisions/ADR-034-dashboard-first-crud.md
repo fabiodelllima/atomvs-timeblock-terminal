@@ -1,10 +1,8 @@
 # ADR-034: Dashboard-first CRUD
 
-**Status**: Aceito
-
-**Data**: 2026-03-05
-
-**Relacionado**: ADR-031 (TUI Implementation), BR-TUI-003 (Dashboard Screen), BR-TUI-005 (CRUD Operations Pattern)
+- **Status:** Aceito
+- **Data:** 2026-03-05
+- **Relacionado:** ADR-031 (TUI Implementation), BR-TUI-003 (Dashboard Screen), BR-TUI-005 (CRUD Operations Pattern)
 
 ## Contexto
 

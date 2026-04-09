@@ -1,14 +1,13 @@
 # ADR-044: Pyright como Job CI de Qualidade
 
-**Status:** Proposed
+- **Status:** Proposto
+- **Data:** 2026-03-23
 
-**Date:** 2026-03-23
-
-## Context
+## Contexto
 
 O projeto usa mypy como type checker bloqueante no CI (0 erros). Basedpyright roda localmente no Zed (modo basic) para feedback em tempo real. Porém, basedpyright no modo standard reporta ~190 warnings não capturados pelo mypy.
 
-## Decision
+## Decisão
 
 Adotar estratégia de promoção gradual em 3 fases:
 
@@ -18,6 +17,6 @@ Adotar estratégia de promoção gradual em 3 fases:
 
 **Fase 3 (v2.0):** Bloqueante. Zero warnings no modo standard.
 
-## Consequences
+## Consequências
 
 Detecção precoce de type errors. Job adicional no pipeline (~3-4min). Considerar migrar de mypy para apenas basedpyright em v2.0.

@@ -1,14 +1,13 @@
 # ADR-030: Arquitetura Multi-Plataforma e Organização de Repositórios
 
-**Status:** Proposto
-
-**Data:** 31 de Janeiro de 2026
-
-**Contexto:** Planejamento v2.0+
+- **Status:** Proposto
+- **Data:** 2026-01-31
 
 ---
 
 ## Contexto
+
+**Contexto:** Planejamento v2.0+
 
 O TimeBlock Planner precisa evoluir de CLI local para ecossistema multi-plataforma:
 

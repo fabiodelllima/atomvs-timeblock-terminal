@@ -1,10 +1,8 @@
 # ADR-033: Fixture scope="session" com Rollback Transacional
 
-**Status**: Aceito
-
-**Data**: 2026-03-05
-
-**Relacionado**: ADR-026 (Test Database Isolation), ADR-031 (TUI Implementation)
+- **Status:** Aceito
+- **Data:** 2026-03-05
+- **Relacionado:** ADR-026 (Test Database Isolation), ADR-031 (TUI Implementation)
 
 ## Contexto
 

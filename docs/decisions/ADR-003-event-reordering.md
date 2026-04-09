@@ -1,9 +1,9 @@
 # ADR-003: Algoritmo de Event Reordering Baseado em Prioridades
 
-- **Status**: Accepted
-- **Data**: 2025-10-15
+- **Status:** Aceito
+- **Data:** 2025-10-15
 
-## Contextoo
+## Contexto
 
 TimeBlock precisa resolver conflitos de agenda automaticamente quando:
 

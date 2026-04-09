@@ -1,10 +1,10 @@
 # ADR-008: Tuple Returns em Services
 
-- **Status:** Deprecated
+- **Status:** Deprecado
 - **Data:** 2025-10-20
 - **Superseded by:** Return direto ou exceções
 
-## Contextoo
+## Contexto
 
 Services retornando tuplas `(success: bool, data, error)` para indicar resultado.
 
