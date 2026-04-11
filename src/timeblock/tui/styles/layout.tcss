@@ -7,9 +7,9 @@
 HeaderBar {
     width: 100%;                       /* Ocupa largura total */
     height: auto;                      /* Altura adapta ao conteúdo */
-    border: round #45475A;           /* Borda arredondada Surface1 */
-    border-title-color: #CDD6F4;     /* Título da borda em Text */
-    background: #1E1E2E;             /* Fundo Base (transparente ao screen) */
+    border: round #45475A;             /* Borda arredondada Surface1 */
+    border-title-color: #CDD6F4;       /* Título da borda em Text */
+    background: #1E1E2E;               /* Fundo Base (transparente ao screen) */
     padding: 0 1;                      /* Padding horizontal 1 char */
     margin-bottom: 1;                  /* Separação do conteúdo abaixo */
 }
@@ -20,10 +20,10 @@ HeaderBar {
    ========================================================================== */
 
 #content-area {
-    width: 122;                        /* Largura fixa: 122 caracteres */
-    max-width: 140;                    /* Máximo para terminais ultra-wide */
-    height: 100%;                      /* Ocupa altura total disponível */
-    padding: 1 2 0 2;                  /* Top 1, horizontal 2, bottom 0 (BR-TUI-034: footer encosta) */
+    width: 122;               /* Largura fixa: 122 caracteres */
+    max-width: 140;           /* Máximo para terminais ultra-wide */
+    height: 100%;             /* Ocupa altura total disponível */
+    padding: 1 2 0 2;         /* Top 1, horizontal 2, bottom 0 (BR-TUI-034: espaçamento zerado em bottom) */
 }
 
 /* ==========================================================================
@@ -45,7 +45,7 @@ HeaderBar {
 #sidebar {
     width: 20;                         /* Largura fixa: 20 caracteres */
     height: 100%;                      /* Altura total */
-    background: #1E1E2E;             /* Fundo Base */
+    background: #1E1E2E;               /* Fundo Base */
     padding: 1 1;                      /* Padding uniforme 1 char */
 }
 
@@ -74,6 +74,5 @@ HeaderBar {
 NavBar {
     width: 22;                         /* Widget de navegação: 22 chars */
     height: 100%;                      /* Altura total */
-    background: #1E1E2E;             /* Fundo Base */
+    background: #1E1E2E;               /* Fundo Base */
 }
-
