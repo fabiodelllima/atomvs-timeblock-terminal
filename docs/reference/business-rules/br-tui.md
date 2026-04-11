@@ -1620,3 +1620,52 @@ Scenario: Return to today
 - `test_br_tui_033_completude_7d_calculation`
 - `test_br_tui_033_reactive_update_on_done`
 - `test_br_tui_033_keybinding_f_cycles_period`
+
+---
+
+### BR-TUI-034: Hints Contextuais no Footer Global (NOVA 10/04/2026)
+
+**Descrição:** Hints de teclado (atalhos contextuais) vivem exclusivamente no footer global (`#status-bar`). Nenhum panel exibe hints inline no corpo do widget. O footer atualiza dinamicamente conforme o panel em foco, garantindo single source of truth para as teclas disponíveis ao usuário.
+
+**Regras — Localização única:**
+
+1. Apenas o `StatusBar` (`#status-bar`) renderiza hints. Panels (`HabitsPanel`, `TasksPanel`, `TimerPanel`, `AgendaPanel`, `MetricsPanel`) não emitem strings de hint nos métodos `_build_*_lines`.
+2. Docstrings de métodos de build de conteúdo que historicamente continham hints e foram removidas devem mencionar este princípio para evitar reintrodução acidental.
+
+**Regras — Formato visual:**
+
+3. Cada hint segue o padrão `[<tecla>] <descrição>` literal, com colchetes visíveis no output renderizado. Exemplos: `[q] sair`, `[j/k] navegar`, `[Ctrl+Q] sair`, `[↑↓] navegar`.
+4. Múltiplos hints na mesma linha são separados por dois espaços: `[v] done  [s] skip  [t] timer`.
+5. Convenção da tecla: uma letra como `[v]`, combinações como `[Ctrl+Q]`, setas como `[↑↓]`, múltiplas teclas equivalentes como `[j/k]` ou `[h/l]`.
+
+**Regras — Cores:**
+
+6. Colchetes e tecla recebem `C_INFO` (`#89B4FA`, azul Catppuccin). A cor é aplicada via markup Rich pelo helper `_format_hint`, não via TCSS global do `#status-center`.
+7. Descrição (texto após `]`) recebe `C_SUBTEXT1` (`#BAC2DE`, cinza claro Catppuccin).
+8. O uso de `[dim]` envolvendo o hint inteiro está proibido. A hierarquia visual vem das duas cores Catppuccin distintas, não de opacidade global.
+
+**Regras — Contextualidade:**
+
+9. O `StatusBar` mantém um mapa `PANEL_KEYBINDINGS: dict[panel_id, hint_string]` no módulo `status_bar.py`. Cada entrada do mapa é uma string no formato definido pelas regras 3-5.
+10. Quando `focused_panel` muda (via `update_focused_panel`), o `_build_center_section` consulta `PANEL_KEYBINDINGS.get(panel_id, DEFAULT_KEYBINDINGS)` e aplica `_format_hint` ao resultado.
+11. `DEFAULT_KEYBINDINGS` é o fallback usado quando nenhum panel está em foco ou quando o panel_id não existe no mapa. Deve cobrir as ações globais (Tab, ajuda, sair).
+12. Todos os IDs de panel registrados no dashboard têm entrada correspondente em `PANEL_KEYBINDINGS`. Adicionar um panel novo sem registrar seu hint é violação desta BR.
+
+**Testes:**
+
+- `test_br_tui_034_format_single_key`
+- `test_br_tui_034_format_multiple_keys`
+- `test_br_tui_034_format_multichar_key`
+- `test_br_tui_034_format_arrow_key`
+- `test_br_tui_034_format_empty_returns_empty`
+- `test_br_tui_034_panel_keybindings_all_panels_covered`
+- `test_br_tui_034_default_keybindings_when_unknown_panel`
+
+**Referências:**
+
+- ADR-035 (Keybindings Standardization)
+- BR-TUI-007 (StatusBar — definição original do footer contextual)
+- BR-TUI-008 (Visual Consistency Material-like — paleta Catppuccin)
+- Issue #29 (TimerPanel hint removal — primeiro caso prático do princípio)
+- Issue #44 (motivação documental desta BR)
+- Issue #32 (implementação do formato `[tecla] descrição` com cores)

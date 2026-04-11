@@ -1,6 +1,6 @@
 # Regras de Negócio
 
-**Versão:** 3.1.0
+**Versão:** 3.2.0
 
 **Status:** Consolidado (SSOT)
 
@@ -39,4 +39,4 @@ Os conceitos introdutórios e o glossário do domínio estão em [Introdução e
 
 ---
 
-**Total de regras:** 109 BRs
+**Total de regras:** 110 BRs
