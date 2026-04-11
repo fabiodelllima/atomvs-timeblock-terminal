@@ -105,12 +105,17 @@ class TestBRTUI007R03FooterContextual:
     """BR-TUI-007 R03: Centro exibe keybindings do panel focado."""
 
     def test_br_tui_007_r03_habits_keybindings(self) -> None:
-        """Panel hábitos mostra keybindings de done/skip."""
+        """Panel hábitos mostra keybindings de concluir/skip/timer.
+
+        Após BR-TUI-034, "done" foi traduzido para "concluir" para
+        consistência com o restante das strings em PT-BR.
+        """
         bar = StatusBar()
         bar.focused_panel = "panel-habits"
         rendered = bar._build_center_section()
-        assert "done" in rendered
+        assert "concluir" in rendered
         assert "skip" in rendered
+        assert "timer" in rendered  # único do panel-habits, diferencia de tasks
 
     def test_br_tui_007_r03_tasks_keybindings(self) -> None:
         """Panel tarefas mostra keybinding de concluir."""

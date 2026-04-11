@@ -51,7 +51,7 @@ TimerScreen {
 #status-center {
     width: 1fr;                        /* Expande para preencher restante */
     content-align: center middle;      /* Centralizado */
-    color: #CBA6F7;                  /* Mauve: destaque accent */
+    /* BR-TUI-034: cor vem do markup Rich (_format_hint), não do TCSS */
 }
 
 #status-right {

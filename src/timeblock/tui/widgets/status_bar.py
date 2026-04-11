@@ -1,26 +1,59 @@
-"""StatusBar - Footer contextual com keybindings por panel (BR-TUI-007).
+"""StatusBar - Footer contextual com keybindings por panel (BR-TUI-007, BR-TUI-034).
 
 Layout: [rotina ativa] | [keybindings do panel focado] | [timer + hora]
 O centro atualiza dinamicamente conforme o panel que recebe foco.
+
+BR-TUI-034: hints exclusivamente no footer global, formato `[tecla] descrição`
+com tecla em C_INFO e descrição em C_SUBTEXT1.
 """
+
+import re
 
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
+from timeblock.tui.colors import C_INFO, C_SUBTEXT1
 from timeblock.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+# BR-TUI-034 regras 9-12: mapa contextual de keybindings por panel
 PANEL_KEYBINDINGS: dict[str, str] = {
-    "agenda-content": "↑↓ navegar",
-    "panel-habits": "j/k navegar  v done  s skip  t timer",
-    "panel-tasks": "j/k navegar  v concluir  s adiar  c cancelar",
-    "panel-timer": "space pausar  s parar  c cancelar",
-    "panel-metrics": "f período",
+    "agenda-content": "[↑↓] navegar",
+    "panel-habits": "[j/k] navegar  [v] concluir  [s] skip  [t] timer",
+    "panel-tasks": "[j/k] navegar  [v] concluir  [s] adiar  [c] cancelar",
+    "panel-timer": "[space] pausar/continuar  [s] parar  [c] cancelar",
+    "panel-metrics": "[f] período",
 }
 
-DEFAULT_KEYBINDINGS = "Tab navegar  ? ajuda  Ctrl+Q sair"
+DEFAULT_KEYBINDINGS = "[Tab] navegar  [?] ajuda  [Ctrl+Q] sair"
+
+# BR-TUI-034 regra 3: parser do formato `[tecla] descrição`
+_HINT_PATTERN = re.compile(r"\[([^\]]+)\]([^\[]*)")
+
+
+def _format_hint(hint: str) -> str:
+    """Converte `[q] sair  [j/k] navegar` em markup Rich colorido.
+
+    BR-TUI-034 regras 6-8: teclas (com colchetes literais) recebem C_INFO,
+    descrições recebem C_SUBTEXT1. Sem `[dim]` envolvendo o todo.
+
+    Args:
+        hint: string no formato `[<tecla>] <descrição>` repetível.
+
+    Returns:
+        Markup Rich pronto para render. String vazia se hint vazio.
+        Se o hint não contém colchetes (formato legado/inesperado),
+        retorna o texto cru sem colorir.
+    """
+    if not hint:
+        return ""
+    parts: list[str] = []
+    for match in _HINT_PATTERN.finditer(hint):
+        key, desc = match.group(1), match.group(2)
+        parts.append(f"[{C_INFO}]\\[{key}\\][/{C_INFO}][{C_SUBTEXT1}]{desc}[/{C_SUBTEXT1}]")
+    return "".join(parts) if parts else hint
 
 
 class StatusBar(Widget):
@@ -59,15 +92,12 @@ class StatusBar(Widget):
         return " [dim][Sem rotina][/dim]"
 
     def _build_center_section(self) -> str:
-        """Keybindings contextuais do panel focado (DT-066)."""
+        """Keybindings contextuais do panel focado (BR-TUI-034, DT-066)."""
         hint = getattr(self, "_context_hint", "")
-        if hint:
-            return f"[dim]{hint}[/dim]"
-        panel_id = self.focused_panel
-        keys = PANEL_KEYBINDINGS.get(panel_id, DEFAULT_KEYBINDINGS)
-        if not keys:
-            keys = DEFAULT_KEYBINDINGS
-        return f"[dim]{keys}[/dim]"
+        if not hint:
+            panel_id = self.focused_panel
+            hint = PANEL_KEYBINDINGS.get(panel_id, DEFAULT_KEYBINDINGS) or DEFAULT_KEYBINDINGS
+        return _format_hint(hint)
 
     def _build_right_section(self) -> str:
         """Timer elapsed."""
