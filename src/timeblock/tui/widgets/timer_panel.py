@@ -94,7 +94,11 @@ class TimerPanel(Static):
         self.update("\n".join(lines))
 
     def _build_active_lines(self) -> list[str]:
-        """Monta linhas para timer ativo (running ou paused)."""
+        """Monta linhas para timer ativo (running ou paused).
+
+        Princípio do projeto: nenhum panel exibe hints de teclado inline.
+        Hints vivem exclusivamente no footer global (status_bar). Issue #29.
+        """
         assert self._timer_info is not None
         info = self._timer_info
         elapsed = info.get("elapsed", "00:00")
@@ -120,8 +124,6 @@ class TimerPanel(Static):
             lines.append(f"    [bold {color}]{row}[/bold {color}]")
         lines.append("")
         lines.append(f"    [{color}]{icon} {label}[/{color}]  {name}")
-        lines.append("")
-        lines.append(r"  [dim]space pause  s stop  c cancel[/dim]")
         return lines
 
     def _build_idle_lines(self) -> list[str]:
