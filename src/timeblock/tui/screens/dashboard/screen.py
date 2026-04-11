@@ -62,9 +62,9 @@ class DashboardScreen(Static):
                 can_focus=False,
             )
             yield Vertical(
+                TimerPanel(id="panel-timer"),
                 HabitsPanel(id="panel-habits"),
                 TasksPanel(id="panel-tasks"),
-                TimerPanel(id="panel-timer"),
                 MetricsPanel(id="panel-metrics"),
                 id="panels-column",
             )
