@@ -203,6 +203,8 @@ Ver: `architecture.md` seção 9.2
 
 Camada de sincronização para múltiplos dispositivos. Modelo event-driven com resolução de conflitos. O aplicativo permanece funcional sem conectividade (offline-first como fundação).
 
+O parking lot de **analytics temporal** (issue #49) — agregações estatísticas sobre `TimeLog` para sugestão de horário ótimo por hábito — está registrado nesta faixa, formalizando a linha "IA para prever melhores horários" já prevista em ADR-011.
+
 **Stack:** Kafka + CloudEvents + Conflict Resolution
 
 Ver: `architecture.md` seção 9.3
