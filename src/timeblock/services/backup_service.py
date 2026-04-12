@@ -4,6 +4,7 @@ Cria cópia timestamped do SQLite no startup e shutdown da TUI.
 Mantém as N cópias mais recentes e remove as antigas.
 """
 
+import os
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -18,10 +19,23 @@ BACKUP_DIR_NAME = "backups"
 
 
 def get_backup_dir() -> Path:
-    """Retorna diretório de backups ao lado do banco."""
-    db_path = Path(get_db_path())
-    backup_dir = db_path.parent / BACKUP_DIR_NAME
-    backup_dir.mkdir(exist_ok=True)
+    """Retorna diretório de backups via XDG Base Directory (BR-DATA-001).
+
+    Prioridade:
+    1. $XDG_DATA_HOME/atomvs/backups
+    2. ~/.local/share/atomvs/backups (fallback XDG padrão)
+
+    Desacoplado de get_db_path para garantir que backups nunca caiam
+    em paths relativos ao workspace (regressão #47).
+    """
+    xdg_data_home = os.getenv("XDG_DATA_HOME")
+    if xdg_data_home:
+        data_dir = Path(xdg_data_home) / "atomvs"
+    else:
+        data_dir = Path.home() / ".local" / "share" / "atomvs"
+
+    backup_dir = data_dir / BACKUP_DIR_NAME
+    backup_dir.mkdir(parents=True, exist_ok=True)
     return backup_dir
 
 
