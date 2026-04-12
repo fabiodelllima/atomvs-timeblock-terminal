@@ -1,42 +1,91 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
 *.so
 .Python
-venv/
+.python-version
+
+# Virtual environments
+.venv/
 env/
+venv/
+
+# Package build artifacts
+*.egg
 *.egg-info/
-dist/
 build/
+dist/
+wheels/
 
-# Database
-cli/data/
+# Databases and user data
+src/data/
+data/
+*.db
+*.db.old
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
 
-# IDE
-.zed/
-.vscode/*
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.yaml
+
+# IDE and editors
 .idea/
+.vscode/*
+.zed/
+*.swp
+*.swo
+*~
+.*.swp
+.*.swo
 
-# OS
+# OS junk
 .DS_Store
+.fuse_hidden*
 Thumbs.db
 
-# Tests
+# Test artifacts
+.mypy_cache/
 .pytest_cache/
 .ruff_cache/
-.mypy_cache/
+snapshot_report.html
+
+# Coverage
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
+
+# Profiling
+*.prof
+profile.txt
 
 # Logs
 *.log
-cli/src/data/
+logs/
 
-#
+# Documentation builds
 site/
-*.tar.gz
-.fuse_hidden*
-demo.cast
+docs/core/ci-optimization.md
+docs/sysdesign/
+docs/wiki/
+
+# Design artifacts
+design/
+
+# CC automation
+CLAUDE.md
+TASK.md
+run-overnight.sh
 
 # Backup files
 *.bak
@@ -44,27 +93,10 @@ demo.cast
 # Test changelogs
 CHANGELOG_test_*.md
 
-# Local databases
-*.db
-*.db.old
-
-# Coverage artifacts
-.coverage
-htmlcov/
-
 # Migration scripts (one-time use)
 migrate_*.py
 
-# Others
-docs/core/ci-optimization.md
-docs/sysdesign/
-
-# CC automation (local only)
-CLAUDE.md
-TASK.md
-run-overnight.sh
-
-# Design artifacts (box-drawing, themes, system-design)
-design/
-docs/wiki/
-snapshot_report.html
+# Archives and demos
+*.tar.gz
+*.zip
+demo.cast
