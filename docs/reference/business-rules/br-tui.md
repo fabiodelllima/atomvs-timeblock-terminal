@@ -692,7 +692,7 @@ else:
 
 **Descrição:** Em todos os cards, o campo nome herda a cor do status do item. Mapeamento definido em `color-system.md` (SSOT para cores).
 
-**Mapeamento:** done/full=Green #A6E3A1, done/partial=Rosewater #F5E0DC, done/overdone=Flamingo #F2CDCD, done/excessive=Peach #FAB387, not_done/justified=Yellow #F9E2AF, not_done/unjustified=Red #F38BA8, not_done/ignored=Maroon #EBA0AC, running=Mauve #CBA6F7, paused=Yellow #F9E2AF, pending=Overlay0 #6C7086, cancelled=Overlay0 #6C7086
+**Mapeamento:** done/full=Green #A6E3A1, done/partial=Rosewater #F5E0DC, done/overdone=Flamingo #F2CDCD, done/excessive=Peach #FAB387, not_done/justified=Yellow #F9E2AF, not_done/unjustified=Red #F38BA8, not_done/ignored=Maroon #EBA0AC, running=Mauve #CBA6F7, paused=Yellow #F9E2AF, pending=Blue #89B4FA, cancelled=Overlay0 #6C7086
 
 **Regras:**
 
