@@ -1,11 +1,44 @@
 # Changelog
 
-All notable changes to ATOMVS Time Planner will be documented in this file.
+- All notable changes to ATOMVS Time Planner will be documented in this file.
+- The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+---
 
 ## [Unreleased]
+
+## [1.7.2] - 2026-04-13
+
+### Added
+
+- BR-TIMER-010: Activity tracking during timer pause
+- BR-DATA-002: Backup strategy formalization
+- ADR-048: Feature toggles for incremental release
+- ADR-049: Two-phase activity tracking during pauses
+- ADR-051: Three-phase backup strategy (CLI/auto/remote)
+- Script: scripts/migrate_backups_to_xdg.py to relocate legacy backups from src/data/backups to ~/.local/share/atomvs/backups
+
+### Changed
+
+- HeaderBar: Now uses native border_title (active routine name) and border_subtitle (full date) instead of manually composed title
+- HeaderBar: Date format updated to "Weekday, DD de Month de YYYY" with proper Portuguese preposition
+- HeaderBar: Placeholder "Sem rotina ativa" shown when no routine is configured
+- HeaderBar: Screen label removed from top bar (already present in sidebar)
+- HeaderBar: TASKS label translated to TAREFAS for Portuguese consistency
+- Agenda: Blocks redesigned with icon prefix and dotted body marker replacing left accent bar
+- Agenda: Vertical ruler between hour column and blocks removed for cleaner layout
+- Agenda: Spacing between hour label and block content tightened
+- Status bar: Keybinding hints now use parentheses instead of brackets for better terminal rendering
+- Status bar: Dotted separator (·) added between consecutive hints for improved readability
+- TimerPanel: Elapsed time now displays HH:MM:SS when exceeding 60 minutes (Closes #5)
+- Dashboard: Panel order reorganized to prioritize timer, habits, tasks, metrics (refs #31)
+
+### Fixed
+
+- Backup service: backup_dir now resolves via XDG spec ($XDG_DATA_HOME/atomvs/backups) instead of deriving from db_path.parent, preventing user data from being written inside the code repository (Closes #47)
+- Color documentation: BR-TUI color mapping reconciled with implementation (pending status is C_INFO blue, not Overlay0 gray as previously documented)
+
+---
 
 ## [1.7.1] - 2026-04-08
 
@@ -30,6 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - main.py: launch_tui() no longer silences migration exceptions (was except:pass)
 - main.py: Migration success now logged with count
+
+---
 
 ## [1.7.0] - 2026-04-05
 
@@ -94,6 +129,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DTs: 51 resolved / 66 total (77%)
 - Pipeline: 8 jobs (~10min CI)
 
+---
+
 ## [1.7.0] - 2026-04-05
 
 ### Added
@@ -152,6 +189,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DTs: 51 resolvidos / 66 total (77%)
 - Pipeline: 8 jobs (~10min CI)
 
+---
+
 ## [1.6.0] - 2026-02-12
 
 ### Added
@@ -181,6 +220,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pipeline: 9 jobs (quality + test + coverage + security + sync)
 - ADRs: 32 documented
 
+---
+
 ## [1.5.0] - 2026-02-03
 
 ### Added
@@ -209,6 +250,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitLab CI: 8 jobs (6 test + 1 build + 1 sync)
 - Pipeline time: ~3min (local => GitHub sync)
 
+---
+
 ## [1.4.1] - 2026-01-30
 
 ### Added
@@ -225,6 +268,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Global coverage: 71% (+27pp since v1.4.0)
 - E2E tests: 42 (+28)
 - Distribution: Unit 513 (75%), Integration 83 (12%), E2E 42 (6%), BDD 7 (1%)
+
+---
 
 ## [1.4.0] - 2026-01-28
 
@@ -256,6 +301,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BRs: 67 formalized
 - Mypy: 0 errors
 
+---
+
 ## [1.3.2] - 2026-01-22
 
 ### Added
@@ -275,6 +322,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests: 466 → 558 (+92)
 - Coverage: 42% (+26pp from v1.3.1)
 - Mypy: 0 errors
+
+---
 
 ## [1.3.1] - 2026-01-19
 
@@ -313,6 +362,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 65% global coverage
 - 0 mypy errors
 - 26 skipped tests (documented analysis)
+
+---
 
 ## [1.3.0] - 2025-11-08
 
@@ -355,6 +406,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Formally specified Business Rules
 - Philosophy alignment: user always in control
 
+---
+
 ## [1.2.2-logging] - 2025-11-10
 
 ### Added
@@ -384,6 +437,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ADRs 015-018 (HabitAtom refactor)
 - logging-strategy.md
 - HabitAtom Sprints docs
+
+---
 
 ## [1.2.1-docs] - 2025-11-11
 
@@ -418,6 +473,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 20 navigable ADRs (vs 11 previously) = +82%
 - Organized docs/ structure without duplications
 - Project philosophy and principles documented
+
+---
 
 ## [1.1.0] - 2025-11-01
 
@@ -470,6 +527,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Conflict detection optimized for O(n log n) complexity
 - Efficient event queries in date ranges
+
+---
 
 ## [1.0.0] - 2025-10-16
 
