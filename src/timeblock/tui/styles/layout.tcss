@@ -9,6 +9,9 @@ HeaderBar {
     height: auto;                      /* Altura adapta ao conteúdo */
     border: round #45475A;             /* Borda arredondada Surface1 */
     border-title-color: #CDD6F4;       /* Título da borda em Text */
+    border-title-align: left;          /* Rotina ativa no canto superior esquerdo */
+    border-subtitle-color: #CDD6F4;    /* Subtítulo em Text */
+    border-subtitle-align: right;      /* Data no canto inferior direito */
     background: #1E1E2E;               /* Fundo Base (transparente ao screen) */
     padding: 0 1;                      /* Padding horizontal 1 char */
     margin-bottom: 1;                  /* Separação do conteúdo abaixo */
