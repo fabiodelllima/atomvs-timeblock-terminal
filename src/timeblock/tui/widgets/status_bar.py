@@ -52,7 +52,7 @@ def _format_hint(hint: str) -> str:
     parts: list[str] = []
     for match in _HINT_PATTERN.finditer(hint):
         key, desc = match.group(1), match.group(2)
-        parts.append(f"[{C_INFO}]\\[{key}\\][/{C_INFO}][{C_SUBTEXT1}]{desc}[/{C_SUBTEXT1}]")
+        parts.append(f"[{C_INFO}][{key}][/{C_INFO}][{C_SUBTEXT1}]{desc}[/{C_SUBTEXT1}]")
     return "".join(parts) if parts else hint
 
 
