@@ -35,7 +35,7 @@ SCREEN_NAMES = {
     "dashboard": "DASHBOARD",
     "routines": "ROTINAS",
     "habits": "HÁBITOS",
-    "tasks": "TASKS",
+    "tasks": "TAREFAS",
     "timer": "TIMER",
 }
 
@@ -66,7 +66,6 @@ class HeaderBar(Static):
 
     def _refresh_content(self) -> None:
         """Renderiza border_title e conteúdo."""
-        screen_label = SCREEN_NAMES.get(self.current_screen, "DASHBOARD")
         today = date.today()
         weekday = WEEKDAYS_FULL_PT[today.weekday()]
         month = MONTHS_FULL_PT[today.month]
@@ -77,8 +76,8 @@ class HeaderBar(Static):
         except Exception:
             logger.debug("Exceção capturada", exc_info=True)
             available = 80
-        gap = max(2, available - len(screen_label) - len(date_str) - 2)
-        self.border_title = f"{screen_label} [#45475A]{'─' * gap}[/#45475A] {date_str}"
+        gap = max(2, available - len(date_str) - 2)
+        self.border_title = f"[#45475A]{'─' * gap}[/#45475A] {date_str}"
 
         routine = self._get_routine_info()
         tasks = self._get_task_info()
