@@ -106,8 +106,10 @@ security:deps:
   before_script: []
   script:
     - pip install -r requirements.txt --quiet
-    - pip-audit --format json --output pip-audit-report.json
-    - pip-audit
+    # CVE-2025-71176 em pytest 8.4.2: upgrade bloqueado por conflito upstream
+    # com pytest-textual-snapshot 1.1.0. Ver issue #55 para detalhes e ação.
+    - pip-audit --format json --output pip-audit-report.json --ignore-vuln CVE-2025-71176
+    - pip-audit --ignore-vuln CVE-2025-71176
   timeout: 10m
   artifacts:
     paths:
