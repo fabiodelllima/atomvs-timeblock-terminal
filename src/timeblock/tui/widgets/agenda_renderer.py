@@ -191,9 +191,9 @@ def build_agenda_content(
         show_label = m % 30 == 0
 
         if show_label:
-            hours_out.append(f"  {_time_label(h, m)} ")
+            hours_out.append(f"  {_time_label(h, m)}")
         else:
-            hours_out.append("        ")
+            hours_out.append("       ")
 
         entries = line_info.get(li, [])
 
@@ -228,7 +228,7 @@ def build_agenda_content(
 
                 if role == "start":
                     # accent bar + título C_TEXT + ícone (BR-TUI-032-R4)
-                    accent_w = 1  # \u258c
+                    accent_w = 0  # sem accent bar no título (#34 / #40)
                     separator_w = 3  # " \u00b7 "
                     icon_w = len(icon)
                     max_nm = max(1, col_w - accent_w - separator_w - icon_w)
@@ -240,25 +240,17 @@ def build_agenda_content(
                     pad = " " * max(0, col_w - visual_w)
                     if bold:
                         parts.append(
-                            f"[bold {color}]\u258c[/bold {color}]"
-                            f"[bold {C_TEXT}]{display_nm}[/bold {C_TEXT}]"
-                            f" [dim]\u00b7[/dim] "
                             f"[bold {color}]{icon}[/bold {color}]"
+                            f" [bold {C_TEXT}]{display_nm}[/bold {C_TEXT}]"
                             f"{pad}"
                         )
                     else:
                         parts.append(
-                            f"[{color}]\u258c[/{color}]"
-                            f"[{C_TEXT}]{display_nm}[/{C_TEXT}]"
-                            f" [dim]\u00b7[/dim] "
-                            f"[{color}]{icon}[/{color}]"
-                            f"{pad}"
+                            f"[{color}]{icon}[/{color}] [{C_TEXT}]{display_nm}[/{C_TEXT}]{pad}"
                         )
                 else:
                     # Corpo: accent bar + fill (BR-TUI-032-R5)
-                    parts.append(
-                        f"[{color}]\u258c[/{color}][{fcolor}]{fc * (col_w - 1)}[/{fcolor}]"
-                    )
+                    parts.append(f"[dim]\u00b7[/dim] [{fcolor}]{fc * (col_w - 2)}[/{fcolor}]")
             else:
                 parts.append(" " * col_w)
 
