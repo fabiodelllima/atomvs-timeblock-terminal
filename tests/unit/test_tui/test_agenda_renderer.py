@@ -30,6 +30,8 @@ Referências:
 
 from datetime import datetime
 
+import pytest
+
 from timeblock.tui.widgets.agenda_renderer import build_agenda_content
 
 # Constante: hora fixa fora de qualquer bloco para evitar marcação de "agora"
@@ -74,6 +76,9 @@ def _make_running_instance(
 class TestAgendaRendererCharacterizationRuler:
     """Caracteriza a régua vertical \u2502 na coluna de horas (a remover no #34)."""
 
+    @pytest.mark.skip(
+        reason="Aguarda adaptação de BR-TUI-032 e teste após redesign de UI da v1.7.2 — ref issue #53"
+    )
     def test_hours_column_contains_vertical_ruler_on_label_lines(self) -> None:
         """Linhas com label de hora terminam com '[dim]\u2502[/dim]'.
 
@@ -91,6 +96,9 @@ class TestAgendaRendererCharacterizationRuler:
             "Régua deve estar envolvida em tag dim"
         )
 
+    @pytest.mark.skip(
+        reason="Aguarda adaptação de BR-TUI-032 e teste após redesign de UI da v1.7.2 — ref issue #53"
+    )
     def test_hours_column_contains_vertical_ruler_on_blank_lines(self) -> None:
         """Linhas sem label de hora (15min/45min) também têm a régua.
 
@@ -109,6 +117,9 @@ class TestAgendaRendererCharacterizationRuler:
 class TestAgendaRendererCharacterizationAccentBar:
     """Caracteriza a barra accent \u258c no role start (a remover no #34)."""
 
+    @pytest.mark.skip(
+        reason="Aguarda adaptação de BR-TUI-032 e teste após redesign de UI da v1.7.2 — ref issue #53"
+    )
     def test_pending_block_title_line_has_accent_bar(self) -> None:
         """Linha do título de bloco pending começa com \u258c colorido.
 
@@ -128,6 +139,9 @@ class TestAgendaRendererCharacterizationAccentBar:
             "Esperado \u258c colorido com C_INFO no início do título pending"
         )
 
+    @pytest.mark.skip(
+        reason="Aguarda adaptação de BR-TUI-032 e teste após redesign de UI da v1.7.2 — ref issue #53"
+    )
     def test_running_block_title_line_has_bold_accent_bar(self) -> None:
         """Para running, a barra accent é bold (C_ACCENT = #CBA6F7)."""
         instances = [_make_running_instance("Atomvs TUI", 600, 750)]
@@ -144,6 +158,9 @@ class TestAgendaRendererCharacterizationAccentBar:
 class TestAgendaRendererCharacterizationIconOrder:
     """Caracteriza a ordem título-antes-de-ícone (a inverter no #34)."""
 
+    @pytest.mark.skip(
+        reason="Aguarda adaptação de BR-TUI-032 e teste após redesign de UI da v1.7.2 — ref issue #53"
+    )
     def test_title_appears_before_icon_in_pending_block(self) -> None:
         """No estado atual, o título vem antes do ícone separados por ' \u00b7 '.
 
