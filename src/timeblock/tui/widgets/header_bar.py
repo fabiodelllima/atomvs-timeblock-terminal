@@ -65,19 +65,21 @@ class HeaderBar(Static):
         return len(re.sub(r"\[.*?\]", "", text))
 
     def _refresh_content(self) -> None:
-        """Renderiza border_title e conteúdo."""
+        """Renderiza border_title, border_subtitle e conteúdo interno."""
         today = date.today()
         weekday = WEEKDAYS_FULL_PT[today.weekday()]
         month = MONTHS_FULL_PT[today.month]
-        date_str = f"{weekday}, {today.day:02d} de {month} {today.year}"
+        date_str = f"{weekday}, {today.day:02d} de {month} de {today.year}"
+
+        routine_name = self._get_active_routine_name()
+        self.border_title = routine_name if routine_name else "Sem rotina ativa"
+        self.border_subtitle = date_str
 
         try:
             available = self.size.width or 80
         except Exception:
             logger.debug("Exceção capturada", exc_info=True)
             available = 80
-        gap = max(2, available - len(date_str) - 2)
-        self.border_title = f"[#45475A]{'─' * gap}[/#45475A] {date_str}"
 
         routine = self._get_routine_info()
         tasks = self._get_task_info()
@@ -97,6 +99,22 @@ class HeaderBar(Static):
         gap = max(2, content_width - left_len - right_len)
 
         self.update(f" {left}{' ' * gap}{right} ")
+
+    @staticmethod
+    def _get_active_routine_name() -> str:
+        """Retorna apenas o nome da rotina ativa, ou string vazia."""
+        try:
+            from timeblock.services.routine_service import RoutineService
+
+            result, error = service_action(lambda s: RoutineService(s).get_active_routine())
+            if error or not result:
+                return ""
+            if isinstance(result, dict):
+                return result.get("name", "")
+            return str(getattr(result, "name", ""))
+        except Exception:
+            logger.debug("Exceção em _get_active_routine_name", exc_info=True)
+            return ""
 
     @staticmethod
     def _get_routine_info() -> str:
