@@ -95,6 +95,7 @@ CHANGELOG_test_*.md
 
 # Migration scripts (one-time use)
 migrate_*.py
+!scripts/migrate_backups_to_xdg.py
 
 # Archives and demos
 *.tar.gz
