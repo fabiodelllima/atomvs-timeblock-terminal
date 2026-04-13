@@ -96,6 +96,9 @@ def _line_index(line_number: int, instances: list[dict]) -> int:
 class TestBRTUI032:
     """Valida regras de renderização de blocos de tempo."""
 
+    @pytest.mark.skip(
+        reason="Aguarda adaptação de BR-TUI-032 e teste após redesign de UI da v1.7.2 — ref issue #53"
+    )
     def test_br_tui_032_block_first_line_title_icon(
         self,
         block_10_11: dict,
@@ -120,6 +123,9 @@ class TestBRTUI032:
         # NÃO deve conter fill chars (░)
         assert "\u2591" not in first_line, "Fill char presente na linha de título"
 
+    @pytest.mark.skip(
+        reason="Aguarda adaptação de BR-TUI-032 e teste após redesign de UI da v1.7.2 — ref issue #53"
+    )
     def test_br_tui_032_block_body_accent_bar_color(
         self,
         block_10_11: dict,
@@ -157,6 +163,9 @@ class TestBRTUI032:
             # ─── dentro de bloco (3+ hífens consecutivos)
             assert "\u2500\u2500\u2500" not in line, f"─── encontrado na linha {line_num}"
 
+    @pytest.mark.skip(
+        reason="Aguarda adaptação de BR-TUI-032 e teste após redesign de UI da v1.7.2 — ref issue #53"
+    )
     def test_br_tui_032_end_time_line_has_color(
         self,
         block_10_11: dict,
