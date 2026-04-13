@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "atomvs-timeblock-terminal"
-version = "1.7.1"
+version = "1.7.2"
 description = "Terminal-based time management with CLI and TUI interfaces"
 readme = "README.md"
 requires-python = ">=3.13"
