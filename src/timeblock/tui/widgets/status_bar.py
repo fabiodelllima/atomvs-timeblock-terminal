@@ -51,9 +51,9 @@ def _format_hint(hint: str) -> str:
         return ""
     parts: list[str] = []
     for match in _HINT_PATTERN.finditer(hint):
-        key, desc = match.group(1), match.group(2)
-        parts.append(f"[{C_INFO}][{key}][/{C_INFO}][{C_SUBTEXT1}]{desc}[/{C_SUBTEXT1}]")
-    return "".join(parts) if parts else hint
+        key, desc = match.group(1), match.group(2).strip()
+        parts.append(f"[{C_INFO}]({key})[/{C_INFO}] [{C_SUBTEXT1}]{desc}[/{C_SUBTEXT1}]")
+    return " [dim]\u00b7[/dim] ".join(parts) if parts else hint
 
 
 class StatusBar(Widget):
