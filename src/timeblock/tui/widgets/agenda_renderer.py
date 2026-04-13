@@ -191,9 +191,9 @@ def build_agenda_content(
         show_label = m % 30 == 0
 
         if show_label:
-            hours_out.append(f"  {_time_label(h, m)}  [dim]\u2502[/dim]")
+            hours_out.append(f"  {_time_label(h, m)} ")
         else:
-            hours_out.append("         [dim]\u2502[/dim]")
+            hours_out.append("        ")
 
         entries = line_info.get(li, [])
 
