@@ -3,8 +3,8 @@
 Layout: [rotina ativa] | [keybindings do panel focado] | [timer + hora]
 O centro atualiza dinamicamente conforme o panel que recebe foco.
 
-BR-TUI-034: hints exclusivamente no footer global, formato `[tecla] descrição`
-com tecla em C_INFO e descrição em C_SUBTEXT1.
+BR-TUI-034: hints exclusivamente no footer global, formato `(tecla) descrição`
+com tecla em C_INFO e descrição em C_SUBTEXT1, separados por ` · `.
 """
 
 import re
@@ -18,33 +18,35 @@ from timeblock.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-# BR-TUI-034 regras 9-12: mapa contextual de keybindings por panel
+# BR-TUI-034 regras 3-6, 10: mapa contextual de keybindings por panel.
+# Formato canônico: `(tecla) descrição · (tecla) descrição`.
+# Sem conversão de delimitadores — _format_hint apenas aplica cores.
 PANEL_KEYBINDINGS: dict[str, str] = {
-    "agenda-content": "[↑↓] navegar",
-    "panel-habits": "[j/k] navegar  [v] concluir  [s] skip  [t] timer",
-    "panel-tasks": "[j/k] navegar  [v] concluir  [s] adiar  [c] cancelar",
-    "panel-timer": "[space] pausar/continuar  [s] parar  [c] cancelar",
-    "panel-metrics": "[f] período",
+    "agenda-content": "(↑↓) navegar",
+    "panel-habits": "(j/k) navegar · (v) concluir · (s) skip · (t) timer",
+    "panel-tasks": "(j/k) navegar · (v) concluir · (s) adiar · (c) cancelar",
+    "panel-timer": "(space) pausar/continuar · (s) parar · (c) cancelar",
+    "panel-metrics": "(f) período",
 }
 
-DEFAULT_KEYBINDINGS = "[Tab] navegar  [?] ajuda  [Ctrl+Q] sair"
+DEFAULT_KEYBINDINGS = "(Tab) navegar · (?) ajuda · (Ctrl+Q) sair"
 
-# BR-TUI-034 regra 3: parser do formato `[tecla] descrição`
-_HINT_PATTERN = re.compile(r"\[([^\]]+)\]([^\[]*)")
+# BR-TUI-034 regra 3: parser do formato `(tecla) descrição`
+_HINT_PATTERN = re.compile(r"\(([^)]+)\)([^(]*)")
 
 
 def _format_hint(hint: str) -> str:
-    """Converte `[q] sair  [j/k] navegar` em markup Rich colorido.
+    """Aplica cores Rich ao hint no formato `(tecla) descrição · ...`.
 
-    BR-TUI-034 regras 6-8: teclas (com colchetes literais) recebem C_INFO,
+    BR-TUI-034 regras 7-9: parênteses+tecla recebem C_INFO,
     descrições recebem C_SUBTEXT1. Sem `[dim]` envolvendo o todo.
 
     Args:
-        hint: string no formato `[<tecla>] <descrição>` repetível.
+        hint: string no formato `(<tecla>) <descrição>` separada por ` · `.
 
     Returns:
         Markup Rich pronto para render. String vazia se hint vazio.
-        Se o hint não contém colchetes (formato legado/inesperado),
+        Se o hint não contém parênteses (formato legado/inesperado),
         retorna o texto cru sem colorir.
     """
     if not hint:
@@ -52,6 +54,8 @@ def _format_hint(hint: str) -> str:
     parts: list[str] = []
     for match in _HINT_PATTERN.finditer(hint):
         key, desc = match.group(1), match.group(2).strip()
+        # Remove separador · residual do desc (fica entre hints no input)
+        desc = desc.rstrip("·").strip()
         parts.append(f"[{C_INFO}]({key})[/{C_INFO}] [{C_SUBTEXT1}]{desc}[/{C_SUBTEXT1}]")
     return " [dim]\u00b7[/dim] ".join(parts) if parts else hint
 
