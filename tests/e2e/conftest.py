@@ -1,32 +1,79 @@
-"""Configuração compartilhada dos testes e2e.
+"""E2E snapshot testing configuration.
 
-Inclui monkey-patch para pytest-textual-snapshot 1.1.0 que não trata
-o retorno de reportinfo() como str (bug com Python 3.14 + pytest 8.4.2).
-Ref: pytest changelog #7259 — reportinfo() retorna str | os.PathLike[str].
+Custom snap_compare fixture using syrupy 5.x + Textual's pilot API,
+replacing the legacy pytest-textual-snapshot dependency.
+
+The fixture preserves the same interface used by all existing tests:
+    assert snap_compare(app, terminal_size=(...), run_before=callback)
 """
 
-from pathlib import Path
+from __future__ import annotations
 
-import pytest_textual_snapshot
+import asyncio
+from typing import TYPE_CHECKING, Any
 
+import pytest
+from syrupy.extensions.single_file import SingleFileSnapshotExtension
 
-def _patched_node_to_report_path(node) -> Path:
-    """Versão corrigida de node_to_report_path que aceita str ou Path."""
-    tempdir = pytest_textual_snapshot.get_tempdir()
-    path_raw, _, name = node.reportinfo()
-    path = Path(path_raw) if isinstance(path_raw, str) else path_raw
-    temp = Path(path.parent)
-    base = []
-    while temp != temp.parent and temp.name != "tests":
-        base.append(temp.name)
-        temp = temp.parent
-    parts = []
-    if base:
-        parts.append("_".join(reversed(base)))
-    parts.append(path.name.replace(".", "_"))
-    parts.append(name.replace("[", "_").replace("]", "_"))
-    return Path(tempdir.name) / "_".join(parts)
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from syrupy.assertion import SnapshotAssertion
+    from syrupy.types import SerializableData, SerializedData
+    from textual.app import App
 
 
-# Aplica o patch no módulo
-pytest_textual_snapshot.node_to_report_path = _patched_node_to_report_path
+class SVGSnapshotExtension(SingleFileSnapshotExtension):
+    """Syrupy extension that stores snapshots as individual .svg files.
+
+    Overrides serialize to accept str from Textual's export_screenshot(),
+    since SingleFileSnapshotExtension expects bytes by default.
+    """
+
+    _file_extension = "svg"
+
+    def serialize(
+        self,
+        data: SerializableData,
+        *,
+        exclude: Any = None,
+        include: Any = None,
+        matcher: Any = None,
+    ) -> SerializedData:
+        """Encode SVG string to bytes for single-file storage."""
+        if isinstance(data, str):
+            return data.encode("utf-8")
+        return super().serialize(data, exclude=exclude, include=include, matcher=matcher)
+
+
+@pytest.fixture
+def snapshot(snapshot: SnapshotAssertion) -> SnapshotAssertion:
+    """Configure syrupy to use SVG single-file snapshots."""
+    return snapshot.use_extension(SVGSnapshotExtension)
+
+
+@pytest.fixture
+def snap_compare(snapshot: SnapshotAssertion):
+    """Drop-in replacement for pytest-textual-snapshot's snap_compare.
+
+    Uses Textual's App.run_test() + export_screenshot() with syrupy
+    for snapshot comparison. Maintains identical call signature.
+    """
+
+    def _compare(
+        app: App,
+        *,
+        terminal_size: tuple[int, int] = (80, 24),
+        run_before: Callable | None = None,
+    ) -> bool:
+        async def _capture() -> str:
+            async with app.run_test(size=terminal_size) as pilot:
+                if run_before is not None:
+                    await run_before(pilot)
+                return app.export_screenshot()
+
+        svg = asyncio.run(_capture())
+        assert svg == snapshot
+        return True
+
+    return _compare
