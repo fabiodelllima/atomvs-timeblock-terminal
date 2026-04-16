@@ -42,7 +42,7 @@ tui = [
     "textual>=0.89.0",
 ]
 dev = [
-    "pytest>=8.0",
+    "pytest>=9.0.3",
     "pytest-cov>=7.0",
     "pytest-bdd>=8.0",
     "pytest-asyncio>=0.24.0",
@@ -54,7 +54,7 @@ dev = [
     "types-python-dateutil>=2.9.0",
     "textual-dev>=1.7.0",
     "pytest-textual-snapshot>=1.1.0",
-    "syrupy>=4.8.0",
+    "syrupy>=5.1.0",
 ]
 
 [project.scripts]
