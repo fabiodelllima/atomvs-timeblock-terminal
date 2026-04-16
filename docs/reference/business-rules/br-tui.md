@@ -8,6 +8,15 @@ O design visual segue um sistema Material-like com paleta de cores definida em T
 
 **Referências:** ADR-006 (decisão original), ADR-031 (implementação), ADR-007 (service layer)
 
+**Convenção de marcadores no heading das BRs:**
+
+- **(NOVA dd/mm/aaaa):** primeira publicação da BR. Data de criação.
+- **(EMENDADA dd/mm/aaaa):** cláusulas pontuais alteradas, estrutura geral preservada. Data da última emenda.
+- **(REVISADA dd/mm/aaaa):** reescrita substancial (>30% das cláusulas ou mudança de premissa). Data da última revisão.
+
+A data entre parênteses é sempre a da última alteração. Data de criação original rastreável via `git log`.
+
+
 ---
 
 ### BR-TUI-001: Entry Point Detection
@@ -1521,7 +1530,7 @@ Scenario: Return to today
 
 ---
 
-### BR-TUI-032: Renderização de Blocos de Tempo na Agenda (NOVA 22/03/2026)
+### BR-TUI-032: Renderização de Blocos de Tempo na Agenda (EMENDADA 16/04/2026)
 
 **Descrição:** Blocos de tempo são retângulos contínuos com granularidade de 15min, sem interrupção por linhas horizontais.
 
@@ -1535,30 +1544,29 @@ Scenario: Return to today
 
 **Regras — Renderização de bloco:**
 
-4. Primeira linha do bloco (horário de início): `▌{título} · {ícone_status}`. Accent bar (`▌`) na cor do status, título em C_TEXT (branco), ícone na cor do status
-5. Linhas seguintes do bloco: `▌{cor_sólida}` — accent bar + preenchimento
-6. `▌` (half block esquerdo) na cor saturada do hábito (paleta Catppuccin Mocha)
-7. Fundo do bloco (após `▌`) na cor suave da mesma família
-8. Ícones de status preservam padrão existente: `○` pending, `▶` running, `✓` done, `⏭` skipped, `⏸` paused
-9. Nenhuma linha horizontal (`───`) atravessa um bloco de tempo
+4. Primeira linha do bloco (horário de início): `{ícone} {título}`. Ícone na cor semântica do status (paleta Catppuccin), título em C_TEXT (`#CDD6F4`). Separados por um único espaço. Não há accent bar nem prefixo — a distinção visual vem da cor do ícone. Para status bold (`running`, `paused`), tanto o ícone quanto o título recebem `[bold]`.
+5. Linhas seguintes do bloco (corpo): `· {fill}`. Prefixo `·` (U+00B7) em `[dim]`. Após o espaço, o caractere de preenchimento (`fill_char`) é repetido `col_w - 2` vezes na cor suave do status (`fill_color`). Caracteres de fill por status: `░` (pending, done), `▓` (running), `▒` (paused), `┄` (not_done).
+6. Cor do fill provém de `fill_color(status, substatus)` em `colors.py`. Running usa Mauve escuro (`#8B6EAC`), paused usa Yellow escuro (`#B8A050`), demais usam `status_color(status, substatus)`.
+7. Ícones de status preservam padrão existente: `○` pending, `▶` running, `✓` done, `⏸` paused. Substatus done: `✓~` partial, `✓+` overdone, `✓!` excessive. Substatus not_done: `!` justified, `✗!` unjustified, `✗?` ignored.
+8. Nenhuma linha horizontal (`───`) atravessa um bloco de tempo
 
 **Regras — Término de bloco:**
 
-10. A linha correspondente ao horário de término do bloco AINDA exibe cor (`▌░░░`). A linha seguinte é livre
-11. Se nenhum bloco inicia na linha seguinte ao término: área vazia (sem pontilhado)
-12. Se outro bloco inicia exatamente no horário de término: o título do novo bloco substitui diretamente — sem gap, sem cor residual do bloco anterior
+9. A linha correspondente ao horário de término do bloco AINDA exibe fill. A linha seguinte é livre. Nota: accent visual de término (borda direita `▌` e sublinhado na última linha de fill) pendente de implementação — ver issue #57.
+10. Se nenhum bloco inicia na linha seguinte ao término: área vazia (sem pontilhado)
+11. Se outro bloco inicia exatamente no horário de término: o título do novo bloco substitui diretamente — sem gap, sem cor residual do bloco anterior
 
 **Regras — Multi-coluna (sobreposição):**
 
-13. Largura mínima por coluna: 18 caracteres. Colunas não encolhem abaixo disso
-14. Gap entre colunas: 1 caractere vazio
-15. Título truncado com reticências se exceder largura da coluna
-16. Lógica de overlap: union-find + greedy column assignment (preserva implementação existente de DT-045)
+12. Largura mínima por coluna: 18 caracteres. Colunas não encolhem abaixo disso
+13. Gap entre colunas: 1 caractere vazio
+14. Título truncado com reticências se exceder largura da coluna
+15. Lógica de overlap: union-find + greedy column assignment (preserva implementação existente de DT-045)
 
 **Regras — Áreas vazias:**
 
-17. Linhas sem bloco em nenhuma coluna: área vazia (string vazia)
-18. Linhas sem bloco em uma coluna mas com bloco em outra: espaço vazio na coluna sem bloco
+16. Linhas sem bloco em nenhuma coluna: área vazia (string vazia)
+17. Linhas sem bloco em uma coluna mas com bloco em outra: espaço vazio na coluna sem bloco
 
 **Exemplos de referência:** ver `docs/reference/agenda-panel-mockup-reference.md`
 
@@ -1573,8 +1581,9 @@ Scenario: Return to today
 - `test_br_tui_032_empty_area_dotted`
 - `test_br_tui_032_granularity_15min`
 
----
+**Histórico:** versão original 22/03/2026 usava accent bar `▌` na borda esquerda de todas as linhas e formato `▌{título} · {ícone}`. Emendada 16/04/2026: accent bar removida; corpo usa prefixo `·` dim; primeira linha invertida para `{ícone} {título}` (v1.7.2, issues #34, #40).
 
+---
 ### BR-TUI-033: MetricsPanel — Exibição de Métricas de Hábitos (NOVA 03/04/2026)
 
 **Descrição:** Painel de métricas agrega dados de completude da rotina ativa com streak, completude percentual e heatmap semanal.
@@ -1623,33 +1632,36 @@ Scenario: Return to today
 
 ---
 
-### BR-TUI-034: Hints Contextuais no Footer Global (NOVA 10/04/2026)
+### BR-TUI-034: Hints Contextuais no Footer Global (EMENDADA 16/04/2026)
 
 **Descrição:** Hints de teclado (atalhos contextuais) vivem exclusivamente no footer global (`#status-bar`). Nenhum panel exibe hints inline no corpo do widget. O footer atualiza dinamicamente conforme o panel em foco, garantindo single source of truth para as teclas disponíveis ao usuário.
+
+**Decisão arquitetural:** ADR-035
 
 **Regras — Localização única:**
 
 1. Apenas o `StatusBar` (`#status-bar`) renderiza hints. Panels (`HabitsPanel`, `TasksPanel`, `TimerPanel`, `AgendaPanel`, `MetricsPanel`) não emitem strings de hint nos métodos `_build_*_lines`.
 2. Docstrings de métodos de build de conteúdo que historicamente continham hints e foram removidas devem mencionar este princípio para evitar reintrodução acidental.
 
-**Regras — Formato visual:**
+**Regras — Formato canônico:**
 
-3. Cada hint segue o padrão `[<tecla>] <descrição>` literal, com colchetes visíveis no output renderizado. Exemplos: `[q] sair`, `[j/k] navegar`, `[Ctrl+Q] sair`, `[↑↓] navegar`.
-4. Múltiplos hints na mesma linha são separados por dois espaços: `[v] done  [s] skip  [t] timer`.
-5. Convenção da tecla: uma letra como `[v]`, combinações como `[Ctrl+Q]`, setas como `[↑↓]`, múltiplas teclas equivalentes como `[j/k]` ou `[h/l]`.
+3. Cada hint segue o padrão `(<tecla>) <descrição>`, com parênteses. Exemplos: `(q) sair`, `(j/k) navegar`, `(Ctrl+Q) sair`, `(↑↓) navegar`.
+4. Múltiplos hints na mesma string são separados por ` · ` (espaço + U+00B7 ponto medial + espaço): `(v) concluir · (s) skip · (t) timer`.
+5. Convenção da tecla: uma letra como `(v)`, combinações como `(Ctrl+Q)`, setas como `(↑↓)`, múltiplas teclas equivalentes como `(j/k)` ou `(h/l)`.
+6. Este formato é usado tanto no mapa `PANEL_KEYBINDINGS` quanto na saída renderizada. Não há conversão de delimitadores — o `_format_hint` apenas aplica cores e retorna.
 
 **Regras — Cores:**
 
-6. Colchetes e tecla recebem `C_INFO` (`#89B4FA`, azul Catppuccin). A cor é aplicada via markup Rich pelo helper `_format_hint`, não via TCSS global do `#status-center`.
-7. Descrição (texto após `]`) recebe `C_SUBTEXT1` (`#BAC2DE`, cinza claro Catppuccin).
-8. O uso de `[dim]` envolvendo o hint inteiro está proibido. A hierarquia visual vem das duas cores Catppuccin distintas, não de opacidade global.
+7. Parênteses e tecla recebem `C_INFO` (`#89B4FA`, azul Catppuccin). A cor é aplicada via markup Rich pelo helper `_format_hint`, não via TCSS global do `#status-center`.
+8. Descrição (texto após `)`) recebe `C_SUBTEXT1` (`#BAC2DE`, cinza claro Catppuccin).
+9. O uso de `[dim]` envolvendo o hint inteiro está proibido. A hierarquia visual vem das duas cores Catppuccin distintas, não de opacidade global.
 
 **Regras — Contextualidade:**
 
-9. O `StatusBar` mantém um mapa `PANEL_KEYBINDINGS: dict[panel_id, hint_string]` no módulo `status_bar.py`. Cada entrada do mapa é uma string no formato definido pelas regras 3-5.
-10. Quando `focused_panel` muda (via `update_focused_panel`), o `_build_center_section` consulta `PANEL_KEYBINDINGS.get(panel_id, DEFAULT_KEYBINDINGS)` e aplica `_format_hint` ao resultado.
-11. `DEFAULT_KEYBINDINGS` é o fallback usado quando nenhum panel está em foco ou quando o panel_id não existe no mapa. Deve cobrir as ações globais (Tab, ajuda, sair).
-12. Todos os IDs de panel registrados no dashboard têm entrada correspondente em `PANEL_KEYBINDINGS`. Adicionar um panel novo sem registrar seu hint é violação desta BR.
+10. O `StatusBar` mantém um mapa `PANEL_KEYBINDINGS: dict[panel_id, hint_string]` no módulo `status_bar.py`. Cada entrada do mapa é uma string no formato definido pelas regras 3-5.
+11. Quando `focused_panel` muda (via `update_focused_panel`), o `_build_center_section` consulta `PANEL_KEYBINDINGS.get(panel_id, DEFAULT_KEYBINDINGS)` e aplica `_format_hint` ao resultado.
+12. `DEFAULT_KEYBINDINGS` é o fallback usado quando nenhum panel está em foco ou quando o panel_id não existe no mapa. Deve cobrir as ações globais (Tab, ajuda, sair).
+13. Todos os IDs de panel registrados no dashboard têm entrada correspondente em `PANEL_KEYBINDINGS`. Adicionar um panel novo sem registrar seu hint é violação desta BR.
 
 **Testes:**
 
@@ -1668,4 +1680,6 @@ Scenario: Return to today
 - BR-TUI-008 (Visual Consistency Material-like — paleta Catppuccin)
 - Issue #29 (TimerPanel hint removal — primeiro caso prático do princípio)
 - Issue #44 (motivação documental desta BR)
-- Issue #32 (implementação do formato `[tecla] descrição` com cores)
+- Issue #32 (implementação do formato `(tecla) descrição` com cores)
+
+**Histórico:** versão original 10/04/2026 usava formato `[tecla]` com colchetes no mapa e conversão para `(tecla)` no render. Emendada 16/04/2026: formato unificado para `(tecla)` em fonte e render por incompatibilidade do escape `\[\]` na pipeline Rich→Textual (v1.7.2, issues #32, #44).
