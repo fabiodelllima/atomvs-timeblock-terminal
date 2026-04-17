@@ -1683,3 +1683,71 @@ Scenario: Return to today
 - Issue #32 (implementação do formato `(tecla) descrição` com cores)
 
 **Histórico:** versão original 10/04/2026 usava formato `[tecla]` com colchetes no mapa e conversão para `(tecla)` no render. Emendada 16/04/2026: formato unificado para `(tecla)` em fonte e render por incompatibilidade do escape `\[\]` na pipeline Rich→Textual (v1.7.2, issues #32, #44).
+
+---
+
+### BR-TUI-035: Conteúdo Interno do HeaderBar (NOVA 16/04/2026)
+
+**Descrição:** O conteúdo interno do HeaderBar exibe métricas agregadas do dia/semana em três seções: progresso semanal de hábitos, progresso de tarefas do dia e próximo item pendente. Informação de contexto (rotina ativa, data) vive nos atributos `border_title` e `border_subtitle` do widget, não no conteúdo interno.
+
+**Decisão arquitetural:** ADR-052
+
+**Regras — Seção 1: Progresso semanal de hábitos:**
+
+1. Formato: `Hábitos X/Y ▪▪▪▪▪▪░░░░ ZZ%`. X = instâncias DONE na semana corrente (segunda a domingo). Y = total esperado (hábitos ativos × dias transcorridos na semana).
+2. Barra visual com 10 caracteres (`▪` para preenchido, `░` para restante), proporcional ao percentual arredondado.
+3. Percentual exibido como inteiro seguido de `%`: `60%`, `100%`.
+4. Quando sem rotina ativa: `[dim]Hábitos --/--[/dim]` sem barra e sem percentual.
+5. Cor da barra: C_SUCCESS (`#A6E3A1`) quando percentual >= 90%, C_INFO (`#89B4FA`) quando < 90%.
+
+**Regras — Seção 2: Progresso de tarefas do dia:**
+
+6. Formato: `Tarefas X/Y ▪▪▪░░ ZZ%`. X = tarefas concluídas hoje. Y = tarefas com deadline hoje ou pendentes sem deadline.
+7. Barra visual com 5 caracteres, mesma convenção de `▪`/`░`.
+8. Quando Y = 0: `[dim]Sem tarefas[/dim]` sem barra.
+9. Quando X = Y e Y > 0: barra inteira em C_SUCCESS.
+10. Cor padrão da barra: C_INFO quando percentual < 90%.
+
+**Regras — Seção 3: Próximo item:**
+
+11. Formato: `Próximo: {nome} em {countdown}`. Nome do próximo hábito ou tarefa pendente, o que vier primeiro cronologicamente.
+12. Countdown em formato relativo: `em Xmin` (< 60min), `em XhYY` (>= 60min). Exemplos: `em 25min`, `em 1h15`.
+13. Hábitos considerados: instâncias com status `pending` e `scheduled_start` futuro no dia corrente.
+14. Tarefas consideradas: tarefas pendentes com horário definido hoje e `scheduled_start` futuro.
+15. Quando empate de horário: hábito tem prioridade (rotina é o eixo principal do ATOMVS).
+16. Nome truncado com `…` se exceder espaço disponível na seção.
+17. Quando sem itens pendentes restantes hoje: `[dim]Sem próximos hoje[/dim]`.
+
+**Regras — Layout e responsividade:**
+
+18. Seções separadas por `  [dim]│[/dim]  ` (2 espaços + pipe dim + 2 espaços).
+19. Distribuição: seções alinhadas à esquerda com gap proporcional preenchendo a largura disponível.
+20. Viewport < 80 colunas: seção 3 (Próximo) colapsa — não é exibida.
+21. Viewport < 60 colunas: seção 2 (Tarefas) também colapsa — apenas seção 1 visível.
+
+**Regras — Eliminação de redundância:**
+
+22. O nome da rotina ativa NÃO aparece no conteúdo interno — vive exclusivamente no `border_title`.
+23. Timer NÃO aparece no conteúdo interno — vive exclusivamente no TimerPanel.
+24. Uma única chamada ao `RoutineService.get_active_routine()` por refresh alimenta tanto o `border_title` quanto a seção 1.
+
+**Testes:**
+
+- `test_br_tui_035_habits_progress_format`
+- `test_br_tui_035_habits_progress_no_routine`
+- `test_br_tui_035_tasks_progress_format`
+- `test_br_tui_035_tasks_progress_no_tasks`
+- `test_br_tui_035_next_item_habit`
+- `test_br_tui_035_next_item_task`
+- `test_br_tui_035_next_item_none`
+- `test_br_tui_035_responsive_collapse_80`
+- `test_br_tui_035_responsive_collapse_60`
+- `test_br_tui_035_no_routine_name_in_content`
+- `test_br_tui_035_no_timer_in_content`
+
+**Referências:**
+
+- ADR-052 (Redesign do conteúdo interno do HeaderBar)
+- BR-TUI-003 (Dashboard Screen — regras gerais)
+- BR-TUI-034 (Hints no footer — sem call-to-action no header)
+- Issue #52 (motivação desta BR)
