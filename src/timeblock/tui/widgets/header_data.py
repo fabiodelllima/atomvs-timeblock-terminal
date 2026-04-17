@@ -173,7 +173,7 @@ def _find_next_habit(
             if best_dt is None or inst_dt < best_dt:
                 best_dt = inst_dt
                 habit = inst.habit
-                best_name = habit.name if habit else str(inst.habit_id)
+                best_name = habit.title if habit else str(inst.habit_id)
 
         return best_name, best_dt
     except Exception:
