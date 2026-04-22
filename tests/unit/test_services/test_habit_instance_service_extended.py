@@ -10,9 +10,9 @@ from datetime import date, time, timedelta
 
 import pytest
 from sqlalchemy.engine import Engine
-from sqlmodel import Session
+from sqlmodel import Session, select
 
-from timeblock.models import Habit, Recurrence, Routine, Status
+from timeblock.models import Habit, HabitInstance, Recurrence, Routine, Status
 from timeblock.models.enums import DoneSubstatus
 from timeblock.services.habit_instance_service import HabitInstanceService
 
@@ -127,6 +127,52 @@ class TestGenerateInstances:
 
         assert len(instances) == 1
         assert instances[0].date == target_date
+
+
+class TestGenerateInstancesIdempotency:
+    """Testa idempotência de generate_instances().
+
+    Reproduz e previne regressão do bug da issue #2: chamadas repetidas
+    de generate_instances para o mesmo (habit_id, date) criavam duplicatas
+    ao invés de pular existentes. A BR-HABIT-003 documenta explicitamente
+    "Não duplica instâncias existentes" como comportamento esperado.
+    """
+
+    def test_generate_is_idempotent_for_same_period(
+        self, everyday_habit: Habit, session: Session
+    ) -> None:
+        """Chamar generate_instances duas vezes para o mesmo período não duplica.
+
+        DADO: hábito EVERYDAY e período de 7 dias
+        QUANDO: generate_instances é chamado duas vezes seguidas
+        ENTÃO: o banco contém exatamente uma instância por (habit_id, date),
+               não duas.
+        """
+        assert everyday_habit.id is not None, "fixture everyday_habit deve ter id após commit"
+        habit_id = everyday_habit.id
+
+        start = date.today()
+        end = start + timedelta(days=6)
+
+        first = HabitInstanceService.generate_instances(habit_id, start, end)
+        assert len(first) == 7, "primeira geração deve criar 7 instâncias"
+
+        second = HabitInstanceService.generate_instances(habit_id, start, end)
+
+        # Verifica estado real do banco, não apenas o retorno do método.
+        # Se o fix escolher retornar [] na segunda chamada mas ainda inserir
+        # no banco, o retorno engana — só a query direta detecta duplicata.
+        rows = session.exec(select(HabitInstance).where(HabitInstance.habit_id == habit_id)).all()
+        assert len(rows) == 7, (
+            f"Esperava 7 instâncias no banco após dupla geração, encontrou {len(rows)}. "
+            f"generate_instances não está sendo idempotente — reintroduziu bug da issue #2."
+        )
+
+        # Segunda chamada deve devolver lista vazia (nada novo foi criado),
+        # sinalizando idempotência ao chamador.
+        assert second == [], (
+            f"Segunda chamada deveria retornar [] (nada criado), retornou {len(second)} itens"
+        )
 
 
 class TestMarkCompleted:
