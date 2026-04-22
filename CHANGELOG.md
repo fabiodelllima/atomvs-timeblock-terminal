@@ -7,6 +7,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `HabitInstanceService.generate_instances` is now idempotent: repeated calls for the same period no longer create duplicate HabitInstance rows, per BR-HABIT-003 ("Não duplica instâncias existentes"). (Closes #2)
+
+---
+
 ## [1.7.2] - 2026-04-13
 
 ### Added
