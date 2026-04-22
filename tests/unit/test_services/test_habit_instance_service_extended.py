@@ -39,6 +39,7 @@ def everyday_habit(session: Session) -> Habit:
     session.add(routine)
     session.commit()
     session.refresh(routine)
+    assert routine.id is not None, "routine deve ter id após refresh"
 
     habit = Habit(
         routine_id=routine.id,
@@ -60,6 +61,7 @@ def weekdays_habit(session: Session) -> Habit:
     session.add(routine)
     session.commit()
     session.refresh(routine)
+    assert routine.id is not None, "routine deve ter id após refresh"
 
     habit = Habit(
         routine_id=routine.id,
@@ -79,6 +81,7 @@ class TestGenerateInstances:
 
     def test_generate_everyday_habit(self, everyday_habit: Habit) -> None:
         """Gera instâncias para hábito EVERYDAY durante 7 dias."""
+        assert everyday_habit.id is not None
         start = date.today()
         end = start + timedelta(days=6)
 
@@ -102,6 +105,7 @@ class TestGenerateInstances:
         monday = today + timedelta(days=days_until_monday)
         sunday = monday + timedelta(days=6)
 
+        assert weekdays_habit.id is not None
         instances = HabitInstanceService.generate_instances(weekdays_habit.id, monday, sunday)
 
         assert len(instances) == 5
@@ -119,6 +123,7 @@ class TestGenerateInstances:
 
     def test_generate_single_day(self, everyday_habit: Habit) -> None:
         """Gera instâncias para período de um único dia."""
+        assert everyday_habit.id is not None
         target_date = date.today()
 
         instances = HabitInstanceService.generate_instances(
@@ -180,10 +185,12 @@ class TestMarkCompleted:
 
     def test_mark_completed_success(self, everyday_habit: Habit) -> None:
         """Marca instância como completada com sucesso."""
+        assert everyday_habit.id is not None
         instances = HabitInstanceService.generate_instances(
             everyday_habit.id, date.today(), date.today()
         )
         instance_id = instances[0].id
+        assert instance_id is not None
 
         updated = HabitInstanceService.mark_completed(
             instance_id, done_substatus=DoneSubstatus.FULL
@@ -204,10 +211,12 @@ class TestMarkSkipped:
 
     def test_mark_skipped_success(self, everyday_habit: Habit) -> None:
         """Marca instância como pulada com sucesso."""
+        assert everyday_habit.id is not None
         instances = HabitInstanceService.generate_instances(
             everyday_habit.id, date.today(), date.today()
         )
         instance_id = instances[0].id
+        assert instance_id is not None
 
         updated = HabitInstanceService.mark_skipped(instance_id)
 
