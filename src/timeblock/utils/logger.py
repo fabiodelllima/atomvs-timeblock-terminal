@@ -136,19 +136,23 @@ def configure_logging(
 def get_logger(name: str) -> logging.Logger:
     """Obtém logger filho do namespace timeblock.
 
-    Se configure_logging() ainda não foi chamado, configura
-    com defaults (console only, nível INFO). Isso garante
-    compatibilidade com código que chama get_logger diretamente.
+    Esta função NÃO configura handlers automaticamente. Se
+    configure_logging() ainda não foi chamado, o logger retornado
+    não terá handlers anexados e mensagens serão silenciosamente
+    descartadas (propagate=False garante isolamento do root Python).
+
+    O entrypoint (main() em src/timeblock/main.py) é responsável
+    por chamar configure_logging() com a intenção correta antes
+    de qualquer uso efetivo de log. Ver BR-OBS-001 regras 11-12
+    e tabela de configuração por modo.
 
     Args:
         name: nome do módulo (geralmente __name__)
 
     Returns:
-        Logger configurado no namespace timeblock.
+        Logger no namespace timeblock. Sem handlers se
+        configure_logging() ainda não foi chamado.
     """
-    if not _configured:
-        configure_logging(log_file=False)
-
     return logging.getLogger(name)
 
 

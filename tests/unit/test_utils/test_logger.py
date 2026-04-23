@@ -99,12 +99,19 @@ class TestGetLogger:
         logger = get_logger("timeblock.services.timer")
         assert logger.name == "timeblock.services.timer"
 
-    def test_get_logger_auto_configures(self):
-        """get_logger sem configure_logging prévio configura defaults."""
-        logger = get_logger("timeblock.test.auto")
+    def test_get_logger_without_configure_has_no_handlers(self):
+        """get_logger sem configure_logging prévio retorna logger silencioso.
+
+        Contrato atualizado após fix de BR-OBS-001 / issue #48: get_logger
+        não adiciona handlers como side-effect. O entrypoint é responsável
+        por chamar configure_logging() explicitamente antes de qualquer
+        uso efetivo de log. Sem handlers, mensagens são silenciosamente
+        descartadas (propagate=False garante isolamento do root Python).
+        """
+        logger = get_logger("timeblock.test.no_auto")
         assert logger is not None
         root = logging.getLogger("timeblock")
-        assert len(root.handlers) > 0
+        assert root.handlers == []
 
     def test_get_logger_inherits_level(self):
         """Logger filho herda nível do root timeblock."""
