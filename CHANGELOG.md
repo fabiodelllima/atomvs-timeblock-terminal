@@ -9,6 +9,8 @@
 
 ### Fixed
 
+- **logger:** Remove auto-configuração silenciosa em `get_logger()` que adicionava `StreamHandler(stderr)` antes de `main()` chamar `configure_logging(console=False)`, corrigindo vazamento de logs sobrepostos ao layout Textual na TUI. Fix alinhado com BR-OBS-001 regras 11-12. (#48)
+
 - `HabitInstanceService.generate_instances` is now idempotent: repeated calls for the same period no longer create duplicate HabitInstance rows, per BR-HABIT-003 ("Não duplica instâncias existentes"). (Closes #2)
 
 ---
