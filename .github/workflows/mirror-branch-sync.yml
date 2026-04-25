@@ -1,0 +1,39 @@
+name: Mirror Branch Sync
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: "0 10,22 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - run: |
+          git remote add gitlab https://gitlab.com/delimafabio/atomvs-timeblock-terminal.git
+          git fetch gitlab --prune
+      - run: |
+          set -euo pipefail
+          gitlab_branches=$(git ls-remote --heads gitlab | awk '{print $2}' | sed 's|refs/heads/||' | sort -u)
+          github_branches=$(git ls-remote --heads origin | awk '{print $2}' | sed 's|refs/heads/||' | sort -u)
+          orphans=$(comm -23 <(echo "$github_branches") <(echo "$gitlab_branches") || true)
+          protected='^(main|develop|master)$'
+          if [ -z "$orphans" ]; then
+            echo "Nothing to delete."
+            exit 0
+          fi
+          while IFS= read -r branch; do
+            if [ -n "$branch" ] && ! echo "$branch" | grep -qE "$protected"; then
+              echo "Deleting orphan branch: $branch"
+              git push origin --delete "$branch" || echo "Failed to delete $branch (may already be removed)"
+            fi
+          done <<< "$orphans"
