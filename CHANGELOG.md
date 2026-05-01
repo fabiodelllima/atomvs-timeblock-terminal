@@ -7,11 +7,15 @@
 
 ## [Unreleased]
 
+---
+
+## [1.7.3] - 2026-05-01
+
 ### Fixed
 
-- **logger:** Remove auto-configuração silenciosa em `get_logger()` que adicionava `StreamHandler(stderr)` antes de `main()` chamar `configure_logging(console=False)`, corrigindo vazamento de logs sobrepostos ao layout Textual na TUI. Fix alinhado com BR-OBS-001 regras 11-12. (#48)
-
-- `HabitInstanceService.generate_instances` is now idempotent: repeated calls for the same period no longer create duplicate HabitInstance rows, per BR-HABIT-003 ("Não duplica instâncias existentes"). (Closes #2)
+- **logger:** Removed silent auto-configuration in `get_logger()` that added `StreamHandler(stderr)` before `main()` could call `configure_logging(console=False)`, fixing log leakage that overlapped with the Textual layout in the TUI. Fix aligned with BR-OBS-001 rules 11-12. (Closes #48)
+- **habit-instance:** `HabitInstanceService.generate_instances` is now idempotent — repeated calls for the same period no longer create duplicate HabitInstance rows, per BR-HABIT-003 ("Não duplica instâncias existentes"). (Closes #2)
+- **version:** Unified `__version__` reading via `importlib.metadata`, eliminating the historical drift between `pyproject.toml` (correct) and `src/timeblock/__init__.py` (frozen at the 0.1.0 placeholder). Single source of truth is now `pyproject.toml`.
 
 ---
 
@@ -506,7 +510,9 @@
 
 ---
 
-[Unreleased]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.1...HEAD
+[Unreleased]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.3...HEAD
+[1.7.3]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.2...v1.7.3
+[1.7.2]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.5.0...v1.6.0
