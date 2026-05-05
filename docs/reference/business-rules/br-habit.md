@@ -135,26 +135,140 @@ habit update ID --start 08:00 --end 09:30
 
 ---
 
-### BR-HABIT-005: Deleção de Habito
+### BR-HABIT-005: Deleção de Habit (semântica de archive)
 
-**Descrição:** Deletar Habit deleta instâncias futuras mas preserva histórico.
+**Descrição:** A operação `delete_habit` arquiva o hábito sem destruir histórico. Para hard delete, ver `purge_habit` em BR-HABIT-006.
+
+**Justificativa:** O ATOMVS é orientado a rastreabilidade longitudinal de hábitos. Streaks, completude histórica, tempo gasto e padrões de adesão dependem da preservação de `HabitInstance` e `TimeLog`. Hard delete destruiria silenciosamente exatamente os dados que sustentam o produto. Ver ADR-057 (Archive Lifecycle para Habit) para a decisão arquitetural completa, incluindo as alternativas consideradas e rejeitadas.
 
 **Comportamento:**
 
-1. Instâncias PENDING são deletadas
-2. Instâncias DONE/NOT_DONE são preservadas (para reports)
-3. Habit é removido
+1. `archived_at` é definido como `utcnow()` no registro do `Habit`
+2. `HabitInstance` e `TimeLog` permanecem intactos no banco
+3. Hábito não aparece em listagens padrão (dashboard, `habit list`, geração de instâncias)
+4. Streaks calculados sobre `TimeLog` continuam corretos para o histórico até o arquivamento
+5. Operação é reversível via `restore_habit`
 
-**Cascade:**
+**Sem cascade físico:**
 
 ```python
 instances: list[HabitInstance] = Relationship(
     back_populates="habit",
-    cascade_delete=True  # Deleta instâncias automaticamente
+    cascade_delete=True  # Mantido para suportar BR-HABIT-006 (purge), NÃO disparado em delete_habit
 )
 ```
 
+A flag `cascade_delete=True` é preservada para que `purge_habit` (BR-HABIT-006) tenha comportamento previsível, mas **não é acionada** pelo fluxo de `delete_habit` — este apenas marca `archived_at`.
+
 **Testes:**
 
-- `test_br_habit_005_delete_removes_future`
-- `test_br_habit_005_preserves_history`
+- `test_br_habit_005_delete_sets_archived_at`
+- `test_br_habit_005_preserves_instances_after_archive`
+- `test_br_habit_005_preserves_timelogs_after_archive`
+- `test_br_habit_005_archived_excluded_from_default_listing`
+
+**Referência cruzada:** BR-HABIT-006 detalha o ciclo completo de archive/purge/restore, incluindo as queries afetadas.
+
+### BR-HABIT-006: Archive Lifecycle
+
+**Descrição:** Habit suporta três operações de ciclo de vida explícitas: archive (soft delete, padrão), purge (hard delete administrativo) e restore (reverte archive). Modela alinhamento com BR-ROUTINE-006 e BR-TASK-009, eliminando a divergência histórica em que `Habit` era o único domínio do trio sem suporte a arquivamento.
+
+**Schema:**
+
+```python
+class Habit(SQLModel, table=True):
+    # ... campos existentes ...
+    archived_at: datetime | None = Field(default=None)
+```
+
+Migration: `migration_004_habit_archive.py` adiciona coluna `archived_at TIMESTAMP DEFAULT NULL` na tabela `habits` via `ALTER TABLE ADD COLUMN`. Idempotente (verifica via `PRAGMA table_info`). Backfill: NULL para todos os existentes (todos ativos).
+
+**Operações:**
+
+| Operação       | Método                               | Comando CLI             | Affordance TUI                |
+| -------------- | ------------------------------------ | ----------------------- | ----------------------------- |
+| Archive (soft) | `delete_habit(id)`                   | `habit delete <id>`     | Dashboard tecla `d` (default) |
+| Purge (hard)   | `purge_habit(id)`                    | `habit purge <id>`      | Não exposto na TUI            |
+| Restore        | `restore_habit(id)`                  | `habit restore <id>`    | Não exposto na TUI            |
+| Listar ativos  | `list_habits()`                      | `habit list`            | Default                       |
+| Listar todos   | `list_habits(include_archived=True)` | `habit list --all`      | —                             |
+| Listar arquiv. | `list_archived_habits()`             | `habit list --archived` | —                             |
+
+**Comportamento de listagens:**
+
+1. `list_habits()` filtra `archived_at IS NULL` (padrão de uso)
+2. `get_habit(id)` **não** filtra — operações administrativas precisam acessar arquivados
+3. `HabitInstanceService.generate_instances` recusa habit arquivado (retorna `[]`); call sites que iteram sobre coleções de habits filtram `archived_at IS NULL` antes de invocar
+4. Dashboard loader (`tui/screens/dashboard/loader.py`) filtra `archived_at IS NULL` em todas as queries de exibição
+
+**Comportamento de purge:**
+
+```bash
+$ habit purge 7
+[WARN] Esta operação é irreversível. Será destruído:
+       - Habit "Leitura matinal" (id=7)
+       - 142 HabitInstance associadas
+       - 89 TimeLog associados
+Confirmar destruição? (digite "purge" para confirmar): purge
+[OK] Habit, instances e time logs destruídos permanentemente.
+```
+
+A confirmação requer digitação literal da palavra "purge" (não apenas Y/N) para impedir disparos acidentais. O comando lista contagens reais antes de pedir confirmação.
+
+**Comportamento de restore:**
+
+```bash
+$ habit restore 7
+[OK] Habit "Leitura matinal" reativado. Próximas instâncias serão geradas no próximo ciclo de generate_instances.
+```
+
+`restore_habit` zera `archived_at` e o hábito volta às listagens. Instâncias futuras voltam a ser geradas no próximo ciclo. Instâncias passadas que existiam permanecem como estavam.
+
+**Cenários BDD (em `tests/bdd/features/habit_archive.feature`):**
+
+```gherkin
+Feature: Habit Archive Lifecycle
+
+  Scenario: Archive preserves history
+    Given a habit with 30 days of TimeLog history
+    When I delete the habit
+    Then the habit is marked as archived
+    And all 30 TimeLog entries remain intact
+    And the streak calculation for the past period remains correct
+
+  Scenario: Archived habit excluded from listing
+    Given an archived habit
+    When I list habits
+    Then the archived habit is not shown
+    When I list habits with --all flag
+    Then the archived habit appears with archive timestamp
+
+  Scenario: Purge requires explicit confirmation
+    Given an archived habit with associated instances and timelogs
+    When I run "habit purge" command
+    Then I am prompted to type the word "purge" literally
+    When I type "y" instead of "purge"
+    Then the operation is aborted
+    And no data is destroyed
+```
+
+**Testes (em `tests/unit/test_services/test_habit_service.py`):**
+
+Classe `TestBRHabit006Archive`:
+
+- `test_br_habit_006_delete_sets_archived_at`
+- `test_br_habit_006_archive_preserves_instances`
+- `test_br_habit_006_archive_preserves_timelogs`
+- `test_br_habit_006_list_habits_excludes_archived_by_default`
+- `test_br_habit_006_list_habits_include_archived_returns_all`
+- `test_br_habit_006_get_habit_returns_archived`
+- `test_br_habit_006_restore_clears_archived_at`
+- `test_br_habit_006_purge_destroys_cascade`
+- `test_br_habit_006_generate_instances_skips_archived`
+
+**Referências:**
+
+- ADR-057 (decisão arquitetural)
+- BR-ROUTINE-006 (precedente para Routine)
+- BR-TASK-009 (precedente para Task)
+- Issue #61 (originalmente reportada como bug de cascade FK, reescopada para esta feature na Sessão 28)
