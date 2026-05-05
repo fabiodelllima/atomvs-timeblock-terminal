@@ -2,7 +2,7 @@
 
 - **Versão:** 10.0.0
 - **Status:** Single Source of Truth (SSOT)
-- **Documentos relacionados:** architecture.md, business-rules/, quality-metrics.md, technical-debt.md, sprints.md, structural-assessment-2026-05-01.md
+- **Documentos relacionados:** architecture.md, business-rules/, quality-metrics.md, technical-debt.md, sprints.md
 
 ---
 
@@ -205,7 +205,7 @@ Foco em tornar a TUI confortável para uso diário prolongado. Inclui features a
 
 ### v2.0-alpha — Refactoring Fase 1 (Planejado)
 
-Materialização das três primeiras camadas do plano de refactoring derivado do `architecture-assessment-2026-04-srp-solid.md`. Operação não-funcional com cobertura de testes preservada como rede de segurança.
+Materialização das três primeiras camadas do plano de refactoring derivado da avaliação arquitetural sob SRP/SOLID de abril/2026 (mantida em `docs/wiki/assessments/` por ter natureza de diagnóstico temporal — ver decisão de governança da Sessão 29). Operação não-funcional com cobertura de testes preservada como rede de segurança.
 
 | Camada | Escopo                                              | ADR/RF          |
 | ------ | --------------------------------------------------- | --------------- |
@@ -280,7 +280,7 @@ Documentação (Diataxis + arc42):
 
 ### 5.2. Análises Estruturais Periódicas
 
-A `docs/reference/architecture-assessment-2026-04-srp-solid.md` (v1.1.0 a partir do commit que incorpora a errata sobre `TaskService`) e a `docs/reference/structural-assessment-2026-05-01.md` (v1.0.0) compõem a base de diagnóstico arquitetural. Análises subsequentes podem aproveitar estes documentos como ponto de partida e devem ser nomeadas no padrão `<tipo>-assessment-<YYYY-MM-DD>-<foco>.md`.
+Os assessments arquiteturais (avaliação sob SRP/SOLID de abril/2026 v1.1.0 com errata sobre `TaskService`, e análise estrutural de 1º de maio de 2026 v1.0.0) compõem a base de diagnóstico e são mantidos em `docs/wiki/assessments/` em vez de versionados sob `docs/reference/`. A decisão (Sessão 29) reconhece que assessments têm natureza de diagnóstico temporal — capturam um snapshot da base num commit específico — e versioná-los criaria atrito de manutenção a cada resolução de achado, sem agregar SSOT real (os achados acionáveis já são representados em DTs, ADRs e issues). Análises subsequentes podem aproveitar estes documentos como ponto de partida e devem ser nomeadas no padrão `<tipo>-assessment-<YYYY-MM-DD>-<foco>.md`.
 
 ---
 
