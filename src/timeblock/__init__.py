@@ -1,4 +1,6 @@
-"""TimeBlock Planner - CLI offline-first time blocking tool."""
+"""ATOMVS Time Planner Terminal - CLI/TUI offline-first time planner tool."""
 
-__version__ = "0.1.0"
+from importlib.metadata import version
+
+__version__ = version("atomvs-timeblock-terminal")
 __author__ = "Fábio de Lima"

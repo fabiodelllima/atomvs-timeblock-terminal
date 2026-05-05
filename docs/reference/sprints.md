@@ -1,48 +1,62 @@
 # Sprints
 
-- **Versão:** 1.7.2
-- **Status:** Single Source of Truth (SSOT)
+- **Versão:** 8.0.0
+- **Status:** [HISTÓRICO] — Descontinuado como SSOT operacional desde a Sessão 19 (2026-04-09)
+- **Substituído por:** GitLab Issues com milestones a partir de v1.7.2
+- **Documentos relacionados:** roadmap.md, sprints-archive.md, technical-debt.md
 
 ---
 
-## Visão Geral
+## Aviso de Descontinuação
 
-Este documento acompanha as sprints ativas do projeto ATOMVS TimeBlock Terminal. Cada sprint representa um ciclo de entregas incrementais onde requisitos formalizados são decompostos em tarefas atômicas, validados e implementados com rastreabilidade completa. A metodologia de engenharia de requisitos, análise comportamental e implementação orientada por testes está documentada em `docs/explanation/development-methodology.md`.
+Este documento foi o registro de tracking operacional do projeto entre v1.5.0 e v1.7.1. A partir da v1.7.2 (entregue em 2026-04-13) o tracking operacional migrou para **GitLab Issues** com milestones por release, decisão registrada no handoff da Sessão 19 (2026-04-09).
 
-O histórico de sprints concluídas (v1.0.0 a v1.7.0) está arquivado em `docs/reference/sprints-archive.md`.
+A motivação da migração foi prática: GitLab Issues oferecem labels estruturadas, vinculação automática a MRs via `Closes #N`, milestones com burndown automático e busca cross-referência entre issues. Manter um arquivo Markdown sincronizado com este nível de granularidade duplicava esforço sem agregar valor.
+
+Este documento permanece versionado como **registro histórico** dos sprints v1.7.0 e v1.7.1, com link para o `sprints-archive.md` que cobre v1.0.0 a v1.6.0. A partir de v1.7.2, consultar:
+
+- **Tracking corrente:** [GitLab Milestones](https://gitlab.com/delimafabio/atomvs-timeblock-terminal/-/milestones)
+- **Histórico de releases:** `CHANGELOG.md`
+- **Planejamento de longo prazo:** `docs/reference/roadmap.md`
+
+Não há previsão de retomar o tracking via Markdown. Caso a equipe cresça e essa decisão precise ser revista, o ponto de retomada será uma nova ADR documentando a justificativa.
 
 ---
 
-## v1.7.1 — Polish e Docs
+## Visão Geral Histórica
+
+Este documento acompanhou as sprints ativas do projeto ATOMVS Time Planner Terminal entre v1.5.0 e v1.7.1. Cada sprint representava um ciclo de entregas incrementais onde requisitos formalizados eram decompostos em tarefas atômicas, validados e implementados com rastreabilidade completa. A metodologia de engenharia de requisitos, análise comportamental e implementação orientada por testes está documentada em `docs/explanation/development-methodology.md`.
+
+O histórico de sprints concluídas até v1.7.0 está arquivado em `docs/reference/sprints-archive.md`.
+
+---
+
+## v1.7.1 — Polish e Docs (Concluído — 2026-04-09)
 
 A v1.7.1 foi entregue em 2026-04-09 (tag `v1.7.1`, commit `723a41a`). Release de polimento pós-v1.7.0 focada em documentação, auditoria de diagramas e observabilidade. Sprint 7.3 (padronização ADRs) foi deferida para v1.8.0 como DT-070/DT-071.
 
 **Métricas de acompanhamento:**
 
-| Métrica            | Início (v1.7.0) | Meta v1.7.1 |
-| ------------------ | --------------- | ----------- |
-| Cobertura global   | ~82%            | >= 80%      |
-| Testes totais      | ~1340           | ~1340       |
-| Erros basedpyright | 0 (standard)    | 0           |
-| DTs resolvidos     | 58/71           | 62/71       |
-
----
+| Métrica            | Início (v1.7.0) | Entrega (v1.7.1) |
+| ------------------ | --------------- | ---------------- |
+| Cobertura global   | ~82%            | ~82%             |
+| Testes totais      | ~1.340          | ~1.345           |
+| Erros basedpyright | 0 (standard)    | 0                |
+| DTs resolvidos     | 58/71           | 62/71            |
 
 ### Sprint 7.1 — Documentação Pós-Release [DONE]
 
-O Sprint 7.1 atualiza toda a documentação de referência para refletir o estado pós-v1.7.0 e resolve DTs de baixa complexidade documentais.
+O Sprint 7.1 atualizou toda a documentação de referência para refletir o estado pós-v1.7.0 e resolveu DTs de baixa complexidade documentais.
 
 **Branch:** `docs/post-release-v1.7.0`
 
 **Critério de conclusão:** roadmap.md, sprints.md e technical-debt.md atualizados, DT-066 resolvido, DT-065/DT-067 re-tagged.
 
-- [ ] Atualizar roadmap.md — v1.7.0 entregue, métricas atualizadas, bump v8.0.0
-- [ ] Atualizar sprints.md — v1.7.0 movida para archive, v1.7.1 criada
-- [ ] Atualizar technical-debt.md — DT-066 RESOLVIDO, DT-065/067 re-tagged para v1.7.1, bump v2.28.0
-- [ ] Fix sync:github — push normal para main/develop, --force para branches
-- [ ] Validar: pipeline verde na branch
-
----
+- [x] Atualizar roadmap.md — v1.7.0 entregue, métricas atualizadas, bump v8.0.0
+- [x] Atualizar sprints.md — v1.7.0 movida para archive, v1.7.1 criada
+- [x] Atualizar technical-debt.md — DT-066 RESOLVIDO, DT-065/067 re-tagged para v1.7.1, bump v2.28.0
+- [x] Fix sync:github — push normal para main/develop, --force para branches
+- [x] Validar: pipeline verde na branch
 
 ### Sprint 7.2 — Auditoria de Diagramas e README [DONE]
 
@@ -52,8 +66,6 @@ O Sprint 7.1 atualiza toda a documentação de referência para refletir o estad
 | 7.2.2 | Remover ou atualizar diagramas desatualizados          | DT-067 |
 | 7.2.3 | Linkar diagramas válidos no README                     | DT-067 |
 | 7.2.4 | Screenshots/GIFs do dashboard funcional no README      | —      |
-
----
 
 ### Sprint 7.3 — Padronização ADRs e Docs [DEFERIDO → v1.8.0]
 
@@ -65,52 +77,17 @@ O Sprint 7.1 atualiza toda a documentação de referência para refletir o estad
 
 ---
 
-## v1.7.2 — Polish Visual e Correções Urgentes
+## Continuação Pós-v1.7.1
 
-Release focada em bugs descobertos em uso real do dashboard e polish visual. Tracking via GitLab Issues (milestone v1.7.2). A migração de `technical-debt.md` + `sprints.md` para GitLab Issues foi decidida na Sessão 19.
+A partir de v1.7.2 (corte 2026-04-13), o tracking de sprint está em GitLab Issues. Para consultar entregas:
 
-**Branch:** `chore/gitlab-issues-and-docs` (base: v1.7.1)
+- **v1.7.2:** Milestone fechada — onze issues entregues, tag `7218bb0`
+- **v1.7.3:** Milestone fechada — três fixes em categoria `Fixed`, tag `2a90333` em 2026-05-01
+- **v1.7.4:** Milestone aberta — escopo em padronização documental e estabilidade de snapshots
+- **v1.7.5:** Milestone aberta — escopo em bugs e cobertura BR pendente
+- **v1.8.0:** Milestone aberta — agenda redesign, archive lifecycle (issue #61 reescopada), reconciliação Gitflow (issue #64)
 
-**Critérios de conclusão:** pipeline verde, 0 erros basedpyright, sem regressão em snapshots e2e.
-
-### Bugs (prioridade alta)
-
-| Issue | Título                                              | Status  |
-| ----- | --------------------------------------------------- | ------- |
-| #5    | TimerPanel não converte >60min para H:MM:SS         | backlog |
-| #36   | Impossível iniciar nova sessão em habit já done     | backlog |
-| #33   | Header exibe placeholders em vez de dados dinâmicos | backlog |
-| #1    | update não propaga horários para instâncias         | backlog |
-| #2    | generate cria duplicatas                            | backlog |
-
-### Correções e polish (prioridade média/baixa)
-
-| Issue | Título                                              | Status  |
-| ----- | --------------------------------------------------- | ------- |
-| #30   | Corrigir title/subtitle no header                   | backlog |
-| #31   | Reordenar panels (timer > habits > tasks > metrics) | backlog |
-| #29   | Remover hint do TimerPanel                          | backlog |
-| #32   | Footer — cores dos hints e margem inferior          | backlog |
-| #34   | Remover régua no AgendaPanel                        | backlog |
-| #11   | DT-073: __pycache__ paths absolutos                 | backlog |
-
-**Ordem de implementação recomendada:** #5 (isolado, localização conhecida) -> #36 (investigar validação de estado) -> #33 (investigar widgets do header) -> #1/#2 (bugs pré-existentes) -> UI polish (#29, #30, #31, #32, #34) como batch -> #11.
-
----
-
-## v1.8.0 — Agenda e Sidebar (Planejado)
-
-A v1.8.0 implementa o redesign da agenda com blocos de tempo contínuos, scroll horizontal, paginação de dias e sidebar compacta. Representa a próxima evolução visual da TUI.
-
-| Item | Descrição                                     | DT     | Complexidade |
-| ---- | --------------------------------------------- | ------ | ------------ |
-| 8.1  | Sidebar redesign (horizontal/hidden/vertical) | DT-060 | Alta         |
-| 8.2  | AgendaPanel scroll horizontal                 | DT-061 | Alta         |
-| 8.3  | Blocos de tempo contínuos (accent bar + cor)  | DT-062 | Alta         |
-| 8.4  | Paginação de dias (-3 a +3)                   | DT-063 | Média        |
-| 8.5  | Navegação de dia com setas (BR-TUI-030)       | —      | Média        |
-| 8.6  | Scroll horizontal com Shift+h/l (BR-TUI-031)  | —      | Média        |
-| 8.7  | Renderização de blocos coloridos (BR-TUI-032) | —      | Alta         |
+Detalhamento estratégico em `docs/reference/roadmap.md` seção 4.
 
 ---
 
@@ -126,8 +103,12 @@ A v1.8.0 implementa o redesign da agenda com blocos de tempo contínuos, scroll 
 | 2026-03-27 | 6.0.0  | Sprint 4.5 DONE, Fase 5 progresso, ~1320 testes            |
 | 2026-04-05 | 7.0.0  | v1.7.0 entregue — sprints movidos para archive,            |
 |            |        | v1.7.1 (Polish e Docs) e v1.8.0 (Agenda e Sidebar) criados |
+| 2026-05-01 | 8.0.0  | Documento marcado como [HISTÓRICO]. Tracking operacional   |
+|            |        | migrou oficialmente para GitLab Issues a partir de v1.7.2. |
+|            |        | Aviso de descontinuação adicionado no topo. v1.7.1 marcada |
+|            |        | como concluída. Ponteiro para milestones do GitLab.        |
 
 ---
 
-- **Próxima revisão:** Após v1.7.2 entregue
-- **Última atualização:** 9 de Abril de 2026
+- **Última atualização:** 1 de Maio de 2026
+- **Estado:** Não receberá novas entradas. Atualizações apenas para correções históricas ou para registrar uma eventual reversão da decisão de descontinuação.

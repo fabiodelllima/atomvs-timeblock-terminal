@@ -99,12 +99,19 @@ class TestGetLogger:
         logger = get_logger("timeblock.services.timer")
         assert logger.name == "timeblock.services.timer"
 
-    def test_get_logger_auto_configures(self):
-        """get_logger sem configure_logging prévio configura defaults."""
-        logger = get_logger("timeblock.test.auto")
+    def test_get_logger_without_configure_has_no_handlers(self):
+        """get_logger sem configure_logging prévio retorna logger silencioso.
+
+        Contrato atualizado após fix de BR-OBS-001 / issue #48: get_logger
+        não adiciona handlers como side-effect. O entrypoint é responsável
+        por chamar configure_logging() explicitamente antes de qualquer
+        uso efetivo de log. Sem handlers, mensagens são silenciosamente
+        descartadas (propagate=False garante isolamento do root Python).
+        """
+        logger = get_logger("timeblock.test.no_auto")
         assert logger is not None
         root = logging.getLogger("timeblock")
-        assert len(root.handlers) > 0
+        assert root.handlers == []
 
     def test_get_logger_inherits_level(self):
         """Logger filho herda nível do root timeblock."""
@@ -261,3 +268,61 @@ class TestXDGPaths:
             finally:
                 os.environ.pop("ATOMVS_LOG_FILE", None)
                 os.environ.pop("XDG_DATA_HOME", None)
+
+
+class TestBROBS001NoStderrLeak:
+    """Testa BR-OBS-001: TUI nunca emite para stderr via logging.
+
+    Referências:
+        - BR-OBS-001 regra 11: "stdout/stderr: NADA durante execução da TUI"
+        - BR-OBS-001 regra 12: "Nunca logging para console handler durante TUI"
+        - BR-OBS-001 tabela: TUI | Console (stderr) = Desabilitado
+        - Issue #48: logs vazam para stderr quebrando layout Textual
+    """
+
+    def test_br_obs_001_tui_no_stdout(self):
+        """get_logger em tempo de import não deve vazar stderr no modo TUI.
+
+        Cenário do bug #48: módulos do projeto chamam get_logger() em tempo
+        de import (padrão `logger = get_logger(__name__)` no topo dos arquivos).
+        Essas chamadas ocorrem antes de main() rodar configure_logging(console=False)
+        porque main.py importa commands no topo e cada command instancia logger.
+
+        Se get_logger auto-configura com console=True como side-effect, o
+        StreamHandler(stderr) persiste quando main() chama configure_logging,
+        porque a função é idempotente (retorna cedo se _configured).
+
+        BR-OBS-001 exige zero console handlers durante TUI. Este teste
+        garante que a sequência "import precoce → configure TUI" resulta
+        em zero StreamHandler (excluindo FileHandler) no logger timeblock.
+
+        A checagem é por tipo de handler, não por stream específico, porque
+        BR-OBS-001 regra 12 veta "console handler" de forma abstrata. Também
+        evita acoplamento ao pytest capture fd-level, que substitui sys.stderr
+        por FileIO durante testes.
+
+        Nota: RotatingFileHandler herda de FileHandler que herda de
+        StreamHandler. A exclusão explícita de FileHandler previne falso
+        positivo quando log_file=True.
+        """
+        # Simula chamada em tempo de import (antes do entrypoint configurar)
+        _early_logger = get_logger("timeblock.commands.tag")
+        assert _early_logger is not None
+
+        # Entrypoint TUI chama configure_logging com console desabilitado
+        configure_logging(console=False, log_file=False)
+
+        # BR-OBS-001 regra 11/12: nenhum console handler ativo no modo TUI.
+        # RotatingFileHandler herda de StreamHandler via FileHandler; exclusão
+        # explícita de FileHandler evita falso positivo em modo dual.
+        root = logging.getLogger("timeblock")
+        console_handlers = [
+            h
+            for h in root.handlers
+            if isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)
+        ]
+        assert console_handlers == [], (
+            f"BR-OBS-001 violada: console handler ativo no modo TUI. "
+            f"Handlers encontrados: {console_handlers}. "
+            f"Streams: {[getattr(h, 'stream', None) for h in console_handlers]}"
+        )

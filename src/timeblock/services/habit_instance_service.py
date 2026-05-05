@@ -107,15 +107,21 @@ class HabitInstanceService:
             current = start_date
             while current <= end_date:
                 if HabitInstanceService._should_create_for_date(habit.recurrence, current):
-                    instance = HabitInstance(
-                        habit_id=habit_id,
-                        date=current,
-                        scheduled_start=habit.scheduled_start,
-                        scheduled_end=habit.scheduled_end,
-                        status=Status.PENDING,
-                    )
-                    sess.add(instance)
-                    instances.append(instance)
+                    existing = sess.exec(
+                        select(HabitInstance)
+                        .where(HabitInstance.habit_id == habit_id)
+                        .where(HabitInstance.date == current)
+                    ).first()
+                    if existing is None:
+                        instance = HabitInstance(
+                            habit_id=habit_id,
+                            date=current,
+                            scheduled_start=habit.scheduled_start,
+                            scheduled_end=habit.scheduled_end,
+                            status=Status.PENDING,
+                        )
+                        sess.add(instance)
+                        instances.append(instance)
 
                 current += timedelta(days=1)
 

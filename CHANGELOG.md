@@ -7,6 +7,18 @@
 
 ## [Unreleased]
 
+---
+
+## [1.7.3] - 2026-05-01
+
+### Fixed
+
+- **logger:** Removed silent auto-configuration in `get_logger()` that added `StreamHandler(stderr)` before `main()` could call `configure_logging(console=False)`, fixing log leakage that overlapped with the Textual layout in the TUI. Fix aligned with BR-OBS-001 rules 11-12. (Closes #48)
+- **habit-instance:** `HabitInstanceService.generate_instances` is now idempotent — repeated calls for the same period no longer create duplicate HabitInstance rows, per BR-HABIT-003 ("Não duplica instâncias existentes"). (Closes #2)
+- **version:** Unified `__version__` reading via `importlib.metadata`, eliminating the historical drift between `pyproject.toml` (correct) and `src/timeblock/__init__.py` (frozen at the 0.1.0 placeholder). Single source of truth is now `pyproject.toml`.
+
+---
+
 ## [1.7.2] - 2026-04-13
 
 ### Added
@@ -127,66 +139,6 @@
 - BRs formalized: 115+ (+34 TUI since v1.6.0)
 - ADRs: 47 documented (+15 since v1.6.0)
 - DTs: 51 resolved / 66 total (77%)
-- Pipeline: 8 jobs (~10min CI)
-
----
-
-## [1.7.0] - 2026-04-05
-
-### Added
-
-- TUI: Dashboard interativo com 5 painéis funcionais (Habits, Tasks, Timer, Metrics, Agenda)
-  - Textual framework com navegação Tab/Shift+Tab e cursor interno (j/k)
-  - FocusablePanel como base para painéis interativos
-  - Color system com semantic tokens e paleta WCAG-compliant
-  - TCSS modularizado em 7 arquivos (base, layout, cards, dashboard, statusbar, timer, forms)
-- TUI: Dashboard-first CRUD com modais contextuais (ADR-034)
-  - Criação, edição e deleção de rotinas, hábitos e tasks via keybindings (n/e/x)
-  - FormModal e ConfirmDialog reutilizáveis
-  - PlaceholderActivated para criação a partir de empty state (BR-TUI-013)
-- TUI: Quick actions no HabitsPanel — done (v), skip (s), timer (t), undo (u)
-- TUI: Timer live com atualização a cada segundo, pause/resume/stop/cancel
-- TUI: MetricsPanel com streak, completude e heatmap semanal (BR-TUI-033, ADR-047)
-  - Streak persistido no banco via migration_003 (best_streak em routines)
-  - Geração retroativa de instâncias PENDING para dias sem registro (R8)
-  - Keybinding f alterna período entre 7d/14d/30d (R7/R13)
-  - Completude calculada para 7d, 14d e 30d
-  - Heatmap mostra done/total por dia com check marks
-- TUI: Footer contextual com keybindings dinâmicos por painel focado (BR-TUI-007)
-- TUI: Agenda com auto-refresh a cada 60s e auto-scroll na hora atual (BR-TUI-003-R15)
-- TUI: StatusBar com rotina ativa, keybindings e timer elapsed
-- TUI: Empty state com placeholders orientativos em todos os painéis
-- CLI: `atomvs demo create` com 3 rotinas mock e 8 tasks (BR-TUI-003-R28)
-- CLI: `atomvs demo clear` para remover dados de demonstração
-- BDD: 8 features TUI em formato Gherkin (61 scenarios)
-- migration_003: campo best_streak na tabela routines
-- ADR-031 a ADR-047: 17 novas decisões arquiteturais documentadas
-- docs: BR-TUI-001 a BR-TUI-033 (33 regras de negócio TUI)
-
-### Changed
-
-- CLI: Entry point alterado para abrir TUI com `atomvs` sem argumentos
-- CI/CD: Pipeline otimizado de 10 para 8 jobs
-- CI/CD: GitHub Actions sincronizado com GitLab CI
-- Footer contextual exibe hints de placeholder quando painel vazio está focado (DT-066)
-- Documentação: snapshot-testing.md reescrito com dados reais
-- BR-TUI-033-R5: Semântica do streak corrigida — sem grace period
-
-### Fixed
-
-- DT-059: Mensagens de migração no stdout substituídas por logger
-- DT-064: CVEs resolvidos (aiohttp 3.13.5, Pygments 2.20.0)
-- DT-066: Hints de placeholder movidos do corpo dos painéis para footer contextual
-- DT-068: Hábitos não ordenados por scheduled_start
-
-### Metrics
-
-- Testes: ~1.340 (1336 passed, +558 desde v1.6.0)
-- Distribuição: Unit ~1050 (78%), Integration ~130 (10%), BDD ~61 (5%), E2E ~95 (7%)
-- Cobertura global: ~82% (threshold 80%)
-- BRs formalizadas: 115+ (+34 TUI desde v1.6.0)
-- ADRs: 47 documentados (+15 desde v1.6.0)
-- DTs: 51 resolvidos / 66 total (77%)
 - Pipeline: 8 jobs (~10min CI)
 
 ---
@@ -558,7 +510,9 @@
 
 ---
 
-[Unreleased]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.1...HEAD
+[Unreleased]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.3...HEAD
+[1.7.3]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.2...v1.7.3
+[1.7.2]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/fabiodelllima/atomvs-timeblock-terminal/compare/v1.5.0...v1.6.0
