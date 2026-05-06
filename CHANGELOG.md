@@ -7,6 +7,33 @@
 
 ## [Unreleased]
 
+### Added
+
+- BR-HABIT-006: Archive lifecycle for Habit (archive/purge/restore semantics with table of operations × surfaces (CLI/TUI), three Gherkin scenarios, nine unit test methods specified)
+- ADR-056: Selective adoption of Object Calisthenics
+- ADR-057: Archive Lifecycle for Habit — `delete_habit` changes semantics to soft delete via `archived_at` field; hard delete moves to dedicated `purge_habit` (CLI-only with literal "purge" confirmation); `restore_habit` reverses archive
+- DT-075: Phantom BR-EVENT-002 vs BR-REORDER-XXX nomenclature drift (planned for v1.7.5)
+- DT-076: TimerScreen placeholder with 5 TODOs to TimerService (planned for v1.8.0)
+- DT-077: Historical drift `__version__` 0.1.0 vs pyproject.toml — resolved retroactively in v1.7.3
+
+### Changed
+
+- BR-HABIT-005: Rewritten to reflect new semantics where `delete_habit` archives instead of hard-deleting, preserving HabitInstance and TimeLog history
+- `roadmap.md` bumped to v10.0.0 absorbing v1.7.2 and v1.7.3, current metrics (1.402 tests, 120 BRs, 52 active ADRs)
+- `sprints.md` v8.0.0 marked as `[HISTORICAL]` — operational tracking migrated to GitLab Issues as Single Source of Truth
+- `technical-debt.md` bumped to v2.34.0 (DT-074 resolved, DT-075/076/077 added, alignment with current roadmap)
+- Architectural assessments moved from versioned tree to `docs/wiki/` (gitignored) — assessment artifacts are temporal diagnostics by nature; actionable findings live as DTs/ADRs/issues
+
+### Fixed
+
+- DT-074: BRs and Humble Objects without test coverage — closed in v1.7.2; documented as resolved
+- Gitflow technical debt: `main` had been frozen at v1.7.2 since mid-April while `develop` accumulated v1.7.3 + Sessão 29 housekeeping. Synchronization performed without release-cut as a transitional sync; next tag will be v1.8.0 when archive lifecycle ships. (Refs #64)
+
+### Notes
+
+- Implementation of BR-HABIT-006 (schema migration `migration_004_habit_archive`, service methods, CLI commands, tests) is planned for v1.8.0 — see `docs/wiki/Session-29-Implementation-Plan-Habit-Archive.md` (gitignored)
+- v1.8.0 will additionally include namespace rename `src/timeblock/` → `src/atomvs/` (ADR-045/050) and Agenda/Sidebar redesign (ADR-041/042)
+
 ---
 
 ## [1.7.3] - 2026-05-01
