@@ -15,8 +15,9 @@
 ```
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-1345%20passing-success.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1402%20passing-success.svg)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-82%25-green.svg)](tests/)
+[![Version](https://img.shields.io/badge/version-1.7.3-blue.svg)](CHANGELOG.md)
 
 ---
 
@@ -204,27 +205,27 @@ atomvs-timeblock-terminal/
 ├── src/timeblock/
 │   ├── commands/       # Comandos CLI (routine, habit, task, timer, tag, reschedule, demo, init)
 │   │
-│   ├── services/       # Lógica de negócio (8 services)
-│   ├── models/         # Modelos SQLModel (9 entidades + enums)
+│   ├── services/       # Lógica de negócio (9 services)
+│   ├── models/         # Modelos SQLModel (7 entidades + enums)
 │   ├── database/       # Engine SQLite e migrations
 │   ├── tui/            # Interface terminal (Textual)
 │   │   ├── screens/    # Dashboard, Routines, Habits, Tasks, Timer
 │   │   └── widgets/    # 12+ widgets: panels, nav, modais, overlays
 │   └── utils/          # Helpers: validators, date_parser, logger
 │
-├── tests/              # 1345 testes   (116 arquivos)
-│   ├── unit/           #   79 arquivos (~75%)
-│   ├── integration/    #   17 arquivos (~11%)
-│   ├── bdd/            #   11 arquivos (~10%)
-│   └── e2e/            #    9 arquivos  (~4%)
+├── tests/              # 1.402 testes (120 arquivos)
+│   ├── unit/           # 1.119 testes (~80%)
+│   ├── integration/    #   115 testes (~8%)
+│   ├── bdd/            #    79 testes (~6%)
+│   └── e2e/            #    89 testes (~6%)
 │
 ├── docs/               # Documentação (framework Diataxis + arc42)
 │   ├── tutorials/      #   Ponto de entrada para novos contribuidores
 │   ├── guides/         #   How-to: CI, testing, snapshots, refactoring
-│   ├── reference/      #   BRs (114), technical-debt, roadmap, sprints
+│   ├── reference/      #   BRs (120 únicas em 16 domínios), technical-debt, roadmap, sprints
 │   ├── explanation/    #   Arquitetura, metodologia, domínio
-│   ├── decisions/      #   46 ADRs (Architecture Decision Records)
-│   └── diagrams/       #   14 diagramas Mermaid (ER, C4, states, sequences)
+│   ├── decisions/      #   52 ADRs ativos + 2 arquivados (formato Nygard adaptado)
+│   └── diagrams/       #   15 diagramas Mermaid (ER, C4, states, sequences)
 │
 └── scripts/            # Automação
 ```
@@ -235,8 +236,15 @@ atomvs-timeblock-terminal/
 
 A instalação requer Python 3.13 ou superior. O projeto utiliza um ambiente virtual isolado para gerenciar dependências, evitando conflitos com outras aplicações Python no sistema.
 
+O repositório primário é hospedado no GitLab; o GitHub atua como mirror automático via push mirroring nativo.
+
 ```bash
+# GitLab (primário)
+git clone https://gitlab.com/delimafabio/atomvs-timeblock-terminal.git
+
+# Ou via mirror GitHub
 git clone https://github.com/fabiodelllima/atomvs-timeblock-terminal.git
+
 cd atomvs-timeblock-terminal
 
 python -m venv venv
@@ -314,7 +322,7 @@ A stack foi escolhida priorizando produtividade do desenvolvedor, type safety e 
 | TUI Framework | Textual             | 0.89.0+  |
 | Terminal UI   | Rich                | 14.0.0+  |
 | Database      | SQLite              | 3.x      |
-| Testing       | pytest + pytest-cov | 8.0+     |
+| Testing       | pytest + pytest-cov | 9.0.3+   |
 | Linting       | ruff                | 0.14.0+  |
 | Type Checking | basedpyright        | standard |
 | Type Checking | mypy (CI)           | 1.18.0+  |
@@ -340,7 +348,7 @@ docs/
 │   └── manual-testing-checklist.md
 │
 ├── reference/                        # Consulta factual
-│   ├── business-rules/               # 114 BRs formalizadas (15 domínios)
+│   ├── business-rules/               # 120 BRs únicas em 16 domínios
 │   ├── tui/                          # Mockups e specs de telas TUI
 │   ├── roadmap.md
 │   ├── sprints.md
@@ -355,9 +363,9 @@ docs/
 │   ├── domain-concepts.md
 │   └── agenda-overlap-rendering.md
 │
-├── decisions/                        # 46 ADRs (formato Nygard adaptado)
+├── decisions/                        # 52 ADRs ativos + 2 arquivados (formato Nygard adaptado)
 │
-└── diagrams/                         # 14 diagramas Mermaid
+└── diagrams/                         # 15 diagramas Mermaid
     ├── data/                         # ER diagram, class diagram
     ├── states/                       # HabitInstance, Task, Timer
     ├── sequences/                    # Timer flow, event reordering, habit generation
@@ -396,7 +404,7 @@ Referências:
 
 ### Implementação
 
-Código é desenvolvido seguindo Test-Driven Development. Testes referenciam BRs pela nomenclatura (test_br_xxx), mantendo rastreabilidade bidirecional entre requisitos, testes e implementação. A pirâmide de testes distribui validações em quatro níveis: unitário (~75%), integração (~11%), BDD (~10%) e end-to-end (~4%).
+Código é desenvolvido seguindo Test-Driven Development. Testes referenciam BRs pela nomenclatura (test_br_xxx), mantendo rastreabilidade bidirecional entre requisitos, testes e implementação. A pirâmide de testes distribui validações em quatro níveis: unitário (~80%), integração (~8%), BDD (~6%) e end-to-end (~6%).
 
 **Nota:** A cobertura de cenários BDD necessita de revisão — nem todas as BRs possuem cenários Gherkin correspondentes. A auditoria de rastreabilidade BR → BDD está pendente.
 
@@ -426,23 +434,31 @@ basedpyright src/
 
 ## Roadmap
 
-O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A versão v1.7.0 consolidou a TUI com dashboard CRUD completo, MetricsPanel e semântica de streak alinhada com Atomic Habits. A versão v1.7.1 (em desenvolvimento) foca em polish: auditoria de diagramas, atualização do README e responsividade.
+O roadmap está organizado em releases incrementais, cada uma construindo sobre a anterior. A v1.7.0 consolidou a TUI completa com dashboard CRUD, MetricsPanel e semântica de streak alinhada com Atomic Habits. A v1.7.1 entregou consolidação de qualidade e logging completo. A v1.7.2 trouxe polish visual e bugfixes urgentes de UX. A v1.7.3 fechou três fixes críticos: vazamento de logs na TUI, idempotência de generate de instâncias e unificação da declaração de versão. Em desenvolvimento: v1.8.0 traz archive lifecycle para Habit (ADR-057), rename de namespace para `src/atomvs/` (ADR-045) e redesign da AgendaPanel.
 
-| Versão | Status    | Features                                 |
-| ------ | --------- | ---------------------------------------- |
-| v1.0.0 | [DONE]    | CLI básica, CRUD eventos                 |
-| v1.1.0 | [DONE]    | Event reordering                         |
-| v1.2.x | [DONE]    | Logging, docs consolidados               |
-| v1.3.x | [DONE]    | Date parser, BDD tests, DI refactor      |
-| v1.4.0 | [DONE]    | Business rules formalizadas, 32 ADRs     |
-| v1.5.0 | [DONE]    | CI/CD dual-repo, i18n, 873 testes        |
-| v1.6.0 | [DONE]    | Docker, DevSecOps, 87% cobertura         |
-| v1.7.0 | [DONE]    | TUI Textual, dashboard CRUD, 1345 testes |
-| v1.7.1 | [CURRENT] | Polish: diagramas, README, docs          |
-| v1.8.0 | [PLANNED] | AgendaPanel redesign, sidebar compacta   |
-| v2.0.0 | [PLANNED] | FastAPI REST API + Observabilidade       |
-| v3.0.0 | [FUTURE]  | Microservices Ecosystem (Kafka)          |
-| v4.0.0 | [FUTURE]  | Android App (Kotlin)                     |
+| Versão     | Status      | Features                                              |
+| ---------- | ----------- | ----------------------------------------------------- |
+| v1.0.0     | [DONE]      | CLI básica, CRUD eventos                              |
+| v1.1.0     | [DONE]      | Event reordering                                      |
+| v1.2.x     | [DONE]      | Logging, docs consolidados                            |
+| v1.3.x     | [DONE]      | Date parser, BDD tests, DI refactor                   |
+| v1.4.0     | [DONE]      | Business rules formalizadas, ADRs                     |
+| v1.5.0     | [DONE]      | CI/CD dual-repo, i18n                                 |
+| v1.6.0     | [DONE]      | Docker, DevSecOps                                     |
+| v1.7.0     | [DONE]      | TUI Textual completa, dashboard CRUD                  |
+| v1.7.1     | [DONE]      | Consolidação, logging completo, docs                  |
+| v1.7.2     | [DONE]      | Polish visual e bugfixes urgentes                     |
+| v1.7.3     | [DONE]      | Logger leak, idempotência generate, versão unificada  |
+| v1.7.4     | [PLANNED]   | Issues abertas no GitLab                              |
+| v1.7.5     | [PLANNED]   | TasksPanel ordem, BRs ausentes, keybindings           |
+| v1.8.0     | [PLANNED]   | Archive lifecycle (ADR-057), rename namespace, agenda |
+| v2.0-alpha | [PLANNED]   | Refactoring SOLID — uniformização services            |
+| v2.0-beta  | [PLANNED]   | Refactoring continuação                               |
+| v2.0.0+    | [PLANNED]   | API REST + PostgreSQL                                 |
+| v3.0.0     | [FUTURE]    | Sync distribuído                                      |
+| v4.0.0     | [FUTURE]    | Mobile (Android)                                      |
+
+Detalhes completos em [docs/reference/roadmap.md](docs/reference/roadmap.md).
 
 ---
 
