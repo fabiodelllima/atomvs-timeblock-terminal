@@ -12,7 +12,7 @@ freezegun==1.5.5
 frozenlist==1.8.0
 gherkin-official==29.0.0
 greenlet==3.4.0
-idna==3.11
+idna==3.15
 iniconfig==2.3.0
 Jinja2==3.1.6
 librt==0.8.1
