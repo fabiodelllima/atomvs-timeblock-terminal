@@ -117,9 +117,30 @@ class TasksPanel(FocusablePanel):
         self.post_message(self.TaskReopenRequest(item["id"]))
 
     def _order_tasks(self) -> None:
-        """Ordena: overdue > pending > completed > cancelled."""
-        order = {"overdue": 0, "pending": 1, "completed": 2, "cancelled": 3}
-        self._ordered = sorted(self._tasks, key=lambda t: order.get(t.get("status", ""), 9))
+        """Ordena conforme BR-TUI-003-R20.
+
+        Grupos:
+            1. overdue   — sort_key ascendente  (mais atrasada primeiro)
+            2. pending   — sort_key ascendente  (mais próxima primeiro)
+            3. completed — sort_key descendente (mais recente primeiro)
+            4. cancelled — sort_key descendente (mais recente primeiro)
+
+        `sort_key` é populado pelo loader (BR-TUI-003-R20 camada 2).
+        Tasks sem sort_key vão para o fim do respectivo bucket.
+        """
+        bucket = {"overdue": 0, "pending": 1, "completed": 2, "cancelled": 3}
+
+        def key(t: dict) -> tuple[int, int, float]:
+            b = bucket.get(t.get("status", ""), 9)
+            sk = t.get("sort_key")
+            if sk is None:
+                # Fallback: sem sort_key vai para o fim do bucket
+                return (b, 1, 0.0)
+            ts = sk.timestamp()
+            # Grupos 1-2 ascendente; grupos 3-4 descendente (inverte sinal)
+            return (b, 0, ts if b < 2 else -ts)
+
+        self._ordered = sorted(self._tasks, key=key)
 
     def _refresh_content(self) -> None:
         """Constrói linhas do card e atualiza border_title + conteúdo."""
