@@ -396,6 +396,10 @@ def _build_task_dict(task: Any, status: str, proximity: str | None = None) -> di
 
     BR-TASK-010: Tasks sem horário explícito (00:00) são tratadas como
     "dia inteiro" — não ficam overdue até o dia seguinte.
+
+    BR-TUI-003-R20: campo `sort_key` carrega o timestamp relevante por
+    status (scheduled para pending/overdue, completed para completed,
+    cancelled para cancelled) para ordenação intra-grupo no TasksPanel.
     """
     today = date.today()
     nm = task.title[:20] if hasattr(task, "title") else str(task)[:20]
@@ -417,6 +421,14 @@ def _build_task_dict(task: Any, status: str, proximity: str | None = None) -> di
         status = "pending"
         proximity = _task_proximity(days)
 
+    # BR-TUI-003-R20: timestamp para ordenação intra-grupo
+    if status == "completed":
+        sort_key = task.completed_datetime
+    elif status == "cancelled":
+        sort_key = task.cancelled_datetime
+    else:  # pending, overdue
+        sort_key = task.scheduled_datetime
+
     return {
         "id": task.id,
         "name": nm,
@@ -425,6 +437,7 @@ def _build_task_dict(task: Any, status: str, proximity: str | None = None) -> di
         "time": time_str,
         "status": status,
         "days": days,
+        "sort_key": sort_key,
     }
 
 
