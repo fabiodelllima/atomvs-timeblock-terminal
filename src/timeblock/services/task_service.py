@@ -95,12 +95,18 @@ class TaskService:
         """Lista tasks pendentes (não concluídas e não canceladas).
 
         BR-TASK-009: tasks canceladas são excluídas da lista de pendentes.
+        BR-TUI-003-R20: resultado ordenado por scheduled_datetime ascendente
+        para suportar ordenação por proximidade no TasksPanel.
         """
 
         def _list(sess: Session) -> list[Task]:
-            statement = select(Task).where(
-                col(Task.completed_datetime).is_(None),
-                col(Task.cancelled_datetime).is_(None),
+            statement = (
+                select(Task)
+                .where(
+                    col(Task.completed_datetime).is_(None),
+                    col(Task.cancelled_datetime).is_(None),
+                )
+                .order_by(col(Task.scheduled_datetime).asc())
             )
             return list(sess.exec(statement).all())
 
@@ -254,15 +260,21 @@ class TaskService:
         """Lista tasks concluídas nas últimas N horas (BR-TUI-003-R29).
 
         Exclui tasks canceladas (cancelled_datetime prevalece).
+        BR-TUI-003-R20: resultado ordenado por completed_datetime descendente
+        (mais recente primeiro) para o grupo 3 do TasksPanel.
         """
         from datetime import timedelta
 
         cutoff = datetime.now() - timedelta(hours=hours)
 
         def _list(sess: Session) -> list[Task]:
-            statement = select(Task).where(
-                col(Task.completed_datetime) >= cutoff,
-                col(Task.cancelled_datetime).is_(None),
+            statement = (
+                select(Task)
+                .where(
+                    col(Task.completed_datetime) >= cutoff,
+                    col(Task.cancelled_datetime).is_(None),
+                )
+                .order_by(col(Task.completed_datetime).desc())
             )
             return list(sess.exec(statement).all())
 
@@ -275,14 +287,22 @@ class TaskService:
     def list_recently_cancelled_tasks(
         hours: int = 24, session: Session | None = None
     ) -> list[Task]:
-        """Lista tasks canceladas nas últimas N horas (BR-TUI-003-R29)."""
+        """Lista tasks canceladas nas últimas N horas (BR-TUI-003-R29).
+
+        BR-TUI-003-R20: resultado ordenado por cancelled_datetime descendente
+        (mais recente primeiro) para o grupo 4 do TasksPanel.
+        """
         from datetime import timedelta
 
         cutoff = datetime.now() - timedelta(hours=hours)
 
         def _list(sess: Session) -> list[Task]:
-            statement = select(Task).where(
-                col(Task.cancelled_datetime) >= cutoff,
+            statement = (
+                select(Task)
+                .where(
+                    col(Task.cancelled_datetime) >= cutoff,
+                )
+                .order_by(col(Task.cancelled_datetime).desc())
             )
             return list(sess.exec(statement).all())
 
