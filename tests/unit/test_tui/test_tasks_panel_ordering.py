@@ -41,6 +41,8 @@ Referências:
     - DT-074 (issue #42 no GitLab)
 """
 
+from datetime import datetime, timedelta
+
 from timeblock.tui.widgets.tasks_panel import TasksPanel
 
 
@@ -62,12 +64,17 @@ def _make_task(
     status: str,
     days: int,
     time: str = "--:--",
+    sort_key: datetime | None = None,
 ) -> dict:
     """Cria dict no formato que loader._build_task_dict produz hoje.
 
-    Campos: id, name, proximity, date, time, status, days.
+    Campos: id, name, proximity, date, time, status, days, sort_key.
     Apenas os relevantes para _order_tasks são significativos
-    (status e days). Outros existem para realismo da fixture.
+    (status, days, sort_key). Outros existem para realismo da fixture.
+
+    sort_key é opcional para preservar compatibilidade com os testes de
+    caracterização originais (que não precisam dele). Os testes da
+    BR-TUI-003-R20 sempre passam sort_key explicitamente.
     """
     return {
         "id": task_id,
@@ -77,6 +84,7 @@ def _make_task(
         "time": time,
         "status": status,
         "days": days,
+        "sort_key": sort_key,
     }
 
 
@@ -165,3 +173,182 @@ class TestOrderTasksCharacterizationTimeOrderingBug:
 
         assert [t["id"] for t in panel._ordered] == [1, 2, 3]
         assert [t["id"] for t in panel._ordered] != [2, 3, 1]
+
+
+class TestBRTUI003R20Ordering:
+    """Testes da BR-TUI-003-R20: ordenação esperada do TasksPanel.
+
+    Estado-alvo. Estes testes falham contra a implementação atual
+    (que ignora horário intra-grupo) e devem passar após o fix:
+
+    1. Grupo 1: overdue,   ordem ascendente  por sort_key (mais atrasada primeiro)
+    2. Grupo 2: pending,   ordem ascendente  por sort_key (mais próxima primeiro)
+    3. Grupo 3: completed, ordem descendente por sort_key (mais recente primeiro)
+    4. Grupo 4: cancelled, ordem descendente por sort_key (mais recente primeiro)
+    """
+
+    def test_br_tui_003_r20_overdue_first(self) -> None:
+        """Overdue vem antes de pending; intra-grupo ordena por sort_key ascendente.
+
+        Três overdues atrasadas em 1d, 7d e 3d. Esperado: 7d, 3d, 1d
+        (mais atrasada primeiro). Mais uma pending para validar que o grupo
+        overdue inteiro precede o grupo pending.
+        """
+        now = datetime(2026, 5, 24, 12, 0)
+        tasks = [
+            _make_task(
+                1,
+                "Pendente amanhã",
+                "pending",
+                days=1,
+                sort_key=now + timedelta(days=1),
+            ),
+            _make_task(
+                2,
+                "Atrasada ontem",
+                "overdue",
+                days=-1,
+                sort_key=now - timedelta(days=1),
+            ),
+            _make_task(
+                3,
+                "Atrasada semana",
+                "overdue",
+                days=-7,
+                sort_key=now - timedelta(days=7),
+            ),
+            _make_task(
+                4,
+                "Atrasada 3d",
+                "overdue",
+                days=-3,
+                sort_key=now - timedelta(days=3),
+            ),
+        ]
+        panel = _make_panel_with_tasks(tasks)
+
+        panel._order_tasks()
+
+        # Overdues primeiro, da mais antiga (-7d) para a mais recente (-1d);
+        # pending por último.
+        assert [t["id"] for t in panel._ordered] == [3, 4, 2, 1]
+
+    def test_br_tui_003_r20_pending_by_proximity(self) -> None:
+        """Pendings no mesmo dia ordenam por horário ascendente.
+
+        Três pendings em days=0 com horários 20:00, 08:00, 14:00. Esperado:
+        08:00, 14:00, 20:00 (proximidade ascendente — mais próximo do
+        início do dia primeiro).
+        """
+        base = datetime(2026, 5, 24)
+        tasks = [
+            _make_task(
+                1,
+                "Tarde",
+                "pending",
+                days=0,
+                time="20:00",
+                sort_key=base.replace(hour=20),
+            ),
+            _make_task(
+                2,
+                "Manhã",
+                "pending",
+                days=0,
+                time="08:00",
+                sort_key=base.replace(hour=8),
+            ),
+            _make_task(
+                3,
+                "Meio",
+                "pending",
+                days=0,
+                time="14:00",
+                sort_key=base.replace(hour=14),
+            ),
+        ]
+        panel = _make_panel_with_tasks(tasks)
+
+        panel._order_tasks()
+
+        assert [t["id"] for t in panel._ordered] == [2, 3, 1]
+
+    def test_br_tui_003_r20_done_after_pending(self) -> None:
+        """Completed vem após pending; intra-grupo ordena por sort_key descendente.
+
+        Pending + dois completed (concluídos há 1h e 12h). Esperado: pending
+        primeiro, depois completed mais recente (1h), depois completed mais
+        antigo (12h).
+        """
+        now = datetime(2026, 5, 24, 12, 0)
+        tasks = [
+            _make_task(
+                1,
+                "Concluída 12h",
+                "completed",
+                days=0,
+                sort_key=now - timedelta(hours=12),
+            ),
+            _make_task(
+                2,
+                "Pendente",
+                "pending",
+                days=1,
+                sort_key=now + timedelta(days=1),
+            ),
+            _make_task(
+                3,
+                "Concluída 1h",
+                "completed",
+                days=0,
+                sort_key=now - timedelta(hours=1),
+            ),
+        ]
+        panel = _make_panel_with_tasks(tasks)
+
+        panel._order_tasks()
+
+        assert [t["id"] for t in panel._ordered] == [2, 3, 1]
+
+    def test_br_tui_003_r20_cancelled_last(self) -> None:
+        """Cancelled vem por último; intra-grupo ordena por sort_key descendente.
+
+        Pending + completed + duas cancelled (3h e 18h atrás). Esperado:
+        pending, completed, cancelled-recente, cancelled-antiga.
+        """
+        now = datetime(2026, 5, 24, 12, 0)
+        tasks = [
+            _make_task(
+                1,
+                "Cancelada 18h",
+                "cancelled",
+                days=0,
+                sort_key=now - timedelta(hours=18),
+            ),
+            _make_task(
+                2,
+                "Pendente",
+                "pending",
+                days=1,
+                sort_key=now + timedelta(days=1),
+            ),
+            _make_task(
+                3,
+                "Concluída",
+                "completed",
+                days=0,
+                sort_key=now - timedelta(hours=2),
+            ),
+            _make_task(
+                4,
+                "Cancelada 3h",
+                "cancelled",
+                days=0,
+                sort_key=now - timedelta(hours=3),
+            ),
+        ]
+        panel = _make_panel_with_tasks(tasks)
+
+        panel._order_tasks()
+
+        assert [t["id"] for t in panel._ordered] == [2, 3, 4, 1]
