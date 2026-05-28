@@ -157,7 +157,7 @@ class DashboardScreen(Screen):
 
 ---
 
-## BR-TUI-004: Global Keybindings (REVISADA 15/03/2026)
+## BR-TUI-004: Global Keybindings (REVISADA 15/03/2026, EMENDADA 28/05/2026)
 
 **Descricao:** Keybindings padronizados em toda a aplicacao conforme ADR-037. Teclas simples sem modificador. CRUD contextual (n/e/x). Quick actions por panel (v/s/u/c/t). Uma acao = um binding.
 
@@ -166,7 +166,7 @@ class DashboardScreen(Screen):
 ```plaintext
 GLOBAIS (app.py):
   1..5 ................. trocar screen (1=Dash, 2=Rotin, 3=Habit, 4=Tasks, 5=Timer)
-  Ctrl+Q ............... sair da TUI
+  Ctrl+Q ............... sair da TUI [MODAL de confirmação]
   ? .................... help overlay (toggle)
   Escape ............... fechar modal / fechar help / voltar ao Dashboard
 
@@ -212,6 +212,7 @@ PROIBIDOS (reservados pelo OS - ADR-035):
 - v no habits panel (done manual - modal de substatus, BR-TUI-022)
 - v com timer ativo (notificacao com opcoes - BR-TUI-023)
 - s no habits panel (skip - modal de SkipReason, BR-TUI-024)
+- Ctrl+Q (sair da TUI - ConfirmDialog, regra 16)
 
 **Regras:**
 
@@ -230,6 +231,7 @@ PROIBIDOS (reservados pelo OS - ADR-035):
 13. Help overlay (?) lista todos os keybindings - toggle
 14. Footer contextual (BR-TUI-007) exibe bindings conforme panel focado
 15. Modals respondem a Enter (confirmar) e Escape (cancelar)
+16. Ctrl+Q abre ConfirmDialog antes de encerrar; Enter confirma e encerra, Escape cancela e mantém a TUI aberta. O backup de shutdown roda ao acionar Ctrl+Q, independentemente da confirmação. Havendo timer ativo, a mensagem do modal o menciona.
 
 **Supersede:** Versao 08/03/2026. Removidos todos os Ctrl+/Shift+ (ADR-037).
 
@@ -238,7 +240,10 @@ PROIBIDOS (reservados pelo OS - ADR-035):
 **Testes:**
 
 - `test_br_tui_004_1_to_5_switches_screen`
-- `test_br_tui_004_ctrl_q_quits`
+- `test_br_tui_004_ctrl_q_opens_confirm`
+- `test_br_tui_004_quit_confirm_exits`
+- `test_br_tui_004_quit_cancel_stays`
+- `test_br_tui_004_quit_message_mentions_active_timer`
 - `test_br_tui_004_escape_closes_modal`
 - `test_br_tui_004_help_overlay_toggle`
 - `test_br_tui_004_tab_advances_panels`
