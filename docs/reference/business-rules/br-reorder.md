@@ -27,6 +27,10 @@ Conflito se: (T1 < T4) AND (T3 < T2)
 
 - `test_br_reorder_001_detects_overlap`
 - `test_br_reorder_001_no_conflict_adjacent`
+- `test_br_reorder_001_conflict_com_todos_campos`
+- `test_br_reorder_001_conflict_type_overlap`
+- `test_br_reorder_001_conflict_type_sequential`
+- `test_br_reorder_001_conflict_suporta_diferentes_tipos_eventos`
 
 ---
 
