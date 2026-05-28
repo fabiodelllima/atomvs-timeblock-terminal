@@ -3,17 +3,43 @@
 import pytest
 
 from timeblock.tui.app import TimeBlockApp
+from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
 
 
 class TestBRTUI004GlobalKeybindings:
     """BR-TUI-004: Keybindings globais funcionam em qualquer screen."""
 
     @pytest.mark.asyncio
-    async def test_br_tui_004_quit_keybinding(self):
-        """Pressionar Ctrl+Q encerra a aplicação."""
+    async def test_br_tui_004_ctrl_q_opens_confirm(self):
+        """Ctrl+Q abre ConfirmDialog em vez de encerrar imediatamente."""
         async with TimeBlockApp().run_test() as pilot:
             await pilot.press("ctrl+q")
+            await pilot.pause()
+            assert pilot.app.is_running is True
+            assert len(pilot.app.screen_stack) == 2
+            assert isinstance(pilot.app.screen, ConfirmDialog)
+
+    @pytest.mark.asyncio
+    async def test_br_tui_004_quit_confirm_exits(self):
+        """Confirmar (Enter) no modal de saída encerra a aplicação."""
+        async with TimeBlockApp().run_test() as pilot:
+            await pilot.press("ctrl+q")
+            await pilot.pause()
+            assert pilot.app.is_running is True
+            await pilot.press("enter")
             assert pilot.app.is_running is False
+
+    @pytest.mark.asyncio
+    async def test_br_tui_004_quit_cancel_stays(self):
+        """Cancelar (Esc) no modal de saída mantém a aplicação aberta."""
+        async with TimeBlockApp().run_test() as pilot:
+            await pilot.press("ctrl+q")
+            await pilot.pause()
+            assert pilot.app.is_running is True
+            await pilot.press("escape")
+            await pilot.pause()
+            assert pilot.app.is_running is True
+            assert len(pilot.app.screen_stack) == 1
 
     @pytest.mark.asyncio
     async def test_br_tui_004_help_overlay(self):
