@@ -5,11 +5,11 @@ from datetime import datetime
 from timeblock.services.event_reordering_models import Conflict, ConflictType
 
 
-class TestBREvent002ConflictDataclass:
-    """BR-EVENT-002: Conflict dataclass contém informações completas."""
+class TestBRReorder001ConflictDataclass:
+    """BR-REORDER-001: Conflict dataclass contém informações completas."""
 
-    def test_br_event_002_conflict_com_todos_campos(self):
-        """BR-EVENT-002: Conflict preserva todos os campos necessários."""
+    def test_br_reorder_001_conflict_com_todos_campos(self):
+        """BR-REORDER-001: Conflict preserva todos os campos necessários."""
         conflict = Conflict(
             triggered_event_id=1,
             triggered_event_type="task",
@@ -32,8 +32,8 @@ class TestBREvent002ConflictDataclass:
         assert conflict.conflicting_start == datetime(2025, 10, 24, 10, 30)
         assert conflict.conflicting_end == datetime(2025, 10, 24, 11, 30)
 
-    def test_br_event_002_conflict_type_overlap(self):
-        """BR-EVENT-002: ConflictType OVERLAP identifica sobreposição."""
+    def test_br_reorder_001_conflict_type_overlap(self):
+        """BR-REORDER-001: ConflictType OVERLAP identifica sobreposição."""
         conflict = Conflict(
             triggered_event_id=1,
             triggered_event_type="task",
@@ -49,8 +49,8 @@ class TestBREvent002ConflictDataclass:
         assert conflict.conflict_type == ConflictType.OVERLAP
         assert conflict.conflict_type.value == "overlap"
 
-    def test_br_event_002_conflict_type_sequential(self):
-        """BR-EVENT-002: ConflictType SEQUENTIAL identifica eventos consecutivos."""
+    def test_br_reorder_001_conflict_type_sequential(self):
+        """BR-REORDER-001: ConflictType SEQUENTIAL identifica eventos consecutivos."""
         conflict = Conflict(
             triggered_event_id=1,
             triggered_event_type="task",
@@ -66,8 +66,8 @@ class TestBREvent002ConflictDataclass:
         assert conflict.conflict_type == ConflictType.SEQUENTIAL
         assert conflict.conflict_type.value == "sequential"
 
-    def test_br_event_002_conflict_suporta_diferentes_tipos_eventos(self):
-        """BR-EVENT-002: Conflict suporta task, habit_instance, event."""
+    def test_br_reorder_001_conflict_suporta_diferentes_tipos_eventos(self):
+        """BR-REORDER-001: Conflict suporta task, habit_instance, event."""
         tipos_validos = ["task", "habit_instance", "event"]
 
         for tipo1 in tipos_validos:
