@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.34.0
+**Versão:** 2.35.0
 
 **Status:** SSOT
 
@@ -86,7 +86,7 @@
 | DT072 | Job sync:github substituído por GitLab Push Mirroring     | BAIXA      | RESOLVIDO | 2026-04      | chore/replace-sync-job      |
 | DT073 | `__pycache__` com paths absolutos impede portabilidade    | BAIXA      | PENDENTE  | -            | v1.7.1                      |
 | DT074 | BRs e Humble Objects com testes intencionados ausentes    | ALTA       | RESOLVIDO | 2026-04      | v1.7.2 (MR caracterização)  |
-| DT075 | BR fantasma BR-EVENT-002 vs nomenclatura BR-REORDER-XXX   | BAIXA      | PENDENTE  | -            | v1.7.5 (issue #42 vizinha)  |
+| DT075 | BR fantasma BR-EVENT-002 vs nomenclatura BR-REORDER-XXX   | BAIXA      | RESOLVIDO | 2026-05      | v1.7.5 (issue #42 vizinha)  |
 | DT076 | TimerScreen é placeholder com cinco TODOs ao TimerService | MEDIA      | PENDENTE  | -            | v1.8.0                      |
 | DT077 | Drift histórico **version** 0.1.0 vs pyproject.toml       | BAIXA      | RESOLVIDO | 2026-05      | v1.7.3                      |
 
@@ -166,7 +166,7 @@
 - [x] DT072 — Job sync:github substituído por GitLab Push Mirroring nativo
 - [ ] DT073 — `__pycache__` com paths absolutos impede portabilidade
 - [x] DT074 — BRs e Humble Objects com testes intencionados ausentes
-- [ ] DT075 — BR fantasma BR-EVENT-002 vs nomenclatura BR-REORDER-XXX
+- [x] DT075 — BR fantasma BR-EVENT-002 vs nomenclatura BR-REORDER-XXX
 - [ ] DT076 — TimerScreen é placeholder (cinco TODOs ao TimerService)
 - [x] DT077 — Drift histórico **version** 0.1.0 vs pyproject.toml
 
@@ -829,7 +829,8 @@ Quinze BRs do catálogo não tinham cobertura direta em arquivos de teste no mom
 
 - **Descoberto:** 2026-05-01 (auditoria estrutural da Sessão 28)
 - **Severidade:** BAIXA
-- **Status:** PENDENTE
+- **Status:** RESOLVIDO
+- **Resolvido em:** 2026-05-28 (Opção A) — commits `10ac4fd` (rename `br-event.md` → `br-reorder.md` + refs em index.md/mkdocs.yml), `3095b7b` (nomenclatura no teste: classe, 4 métodos, 5 docstrings → BR-REORDER-001) e `4ed781c` (rastreabilidade: 4 testes anexados à BR-REORDER-001). Instância event-reordering do Caso 3 da issue #42 fechada; br-task.md/br-skip.md seguem em aberto sob #42.
 - **Impacto:** Quebra de rastreabilidade BR → Teste. Buscas como `grep -rn "BR-REORDER" tests/` não localizam os cinco testes que de fato cobrem a regra. Não há impacto funcional.
 - **Correção sugerida:** opção A (mais barata) — renomear filename para `br-reorder.md`, manter os seis identificadores internos como estão e atualizar os cinco docstrings dos testes para `BR-REORDER-001` correspondente. Opção B — renomear todo o conjunto de identificadores para `BR-EVENT-XXX`, mais invasiva.
 
@@ -905,6 +906,7 @@ Refatorações catalogadas seguem nomenclatura RF-XXX com referência a Fowler (
 
 | Data       | Versão | Mudanças                                                                                                     |
 | ---------- | ------ | ------------------------------------------------------------------------------------------------------------ |
+| 2026-05-28 | 2.35.0 | DT-075 marcado RESOLVIDO (Opção A): rename para br-reorder.md, nomenclatura no teste e rastreabilidade BR-REORDER-001; Caso 3 (event-reordering) da #42 fechado.                |
 | 2026-05-01 | 2.34.0 | DT-074 marcado RESOLVIDO. Adicionados DT-075                                                                 |
 |            |        | (BR fantasma BR-EVENT-002), DT-076 (TimerScreen                                                              |
 |            |        | placeholder), DT-077 (drift **version** resolvido em                                                         |
