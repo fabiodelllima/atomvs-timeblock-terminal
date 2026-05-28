@@ -79,7 +79,7 @@ nav:
           - Streak: reference/business-rules/br-streak.md
           - Task: reference/business-rules/br-task.md
           - Timer: reference/business-rules/br-timer.md
-          - Event Reordering: reference/business-rules/br-event.md
+          - Event Reordering: reference/business-rules/br-reorder.md
           - Validações Globais: reference/business-rules/br-validation.md
           - CLI: reference/business-rules/br-cli.md
           - Tag: reference/business-rules/br-tag.md

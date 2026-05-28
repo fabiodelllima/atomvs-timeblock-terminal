@@ -19,7 +19,7 @@ Os conceitos introdutórios e o glossário do domínio estão em [Introdução e
 - [Streak](br-streak.md)
 - [Task](br-task.md)
 - [Timer](br-timer.md)
-- [Event Reordering](br-event.md)
+- [Event Reordering](br-reorder.md)
 - [Validações Globais](br-validation.md)
 - [CLI](br-cli.md)
 - [Tag](br-tag.md)
