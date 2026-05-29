@@ -21,13 +21,22 @@ class TestBRTUI004GlobalKeybindings:
 
     @pytest.mark.asyncio
     async def test_br_tui_004_quit_confirm_exits(self):
-        """Confirmar (Enter) no modal de saída encerra a aplicação."""
-        async with TimeBlockApp().run_test() as pilot:
+        """Confirmar (Enter) no modal de saída solicita o encerramento."""
+        app = TimeBlockApp()
+        async with app.run_test() as pilot:
+            exit_called = False
+
+            def fake_exit(*args: object, **kwargs: object) -> None:
+                nonlocal exit_called
+                exit_called = True
+
+            app.exit = fake_exit  # type: ignore[method-assign]
             await pilot.press("ctrl+q")
             await pilot.pause()
-            assert pilot.app.is_running is True
+            assert len(pilot.app.screen_stack) == 2
             await pilot.press("enter")
-            assert pilot.app.is_running is False
+            await pilot.pause()
+            assert exit_called is True
 
     @pytest.mark.asyncio
     async def test_br_tui_004_quit_cancel_stays(self):
