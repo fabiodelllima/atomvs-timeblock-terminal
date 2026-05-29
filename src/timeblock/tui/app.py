@@ -8,7 +8,7 @@ from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
 
 from timeblock.services.backup_service import create_backup
-from timeblock.tui.screens.dashboard import DashboardScreen
+from timeblock.tui.screens.dashboard import DashboardScreen, loader
 from timeblock.tui.screens.habits import HabitsScreen
 from timeblock.tui.screens.routines import RoutinesScreen
 from timeblock.tui.screens.tasks import TasksScreen
@@ -162,13 +162,19 @@ class TimeBlockApp(App):
         logger.info("Ctrl+Q acionado — backup de shutdown")
         create_backup(label="shutdown")
 
+        message = "Deseja sair do ATOMVS? O progresso não salvo será perdido."
+        active = loader.load_active_timer()
+        if active:
+            name = active.get("name") or "sem hábito associado"
+            message = f"Timer '{name}' está em andamento. Deseja parar e sair do ATOMVS?"
+
         def on_confirm() -> None:
             self.exit()
 
         self.push_screen(
             ConfirmDialog(
                 title="Sair do ATOMVS",
-                message="Deseja sair do ATOMVS? O progresso não salvo será perdido.",
+                message=message,
                 on_confirm=on_confirm,
             )
         )

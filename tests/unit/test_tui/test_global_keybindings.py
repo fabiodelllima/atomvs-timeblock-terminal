@@ -3,6 +3,7 @@
 import pytest
 
 from timeblock.tui.app import TimeBlockApp
+from timeblock.tui.screens.dashboard import loader
 from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
 
 
@@ -49,6 +50,21 @@ class TestBRTUI004GlobalKeybindings:
             await pilot.pause()
             assert pilot.app.is_running is True
             assert len(pilot.app.screen_stack) == 1
+
+    @pytest.mark.asyncio
+    async def test_br_tui_004_quit_message_mentions_active_timer(self, monkeypatch):
+        """Com timer ativo, a mensagem do modal de saída menciona o timer."""
+        monkeypatch.setattr(
+            loader,
+            "load_active_timer",
+            lambda: {"name": "Estudar Biologia", "status": "RUNNING"},
+        )
+        async with TimeBlockApp().run_test() as pilot:
+            await pilot.press("ctrl+q")
+            await pilot.pause()
+            dialog = pilot.app.screen
+            assert "Estudar Biologia" in str(dialog._message)
+            assert "andamento" in str(dialog._message)
 
     @pytest.mark.asyncio
     async def test_br_tui_004_help_overlay(self):
