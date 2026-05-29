@@ -13,6 +13,7 @@ from timeblock.tui.screens.habits import HabitsScreen
 from timeblock.tui.screens.routines import RoutinesScreen
 from timeblock.tui.screens.tasks import TasksScreen
 from timeblock.tui.screens.timer import TimerScreen
+from timeblock.tui.widgets.confirm_dialog import ConfirmDialog
 from timeblock.tui.widgets.header_bar import HeaderBar
 from timeblock.tui.widgets.help_overlay import HelpOverlay
 from timeblock.tui.widgets.nav_bar import NavBar
@@ -153,7 +154,21 @@ class TimeBlockApp(App):
             self.set_focus(None)
 
     async def action_quit(self) -> None:
-        """Faz backup e encerra a aplicação."""
-        logger.info("Encerrando TUI — backup de shutdown")
+        """Abre confirmação antes de encerrar (BR-TUI-004 regra 16).
+
+        O backup de shutdown roda ao acionar Ctrl+Q, independentemente da
+        confirmação. Apenas a saída em si depende do usuário confirmar.
+        """
+        logger.info("Ctrl+Q acionado — backup de shutdown")
         create_backup(label="shutdown")
-        self.exit()
+
+        def on_confirm() -> None:
+            self.exit()
+
+        self.push_screen(
+            ConfirmDialog(
+                title="Sair do ATOMVS",
+                message="Deseja sair do ATOMVS? O progresso não salvo será perdido.",
+                on_confirm=on_confirm,
+            )
+        )
