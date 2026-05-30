@@ -162,7 +162,7 @@ class TimeBlockApp(App):
         logger.info("Ctrl+Q acionado — backup de shutdown")
         create_backup(label="shutdown")
 
-        message = "Deseja sair do ATOMVS? O progresso não salvo será perdido."
+        message = "Deseja sair do ATOMVS?"
         active = loader.load_active_timer()
         if active:
             name = active.get("name") or "sem hábito associado"
