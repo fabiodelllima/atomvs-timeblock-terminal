@@ -53,3 +53,23 @@
 **Testes esperados:** 1
 
 - `test_br_test_002_all_brs_have_error_tests` (meta-teste — verifica cobertura)
+
+---
+
+### BR-TEST-003: Isolamento Absoluto do Banco de Produção (NOVA 30/05/2026)
+
+**Regra:** Nenhum teste, em nenhuma camada (unit, integration, e2e, bdd), pode resolver `get_db_path()` para o banco de produção XDG (`~/.local/share/atomvs/atomvs.db`). A suíte deve garantir, por construção, que `TIMEBLOCK_DB_PATH` aponta sempre para um banco efêmero (arquivo temporário ou `:memory:`) antes de qualquer acesso a banco.
+
+**Motivação:** O isolamento anterior era parcial e por-camada — `tests/unit/test_tui/conftest.py` forçava `:memory:` apenas para a TUI, `tests/integration/conftest.py` usava `integration_engine` próprio, e os testes CLI dependiam da fixture `isolated_db` (scope função). Qualquer teste que não usasse essas fixturas caía no path XDG default. Com uma instância ATOMVS concorrente tocando esse banco, a contenção de lock SQLite gerava falhas intermitentes (`exit_code 2`), diagnosticadas no DT-078 após eliminação de cinco hipóteses. A ausência de uma guarda global tornava a fragilidade silenciosa: o teste passava ou falhava conforme o ambiente, não conforme o código. Referências: DT-078; ADR-026; ADR-040; HUMBLE; FARLEY, 2010, p. 375.
+
+**Requisitos:**
+1. Uma fixture `autouse` de escopo sessão no `tests/conftest.py` (raiz) força `TIMEBLOCK_DB_PATH` para um arquivo temporário caso a variável não esteja definida no ambiente.
+2. A guarda usa arquivo temporário (não `:memory:`) por padrão, pois processos CLI via `CliRunner` não compartilham bancos `:memory:` entre conexões.
+3. Fixturas mais específicas (`test_tui` com `:memory:`, `isolated_db` com tmp próprio) podem sobrescrever a env por cima — a guarda define apenas o piso seguro.
+4. A guarda salva e restaura o valor original de `TIMEBLOCK_DB_PATH` ao final da sessão, sem efeitos colaterais no ambiente do desenvolvedor.
+5. Um teste-guarda asserta que `get_db_path()` jamais retorna o path XDG de produção durante a execução da suíte, transformando qualquer regressão de isolamento em falha determinística.
+6. A guarda é compatível com `pytest-xdist` (cada worker recebe seu próprio tmp via `tmp_path_factory` com escopo de sessão por-worker).
+
+**Testes esperados:** 2
+- `test_br_test_003_db_path_never_resolves_to_production`
+- `test_br_test_003_env_var_is_set_during_suite`
