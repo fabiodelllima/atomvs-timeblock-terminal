@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import tempfile
 from collections.abc import Generator
 from datetime import UTC, datetime, time
 from typing import TYPE_CHECKING, Any
@@ -23,6 +25,36 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from timeblock.services.habit_service import HabitService
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _isolate_production_database() -> Generator[None]:
+    """Isola toda a suíte do banco de produção XDG (BR-TEST-003 / DT-078).
+
+    Força TIMEBLOCK_DB_PATH para um arquivo temporário de sessão caso a
+    variável não esteja definida, garantindo que nenhum teste resolva
+    get_db_path() para ~/.local/share/atomvs/atomvs.db. Fixturas mais
+    específicas (test_tui com :memory:, isolated_db com tmp próprio)
+    sobrescrevem este piso. O valor original é restaurado ao final.
+
+    Usa tempfile.mkdtemp() em vez de tmp_path_factory porque a fixture
+    de sessão do pytest, quando resolvida dentro de uma autouse de
+    escopo sessão, causa deadlock na coleta (DT-078).
+
+    Referências:
+        - BR-TEST-003: Isolamento Absoluto do Banco de Produção
+        - DT-078: Testes de integração sem guarda global de banco isolado
+        - ADR-026: Test Database Isolation Strategy
+    """
+    original = os.environ.get("TIMEBLOCK_DB_PATH")
+    if original is None:
+        tmp_dir = tempfile.mkdtemp(prefix="atomvs_suite_")
+        os.environ["TIMEBLOCK_DB_PATH"] = os.path.join(tmp_dir, "test_suite.db")
+    yield
+    if original is None:
+        os.environ.pop("TIMEBLOCK_DB_PATH", None)
+    else:
+        os.environ["TIMEBLOCK_DB_PATH"] = original
 
 
 @pytest.fixture
