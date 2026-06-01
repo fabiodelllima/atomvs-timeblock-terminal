@@ -1,6 +1,6 @@
 # Technical Debt
 
-**Versão:** 2.36.0
+**Versão:** 2.37.0
 
 **Status:** SSOT
 
@@ -89,7 +89,7 @@
 | DT075 | BR fantasma BR-EVENT-002 vs nomenclatura BR-REORDER-XXX   | BAIXA      | RESOLVIDO    | 2026-05      | v1.7.5 (issue #42 vizinha)  |
 | DT076 | TimerScreen é placeholder com cinco TODOs ao TimerService | MEDIA      | PENDENTE     | -            | v1.8.0                      |
 | DT077 | Drift histórico **version** 0.1.0 vs pyproject.toml       | BAIXA      | RESOLVIDO    | 2026-05      | v1.7.3                      |
-| DT078 | Testes de integração sem guarda global de banco isolado   | BAIXA      | EM RESOLUÇÃO | -            | v1.7.5                      |
+| DT078 | Testes de integração sem guarda global de banco isolado   | BAIXA      | RESOLVIDO    | 2026-05      | v1.7.5                      |
 
 ## 1b. Quick Status
 
@@ -170,9 +170,9 @@
 - [x] DT075 — BR fantasma BR-EVENT-002 vs nomenclatura BR-REORDER-XXX
 - [ ] DT076 — TimerScreen é placeholder (cinco TODOs ao TimerService)
 - [x] DT077 — Drift histórico **version** 0.1.0 vs pyproject.toml
-- [ ] DT078 — Testes de integração sem guarda global de banco isolado
+- [x] DT078 — Testes de integração sem guarda global de banco isolado
 
-**Resolvidos:** 62/74 | **Pendentes:** 5/74 | **Em resolução:** 1/74 | **Aceitos:** 1/74 | **Reclassificados:** 5/74
+**Resolvidos:** 63/74 | **Pendentes:** 5/74 | **Em resolução:** 0/74 | **Aceitos:** 1/74 | **Reclassificados:** 5/74
 
 ---
 
@@ -862,7 +862,8 @@ Quando há uma TUI/CLI ATOMVS aberta em paralelo durante a execução da suíte,
 
 - **Descoberto:** 2026-05-30 (Sessão 30, durante validação da suíte completa antes do push da issue #46)
 - **Severidade:** BAIXA
-- **Status:** EM RESOLUÇÃO
+- **Status:** RESOLVIDO
+- **Resolvido em:** 2026-05-30 — fixture autouse de escopo sessão `_isolate_production_database` no `tests/conftest.py` raiz força `TIMEBLOCK_DB_PATH` para um arquivo temporário (`tempfile.mkdtemp()`) caso não esteja definido. Acompanha BR-TEST-003 e dois testes-guarda em `tests/unit/test_infra/test_db_isolation_guard.py` (RED→GREEN). Suíte unit: 1128 passed. Nota: `tmp_path_factory` causava deadlock na coleta quando resolvido dentro de uma autouse de sessão — `tempfile.mkdtemp()` foi a alternativa adotada.
 - **Impacto:** Nenhum em produção (uso real tem instância única) nem em CI (sem concorrência). Afeta apenas rodadas locais da suíte completa quando há ATOMVS aberto, gerando falsos negativos que custam tempo de diagnóstico. O ADR-026 já previa "falhas intermitentes" como sintoma do isolamento incompleto.
 
 **Investigação:**
@@ -935,6 +936,8 @@ Refatorações catalogadas seguem nomenclatura RF-XXX com referência a Fowler (
 
 | Data       | Versão | Mudanças                                                               |
 | ---------- | ------ | ---------------------------------------------------------------------- |
+| 2026-05-30 | 2.37.0 | DT-078 RESOLVIDO: fixture autouse de isolamento global de              |
+|            |        | banco (BR-TEST-003) + teste-guarda em test_infra. Sessão 30.           |
 | 2026-05-30 | 2.36.0 | DT-078 registrado (EM RESOLUÇÃO): testes de integração                 |
 |            |        | sem guarda global de banco isolado. Causa-raiz: concorrência           |
 |            |        | com instância ATOMVS no banco XDG real. Cinco hipóteses                |

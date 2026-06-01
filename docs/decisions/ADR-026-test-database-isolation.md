@@ -449,4 +449,5 @@ grep -rn "def isolated_db" tests/ --include="*.py"
 ## Histórico
 
 - **2025-01-19:** Criado (versão 1.0)
+- **2026-05-30:** Gap de isolamento global fechado (DT-078). As "falhas intermitentes" previstas no Contexto eram causadas por testes que resolviam `get_db_path()` para o banco XDG real na ausência de guarda global, manifestando-se sob concorrência com instância ATOMVS. Resolvido por fixture autouse de escopo sessão (`_isolate_production_database` em `tests/conftest.py`) que força `TIMEBLOCK_DB_PATH` para tmp, formalizada na BR-TEST-003 com teste-guarda em `tests/unit/test_infra/`.
 - **Próximo:** Implementar refatoração de fixtures

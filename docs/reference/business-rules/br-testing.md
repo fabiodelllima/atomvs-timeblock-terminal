@@ -68,7 +68,7 @@
 3. Fixturas mais específicas (`test_tui` com `:memory:`, `isolated_db` com tmp próprio) podem sobrescrever a env por cima — a guarda define apenas o piso seguro.
 4. A guarda salva e restaura o valor original de `TIMEBLOCK_DB_PATH` ao final da sessão, sem efeitos colaterais no ambiente do desenvolvedor.
 5. Um teste-guarda asserta que `get_db_path()` jamais retorna o path XDG de produção durante a execução da suíte, transformando qualquer regressão de isolamento em falha determinística.
-6. A guarda é compatível com `pytest-xdist` (cada worker recebe seu próprio tmp via `tmp_path_factory` com escopo de sessão por-worker).
+6. A guarda usa `tempfile.mkdtemp()` (não `tmp_path_factory`), pois a fixture de sessão do pytest causa deadlock na coleta quando resolvida dentro de uma autouse de escopo sessão (DT-078). `tempfile` é igualmente compatível com `pytest-xdist`, já que cada worker é um processo independente com seu próprio diretório temporário.
 
 **Testes esperados:** 2
 - `test_br_test_003_db_path_never_resolves_to_production`
