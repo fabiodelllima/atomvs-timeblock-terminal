@@ -8,6 +8,17 @@
 
 ---
 
+## Sumário
+
+- [1. Inventário](#1-inventário)
+- [1b. Quick Status](#1b-quick-status)
+- [2. Detalhamento](#2-detalhamento)
+- [3. Política de Gestão](#3-política-de-gestão)
+- [4. Catálogo de Refatorações](#4-catálogo-de-refatorações)
+- [5. Changelog do Documento](#5-changelog-do-documento)
+
+---
+
 ## 1. Inventário
 
 | ID    | Descrição                                                 | Severidade | Status       | Resolvido em | Sprint planejado            |
