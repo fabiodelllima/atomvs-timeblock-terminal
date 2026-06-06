@@ -103,6 +103,10 @@ class HabitInstanceService:
                 logger.error(f"Hábito não encontrado: habit_id={habit_id}")
                 raise ValueError(f"Habit {habit_id} not found")
 
+            if habit.archived_at is not None:
+                logger.info(f"Hábito arquivado, geração ignorada: habit_id={habit_id}")
+                return []
+
             instances = []
             current = start_date
             while current <= end_date:

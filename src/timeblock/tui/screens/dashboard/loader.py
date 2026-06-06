@@ -45,7 +45,11 @@ def ensure_today_instances() -> int:
         if not routine or not routine.id:
             return 0
 
-        habits = list(s.exec(select(Habit).where(Habit.routine_id == routine.id)).all())
+        habits = list(
+            s.exec(
+                select(Habit).where(Habit.routine_id == routine.id).where(Habit.archived_at == None)  # noqa: E711
+            ).all()
+        )
         if not habits:
             return 0
 
@@ -117,7 +121,11 @@ def ensure_period_instances(routine_id: int | None = None, days: int = 7) -> int
         if not routine:
             return 0
 
-        habits = list(s.exec(select(Habit).where(Habit.routine_id == routine_id)).all())
+        habits = list(
+            s.exec(
+                select(Habit).where(Habit.routine_id == routine_id).where(Habit.archived_at == None)  # noqa: E711
+            ).all()
+        )
         if not habits:
             return 0
 
@@ -292,7 +300,11 @@ def load_metrics(routine_id: int | None = None) -> dict:
 
     def _load(s: Session) -> dict:
         today = date.today()
-        habits = list(s.exec(select(Habit).where(Habit.routine_id == routine_id)).all())
+        habits = list(
+            s.exec(
+                select(Habit).where(Habit.routine_id == routine_id).where(Habit.archived_at == None)  # noqa: E711
+            ).all()
+        )
         if not habits:
             return {}
         habit_ids = [h.id for h in habits if h.id is not None]
