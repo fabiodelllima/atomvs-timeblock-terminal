@@ -389,3 +389,110 @@ class TestBRHabitDeletion:
         result = runner.invoke(app, ["habit", "delete", habit_id], input="n\n")
         # ASSERT
         assert result.exit_code == 0, f"Cancelamento deve retornar sucesso. Output: {result.output}"
+
+
+def _create_and_get_id(
+    runner: CliRunner,
+    routine_id: str,
+    title: str,
+    recurrence: str = "MONDAY",
+    start: str = "06:00",
+    end: str = "07:00",
+) -> str:
+    """Cria um hábito via CLI e retorna o id extraído da saída."""
+    res = runner.invoke(
+        app,
+        [
+            "habit",
+            "create",
+            "--routine",
+            routine_id,
+            "-t",
+            title,
+            "-r",
+            recurrence,
+            "-s",
+            start,
+            "-e",
+            end,
+        ],
+    )
+    assert res.exit_code == 0, res.output
+    id_lines = [line for line in res.stdout.split("\n") if "ID:" in line]
+    assert id_lines, f"ID não encontrado: {res.output}"
+    clean = re.sub(r"\x1b\[[0-9;]*m", "", id_lines[0])
+    return clean.split(":")[1].strip()
+
+
+class TestBRHabit006ArchiveCommands:
+    """Integration: ciclo de archive via CLI (BR-HABIT-006)."""
+
+    def test_br_habit_006_cli_delete_archives_message(
+        self, runner: CliRunner, isolated_db: None, active_routine_id: str
+    ) -> None:
+        """habit delete arquiva e a mensagem reflete 'arquivado'."""
+        hid = _create_and_get_id(runner, active_routine_id, "Archive Me")
+        result = runner.invoke(app, ["habit", "delete", hid, "--force"])
+        assert result.exit_code == 0, result.output
+        assert "arquiv" in result.stdout.lower()
+
+    def test_br_habit_006_cli_archived_hidden_from_default_list(
+        self, runner: CliRunner, isolated_db: None, active_routine_id: str
+    ) -> None:
+        """Após archive o hábito some de 'habit list' e aparece em '--all'."""
+        hid = _create_and_get_id(runner, active_routine_id, "Hidden Habit")
+        runner.invoke(app, ["habit", "delete", hid, "--force"])
+
+        default_list = runner.invoke(app, ["habit", "list", "--routine", active_routine_id])
+        assert "Hidden Habit" not in default_list.stdout
+
+        all_list = runner.invoke(app, ["habit", "list", "--routine", active_routine_id, "--all"])
+        assert all_list.exit_code == 0, all_list.output
+        assert "Hidden Habit" in all_list.stdout
+
+    def test_br_habit_006_cli_list_archived_only(
+        self, runner: CliRunner, isolated_db: None, active_routine_id: str
+    ) -> None:
+        """'habit list --archived' mostra apenas arquivados."""
+        _create_and_get_id(runner, active_routine_id, "Still Active")
+        archived_id = _create_and_get_id(runner, active_routine_id, "Now Archived")
+        runner.invoke(app, ["habit", "delete", archived_id, "--force"])
+
+        result = runner.invoke(app, ["habit", "list", "--archived"])
+        assert result.exit_code == 0, result.output
+        assert "Now Archived" in result.stdout
+        assert "Still Active" not in result.stdout
+
+    def test_br_habit_006_cli_restore_brings_back(
+        self, runner: CliRunner, isolated_db: None, active_routine_id: str
+    ) -> None:
+        """'habit restore' reativa e o hábito volta à listagem padrão."""
+        hid = _create_and_get_id(runner, active_routine_id, "Restore Me")
+        runner.invoke(app, ["habit", "delete", hid, "--force"])
+
+        result = runner.invoke(app, ["habit", "restore", hid])
+        assert result.exit_code == 0, result.output
+
+        default_list = runner.invoke(app, ["habit", "list", "--routine", active_routine_id])
+        assert "Restore Me" in default_list.stdout
+
+    def test_br_habit_006_cli_purge_with_confirmation(
+        self, runner: CliRunner, isolated_db: None, active_routine_id: str
+    ) -> None:
+        """'habit purge' com a palavra 'purge' destrói o hábito."""
+        hid = _create_and_get_id(runner, active_routine_id, "Purge Me")
+        result = runner.invoke(app, ["habit", "purge", hid], input="purge\n")
+        assert result.exit_code == 0, result.output
+
+        all_list = runner.invoke(app, ["habit", "list", "--routine", active_routine_id, "--all"])
+        assert "Purge Me" not in all_list.stdout
+
+    def test_br_habit_006_cli_purge_aborts_on_wrong_word(
+        self, runner: CliRunner, isolated_db: None, active_routine_id: str
+    ) -> None:
+        """'habit purge' com palavra errada aborta e preserva os dados (cenário BDD)."""
+        hid = _create_and_get_id(runner, active_routine_id, "Keep On Wrong")
+        runner.invoke(app, ["habit", "purge", hid], input="y\n")
+
+        all_list = runner.invoke(app, ["habit", "list", "--routine", active_routine_id, "--all"])
+        assert "Keep On Wrong" in all_list.stdout
