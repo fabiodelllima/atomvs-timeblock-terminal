@@ -1,6 +1,6 @@
 """Habit model."""
 
-from datetime import time
+from datetime import datetime, time
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -44,6 +44,7 @@ class Habit(SQLModel, table=True):
     recurrence: Recurrence
     color: str | None = Field(default=None, max_length=7)
     tag_id: int | None = Field(default=None, foreign_key="tags.id")
+    archived_at: datetime | None = Field(default=None)
 
     # Relationships
     routine: Routine | None = Relationship(back_populates="habits")
