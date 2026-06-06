@@ -6,10 +6,10 @@ from datetime import time as dt_time
 import typer
 from dateutil.relativedelta import relativedelta  # type: ignore[import-untyped]
 from rich.console import Console
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from timeblock.database import get_engine_context
-from timeblock.models import Recurrence
+from timeblock.models import Recurrence, TimeLog
 from timeblock.services.habit_instance_service import HabitInstanceService
 from timeblock.services.habit_service import HabitService
 from timeblock.services.routine_service import RoutineService
@@ -115,6 +115,12 @@ def create_habit(
 
 def list_habits(
     routine: str = typer.Option("active", "--routine", "-R", help="Filtrar: active, all ou ID"),
+    archived: bool = typer.Option(
+        False, "--archived", help="Mostrar apenas hábitos arquivados (BR-HABIT-006)"
+    ),
+    show_all: bool = typer.Option(
+        False, "--all", "-a", help="Incluir hábitos arquivados na listagem (BR-HABIT-006)"
+    ),
 ):
     """Lista hábitos."""
     try:
@@ -140,7 +146,14 @@ def list_habits(
                     raise typer.Exit(1)
                 title = f"Hábitos - {routine_obj.name}"
 
-            habits = habit_service.list_habits(routine_id)
+            if archived:
+                habits = habit_service.list_archived_habits(routine_id)
+                title += " (arquivados)"
+            elif show_all:
+                habits = habit_service.list_habits(routine_id, include_archived=True)
+                title += " (incluindo arquivados)"
+            else:
+                habits = habit_service.list_habits(routine_id)
 
             if not habits:
                 console.print("[yellow]Nenhum hábito encontrado.[/yellow]")
@@ -149,11 +162,14 @@ def list_habits(
             console.print(f"\n[bold]{title}[/bold]\n")
             for h in habits:
                 rec = h.recurrence.value.replace("_", " ").title()
-                console.print(
+                line = (
                     f"[cyan]{h.id}[/cyan] [bold]{h.title}[/bold] "
                     f"({rec} {h.scheduled_start.strftime('%H:%M')}-"
                     f"{h.scheduled_end.strftime('%H:%M')})"
                 )
+                if h.archived_at is not None:
+                    line += f" [dim](arquivado em {h.archived_at.strftime('%Y-%m-%d')})[/dim]"
+                console.print(line)
             console.print()
 
     except ValueError as e:
@@ -214,7 +230,7 @@ def delete_habit(
     habit_id: int = typer.Argument(..., help="ID do hábito"),
     force: bool = typer.Option(False, "--force", "-f", help="Não pedir confirmação"),
 ):
-    """Deleta um hábito."""
+    """Arquiva um hábito (soft delete — BR-HABIT-005)."""
     try:
         with get_engine_context() as engine, Session(engine) as session:
             habit_service = HabitService(session)
@@ -225,12 +241,88 @@ def delete_habit(
                 raise typer.Exit(1)
 
             if not force:
-                if not typer.confirm(f"Deletar hábito '{habit.title}'?", default=False):
+                if not typer.confirm(f"Arquivar hábito '{habit.title}'?", default=False):
                     console.print("[yellow]Cancelado.[/yellow]")
                     return
 
             habit_service.delete_habit(habit_id)
-            console.print(f"[green]Hábito deletado: [bold]{habit.title}[/bold][/green]")
+            console.print(f"[green]Hábito arquivado: [bold]{habit.title}[/bold][/green]")
+            console.print(
+                f"[dim]Reative com 'habit restore {habit_id}' ou apague de vez "
+                f"com 'habit purge {habit_id}'.[/dim]"
+            )
+
+    except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
+        console.print(f"[red]Erro: {e}[/red]")
+        raise typer.Exit(1)
+
+
+def restore_habit(
+    habit_id: int = typer.Argument(..., help="ID do hábito a reativar"),
+):
+    """Reativa um hábito arquivado (BR-HABIT-006)."""
+    try:
+        with get_engine_context() as engine, Session(engine) as session:
+            habit_service = HabitService(session)
+
+            habit = habit_service.get_habit(habit_id)
+            if habit is None:
+                console.print(f"[red]Hábito {habit_id} não encontrado[/red]")
+                raise typer.Exit(1)
+
+            if habit.archived_at is None:
+                console.print(f"[yellow]Hábito '{habit.title}' já está ativo.[/yellow]")
+                return
+
+            habit_service.restore_habit(habit_id)
+            console.print(f"[green]Hábito reativado: [bold]{habit.title}[/bold][/green]")
+            console.print(
+                "[dim]Próximas instâncias serão geradas no próximo ciclo de generate.[/dim]"
+            )
+
+    except ValueError as e:
+        logger.warning("Erro de validação: %s", e)
+        console.print(f"[red]Erro: {e}[/red]")
+        raise typer.Exit(1)
+
+
+def purge_habit(
+    habit_id: int = typer.Argument(..., help="ID do hábito a apagar permanentemente"),
+):
+    """Apaga um hábito permanentemente (hard delete, irreversível — BR-HABIT-006)."""
+    try:
+        with get_engine_context() as engine, Session(engine) as session:
+            habit_service = HabitService(session)
+
+            habit = habit_service.get_habit(habit_id)
+            if habit is None:
+                console.print(f"[red]Hábito {habit_id} não encontrado[/red]")
+                raise typer.Exit(1)
+
+            instance_ids = [i.id for i in habit.instances if i.id is not None]
+            timelog_count = 0
+            if instance_ids:
+                timelog_count = len(
+                    session.exec(
+                        select(TimeLog).where(
+                            TimeLog.habit_instance_id.in_(instance_ids)  # type: ignore[attr-defined]
+                        )
+                    ).all()
+                )
+
+            console.print("[yellow]Esta operação é irreversível. Será destruído:[/yellow]")
+            console.print(f"  - Habit [bold]{habit.title}[/bold] (id={habit.id})")
+            console.print(f"  - {len(instance_ids)} HabitInstance associadas")
+            console.print(f"  - {timelog_count} TimeLog associados")
+
+            confirmation = typer.prompt('Confirmar destruição? (digite "purge" para confirmar)')
+            if confirmation.strip() != "purge":
+                console.print("[yellow]Cancelado. Nada foi destruído.[/yellow]")
+                return
+
+            habit_service.purge_habit(habit_id)
+            console.print("[green]Habit, instances e time logs destruídos permanentemente.[/green]")
 
     except ValueError as e:
         logger.warning("Erro de validação: %s", e)

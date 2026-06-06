@@ -4,7 +4,14 @@ import typer
 
 from .actions import adjust_instance, skip_instance
 from .atom import atom_app
-from .crud import create_habit, delete_habit, list_habits, update_habit
+from .crud import (
+    create_habit,
+    delete_habit,
+    list_habits,
+    purge_habit,
+    restore_habit,
+    update_habit,
+)
 
 app = typer.Typer(help="Gerenciar hábitos")
 
@@ -13,6 +20,8 @@ app.command("create")(create_habit)
 app.command("list")(list_habits)
 app.command("update")(update_habit)
 app.command("delete")(delete_habit)
+app.command("restore")(restore_habit)
+app.command("purge")(purge_habit)
 
 # Registrar ações
 app.command("adjust")(adjust_instance)
