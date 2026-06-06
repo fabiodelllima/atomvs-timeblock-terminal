@@ -1,10 +1,10 @@
 """Service para gerenciamento de hábitos."""
 
-from datetime import time
+from datetime import datetime, time
 
 from sqlmodel import Session, select
 
-from timeblock.models import Habit, Recurrence
+from timeblock.models import Habit, Recurrence, TimeLog
 from timeblock.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -56,9 +56,24 @@ class HabitService:
         """Busca hábito por ID."""
         return self.session.get(Habit, habit_id)
 
-    def list_habits(self, routine_id: int | None = None) -> list[Habit]:
-        """Lista hábitos, opcionalmente filtrados por rotina."""
+    def list_habits(
+        self, routine_id: int | None = None, include_archived: bool = False
+    ) -> list[Habit]:
+        """Lista hábitos ativos (BR-HABIT-006).
+
+        Por padrão exclui arquivados (archived_at IS NULL). Use
+        include_archived=True para retornar todos.
+        """
         statement = select(Habit)
+        if routine_id is not None:
+            statement = statement.where(Habit.routine_id == routine_id)
+        if not include_archived:
+            statement = statement.where(Habit.archived_at == None)  # noqa: E711
+        return list(self.session.exec(statement).all())
+
+    def list_archived_habits(self, routine_id: int | None = None) -> list[Habit]:
+        """Lista apenas hábitos arquivados (BR-HABIT-006)."""
+        statement = select(Habit).where(Habit.archived_at != None)  # noqa: E711
         if routine_id is not None:
             statement = statement.where(Habit.routine_id == routine_id)
         return list(self.session.exec(statement).all())
@@ -102,12 +117,61 @@ class HabitService:
         return habit
 
     def delete_habit(self, habit_id: int) -> bool:
-        """Remove hábito."""
+        """Arquiva hábito (soft delete — BR-HABIT-005).
+
+        Marca archived_at sem destruir HabitInstance/TimeLog. Para hard
+        delete administrativo, ver purge_habit (BR-HABIT-006). Reversível
+        via restore_habit.
+        """
         habit = self.session.get(Habit, habit_id)
         if not habit:
             return False
 
+        if habit.archived_at is None:
+            habit.archived_at = datetime.now()
+        self.session.add(habit)
+        self.session.commit()
+        logger.info("Hábito arquivado: id=%s", habit_id)
+        return True
+
+    def restore_habit(self, habit_id: int) -> Habit | None:
+        """Reverte o arquivamento de um hábito (BR-HABIT-006).
+
+        Zera archived_at; o hábito volta às listagens padrão e a geração
+        de instâncias futuras é retomada no próximo ciclo.
+        """
+        habit = self.session.get(Habit, habit_id)
+        if not habit:
+            return None
+
+        habit.archived_at = None
+        self.session.add(habit)
+        self.session.commit()
+        self.session.refresh(habit)
+        logger.info("Hábito restaurado: id=%s", habit_id)
+        return habit
+
+    def purge_habit(self, habit_id: int) -> bool:
+        """Hard delete permanente de hábito (BR-HABIT-006).
+
+        Destrói o Habit, suas HabitInstance (via cascade ORM) e os TimeLog
+        associados às instâncias. O cascade ORM de Habit.instances não
+        alcança TimeLog, então estes são removidos explicitamente antes da
+        deleção do Habit. Operação irreversível.
+        """
+        habit = self.session.get(Habit, habit_id)
+        if not habit:
+            return False
+
+        instance_ids = [i.id for i in habit.instances if i.id is not None]
+        if instance_ids:
+            logs = self.session.exec(
+                select(TimeLog).where(TimeLog.habit_instance_id.in_(instance_ids))  # type: ignore[attr-defined]
+            ).all()
+            for log in logs:
+                self.session.delete(log)
+
         self.session.delete(habit)
         self.session.commit()
-        logger.info("Hábito deletado: id=%s", habit_id)
+        logger.info("Hábito purgado (hard delete): id=%s", habit_id)
         return True
