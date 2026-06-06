@@ -17,6 +17,8 @@ A inspeção do trio de domínios principais revela que `Habit` é o único sem 
 
 A divergência arquitetural é portanto pré-existente à issue, e a resolução correta é alinhar `Habit` ao padrão dos demais domínios, não corrigir o bug com mais cascade.
 
+---
+
 ## Decisão
 
 Adotamos **archive lifecycle** para `Habit` como padrão de "deleção" via campo `archived_at: datetime | None = None` no modelo. A semântica do método público `delete_habit` na camada de service muda: em vez de remover o registro, marca `archived_at = utcnow()`. Um novo método `purge_habit` é introduzido para hard delete administrativo, exposto via comando CLI dedicado (`habit purge <id>`), sem affordance no dashboard da TUI nesta fase.
@@ -27,6 +29,8 @@ Operações de listagem padrão (`list_habits`, queries do dashboard, geração 
 
 A reativação de hábito arquivado ocorre via campo de comando explícito, não como side effect de qualquer operação. `restore_habit(habit_id)` zera `archived_at` e o hábito volta às listagens.
 
+---
+
 ## Alternativas consideradas
 
 **Cascade hard delete (proposta original da issue #61).** Adicionar `ondelete="CASCADE"` em `TimeLog.habit_instance_id` e em `HabitInstance.habit_id` para resolver a violação de integridade referencial. Rejeitada porque destrói histórico de adesão, que é o produto. Não há cenário de uso em que destruir TimeLogs antigos seja o comportamento desejado de uma operação chamada "delete habit" pelo usuário comum.
@@ -36,6 +40,8 @@ A reativação de hábito arquivado ocorre via campo de comando explícito, não
 **Active flag boolean (`is_active: bool`).** Mais simples que `archived_at: datetime | None` porque não requer timestamp. Rejeitada porque perde informação de quando o arquivamento ocorreu — informação valiosa para análises do tipo "este hábito foi tentado por quanto tempo antes de ser abandonado". O custo de um `datetime` opcional vs um `bool` é mínimo (oito bytes por linha em SQLite) e o ganho informacional é substancial.
 
 **Manter status quo (não fazer nada).** Rejeitada porque deixa a issue #61 como bug aberto e mantém divergência arquitetural com Routine e Task. Custo crescente conforme outros domínios futuros (eventos, projetos) precisem ser modelados.
+
+---
 
 ## Consequências
 
@@ -61,6 +67,8 @@ A descoberta de hábitos arquivados pelo usuário fica menos óbvia. A solução
 
 A relação `Habit.instances` mantém `cascade_delete=True` para suportar `purge_habit`. Isso significa que código que use `.delete(habit)` no SQLAlchemy diretamente (sem passar pelo service) ainda dispara o cascade — risco operacional de baixa relevância porque o projeto usa o pattern Service Layer (ADR-007), mas merece nota em revisões de código futuras.
 
+---
+
 ## Plano de implementação resumido
 
 Detalhamento completo em `docs/wiki/Session-29-Implementation-Plan-Habit-Archive.md` (rascunho local). Resumo:
@@ -75,6 +83,18 @@ Detalhamento completo em `docs/wiki/Session-29-Implementation-Plan-Habit-Archive
 8. **Testes:** classe `TestBRHabit006Archive` em `tests/unit/test_services/test_habit_service.py` cobrindo archive, purge, restore, listing semantics. BDD scenario novo em `tests/bdd/features/habit_archive.feature`. Integration test validando que `TimeLog` permanece intacto após archive.
 
 A entrega é cabível em uma única MR para `develop` com ~12 commits atômicos. Estimativa: 2-3 dias de trabalho focado, distribuídos entre sessões.
+
+---
+
+## Errata de implementação (2026-06-05)
+
+Durante a implementação na branch `feat/habit-archive-lifecycle`, o recon do código revelou duas imprecisões nas seções acima. Conforme o formato Nygard, o registro original é preservado e estas correções são anexadas.
+
+1. **Timestamp (seção Decisão).** O texto menciona `archived_at = utcnow()`. A convenção real do projeto é `datetime.now()` (naive local), usada em `Task.cancelled_datetime`, `Task.completed_datetime` e `Routine.created_at`. A implementação adota `datetime.now()` por consistência com BR-TASK-009; "utcnow" deve ser lido como `datetime.now()`.
+
+2. **Cascade do purge (seção Decisão).** O texto afirma que `purge_habit` "mantém o comportamento de cascade existente" para destruir os TimeLogs. Isso é incorreto: `cascade_delete=True` em `Habit.instances` alcança `HabitInstance`, mas não `TimeLog` — `TimeLog.habit_instance_id` é FK nullable sem `ondelete` e `HabitInstance` não declara relationship para `TimeLog`. Esse é precisamente o bug de integridade referencial que originou a issue #61 (TimeLogs órfãos). Portanto `purge_habit` remove explicitamente os TimeLogs das instâncias antes de deletar o Habit; sob `PRAGMA foreign_keys=ON`, sem essa remoção o purge falharia com FOREIGN KEY constraint failed.
+
+---
 
 ## Referências
 

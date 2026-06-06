@@ -143,7 +143,7 @@ habit update ID --start 08:00 --end 09:30
 
 **Comportamento:**
 
-1. `archived_at` é definido como `utcnow()` no registro do `Habit`
+1. `archived_at` é definido como `datetime.now()` no registro do `Habit` (naive local; ver errata do ADR-057)
 2. `HabitInstance` e `TimeLog` permanecem intactos no banco
 3. Hábito não aparece em listagens padrão (dashboard, `habit list`, geração de instâncias)
 4. Streaks calculados sobre `TimeLog` continuam corretos para o histórico até o arquivamento
