@@ -1,20 +1,20 @@
 """Testes unitários para Business Rules de Habit.
 
-Valida as 5 BRs principais:
-- BR-HABIT-001: Title Validation
-- BR-HABIT-002: Time Range Validation
-- BR-HABIT-003: Routine Association
-- BR-HABIT-004: Recurrence Pattern
-- BR-HABIT-005: Optional Color
+- BR-HABIT-001: Estrutura do hábito (título, horário e color opcional)
+- BR-HABIT-002: Validação de intervalo de horário
+- BR-HABIT-003: Associação obrigatória a routine
+- BR-HABIT-004: Padrão de recorrência
+- BR-HABIT-005: Exclusão com semântica de archive (ADR-057)
 """
 
-from datetime import time
+from datetime import date, datetime, time
 
 import pytest
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session
 
-from timeblock.models import Habit, Recurrence
+from timeblock.models import Habit, HabitInstance, Recurrence, TimeLog
+from timeblock.models.enums import Status
 from timeblock.services.habit_service import HabitService
 
 
@@ -183,11 +183,11 @@ class TestBRHabit004RecurrencePattern:
             session.commit()
 
 
-class TestBRHabit005OptionalColor:
-    """BR-HABIT-005: Optional Color."""
+class TestBRHabit001Color:
+    """BR-HABIT-001: Color opcional (campo estrutural)."""
 
-    def test_br_habit_005_color_optional(self, session: Session, routine_service):
-        """BR-HABIT-005: Color é opcional."""
+    def test_br_habit_001_color_optional(self, session: Session, routine_service):
+        """BR-HABIT-001: Color é opcional."""
         routine = routine_service.create_routine("Test Routine")
         habit_service = HabitService(session)
 
@@ -201,8 +201,8 @@ class TestBRHabit005OptionalColor:
 
         assert habit.color is None
 
-    def test_br_habit_005_valid_hex_color(self, session: Session, routine_service):
-        """BR-HABIT-005: Hex color válido é aceito."""
+    def test_br_habit_001_valid_hex_color(self, session: Session, routine_service):
+        """BR-HABIT-001: Hex color válido é aceito."""
         routine = routine_service.create_routine("Test Routine")
         habit_service = HabitService(session)
 
@@ -216,3 +216,75 @@ class TestBRHabit005OptionalColor:
         )
 
         assert habit.color == "#FF5733"
+
+
+class TestBRHabit005Archive:
+    """BR-HABIT-005: Deleção de Habit com semântica de archive (ADR-057)."""
+
+    def _create_habit(self, session: Session, routine_service) -> Habit:
+        routine = routine_service.create_routine("Rotina Teste")
+        return HabitService(session).create_habit(
+            routine_id=routine.id,
+            title="Leitura matinal",
+            scheduled_start=time(9, 0),
+            scheduled_end=time(10, 0),
+            recurrence=Recurrence.EVERYDAY,
+        )
+
+    def _add_instance_with_log(self, session: Session, habit_id: int) -> tuple[int, int]:
+        instance = HabitInstance(
+            habit_id=habit_id,
+            date=date.today(),
+            scheduled_start=time(9, 0),
+            scheduled_end=time(10, 0),
+            status=Status.PENDING,
+        )
+        session.add(instance)
+        session.commit()
+        session.refresh(instance)
+        log = TimeLog(habit_instance_id=instance.id, start_time=datetime.now())
+        session.add(log)
+        session.commit()
+        session.refresh(log)
+        return instance.id, log.id
+
+    def test_br_habit_005_delete_sets_archived_at(self, session: Session, routine_service):
+        """BR-HABIT-005: delete_habit marca archived_at sem remover o registro."""
+        habit = self._create_habit(session, routine_service)
+        service = HabitService(session)
+
+        assert service.delete_habit(habit.id) is True
+        refreshed = service.get_habit(habit.id)
+        assert refreshed is not None
+        assert refreshed.archived_at is not None
+
+    def test_br_habit_005_preserves_instances_after_archive(
+        self, session: Session, routine_service
+    ):
+        """BR-HABIT-005: HabitInstance permanece intacta após o archive."""
+        habit = self._create_habit(session, routine_service)
+        inst_id, _ = self._add_instance_with_log(session, habit.id)
+
+        HabitService(session).delete_habit(habit.id)
+
+        assert session.get(HabitInstance, inst_id) is not None
+
+    def test_br_habit_005_preserves_timelogs_after_archive(self, session: Session, routine_service):
+        """BR-HABIT-005: TimeLog permanece intacto após o archive."""
+        habit = self._create_habit(session, routine_service)
+        _, log_id = self._add_instance_with_log(session, habit.id)
+
+        HabitService(session).delete_habit(habit.id)
+
+        assert session.get(TimeLog, log_id) is not None
+
+    def test_br_habit_005_archived_excluded_from_default_listing(
+        self, session: Session, routine_service
+    ):
+        """BR-HABIT-005: hábito arquivado some da listagem padrão."""
+        habit = self._create_habit(session, routine_service)
+        service = HabitService(session)
+        service.delete_habit(habit.id)
+
+        assert habit.id not in [h.id for h in service.list_habits()]
+        assert habit.id in [h.id for h in service.list_habits(include_archived=True)]

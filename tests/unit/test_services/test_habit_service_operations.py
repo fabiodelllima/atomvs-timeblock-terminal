@@ -117,11 +117,15 @@ class TestUpdateHabit:
 class TestDeleteHabit:
     """Testes para delete_habit. Validates BR-HABIT-005."""
 
-    def test_delete_habit_success(self, session: Session, test_habit: Habit) -> None:
-        """Remove hábito com sucesso."""
+    def test_delete_habit_archives(self, session: Session, test_habit: Habit) -> None:
+        """delete_habit arquiva (BR-HABIT-005 / ADR-057): registro preservado com
+        archived_at definido e ausente da listagem padrão."""
         habit_service = HabitService(session)
         assert habit_service.delete_habit(test_habit.id) is True
-        assert habit_service.get_habit(test_habit.id) is None
+        archived = habit_service.get_habit(test_habit.id)
+        assert archived is not None
+        assert archived.archived_at is not None
+        assert test_habit.id not in [h.id for h in habit_service.list_habits()]
 
     def test_delete_habit_not_found(self, session: Session) -> None:
         """Retorna False para ID inexistente."""
