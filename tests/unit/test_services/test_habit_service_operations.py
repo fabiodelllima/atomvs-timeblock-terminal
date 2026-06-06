@@ -121,6 +121,7 @@ class TestDeleteHabit:
         """delete_habit arquiva (BR-HABIT-005 / ADR-057): registro preservado com
         archived_at definido e ausente da listagem padrão."""
         habit_service = HabitService(session)
+        assert test_habit.id is not None
         assert habit_service.delete_habit(test_habit.id) is True
         archived = habit_service.get_habit(test_habit.id)
         assert archived is not None

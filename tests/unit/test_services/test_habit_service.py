@@ -23,6 +23,7 @@ from timeblock.services.habit_service import HabitService
 def _make_habit(session: Session, routine_service, title: str = "Leitura matinal") -> Habit:
     """Cria uma rotina e um hábito ativo para os cenários de archive."""
     routine = routine_service.create_routine("Rotina Teste")
+    assert routine.id is not None
     service = HabitService(session)
     return service.create_habit(
         routine_id=routine.id,
@@ -50,6 +51,8 @@ def _add_instance_with_timelog(session: Session, habit_id: int) -> tuple[int, in
     session.add(log)
     session.commit()
     session.refresh(log)
+    assert instance.id is not None
+    assert log.id is not None
     return instance.id, log.id
 
 
@@ -59,6 +62,7 @@ class TestBRHabit006Archive:
     def test_br_habit_006_delete_sets_archived_at(self, session: Session, routine_service):
         """delete_habit marca archived_at em vez de remover o registro."""
         habit = _make_habit(session, routine_service)
+        assert habit.id is not None
         service = HabitService(session)
 
         assert service.delete_habit(habit.id) is True
@@ -70,6 +74,7 @@ class TestBRHabit006Archive:
     def test_br_habit_006_archive_preserves_instances(self, session: Session, routine_service):
         """Archive preserva HabitInstance associadas."""
         habit = _make_habit(session, routine_service)
+        assert habit.id is not None
         inst_id, _ = _add_instance_with_timelog(session, habit.id)
         service = HabitService(session)
 
@@ -80,6 +85,7 @@ class TestBRHabit006Archive:
     def test_br_habit_006_archive_preserves_timelogs(self, session: Session, routine_service):
         """Archive preserva TimeLog associados às instâncias."""
         habit = _make_habit(session, routine_service)
+        assert habit.id is not None
         _, log_id = _add_instance_with_timelog(session, habit.id)
         service = HabitService(session)
 
@@ -92,6 +98,7 @@ class TestBRHabit006Archive:
     ):
         """list_habits() omite arquivados por padrão."""
         habit = _make_habit(session, routine_service)
+        assert habit.id is not None
         service = HabitService(session)
         service.delete_habit(habit.id)
 
@@ -103,6 +110,7 @@ class TestBRHabit006Archive:
     ):
         """list_habits(include_archived=True) retorna também os arquivados."""
         habit = _make_habit(session, routine_service)
+        assert habit.id is not None
         service = HabitService(session)
         service.delete_habit(habit.id)
 
@@ -112,6 +120,7 @@ class TestBRHabit006Archive:
     def test_br_habit_006_get_habit_returns_archived(self, session: Session, routine_service):
         """get_habit não filtra arquivados (inspeção administrativa)."""
         habit = _make_habit(session, routine_service)
+        assert habit.id is not None
         service = HabitService(session)
         service.delete_habit(habit.id)
 
@@ -120,6 +129,7 @@ class TestBRHabit006Archive:
     def test_br_habit_006_restore_clears_archived_at(self, session: Session, routine_service):
         """restore_habit zera archived_at e devolve o hábito às listagens."""
         habit = _make_habit(session, routine_service)
+        assert habit.id is not None
         service = HabitService(session)
         service.delete_habit(habit.id)
 
@@ -132,6 +142,7 @@ class TestBRHabit006Archive:
     def test_br_habit_006_purge_destroys_cascade(self, session: Session, routine_service):
         """purge_habit destrói o hábito, suas instâncias e os TimeLog."""
         habit = _make_habit(session, routine_service)
+        assert habit.id is not None
         inst_id, log_id = _add_instance_with_timelog(session, habit.id)
         service = HabitService(session)
 
@@ -146,6 +157,7 @@ class TestBRHabit006Archive:
     ):
         """generate_instances retorna [] para hábito arquivado."""
         habit = _make_habit(session, routine_service)
+        assert habit.id is not None
         service = HabitService(session)
         service.delete_habit(habit.id)
 

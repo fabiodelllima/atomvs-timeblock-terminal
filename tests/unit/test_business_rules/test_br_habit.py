@@ -223,6 +223,7 @@ class TestBRHabit005Archive:
 
     def _create_habit(self, session: Session, routine_service) -> Habit:
         routine = routine_service.create_routine("Rotina Teste")
+        assert routine.id is not None
         return HabitService(session).create_habit(
             routine_id=routine.id,
             title="Leitura matinal",
@@ -246,11 +247,14 @@ class TestBRHabit005Archive:
         session.add(log)
         session.commit()
         session.refresh(log)
+        assert instance.id is not None
+        assert log.id is not None
         return instance.id, log.id
 
     def test_br_habit_005_delete_sets_archived_at(self, session: Session, routine_service):
         """BR-HABIT-005: delete_habit marca archived_at sem remover o registro."""
         habit = self._create_habit(session, routine_service)
+        assert habit.id is not None
         service = HabitService(session)
 
         assert service.delete_habit(habit.id) is True
@@ -263,6 +267,7 @@ class TestBRHabit005Archive:
     ):
         """BR-HABIT-005: HabitInstance permanece intacta após o archive."""
         habit = self._create_habit(session, routine_service)
+        assert habit.id is not None
         inst_id, _ = self._add_instance_with_log(session, habit.id)
 
         HabitService(session).delete_habit(habit.id)
@@ -272,6 +277,7 @@ class TestBRHabit005Archive:
     def test_br_habit_005_preserves_timelogs_after_archive(self, session: Session, routine_service):
         """BR-HABIT-005: TimeLog permanece intacto após o archive."""
         habit = self._create_habit(session, routine_service)
+        assert habit.id is not None
         _, log_id = self._add_instance_with_log(session, habit.id)
 
         HabitService(session).delete_habit(habit.id)
@@ -283,6 +289,7 @@ class TestBRHabit005Archive:
     ):
         """BR-HABIT-005: hábito arquivado some da listagem padrão."""
         habit = self._create_habit(session, routine_service)
+        assert habit.id is not None
         service = HabitService(session)
         service.delete_habit(habit.id)
 
