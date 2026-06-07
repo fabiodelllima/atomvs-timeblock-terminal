@@ -226,7 +226,13 @@ def load_instances(routine_id: int | None = None) -> list[dict]:
 
         # Filtrar por rotina (DT-049)
         if routine_id is not None:
-            result = [inst for inst in result if inst.habit and inst.habit.routine_id == routine_id]
+            result = [
+                inst
+                for inst in result
+                if inst.habit
+                and inst.habit.routine_id == routine_id
+                and inst.habit.archived_at is None  # BR-HABIT-005/006
+            ]
             if not result:
                 return []
 
