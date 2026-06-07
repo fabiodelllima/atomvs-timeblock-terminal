@@ -13,6 +13,11 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
+# Garante que os consoles Rich dos comandos surjam sem cor (saída de CLI
+# determinística nos testes). Precisa vir antes de importar timeblock,
+# pois o Rich decide o uso de cor no __init__ do Console (import-time).
+os.environ.setdefault("NO_COLOR", "1")
+
 from timeblock.models import (
     Event,
     EventStatus,

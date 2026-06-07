@@ -46,6 +46,17 @@ class SVGSnapshotExtension(SingleFileSnapshotExtension):
         return super().serialize(data, exclude=exclude, include=include, matcher=matcher)
 
 
+@pytest.fixture(autouse=True)
+def _allow_color_for_snapshots(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Permite cor na renderização do Textual para os snapshots e2e.
+
+    O conftest raiz força NO_COLOR para tornar a saída de CLI determinística,
+    mas os snapshots e2e capturam a UI colorida do Textual. Remover NO_COLOR
+    por teste garante que export_screenshot preserve as cores do snapshot.
+    """
+    monkeypatch.delenv("NO_COLOR", raising=False)
+
+
 @pytest.fixture
 def snapshot(snapshot: SnapshotAssertion) -> SnapshotAssertion:
     """Configure syrupy to use SVG single-file snapshots."""
