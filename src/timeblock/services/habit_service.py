@@ -166,7 +166,7 @@ class HabitService:
         instance_ids = [i.id for i in habit.instances if i.id is not None]
         if instance_ids:
             logs = self.session.exec(
-                select(TimeLog).where(TimeLog.habit_instance_id.in_(instance_ids))  # type: ignore[attr-defined]
+                select(TimeLog).where(TimeLog.habit_instance_id.in_(instance_ids))  # type: ignore[union-attr]
             ).all()
             for log in logs:
                 self.session.delete(log)

@@ -306,7 +306,7 @@ def purge_habit(
                 timelog_count = len(
                     session.exec(
                         select(TimeLog).where(
-                            TimeLog.habit_instance_id.in_(instance_ids)  # type: ignore[attr-defined]
+                            TimeLog.habit_instance_id.in_(instance_ids)  # type: ignore[union-attr]
                         )
                     ).all()
                 )
