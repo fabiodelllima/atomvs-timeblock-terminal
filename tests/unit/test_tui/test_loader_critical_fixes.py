@@ -50,6 +50,7 @@ def _make_instance(
     inst.habit_id = inst_id
     inst.habit.title = title
     inst.habit.routine_id = routine_id
+    inst.habit.archived_at = None
     inst.scheduled_start = MagicMock(hour=8, minute=0)
     inst.scheduled_end = MagicMock(hour=9, minute=0)
     inst.status = MagicMock(value=status_value)
