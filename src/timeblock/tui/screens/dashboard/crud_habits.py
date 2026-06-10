@@ -411,7 +411,11 @@ def open_delete_habit(
     habit_name = habit_data.get("name", "hábito")
 
     def on_confirm() -> None:
-        service_action(lambda s: HabitService(s).delete_habit(habit_id))
+        _, error = service_action(lambda s: HabitService(s).delete_habit(habit_id))
+        if error:
+            app.notify(error, severity="error")
+            return
+        app.notify(f"Deletado: {habit_name}")
         on_done()
 
     app.push_screen(

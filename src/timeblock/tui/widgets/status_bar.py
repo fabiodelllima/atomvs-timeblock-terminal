@@ -23,8 +23,8 @@ logger = get_logger(__name__)
 # Sem conversão de delimitadores — _format_hint apenas aplica cores.
 PANEL_KEYBINDINGS: dict[str, str] = {
     "agenda-content": "(↑↓) navegar",
-    "panel-habits": "(j/k) navegar · (v) concluir · (s) skip · (t) timer",
-    "panel-tasks": "(j/k) navegar · (v) concluir · (s) adiar · (c) cancelar",
+    "panel-habits": "(j/k) navegar · (v) concluir · (s) skip · (t) timer · (x) deletar",
+    "panel-tasks": "(j/k) navegar · (v) concluir · (s) adiar · (c) cancelar · (x) deletar",
     "panel-timer": "(space) pausar/continuar · (s) parar · (c) cancelar",
     "panel-metrics": "(f) período",
 }

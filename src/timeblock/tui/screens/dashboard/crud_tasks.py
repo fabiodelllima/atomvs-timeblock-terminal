@@ -171,7 +171,11 @@ def open_delete_task(
     task_name = task_data.get("name", "tarefa")
 
     def on_confirm() -> None:
-        service_action(lambda s: TaskService.delete_task(task_id, session=s))
+        _, error = service_action(lambda s: TaskService.delete_task(task_id, session=s))
+        if error:
+            app.notify(error, severity="error")
+            return
+        app.notify(f"Deletado: {task_name}")
         on_done()
 
     app.push_screen(
