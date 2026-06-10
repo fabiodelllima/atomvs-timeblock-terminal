@@ -115,3 +115,33 @@ class TestBRTUI034PanelKeybindings:
         assert formatted  # não-vazio
         assert C_INFO in formatted
         assert C_SUBTEXT1 in formatted
+
+
+class TestBRTUI036DeleteHint:
+    """Valida BR-TUI-036 regras 13-14 — hint (x) deletar por panel focado.
+
+    O DashboardScreen deleta habit/task sob cursor via x (BR-TUI-036). A
+    StatusBar deve anunciar essa ação nos panels deletáveis e omitir nos
+    não-deletáveis, conforme as cláusulas da BR — não auto-referente ao código.
+
+    Referências:
+        - BR-TUI-036 regras 13-14 em docs/reference/business-rules/br-tui.md
+        - ADR-037 (x como CRUD contextual)
+        - Issue #62
+    """
+
+    def test_br_tui_036_hint_includes_delete_when_habits_focused(self) -> None:
+        """Regra 13: panel-habits focado expõe (x) deletar no hint."""
+        assert "(x) deletar" in PANEL_KEYBINDINGS["panel-habits"]
+
+    def test_br_tui_036_hint_includes_delete_when_tasks_focused(self) -> None:
+        """Regra 13: panel-tasks focado expõe (x) deletar no hint."""
+        assert "(x) deletar" in PANEL_KEYBINDINGS["panel-tasks"]
+
+    def test_br_tui_036_hint_excludes_delete_when_timer_focused(self) -> None:
+        """Regra 14: panel-timer (não-deletável) NÃO expõe (x) deletar."""
+        assert "(x) deletar" not in PANEL_KEYBINDINGS["panel-timer"]
+
+    def test_br_tui_036_hint_excludes_delete_when_agenda_focused(self) -> None:
+        """Regra 14: agenda-content (no-op no MVP) NÃO expõe (x) deletar."""
+        assert "(x) deletar" not in PANEL_KEYBINDINGS["agenda-content"]

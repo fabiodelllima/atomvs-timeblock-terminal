@@ -964,3 +964,93 @@ class TestNavigationComplete:
             await _wait(pilot)
 
             assert dash._active_routine_id is not None, "Rotina deve ter sido criada"
+
+
+class TestBRTUI036DeleteKeybinding:
+    """Valida BR-TUI-036 — notify e cancelamento na deleção contextual via x.
+
+    A deleção via x já remove o item (coberto por test_habits_delete_flow e
+    test_tasks_delete_flow). Aqui validamos o feedback (regra 10: notify de
+    sucesso) e o cancelamento (regra 8: Esc não deleta nem notifica).
+
+    Referências:
+        - BR-TUI-036 regras 8, 10 em docs/reference/business-rules/br-tui.md
+        - Issue #62
+    """
+
+    @pytest.mark.asyncio
+    async def test_dashboard_delete_habit_notifies_on_success(self):
+        """Regra 10: deletar habit via x emite a notificação 'Deletado: {nome}'."""
+        async with TimeBlockApp().run_test() as pilot:
+            await _wait(pilot)
+            await _setup_routine_and_habit(pilot, "Notificar Habit")
+            panel = pilot.app.query_one(HabitsPanel)
+            pilot.app.set_focus(panel)
+            await _wait(pilot)
+            await pilot.press("x")
+            await _wait(pilot)
+            await pilot.press("enter")
+            await _wait(pilot)
+            messages = [n.message for n in pilot.app._notifications]
+            assert any("Deletado: Notificar Habit" in m for m in messages), (
+                f"Esperava notify de sucesso; notificações: {messages}"
+            )
+
+    @pytest.mark.asyncio
+    async def test_dashboard_delete_task_notifies_on_success(self):
+        """Regra 10: deletar task via x emite a notificação 'Deletado: {nome}'."""
+        async with TimeBlockApp().run_test() as pilot:
+            await _wait(pilot)
+            await _create_task(pilot, "Notificar Task")
+            panel = pilot.app.query_one(TasksPanel)
+            pilot.app.set_focus(panel)
+            await _wait(pilot)
+            await pilot.press("x")
+            await _wait(pilot)
+            await pilot.press("enter")
+            await _wait(pilot)
+            messages = [n.message for n in pilot.app._notifications]
+            assert any("Deletado: Notificar Task" in m for m in messages), (
+                f"Esperava notify de sucesso; notificações: {messages}"
+            )
+
+    @pytest.mark.asyncio
+    async def test_dashboard_delete_habit_cancel_keeps_item_and_no_notify(self):
+        """Regra 8: Esc no ConfirmDialog não deleta o habit e nem notifica."""
+        async with TimeBlockApp().run_test() as pilot:
+            await _wait(pilot)
+            await _setup_routine_and_habit(pilot, "Manter Habit")
+            panel = pilot.app.query_one(HabitsPanel)
+            pilot.app.set_focus(panel)
+            await _wait(pilot)
+            await pilot.press("x")
+            await _wait(pilot)
+            # Esc cancela o ConfirmDialog
+            await pilot.press("escape")
+            await _wait(pilot)
+            instances = loader.load_instances(routine_id=loader.load_active_routine()[0])
+            assert len(instances) > 0, "Habit deve permanecer após cancelar"
+            messages = [n.message for n in pilot.app._notifications]
+            assert not any("Deletado" in m for m in messages), (
+                f"Cancelar não deve notificar deleção; notificações: {messages}"
+            )
+
+    @pytest.mark.asyncio
+    async def test_dashboard_delete_task_cancel_keeps_item_and_no_notify(self):
+        """Regra 8: Esc no ConfirmDialog não deleta a task e nem notifica."""
+        async with TimeBlockApp().run_test() as pilot:
+            await _wait(pilot)
+            await _create_task(pilot, "Manter Task")
+            panel = pilot.app.query_one(TasksPanel)
+            pilot.app.set_focus(panel)
+            await _wait(pilot)
+            await pilot.press("x")
+            await _wait(pilot)
+            await pilot.press("escape")
+            await _wait(pilot)
+            tasks = loader.load_tasks()
+            assert len(tasks) > 0, "Task deve permanecer após cancelar"
+            messages = [n.message for n in pilot.app._notifications]
+            assert not any("Deletado" in m for m in messages), (
+                f"Cancelar não deve notificar deleção; notificações: {messages}"
+            )
