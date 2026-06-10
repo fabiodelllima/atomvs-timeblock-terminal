@@ -1756,3 +1756,61 @@ Scenario: Return to today
 - BR-TUI-003 (Dashboard Screen — regras gerais)
 - BR-TUI-034 (Hints no footer — sem call-to-action no header)
 - Issue #52 (motivação desta BR)
+
+---
+
+### BR-TUI-036: Deleção Contextual no DashboardScreen via `x` (NOVA 10/06/2026)
+
+**Descrição:** No DashboardScreen, a tecla `x` aciona a deleção do item sob o cursor do panel focado, sem exigir navegação até a CRUD screen dedicada. O despacho é contextual ao panel em foco: HabitsPanel deleta o hábito selecionado, TasksPanel deleta a tarefa selecionada. AgendaPanel e TimerPanel não possuem item deletável e tratam `x` como no-op. A operação é destrutiva e exige confirmação modal (`ConfirmDialog`) antes de executar, reaproveitando o mesmo widget e padrão das CRUD screens. Após a operação, o feedback é dado por notificação (`app.notify`) e pelo refresh dos panels.
+
+**Decisão arquitetural:** ADR-037 (TUI Keybindings Standard — `x` como CRUD contextual "Deletar item sob cursor")
+
+**Regras — Despacho contextual:**
+
+1. No DashboardScreen, `x` é interceptado pelo `on_key` e despachado conforme o panel focado (`_focused_panel`), seguindo o mesmo mecanismo de `n` (criar) e `e` (editar).
+2. HabitsPanel (`panel-habits`) focado com item sob cursor: aciona a deleção do hábito selecionado via `HabitService.delete_habit` (que é soft delete / archive — BR-HABIT-005/006).
+3. TasksPanel (`panel-tasks`) focado com item sob cursor: aciona a deleção da tarefa selecionada via `TaskService.delete_task`.
+4. AgendaPanel focado: `x` é no-op no MVP. Deleção de `HabitInstance` individual do dia (skip permanente) fica reservada para spike futuro.
+5. TimerPanel focado: `x` é no-op (não há item deletável).
+6. Quando o panel focado não possui item sob cursor (lista vazia ou seleção nula), `x` é no-op silencioso — nenhum dialog é aberto.
+
+**Regras — Confirmação obrigatória:**
+
+7. Antes de executar qualquer deleção, o DashboardScreen exibe um `ConfirmDialog` modal com título `Deletar <Tipo>` e mensagem `Deletar '<title>'?`, idêntico ao padrão das CRUD screens dedicadas.
+8. Cancelar o `ConfirmDialog` (Esc ou ação de cancelar) não executa a deleção, não emite notificação e não dispara refresh — o estado permanece inalterado.
+9. Apenas a confirmação explícita do dialog invoca o service de deleção.
+
+**Regras — Feedback pós-operação:**
+
+10. Em deleção bem-sucedida: emitir `app.notify(f"Deletado: {title}")` e, em seguida, `refresh_data()` no DashboardScreen para atualizar todos os panels.
+11. Em erro retornado pelo `service_action` (tupla `(_, error)` com `error` não nulo): emitir `app.notify(error, severity="error")` e retornar sem disparar `refresh_data()` desnecessário.
+12. A captura do resultado segue o contrato de `service_action`, que nunca propaga exceção à TUI e retorna `(resultado, None)` em sucesso ou `(None, mensagem_erro)` em falha.
+
+**Regras — Affordance na StatusBar:**
+
+13. Quando HabitsPanel ou TasksPanel está focado, o hint contextual da StatusBar (`PANEL_KEYBINDINGS`, BR-TUI-034) inclui `(x) deletar`.
+14. Quando AgendaPanel, TimerPanel ou nenhum panel deletável está focado, o hint NÃO inclui `(x) deletar` (coerência com o no-op das regras 4 e 5).
+15. O help overlay (`?`) lista `x` como "Deletar item" no contexto do DashboardScreen.
+
+**Nota de consistência:** As regras 10 e 11 estabelecem notificação de sucesso E erro para a deleção contextual de hábito e tarefa. Isso diverge intencionalmente do `open_delete_routine` existente (BR-TUI-016), que notifica apenas em erro e delega o feedback de sucesso ao refresh (o item desaparece da lista). A divergência é uma decisão consciente: a deleção contextual corre direto do dashboard sem troca de contexto, e a notificação de sucesso reforça o feedback da ação destrutiva. A uniformização retroativa do padrão de notify de rotina fica fora do escopo desta BR.
+
+**Testes:**
+
+- `test_dashboard_delete_habit_via_x_focused_panel`
+- `test_dashboard_delete_task_via_x_focused_panel`
+- `test_dashboard_delete_habit_notifies_on_success`
+- `test_dashboard_delete_task_notifies_on_success`
+- `test_dashboard_delete_cancel_does_not_delete`
+- `test_dashboard_delete_cancel_does_not_notify`
+- `test_dashboard_statusbar_hint_includes_delete_when_habits_focused`
+- `test_dashboard_statusbar_hint_includes_delete_when_tasks_focused`
+- `test_dashboard_statusbar_hint_excludes_delete_when_timer_focused`
+
+**Referências:**
+
+- ADR-037 (TUI Keybindings Standard — `x` como CRUD contextual)
+- BR-TUI-016 (CRUD de rotinas — padrão `service_action` + notify; divergência de notify documentada na Nota de consistência)
+- BR-TUI-017 / BR-TUI-018 (delete de hábito e tarefa via CRUD screens dedicadas)
+- BR-TUI-034 (hints contextuais no footer global)
+- BR-HABIT-005 / BR-HABIT-006 (delete de hábito é soft delete / archive — pré-requisito resolvido pela issue #61)
+- Issue #62 (motivação desta BR)
