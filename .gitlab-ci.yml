@@ -105,6 +105,7 @@ security:deps:
   needs: []
   before_script: []
   script:
+    - python -m pip install --upgrade pip --quiet  # PYSEC-2026-196 (pip do ambiente CI)
     - pip install -r requirements.txt --quiet
     - pip-audit --format json --output pip-audit-report.json || true
     - |
